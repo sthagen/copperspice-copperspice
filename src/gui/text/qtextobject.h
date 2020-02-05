@@ -28,7 +28,7 @@
 #include <qtextformat.h>
 #include <qtextlayout.h>
 #include <qglyphrun.h>
-#include <QScopedPointer>
+#include <qscopedpointer.h>
 
 class QTextObjectPrivate;
 class QTextDocument;
@@ -36,7 +36,6 @@ class QTextDocumentPrivate;
 class QTextCursor;
 class QTextBlock;
 class QTextFragment;
-
 class QTextList;
 class QTextBlockGroupPrivate;
 class QTextFramePrivate;
@@ -194,7 +193,6 @@ class Q_GUI_EXPORT QTextFrame : public QTextObject
    Q_DECLARE_PRIVATE(QTextFrame)
    Q_DISABLE_COPY(QTextFrame)
 };
-Q_DECLARE_TYPEINFO(QTextFrame::iterator, Q_MOVABLE_TYPE);
 
 inline void QTextFrame::setFrameFormat(const QTextFrameFormat &aformat)
 {
@@ -348,9 +346,6 @@ class Q_GUI_EXPORT QTextBlock
    friend class QSyntaxHighlighter;
 };
 
-Q_DECLARE_TYPEINFO(QTextBlock, Q_MOVABLE_TYPE);
-Q_DECLARE_TYPEINFO(QTextBlock::iterator, Q_MOVABLE_TYPE);
-
 class Q_GUI_EXPORT QTextFragment
 {
  public:
@@ -401,7 +396,5 @@ class Q_GUI_EXPORT QTextFragment
    int n;
    int ne;
 };
-
-Q_DECLARE_TYPEINFO(QTextFragment, Q_MOVABLE_TYPE);
 
 #endif

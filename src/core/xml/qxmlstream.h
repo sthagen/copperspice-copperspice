@@ -116,8 +116,6 @@ class Q_CORE_EXPORT QXmlStreamAttribute
    friend class QXmlStreamAttributes;
 };
 
-Q_DECLARE_TYPEINFO(QXmlStreamAttribute, Q_MOVABLE_TYPE);
-
 class Q_CORE_EXPORT QXmlStreamAttributes : public QVector<QXmlStreamAttribute>
 {
  public:
@@ -159,7 +157,9 @@ class Q_CORE_EXPORT QXmlStreamNamespaceDeclaration
 
    inline bool operator==(const QXmlStreamNamespaceDeclaration &other) const {
       return (prefix() == other.prefix() && namespaceUri() == other.namespaceUri());
-   }   inline bool operator!=(const QXmlStreamNamespaceDeclaration &other) const {
+   }
+
+   inline bool operator!=(const QXmlStreamNamespaceDeclaration &other) const {
       return !operator==(other);
    }
 
@@ -170,7 +170,6 @@ class Q_CORE_EXPORT QXmlStreamNamespaceDeclaration
    friend class QXmlStreamReaderPrivate;
 };
 
-Q_DECLARE_TYPEINFO(QXmlStreamNamespaceDeclaration, Q_MOVABLE_TYPE);
 typedef QVector<QXmlStreamNamespaceDeclaration> QXmlStreamNamespaceDeclarations;
 
 class Q_CORE_EXPORT QXmlStreamNotationDeclaration
@@ -211,7 +210,6 @@ class Q_CORE_EXPORT QXmlStreamNotationDeclaration
    friend class QXmlStreamReaderPrivate;
 };
 
-Q_DECLARE_TYPEINFO(QXmlStreamNotationDeclaration, Q_MOVABLE_TYPE);
 typedef QVector<QXmlStreamNotationDeclaration> QXmlStreamNotationDeclarations;
 
 class Q_CORE_EXPORT QXmlStreamEntityDeclaration
@@ -264,7 +262,6 @@ class Q_CORE_EXPORT QXmlStreamEntityDeclaration
    friend class QXmlStreamReaderPrivate;
 };
 
-Q_DECLARE_TYPEINFO(QXmlStreamEntityDeclaration, Q_MOVABLE_TYPE);
 typedef QVector<QXmlStreamEntityDeclaration> QXmlStreamEntityDeclarations;
 
 class Q_CORE_EXPORT QXmlStreamEntityResolver

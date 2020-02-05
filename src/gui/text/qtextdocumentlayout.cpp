@@ -379,7 +379,6 @@ struct QCheckPoint {
    QFixed maximumWidth;
    QFixed contentsWidth;
 };
-Q_DECLARE_TYPEINFO(QCheckPoint, Q_PRIMITIVE_TYPE);
 
 static bool operator<(const QCheckPoint &checkPoint, QFixed y)
 {
@@ -3291,7 +3290,7 @@ void QTextDocumentLayout::positionInlineObject(QTextInlineObject item, int posIn
    Q_ASSERT(f.isValid());
 
    QTextObjectHandler handler = d->handlers.value(f.objectType());
-   if (!handler.component) {
+   if (! handler.component) {
       return;
    }
 

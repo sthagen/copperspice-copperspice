@@ -24,10 +24,8 @@
 #ifndef QVECTOR2D_H
 #define QVECTOR2D_H
 
-#include <QtCore/qpoint.h>
-#include <QtCore/qmetatype.h>
-
-QT_BEGIN_NAMESPACE
+#include <qpoint.h>
+#include <qmetatype.h>
 
 class QVector3D;
 class QVector4D;
@@ -107,8 +105,6 @@ class Q_GUI_EXPORT QVector2D
    friend class QVector3D;
    friend class QVector4D;
 };
-
-Q_DECLARE_TYPEINFO(QVector2D, Q_MOVABLE_TYPE);
 
 inline QVector2D::QVector2D() : xp(0.0f), yp(0.0f) {}
 
@@ -240,13 +236,9 @@ inline QPointF QVector2D::toPointF() const
 
 Q_GUI_EXPORT QDebug operator<<(QDebug dbg, const QVector2D &vector);
 
-#ifndef QT_NO_DATASTREAM
 Q_GUI_EXPORT QDataStream &operator<<(QDataStream &, const QVector2D &);
 Q_GUI_EXPORT QDataStream &operator>>(QDataStream &, QVector2D &);
-#endif
 
 #endif
-
-QT_END_NAMESPACE
 
 #endif

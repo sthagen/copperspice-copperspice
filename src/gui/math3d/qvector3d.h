@@ -24,10 +24,9 @@
 #ifndef QVECTOR3D_H
 #define QVECTOR3D_H
 
-#include <QtCore/qpoint.h>
-#include <QtCore/qmetatype.h>
-
-QT_BEGIN_NAMESPACE
+#include <qpoint.h>
+#include <qmetatype.h>
+#include <qvariant.h>
 
 class QMatrix4x4;
 class QVector2D;
@@ -37,7 +36,6 @@ class QVector4D;
 
 class Q_GUI_EXPORT QVector3D
 {
-
  public:
    QVector3D();
    QVector3D(qreal xpos, qreal ypos, qreal zpos);
@@ -124,8 +122,6 @@ class Q_GUI_EXPORT QVector3D
 #endif
 };
 
-Q_DECLARE_TYPEINFO(QVector3D, Q_MOVABLE_TYPE);
-
 inline QVector3D::QVector3D() : xp(0.0f), yp(0.0f), zp(0.0f) {}
 
 inline QVector3D::QVector3D(qreal xpos, qreal ypos, qreal zpos) : xp(xpos), yp(ypos), zp(zpos) {}
@@ -145,10 +141,12 @@ inline qreal QVector3D::x() const
 {
    return qreal(xp);
 }
+
 inline qreal QVector3D::y() const
 {
    return qreal(yp);
 }
+
 inline qreal QVector3D::z() const
 {
    return qreal(zp);
@@ -158,10 +156,12 @@ inline void QVector3D::setX(qreal aX)
 {
    xp = aX;
 }
+
 inline void QVector3D::setY(qreal aY)
 {
    yp = aY;
 }
+
 inline void QVector3D::setZ(qreal aZ)
 {
    zp = aZ;
@@ -254,9 +254,7 @@ inline const QVector3D operator/(const QVector3D &vector, qreal divisor)
 
 inline bool qFuzzyCompare(const QVector3D &v1, const QVector3D &v2)
 {
-   return qFuzzyCompare(v1.xp, v2.xp) &&
-          qFuzzyCompare(v1.yp, v2.yp) &&
-          qFuzzyCompare(v1.zp, v2.zp);
+   return qFuzzyCompare(v1.xp, v2.xp) && qFuzzyCompare(v1.yp, v2.yp) && qFuzzyCompare(v1.zp, v2.zp);
 }
 
 inline QPoint QVector3D::toPoint() const
@@ -271,14 +269,9 @@ inline QPointF QVector3D::toPointF() const
 
 Q_GUI_EXPORT QDebug operator<<(QDebug dbg, const QVector3D &vector);
 
-
-#ifndef QT_NO_DATASTREAM
 Q_GUI_EXPORT QDataStream &operator<<(QDataStream &, const QVector3D &);
 Q_GUI_EXPORT QDataStream &operator>>(QDataStream &, QVector3D &);
-#endif
 
 #endif
-
-QT_END_NAMESPACE
 
 #endif
