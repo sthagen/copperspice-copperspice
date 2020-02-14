@@ -413,6 +413,7 @@ static void fillBackground(QPainter *p, const QRectF &rect, QBrush brush, const 
 class QTextDocumentLayoutPrivate : public QAbstractTextDocumentLayoutPrivate
 {
    Q_DECLARE_PUBLIC(QTextDocumentLayout)
+
  public:
    QTextDocumentLayoutPrivate();
 
@@ -3354,26 +3355,22 @@ int QTextDocumentLayout::pageCount() const
 QSizeF QTextDocumentLayout::documentSize() const
 {
    Q_D(const QTextDocumentLayout);
+
    d->ensureLayoutFinished();
    return dynamicDocumentSize();
 }
 
 void QTextDocumentLayoutPrivate::ensureLayouted(QFixed y) const
 {
-   Q_Q(const QTextDocumentLayout);
-
    if (currentLazyLayoutPosition == -1) {
       return;
    }
-
-   const QSizeF oldSize = q->dynamicDocumentSize();
 
    if (checkPoints.isEmpty()) {
       layoutStep();
    }
 
-   while (currentLazyLayoutPosition != -1
-      && checkPoints.last().y < y) {
+   while (currentLazyLayoutPosition != -1 && checkPoints.last().y < y) {
       layoutStep();
    }
 }
@@ -3387,8 +3384,8 @@ void QTextDocumentLayoutPrivate::ensureLayoutedByPosition(int position) const
    if (position < currentLazyLayoutPosition) {
       return;
    }
-   while (currentLazyLayoutPosition != -1
-      && currentLazyLayoutPosition < position) {
+
+   while (currentLazyLayoutPosition != -1 && currentLazyLayoutPosition < position) {
       const_cast<QTextDocumentLayout *>(q_func())->doLayout(currentLazyLayoutPosition, 0,
          INT_MAX - currentLazyLayoutPosition);
    }

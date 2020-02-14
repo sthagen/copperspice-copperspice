@@ -7,7 +7,6 @@ target_compile_definitions(CsGui
    PRIVATE
    -DQT_BUILD_GUI_LIB
    -DQT_BUILTIN_GIF_READER
-   -DQOPENGL_DEPRECATEDFUNCTION
    -DMNG_BUILD_SO
    -DMNG_NO_INCLUDE_JNG
    -DPNG_NO_CONFIG_H
@@ -106,7 +105,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
       ${X11_Xfixes_LIB}
       ${X11_SM_LIB}
       ${X11_ICE_LIB}
-      ${NAS_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
       rt
    )
@@ -131,7 +129,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
       ${X11_Xfixes_INCLUDE_PATH}
       ${X11_SM_INCLUDE_PATH}
       ${X11_ICE_INCLUDE_PATH}
-      ${NAS_INCLUDES}
    )
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")

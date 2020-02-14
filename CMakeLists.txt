@@ -150,7 +150,7 @@ else()
 endif()
 
 string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
-add_definitions(-DQT_SHARED -DBUILD_DATE="${BUILD_DATE}")
+add_definitions(-DQT_SHARED)
 
 check_include_file(dlfcn.h       HAVE_DLFCN_H)
 check_include_file(dirent.h      HAVE_DIRENT_H)
@@ -356,14 +356,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
    endif()
 
    if(WITH_GUI)
-      find_package(NAS)
-      set_package_properties(NAS PROPERTIES
-         PURPOSE "Required for basic audio support"
-         DESCRIPTION "Network transparent, client/server audio transport system"
-         URL "http://www.radscan.com/nas.html"
-         TYPE REQUIRED
-      )
-
       find_package(X11 COMPONENTS ICE SM Xcursor Xext Xfixes Xi Xinerama Xrandr Xrender)
       set_package_properties(X11 PROPERTIES
          PURPOSE "Required for X11/X.Org integration support"
