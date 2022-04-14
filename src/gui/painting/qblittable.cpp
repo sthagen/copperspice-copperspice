@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,8 +30,9 @@ class QBlittablePrivate
 {
  public:
    QBlittablePrivate(const QSize &size, QBlittable::Capabilities caps)
-      : caps(caps), m_size(size), locked(false), cachedImg(0)
+      : caps(caps), m_size(size), locked(false), cachedImg(nullptr)
    { }
+
    QBlittable::Capabilities caps;
    QSize m_size;
    bool locked;

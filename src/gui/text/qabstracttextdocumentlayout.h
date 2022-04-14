@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,11 @@
 #ifndef QABSTRACTTEXTDOCUMENTLAYOUT_H
 #define QABSTRACTTEXTDOCUMENTLAYOUT_H
 
-#include <QtCore/qobject.h>
-#include <QtGui/qtextlayout.h>
-#include <QtGui/qtextdocument.h>
-#include <QtGui/qtextcursor.h>
-#include <QtGui/qpalette.h>
+#include <qobject.h>
+#include <qtextlayout.h>
+#include <qtextdocument.h>
+#include <qtextcursor.h>
+#include <qpalette.h>
 #include <QTextBlock>
 #include <QScopedPointer>
 
@@ -79,8 +79,8 @@ class Q_GUI_EXPORT QAbstractTextDocumentLayout : public QObject
    void unregisterHandler(int objectType, QObject *component = nullptr);
    QTextObjectInterface *handlerForObject(int objectType) const;
 
-   GUI_CS_SIGNAL_1(Public, void update(const QRectF &un_named_arg1 = QRectF(0.0, 0.0, 1000000000.0, 1000000000.0) ))
-   GUI_CS_SIGNAL_2(update, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void update(const QRectF &rect = QRectF(0.0, 0.0, 1000000000.0, 1000000000.0) ))
+   GUI_CS_SIGNAL_2(update, rect)
 
    GUI_CS_SIGNAL_1(Public, void updateBlock(const QTextBlock &block))
    GUI_CS_SIGNAL_2(updateBlock, block)
@@ -94,7 +94,7 @@ class Q_GUI_EXPORT QAbstractTextDocumentLayout : public QObject
  protected:
    QAbstractTextDocumentLayout(QAbstractTextDocumentLayoutPrivate &, QTextDocument *);
 
-   virtual void documentChanged(int from, int charsRemoved, int charsAdded) = 0;
+   virtual void documentChanged(int pos, int charsRemoved, int charsAdded) = 0;
 
    virtual void resizeInlineObject(QTextInlineObject item, int posInDocument, const QTextFormat &format);
    virtual void positionInlineObject(QTextInlineObject item, int posInDocument, const QTextFormat &format);

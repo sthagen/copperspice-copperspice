@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,14 @@
 #ifndef PHRASEMODEL_H
 #define PHRASEMODEL_H
 
-#include "phrase.h"
+#include <phrase.h>
 
-#include <QList>
-#include <QAbstractItemModel>
-
-QT_BEGIN_NAMESPACE
+#include <qlist.h>
+#include <qabstractitemmodel.h>
 
 class PhraseModel : public QAbstractTableModel
 {
-   Q_OBJECT
+   CS_OBJECT(PhraseModel)
 
  public:
    PhraseModel(QObject *parent = nullptr)
@@ -51,6 +49,7 @@ class PhraseModel : public QAbstractTableModel
    Phrase *phrase(const QModelIndex &index) const;
    void setPhrase(const QModelIndex &indx, Phrase *ph);
    QModelIndex index(Phrase *const phr) const;
+
    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const {
       return QAbstractTableModel::index(row, column, parent);
    }
@@ -59,22 +58,17 @@ class PhraseModel : public QAbstractTableModel
    int rowCount(const QModelIndex &) const;
    int columnCount(const QModelIndex &) const;
    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-   QVariant headerData(int section, Qt::Orientation orientation,
-                       int role = Qt::DisplayRole) const;
+   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
    Qt::ItemFlags flags(const QModelIndex &index) const;
-   bool setData(const QModelIndex &index, const QVariant &value,
-                int role = Qt::EditRole);
+   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
-   // HACK: This model will be displayed in a _TreeView_
-   // which has a tendency to expand 'children' on double click
+   // This model will be displayed in a _TreeView_  which has a tendency to expand 'children' on double click
    bool hasChildren(const QModelIndex &parent) const {
-      return !parent.isValid();
+      return ! parent.isValid();
    }
 
  private:
    QList<Phrase *> plist;
 };
 
-QT_END_NAMESPACE
-
-#endif // PHRASEMODEL_H
+#endif

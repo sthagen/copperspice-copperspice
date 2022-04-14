@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,8 +23,8 @@
 
 #include <qwavedecoder_p.h>
 
-#include <QtCore/qtimer.h>
-#include <QtCore/qendian.h>
+#include <qtimer.h>
+#include <qendian.h>
 
 QWaveDecoder::QWaveDecoder(QIODevice *s, QObject *parent):
    QIODevice(parent),
@@ -162,7 +162,7 @@ void QWaveDecoder::handleData()
             parsingFailed();
             return;
          } else {
-            format.setCodec(QLatin1String("audio/pcm"));
+            format.setCodec("audio/pcm");
 
             if (bigEndian) {
                int bps = qFromBigEndian<quint16>(wave.bitsPerSample);

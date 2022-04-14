@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,6 @@
 // include first, do not move
 #include <qstring8.h>
 
-#include <qmetatype.h>
 #include <qvariant.h>
 
 #include <initializer_list>
@@ -40,7 +39,7 @@ class QObject;
 class QMetaObject;
 
 template<class T1>
-const QString &cs_typeName();
+const QString &cs_typeToName();
 
 // csArgument
 template <typename T>
@@ -60,7 +59,7 @@ class CSArgument
 
 template <typename T>
 CSArgument<T>::CSArgument(const T &data)
-   : m_data(data), m_typeName(cs_typeName<T>())
+   : m_data(data), m_typeName(cs_typeToName<T>())
 {
 }
 
@@ -162,39 +161,29 @@ inline void CSReturnArgument<void>::setData(CsSignal::Internal::CSVoidReturn)
 
 // registration of enums and flags
 template<class T>
-struct is_enum_or_flag: public std::is_enum<T> {
+struct cs_is_enum_or_flag : public std::is_enum<T> {
 };
 
 template<class T>
-struct is_enum_or_flag<QFlags<T>>: public std::integral_constant<bool, true> {
+struct cs_is_enum_or_flag<QFlags<T>>
+   : public std::integral_constant<bool, true> {
 };
 
 template<class T>
-struct cs_underlying_type: public std::underlying_type<T> {
+struct cs_underlying_type
+   : public std::underlying_type<T> {
 };
 
 template<class T>
-struct cs_underlying_type<QFlags<T>>: public std::underlying_type<T> {
+struct cs_underlying_type<QFlags<T>>
+   : public std::underlying_type<T> {
 };
 
-// QVarient
-template < class T, class = void, class = typename std::enable_if < !std::is_constructible<QVariant, T>::value >::type >
+template<class T>
 QVariant cs_convertToQVariant(T data);
 
-template<class T, class = typename std::enable_if<std::is_constructible<QVariant, T>::value>::type>
-QVariant cs_convertToQVariant(T data);
-
-template < class T, class = void, class = void, class = typename std::enable_if < (! is_enum_or_flag<T>::value) &&
-           ! QMetaTypeId2<T>::Defined >::type >
+template <class T>
 std::pair<T, bool> convertFromQVariant(QVariant data);
-
-template < class T, class = void, class = typename std::enable_if < (! is_enum_or_flag<T>::value) &&
-           QMetaTypeId2<T>::Defined >::type >
-std::pair<T, bool> convertFromQVariant(QVariant data);
-
-template<class T, class = typename std::enable_if<is_enum_or_flag<T>::value>::type>
-std::pair<T, bool> convertFromQVariant(QVariant data);
-
 
 
 // ***********
@@ -209,6 +198,10 @@ class JarReadAbstract
 
    template<class R>
    R run(const QObject *) const;
+
+   virtual bool isStatic() const {
+      return false;
+   }
 };
 
 template<class R>
@@ -242,6 +235,10 @@ class SpiceJarRead : public JarRead<R>
 
    QVariant runV(const QObject *) const override;
    R call(const QObject *) const override;
+
+   bool isStatic() const override {
+      return m_func != nullptr;
+   }
 
  private:
    R (T::*m_method)() const;
@@ -302,7 +299,6 @@ R SpiceJarRead<T, R>::call(const QObject *obj) const
 }
 
 
-
 // ** WRITE
 class JarWriteAbstract
 {
@@ -353,7 +349,7 @@ bool SpiceJarWrite<T, V>::runV(QObject *obj, QVariant data) const
    // strip away const and & if they exist
    using bareType = typename std::remove_const<typename std::remove_reference<V>::type>::type;
 
-   // convert data to type V
+   // convert data to type bareType
    std::pair<bareType, bool> retval = convertFromQVariant<bareType>(data);
 
    if (retval.second) {
@@ -452,7 +448,7 @@ class CSBentoAbstract : public virtual CsSignal::Internal::BentoAbstract
    public:
       using CsSignal::Internal::BentoAbstract::invoke;
       virtual void invoke(QObject *receiver, const CsSignal::Internal::TeaCupAbstract *dataPack,
-                  CSGenericReturnArgument *retval = 0) const = 0;
+                  CSGenericReturnArgument *retval = nullptr) const = 0;
 
       virtual bool checkReturnType(CSGenericReturnArgument &retval) const = 0;
 };
@@ -467,7 +463,7 @@ class CSBento : public CSBentoAbstract, public CsSignal::Internal::Bento<T>
 
       using CsSignal::Internal::Bento<T>::invoke;
       void invoke(QObject *receiver, const CsSignal::Internal::TeaCupAbstract *dataPack,
-                  CSGenericReturnArgument *retval = 0) const override;
+                  CSGenericReturnArgument *retval = nullptr) const override;
 
       bool checkReturnType(CSGenericReturnArgument &retval) const override;
 };
@@ -483,7 +479,7 @@ class CSBento<FunctionReturn (*)(FunctionArgs...)> : public CSBentoAbstract,
 
       using CsSignal::Internal::Bento<FunctionReturn (*)(FunctionArgs...)>::invoke;
       void invoke(QObject *receiver, const CsSignal::Internal::TeaCupAbstract *dataPack,
-                  CSGenericReturnArgument *retval = 0) const override;
+                  CSGenericReturnArgument *retval = nullptr) const override;
 
       bool checkReturnType(CSGenericReturnArgument &retval) const override;
 };
@@ -499,7 +495,7 @@ class CSBento<MethodReturn(MethodClass::*)(MethodArgs...)>: public CSBentoAbstra
 
       using CsSignal::Internal::Bento<MethodReturn(MethodClass::*)(MethodArgs...)>::invoke;
       void invoke(QObject *receiver, const CsSignal::Internal::TeaCupAbstract *dataPack,
-                  CSGenericReturnArgument *retval = 0) const override;
+                  CSGenericReturnArgument *retval = nullptr) const override;
 
       bool checkReturnType(CSGenericReturnArgument &retval) const override;
 };
@@ -517,7 +513,7 @@ class CSBento<MethodReturn(MethodClass::*)(MethodArgs...) const>: public CSBento
 
       using CsSignal::Internal::Bento<MethodReturn(MethodClass::*)(MethodArgs...) const>::invoke;
       void invoke(QObject *receiver, const CsSignal::Internal::TeaCupAbstract *dataPack,
-                     CSGenericReturnArgument *retval = 0) const override;
+                     CSGenericReturnArgument *retval = nullptr) const override;
 
       bool checkReturnType(CSGenericReturnArgument &retval) const override;
 };

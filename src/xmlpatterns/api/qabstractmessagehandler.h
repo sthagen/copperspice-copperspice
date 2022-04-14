@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QABSTRACTMESSAGEHANDLER_H
 #define QABSTRACTMESSAGEHANDLER_H
 
-#include <QtXmlPatterns/QSourceLocation>
-#include <QtCore/QObject>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qsourcelocation.h>
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 class QAbstractMessageHandlerPrivate;
 
@@ -54,11 +52,9 @@ class Q_XMLPATTERNS_EXPORT QAbstractMessageHandler : public QObject
 
  private:
    Q_DECLARE_PRIVATE(QAbstractMessageHandler)
-   Q_DISABLE_COPY(QAbstractMessageHandler)
 
-
+   QAbstractMessageHandler(const QAbstractMessageHandler &) = delete;
+   QAbstractMessageHandler &operator=(const QAbstractMessageHandler &) = delete;
 };
-
-QT_END_NAMESPACE
 
 #endif

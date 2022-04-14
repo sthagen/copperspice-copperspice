@@ -109,7 +109,7 @@
 #include "SecurityOrigin.h"
 #include "Settings.h"
 
-#if defined Q_OS_WIN32
+#if defined Q_OS_WIN
 #include "SystemInfo.h"
 #endif
 
@@ -125,7 +125,7 @@
 #include "runtime/InitializeThreading.h"
 #include "wtf/Threading.h"
 
-#include <qhttpheader_p.h>
+#include <qhttp_header_p.h>
 
 #include <QApplication>
 #include <QBasicTimer>
@@ -150,8 +150,8 @@
 #include <QTextCharFormat>
 #include <QTextDocument>
 #include <QTouchEvent>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
+#include <qnetaccess_manager.h>
+#include <qnetwork_request.h>
 
 #if USE(QT_MOBILITY_SYSTEMINFO)
 #include <qsysteminfo.h>
@@ -3780,8 +3780,8 @@ QString QWebPage::userAgentForUrl(const QUrl&) const
    firstPartTemp += QString::fromLatin1("N; ");
 #endif
 
-        // Operating system
-#if defined Q_OS_WIN32
+
+#if defined Q_OS_WIN
         firstPartTemp += windowsVersionForUAString();
 #elif defined Q_OS_DARWIN
 #if CPU(X86) || CPU(X86_64)
@@ -3869,13 +3869,12 @@ QString QWebPage::userAgentForUrl(const QUrl&) const
         if (!appVer.isEmpty())
             appName.append(QLatin1Char('/') + appVer);
     } else {
-        // Qt version
-        appName = QString::fromLatin1("Qt/") + QString::fromLatin1(qVersion());
+        // CS version
+        appName = "CopperSpice/" + QString::fromLatin1(csVersion());
     }
 
     return firstPart + secondPart + appName + thirdPart;
 }
-
 
 void QWebPagePrivate::_q_onLoadProgressChanged(int)
 {

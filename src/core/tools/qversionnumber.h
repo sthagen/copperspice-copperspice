@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,14 +27,13 @@
 #include <qnamespace.h>
 #include <qstring.h>
 #include <qvector.h>
-#include <qmetatype.h>
 
 class QVersionNumber;
 
 Q_CORE_EXPORT uint qHash(const QVersionNumber &key, uint seed = 0);
 
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &out, const QVersionNumber &version);
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &in, QVersionNumber &version);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QVersionNumber &version);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QVersionNumber &version);
 
 class QVersionNumber
 {
@@ -146,7 +145,7 @@ class QVersionNumber
    Q_CORE_EXPORT static QVersionNumber fromString(const QString &string, int *suffixIndex = nullptr);
 
  private:
-   friend Q_CORE_EXPORT QDataStream &operator>>(QDataStream &in, QVersionNumber &version);
+   friend Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QVersionNumber &version);
    friend Q_CORE_EXPORT uint qHash(const QVersionNumber &key, uint seed);
 };
 
@@ -181,7 +180,5 @@ inline bool operator!=(const QVersionNumber &lhs, const QVersionNumber &rhs)
 {
    return QVersionNumber::compare(lhs, rhs) != 0;
 }
-
-Q_DECLARE_METATYPE(QVersionNumber)
 
 #endif

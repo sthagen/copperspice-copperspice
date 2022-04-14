@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,8 +31,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <resolv.h>
-
-QT_BEGIN_NAMESPACE
 
 // Almost always the same. If not, specify in qplatformdefs.h.
 #if !defined(QT_SOCKOPTLEN_T)
@@ -163,7 +161,5 @@ static inline int qt_safe_recvmsg(int sockfd, struct msghdr *msg, int flags)
     EINTR_LOOP(ret, ::recvmsg(sockfd, msg, flags));
     return ret;
 }
-
-
 
 #endif // QNET_UNIX_P_H

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,32 +35,41 @@ class QInputDialogPrivate;
 class Q_GUI_EXPORT QInputDialog : public QDialog
 {
    GUI_CS_OBJECT(QInputDialog)
-   Q_DECLARE_PRIVATE(QInputDialog)
+
    GUI_CS_PROPERTY_READ(inputMode, inputMode)
    GUI_CS_PROPERTY_WRITE(inputMode, setInputMode)
    GUI_CS_PROPERTY_READ(labelText, labelText)
    GUI_CS_PROPERTY_WRITE(labelText, setLabelText)
    GUI_CS_PROPERTY_READ(options, options)
    GUI_CS_PROPERTY_WRITE(options, setOptions)
+
    GUI_CS_PROPERTY_READ(textValue, textValue)
    GUI_CS_PROPERTY_WRITE(textValue, setTextValue)
    GUI_CS_PROPERTY_NOTIFY(textValue, textValueChanged)
+
    GUI_CS_PROPERTY_READ(intValue, intValue)
    GUI_CS_PROPERTY_WRITE(intValue, setIntValue)
    GUI_CS_PROPERTY_NOTIFY(intValue, intValueChanged)
+
    GUI_CS_PROPERTY_READ(doubleValue, doubleValue)
    GUI_CS_PROPERTY_WRITE(doubleValue, setDoubleValue)
    GUI_CS_PROPERTY_NOTIFY(doubleValue, doubleValueChanged)
+
    GUI_CS_PROPERTY_READ(textEchoMode, textEchoMode)
    GUI_CS_PROPERTY_WRITE(textEchoMode, setTextEchoMode)
+
    GUI_CS_PROPERTY_READ(comboBoxEditable, isComboBoxEditable)
    GUI_CS_PROPERTY_WRITE(comboBoxEditable, setComboBoxEditable)
+
    GUI_CS_PROPERTY_READ(comboBoxItems, comboBoxItems)
    GUI_CS_PROPERTY_WRITE(comboBoxItems, setComboBoxItems)
+
    GUI_CS_PROPERTY_READ(intMinimum, intMinimum)
    GUI_CS_PROPERTY_WRITE(intMinimum, setIntMinimum)
+
    GUI_CS_PROPERTY_READ(intMaximum, intMaximum)
    GUI_CS_PROPERTY_WRITE(intMaximum, setIntMaximum)
+
    GUI_CS_PROPERTY_READ(intStep, intStep)
    GUI_CS_PROPERTY_WRITE(intStep, setIntStep)
    GUI_CS_PROPERTY_READ(doubleMinimum, doubleMinimum)
@@ -89,7 +98,11 @@ class Q_GUI_EXPORT QInputDialog : public QDialog
       DoubleInput
    };
 
-   QInputDialog(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+   QInputDialog(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
+   QInputDialog(const QInputDialog &) = delete;
+   QInputDialog &operator=(const QInputDialog &) = delete;
+
    ~QInputDialog();
 
    void setInputMode(InputMode mode);
@@ -157,30 +170,25 @@ class Q_GUI_EXPORT QInputDialog : public QDialog
 
    void setVisible(bool visible) override;
 
-   static QString getText(QWidget *parent, const QString &title, const QString &label, QLineEdit::EchoMode echo = QLineEdit::Normal,
-      const QString &text = QString(), bool *ok = nullptr, Qt::WindowFlags flags = Qt::WindowFlags(),
-      Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
+   static QString getText(QWidget *parent, const QString &title, const QString &label,
+      QLineEdit::EchoMode echoMode = QLineEdit::Normal, const QString &text = QString(), bool *ok = nullptr,
+      Qt::WindowFlags flags = Qt::EmptyFlag, Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
 
    static QString getMultiLineText(QWidget *parent, const QString &title, const QString &label,
       const QString &text = QString(), bool *ok = nullptr,
-      Qt::WindowFlags flags = Qt::WindowFlags(),
-      Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
+      Qt::WindowFlags flags = Qt::EmptyFlag, Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
 
    static QString getItem(QWidget *parent, const QString &title, const QString &label,
-      const QStringList &items,
-      int current = 0, bool editable = true, bool *ok = nullptr, Qt::WindowFlags flags = Qt::WindowFlags(),
-      Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
-
-
+      const QStringList &items, int current = 0, bool editable = true, bool *ok = nullptr,
+      Qt::WindowFlags flags = Qt::EmptyFlag, Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
 
    static int getInt(QWidget *parent, const QString &title, const QString &label, int value = 0,
-      int minValue = -2147483647, int maxValue = 2147483647,
-      int step = 1, bool *ok = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+      int minValue = -2147483647, int maxValue = 2147483647, int step = 1, bool *ok = nullptr,
+      Qt::WindowFlags flags = Qt::EmptyFlag);
 
    static double getDouble(QWidget *parent, const QString &title, const QString &label, double value = 0,
       double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1,
-      bool *ok = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
-
+      bool *ok = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
 
    GUI_CS_SIGNAL_1(Public, void textValueChanged(const QString &text))
    GUI_CS_SIGNAL_2(textValueChanged, text)
@@ -203,7 +211,7 @@ class Q_GUI_EXPORT QInputDialog : public QDialog
    void done(int result) override;
 
  private:
-   Q_DISABLE_COPY(QInputDialog)
+   Q_DECLARE_PRIVATE(QInputDialog)
 
    GUI_CS_SLOT_1(Private, void _q_textChanged(const QString &un_named_arg1))
    GUI_CS_SLOT_2(_q_textChanged)
@@ -218,7 +226,5 @@ class Q_GUI_EXPORT QInputDialog : public QDialog
 Q_DECLARE_OPERATORS_FOR_FLAGS(QInputDialog::InputDialogOptions)
 
 #endif // QT_NO_INPUTDIALOG
-
-
 
 #endif

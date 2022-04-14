@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,12 +28,9 @@
 #include <qatomic.h>
 #include <qstring.h>
 
-#include <qmutex_p.h>
 #include <qreadwritelock_p.h>
 
 #include <errno.h>
-
-QT_BEGIN_NAMESPACE
 
 static void report_error(int code, const char *where, const char *what)
 {
@@ -55,7 +52,7 @@ class QWaitConditionPrivate
       while (true) {
          if (time != ULONG_MAX) {
             struct timeval tv;
-            gettimeofday(&tv, 0);
+            gettimeofday(&tv, nullptr);
 
             timespec ti;
             ti.tv_nsec = (tv.tv_usec + (time % 1000) * 1000) * 1000;
@@ -95,8 +92,8 @@ class QWaitConditionPrivate
 QWaitCondition::QWaitCondition()
 {
    d = new QWaitConditionPrivate;
-   report_error(pthread_mutex_init(&d->mutex, NULL), "QWaitCondition", "mutex init");
-   report_error(pthread_cond_init(&d->cond, NULL), "QWaitCondition", "cv init");
+   report_error(pthread_mutex_init(&d->mutex, nullptr), "QWaitCondition", "mutex init");
+   report_error(pthread_cond_init(&d->cond, nullptr), "QWaitCondition", "cv init");
    d->waiters = d->wakeups = 0;
 }
 
@@ -127,10 +124,6 @@ void QWaitCondition::wakeAll()
 bool QWaitCondition::wait(QMutex *mutex, unsigned long time)
 {
    if (! mutex) {
-      return false;
-   }
-   if (mutex->isRecursive()) {
-      qWarning("QWaitCondition: cannot wait on recursive mutexes");
       return false;
    }
 
@@ -171,5 +164,3 @@ bool QWaitCondition::wait(QReadWriteLock *readWriteLock, unsigned long time)
 
    return returnValue;
 }
-
-QT_END_NAMESPACE

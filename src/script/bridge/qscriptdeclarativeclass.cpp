@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -140,7 +140,7 @@ QScriptValue QScriptDeclarativeClass::Value::toScriptValue(QScriptEngine *engine
 }
 
 QScriptDeclarativeClass::PersistentIdentifier::PersistentIdentifier()
-   : identifier(0), engine(0)
+   : identifier(nullptr), engine(nullptr)
 {
    new (&d) JSC::Identifier();
 }
@@ -218,18 +218,20 @@ QScriptDeclarativeClass::Value QScriptDeclarativeClass::newObjectValue(QScriptEn
 QScriptDeclarativeClass *QScriptDeclarativeClass::scriptClass(const QScriptValue &v)
 {
    QScriptValuePrivate *d = QScriptValuePrivate::get(v);
-   if (!d || !d->isJSC()) {
-      return 0;
+   if (! d || ! d->isJSC()) {
+      return nullptr;
    }
+
    return QScriptEnginePrivate::declarativeClass(d->jscValue);
 }
 
 QScriptDeclarativeClass::Object *QScriptDeclarativeClass::object(const QScriptValue &v)
 {
    QScriptValuePrivate *d = QScriptValuePrivate::get(v);
-   if (!d || !d->isJSC()) {
-      return 0;
+   if (! d || ! d->isJSC()) {
+      return nullptr;
    }
+
    return QScriptEnginePrivate::declarativeObject(d->jscValue);
 }
 
@@ -237,7 +239,7 @@ QScriptValue QScriptDeclarativeClass::function(const QScriptValue &v, const Iden
 {
    QScriptValuePrivate *d = QScriptValuePrivate::get(v);
 
-   if (!d->isObject()) {
+   if (! d->isObject()) {
       return QScriptValue();
    }
 
@@ -372,7 +374,7 @@ QScriptValue QScriptDeclarativeClass::scopeChainValue(QScriptContext *context, i
          }
 
          if (object->inherits(&QScript::QScriptActivationObject::info)
-            && (static_cast<QScript::QScriptActivationObject *>(object)->delegate() != 0)) {
+            && (static_cast<QScript::QScriptActivationObject *>(object)->delegate() != nullptr)) {
             // Return the object that property access is being delegated to
             object = static_cast<QScript::QScriptActivationObject *>(object)->delegate();
          }
@@ -391,7 +393,7 @@ QScriptValue QScriptDeclarativeClass::scopeChainValue(QScriptContext *context, i
 QScriptContext *QScriptDeclarativeClass::pushCleanContext(QScriptEngine *engine)
 {
    if (! engine) {
-      return 0;
+      return nullptr;
    }
 
    return engine->pushContext();
@@ -475,7 +477,7 @@ QScriptClass::QueryFlags QScriptDeclarativeClass::queryProperty(Object *object,
    Q_UNUSED(object);
    Q_UNUSED(name);
    Q_UNUSED(flags);
-   return 0;
+   return Qt::EmptyFlag;
 }
 
 QScriptDeclarativeClass::Value QScriptDeclarativeClass::property(Object *object, const Identifier &name)
@@ -496,7 +498,7 @@ QScriptValue::PropertyFlags QScriptDeclarativeClass::propertyFlags(Object *objec
 {
    Q_UNUSED(object);
    Q_UNUSED(name);
-   return 0;
+   return Qt::EmptyFlag;
 }
 
 QScriptDeclarativeClass::Value QScriptDeclarativeClass::call(Object *object, QScriptContext *ctxt)
@@ -527,7 +529,8 @@ QObject *QScriptDeclarativeClass::toQObject(Object *, bool *ok)
    if (ok) {
       *ok = false;
    }
-   return 0;
+
+   return nullptr;
 }
 
 QVariant QScriptDeclarativeClass::toVariant(Object *, bool *ok)
@@ -535,6 +538,7 @@ QVariant QScriptDeclarativeClass::toVariant(Object *, bool *ok)
    if (ok) {
       *ok = false;
    }
+
    return QVariant();
 }
 

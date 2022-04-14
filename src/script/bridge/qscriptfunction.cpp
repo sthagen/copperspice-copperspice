@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,17 +40,14 @@ ASSERT_CLASS_FITS_IN_CELL(QT_PREPEND_NAMESPACE(QScript::FunctionWrapper));
 ASSERT_CLASS_FITS_IN_CELL(QT_PREPEND_NAMESPACE(QScript::FunctionWithArgWrapper));
 }
 
-QT_BEGIN_NAMESPACE
-
 namespace QScript {
 
-const JSC::ClassInfo FunctionWrapper::info = { "QtNativeFunctionWrapper", &PrototypeFunction::info, 0, 0 };
-const JSC::ClassInfo FunctionWithArgWrapper::info = { "QtNativeFunctionWithArgWrapper", &PrototypeFunction::info, 0, 0 };
+const JSC::ClassInfo FunctionWrapper::info = { "QtNativeFunctionWrapper", &PrototypeFunction::info, nullptr, nullptr };
+const JSC::ClassInfo FunctionWithArgWrapper::info = { "QtNativeFunctionWithArgWrapper", &PrototypeFunction::info, nullptr, nullptr };
 
 FunctionWrapper::FunctionWrapper(JSC::ExecState *exec, int length, const JSC::Identifier &name,
    QScriptEngine::FunctionSignature function)
-   : JSC::PrototypeFunction(exec, length, name, proxyCall),
-     data(new Data())
+   : JSC::PrototypeFunction(exec, length, name, proxyCall), data(new Data())
 {
    data->function = function;
 }
@@ -173,6 +170,4 @@ JSC::JSObject *FunctionWithArgWrapper::proxyConstruct(JSC::ExecState *exec, JSC:
    return JSC::asObject(eng_p->scriptValueToJSCValue(result));
 }
 
-} // namespace QScript
-
-QT_END_NAMESPACE
+} // namespace

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,8 +23,7 @@
 
 #include <Cocoa/Cocoa.h>
 
-#include "qpagesetupdialog.h"
-
+#include <qpagesetupdialog.h>
 
 #ifndef QT_NO_PRINTDIALOG
 
@@ -32,7 +31,6 @@
 
 #include <qplatform_nativeinterface.h>
 #include <qprintengine.h>
-
 
 @class QCocoaPageLayoutDelegate;
 
@@ -86,11 +84,13 @@ class QMacPageSetupDialogPrivate : public QPageSetupDialogPrivate
 
  public:
     QMacPageSetupDialogPrivate(QPrinter *printer)
-        :  QPageSetupDialogPrivate(printer), printInfo(0), pageLayout(0)
-   {}
+        :  QPageSetupDialogPrivate(printer), printInfo(nullptr), pageLayout(nullptr)
+   {
+   }
 
-    ~QMacPageSetupDialogPrivate() {
-    }
+    ~QMacPageSetupDialogPrivate()
+   {
+   }
 
    void openCocoaPageLayout(Qt::WindowModality modality);
    void closeCocoaPageLayout();
@@ -144,9 +144,9 @@ void QMacPageSetupDialogPrivate::openCocoaPageLayout(Qt::WindowModality modality
 void QMacPageSetupDialogPrivate::closeCocoaPageLayout()
 {
     [printInfo release];
-    printInfo = 0;
+    printInfo  = nullptr;
     [pageLayout release];
-    pageLayout = 0;
+    pageLayout = nullptr;
 }
 
 QPageSetupDialog::QPageSetupDialog(QPrinter *printer, QWidget *parent)
@@ -157,7 +157,7 @@ QPageSetupDialog::QPageSetupDialog(QPrinter *printer, QWidget *parent)
 }
 
 QPageSetupDialog::QPageSetupDialog(QWidget *parent)
-    : QDialog(*(new QMacPageSetupDialogPrivate(0)), parent)
+    : QDialog(*(new QMacPageSetupDialogPrivate(nullptr)), parent)
 {
     setWindowTitle(QCoreApplication::translate("QPrintPreviewDialog", "Page Setup"));
     setAttribute(Qt::WA_DontShowOnScreen);
@@ -171,7 +171,7 @@ void QPageSetupDialog::setVisible(bool visible)
       return;
    }
 
-    bool isCurrentlyVisible = (static_cast <QMacPageSetupDialogPrivate*>(d)->pageLayout != 0);
+    bool isCurrentlyVisible = (static_cast <QMacPageSetupDialogPrivate*>(d)->pageLayout != nullptr);
 
    if (!visible == !isCurrentlyVisible) {
       return;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,15 +24,13 @@
 #ifndef QREADWRITELOCK_P_H
 #define QREADWRITELOCK_P_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qhash.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
+#include <qhash.h>
 
 struct QReadWriteLockPrivate {
    QReadWriteLockPrivate(QReadWriteLock::RecursionMode recursionMode)
       : accessCount(0), waitingReaders(0), waitingWriters(0),
-        recursive(recursionMode == QReadWriteLock::Recursive), currentWriter(0) {
+        recursive(recursionMode == QReadWriteLock::Recursive), currentWriter(nullptr) {
    }
 
    QMutex mutex;
@@ -48,6 +46,4 @@ struct QReadWriteLockPrivate {
    QHash<Qt::HANDLE, int> currentReaders;
 };
 
-QT_END_NAMESPACE
-
-#endif // QREADWRITELOCK_P_H
+#endif

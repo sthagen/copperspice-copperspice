@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QSIMPLEXMLNODEMODEL_H
 #define QSIMPLEXMLNODEMODEL_H
 
-#include <QtXmlPatterns/QAbstractXmlNodeModel>
-#include <QtXmlPatterns/QXmlQuery>
+#include <QAbstractXmlNodeModel>
+#include <QXmlQuery>
 
 QT_BEGIN_NAMESPACE
 
@@ -39,7 +39,7 @@ class Q_XMLPATTERNS_EXPORT QSimpleXmlNodeModel : public QAbstractXmlNodeModel
 
    QUrl baseUri(const QXmlNodeModelIndex &node) const override;
    QXmlNamePool &namePool() const;
-   QVector<QXmlName> namespaceBindings(const QXmlNodeModelIndex &) const override;
+   QVector<QXmlName> namespaceBindings(const QXmlNodeModelIndex &node) const override;
    QString stringValue(const QXmlNodeModelIndex &node) const override;
    QXmlNodeModelIndex elementById(const QXmlName &id) const override;
    QVector<QXmlNodeModelIndex> nodesByIdref(const QXmlName &idref) const override;

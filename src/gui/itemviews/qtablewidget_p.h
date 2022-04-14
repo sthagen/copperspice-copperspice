@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,13 +27,12 @@
 #include <qheaderview.h>
 #include <qtablewidget.h>
 #include <qabstractitemmodel.h>
+
 #include <qabstractitemmodel_p.h>
 #include <qtableview_p.h>
 #include <qwidgetitemdata_p.h>
 
 #ifndef QT_NO_TABLEWIDGET
-
-QT_BEGIN_NAMESPACE
 
 // workaround for VC++ 6.0 linker bug
 typedef bool(*LessThan)(const QPair<QTableWidgetItem *, int> &, const QPair<QTableWidgetItem *, int> &);
@@ -67,9 +66,10 @@ class QTableModel : public QAbstractTableModel
    GUI_CS_OBJECT(QTableModel)
 
  public:
+   // need this to separate header items from other items
    enum ItemFlagsExtension {
       ItemIsHeaderItem = 128
-   }; // we need this to separate header items from other items
+   };
 
    QTableModel(int rows, int columns, QTableWidget *parent);
    ~QTableModel();
@@ -197,8 +197,6 @@ class QTableWidgetItemPrivate
    QTableWidgetItem *q;
    int id;
 };
-
-
 
 #endif // QT_NO_TABLEWIDGET
 

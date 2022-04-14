@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,15 +35,20 @@ class QColumnViewGrip : public QWidget
    GUI_CS_OBJECT(QColumnViewGrip)
 
  public:
-   GUI_CS_SIGNAL_1(Public, void gripMoved(int offset))
-   GUI_CS_SIGNAL_2(gripMoved, offset)
-
    explicit QColumnViewGrip(QWidget *parent = nullptr);
+
+   QColumnViewGrip(const QColumnViewGrip &) = delete;
+   QColumnViewGrip &operator=(const QColumnViewGrip &) = delete;
+
    ~QColumnViewGrip();
    int moveGrip(int offset);
 
+   GUI_CS_SIGNAL_1(Public, void gripMoved(int offset))
+   GUI_CS_SIGNAL_2(gripMoved, offset)
+
  protected:
-   QColumnViewGrip(QColumnViewGripPrivate &, QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+   QColumnViewGrip(QColumnViewGripPrivate &, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
    void paintEvent(QPaintEvent *event) override;
    void mouseDoubleClickEvent(QMouseEvent *event) override;
    void mouseMoveEvent(QMouseEvent *event) override;
@@ -52,22 +57,23 @@ class QColumnViewGrip : public QWidget
 
  private:
    Q_DECLARE_PRIVATE(QColumnViewGrip)
-   Q_DISABLE_COPY(QColumnViewGrip)
 };
 
 class QColumnViewGripPrivate : public QWidgetPrivate
 {
-   Q_DECLARE_PUBLIC(QColumnViewGrip)
-
  public:
    QColumnViewGripPrivate();
-   ~QColumnViewGripPrivate() {}
+
+   ~QColumnViewGripPrivate()
+   {
+   }
 
    int originalXLocation;
+
+ private:
+   Q_DECLARE_PUBLIC(QColumnViewGrip)
 };
 
+#endif //QT_NO_QCOLUMNVIEW
 
-
-#endif // QT_NO_QCOLUMNVIEW
-
-#endif //QCOLUMNVIEWGRIP_P_H
+#endif

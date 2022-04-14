@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,16 +23,11 @@
 
 #include "qxsdschemaparsercontext_p.h"
 
-QT_BEGIN_NAMESPACE
-
 using namespace QPatternist;
 
 XsdSchemaParserContext::XsdSchemaParserContext(const NamePool::Ptr &namePool, const XsdSchemaContext::Ptr &context)
-   : m_namePool(namePool)
-   , m_schema(new XsdSchema(m_namePool))
-   , m_checker(new XsdSchemaChecker(context, this))
-   , m_resolver(new XsdSchemaResolver(context, this))
-   , m_elementDescriptions(setupElementDescriptions())
+   : m_namePool(namePool), m_schema(new XsdSchema(m_namePool)), m_checker(new XsdSchemaChecker(context, this)),
+     m_resolver(new XsdSchemaResolver(context, this)), m_elementDescriptions(setupElementDescriptions())
 {
 }
 
@@ -595,5 +590,3 @@ ElementDescription<XsdSchemaToken, XsdTagScope::Type>::Hash  XsdSchemaParserCont
 
    return elementDescriptions;
 }
-
-QT_END_NAMESPACE

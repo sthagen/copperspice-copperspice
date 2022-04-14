@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QTCONCURRENTEXCEPTION_H
 #define QTCONCURRENTEXCEPTION_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qatomic.h>
+#include <qglobal.h>
+#include <qatomic.h>
 #include <exception>
-
-QT_BEGIN_NAMESPACE
 
 namespace QtConcurrent {
 
@@ -53,11 +51,14 @@ class Base;
 class ExceptionHolder
 {
  public:
-   ExceptionHolder(Exception *exception = 0);
+   ExceptionHolder(Exception *exception = nullptr);
    ExceptionHolder(const ExceptionHolder &other);
    void operator=(const ExceptionHolder &other);
+
    ~ExceptionHolder();
+
    Exception *exception() const;
+
    Base *base;
 };
 
@@ -74,9 +75,6 @@ class Q_CORE_EXPORT ExceptionStore
 
 } // namespace internal
 
-
 } // namespace QtConcurrent
-
-QT_END_NAMESPACE
 
 #endif

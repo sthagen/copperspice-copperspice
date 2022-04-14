@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,8 @@
 
 namespace QScript {
 
-SyntaxChecker::SyntaxChecker():
-   tos(0), stack_size(0), state_stack(0)
+SyntaxChecker::SyntaxChecker()
+   : tos(0), stack_size(0), state_stack(nullptr)
 {
 }
 
@@ -47,8 +47,8 @@ bool SyntaxChecker::automatic(QScript::Lexer *lexer, int token) const
 SyntaxChecker::Result SyntaxChecker::checkSyntax(const QString &code)
 {
    const int INITIAL_STATE = 0;
-   QScript::Lexer lexer (/*engine=*/ 0);
-   lexer.setCode(code, /*lineNo*/ 1);
+   QScript::Lexer lexer(nullptr);
+   lexer.setCode(code, 1);
 
    int yytoken = -1;
    int saved_yytoken = -1;

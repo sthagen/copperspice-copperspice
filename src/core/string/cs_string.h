@@ -1,9 +1,9 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
 *
-* This file is part of CopperSpice.
+* This file is part of CsString.
 *
 * CsString is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
@@ -20,10 +20,12 @@
 #define LIB_CS_STRING_H
 
 #include <algorithm>
+#include <cstring>
 #include <cstddef>
 #include <exception>
 #include <iterator>
 #include <stdexcept>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -56,6 +58,9 @@ class CsBasicString
       using const_reverse_iterator = CsStringReverseIterator<const_iterator>;
       using reverse_iterator       = CsStringReverseIterator<iterator>;
 
+      using const_storage_iterator         = typename std::vector<typename E::storage_unit, A>::const_iterator;
+      using const_storage_reverse_iterator = typename std::vector<typename E::storage_unit, A>::const_reverse_iterator;
+
       static constexpr const size_type npos = -1;
 
       CsBasicString()
@@ -67,15 +72,6 @@ class CsBasicString
          : m_string(1, 0, a)
       {
       }
-
-      // copy
-      CsBasicString(const CsBasicString &str) = default;
-      CsBasicString(const CsBasicString &str, const A &a);
-
-      // move
-      CsBasicString(CsBasicString && str) = default;
-      CsBasicString(CsBasicString && str, const A &a);
-
 
       // for a const char * and char *
       template <typename T, typename  = typename std::enable_if<std::is_same<T, const char *>::value ||
@@ -92,12 +88,17 @@ class CsBasicString
                   std::is_same<T, char *>::value>::type>
       CsBasicString(const T &str, size_type size, const A &a = A());
 
-
       // for an array of chars
       template <int N>
       CsBasicString(const char (&str)[N], size_type size, const A &a = A());
 
+
+      CsBasicString(const char16_t *str, const A &a = A());
+      CsBasicString(const char16_t *str, size_type size, const A &a = A());
+
       CsBasicString(const char32_t *str, const A &a = A());
+      CsBasicString(const char32_t *str, size_type size, const A &a = A());
+
 
       // substring constructors
       CsBasicString(const CsBasicString &str, size_type indexStart, const A &a = A());
@@ -122,6 +123,25 @@ class CsBasicString
       CsBasicString(Iterator begin, Iterator end, const A &a = A());
 
       CsBasicString(const_iterator begin, const_iterator end, const A &a = A());
+
+      // copy constructor
+      CsBasicString(const CsBasicString &str) = default;
+      CsBasicString(const CsBasicString &str, const A &a);
+
+      // move constructor
+      CsBasicString(CsBasicString && str) = default;
+      CsBasicString(CsBasicString && str, const A &a);
+
+
+#if defined(__cpp_char8_t)
+      // support new data type added in C++20
+
+      CsBasicString(const char8_t *str, const A &a = A());
+      CsBasicString(const char8_t *str, size_type size, const A &a = A());
+
+      static CsBasicString fromUtf8(const char8_t *str, size_type numOfChars = -1, const A &a = A());
+#endif
+
 
       // ** operators
       CsBasicString &operator=(const CsBasicString &str) = default;
@@ -450,9 +470,10 @@ class CsBasicString
       //   decltype(*(std::declval<typename U::const_iterator>())), CsChar>::value>::type>
       // size_type rfind(CsBasicStringView<U> str, size_type indexStart = npos) const;
 
-
       CsChar front() const;
-      static CsBasicString fromUtf8(const char *str, size_type numOfChars);
+
+      static CsBasicString fromUtf8(const char *str, size_type numOfChars = -1, const A &a = A());
+      static CsBasicString fromUtf16(const char16_t *str, size_type numOfChars = -1, const A &a = A());
 
       A getAllocator() const;
 
@@ -479,7 +500,7 @@ class CsBasicString
       CsBasicString &insert(size_type indexStart, const CsBasicString &str);
 
       CsBasicString &insert(size_type indexStart, const CsBasicString &str,
-                  size_type srcStart, size_type srcSize = npos);
+                  size_type srcStart, size_type size = npos);
 
       iterator insert(const_iterator posStart, CsChar c);
       iterator insert(const_iterator posStart, size_type count, CsChar c);
@@ -506,16 +527,16 @@ class CsBasicString
 
       template <typename U, typename = typename std::enable_if< std::is_convertible<
             decltype(*(std::declval<typename U::const_iterator>())), CsChar>::value>::type>
-      iterator insert(size_type indexStart, CsBasicStringView<U> str, size_type srcStart, size_type srcSize = npos);
+      iterator insert(size_type indexStart, CsBasicStringView<U> str, size_type srcStart, size_type size = npos);
 
       void pop_back();
       void push_back(CsChar c);
 
       CsBasicString &replace(size_type indexStart, size_type size, const CsBasicString &str);
       CsBasicString &replace(const_iterator first, const_iterator last, const CsBasicString &str);
-	
-      CsBasicString &replace(size_type indexStart, size_type size, const CsBasicString &str,
-                  size_type srcStart, size_type srcSize = npos);
+
+      CsBasicString &replace(size_type indexStart, size_type count, const CsBasicString &str,
+                  size_type srcStart, size_type size = npos);
 
       template <class Iterator>
       CsBasicString &replace(const_iterator first1, const_iterator last1, Iterator first2, Iterator last2);
@@ -523,20 +544,20 @@ class CsBasicString
       // for a const char * and char *
       template <typename T, typename  = typename std::enable_if<std::is_same<T, const char *>::value ||
                   std::is_same<T, char *>::value>::type>
-      CsBasicString &replace(size_type indexStart, size_type size, const T &str, size_type srcSize);
+      CsBasicString &replace(size_type indexStart, size_type count, const T &str, size_type size);
 
       // for an array of chars
       template <int N>
-      CsBasicString &replace(size_type indexStart, size_type size, const char (&str)[N], size_type srcSize);
+      CsBasicString &replace(size_type indexStart, size_type count, const char (&str)[N], size_type size);
 
       // for a const char * and char *
       template <typename T, typename  = typename std::enable_if<std::is_same<T, const char *>::value ||
                   std::is_same<T, char *>::value>::type>
-      CsBasicString &replace(const_iterator first, const_iterator last, const T &str, size_type srcSize);
+      CsBasicString &replace(const_iterator first, const_iterator last, const T &str, size_type size);
 
       // for an array of chars
       template <int N>
-      CsBasicString &replace(const_iterator first, const_iterator last, const char (&str)[N], size_type srcSize);
+      CsBasicString &replace(const_iterator first, const_iterator last, const char (&str)[N], size_type size);
 
       // for a const char * and char *
       template <typename T, typename  = typename std::enable_if<std::is_same<T, const char *>::value ||
@@ -558,25 +579,25 @@ class CsBasicString
 
       CsBasicString &replace(size_type indexStart, size_type size, size_type count, CsChar c);
       CsBasicString &replace(const_iterator first, const_iterator last, size_type count, CsChar c);
-      	
+
       // unknown encoding
       // CsBasicString &replace(const_iterator first, const_iterator last, std::initializer_list<CsChar> str);
-      	
+
       // template <typename U, typename = typename std::enable_if< std::is_convertible<
       //   decltype(*(std::declval<typename U::const_iterator>())), CsChar>::value>::type>
       // basic_string &replace(size_type pos, size_type size, CsBasicStringView<U> str);
-      	
+
       // template <typename U, typename = typename std::enable_if< std::is_convertible<
       //   decltype(*(std::declval<typename U::const_iterator>())), CsChar>::value>::type>
       // basic_string &replace(const_iterator first, const_iterator last, CsBasicStringView<U> str);
-      	
+
       template <class T>
-      CsBasicString &replace(size_type indexStart, size_type size, const T &str,
-                  size_type srcStart, size_type srcSize = npos);
+      CsBasicString &replace(size_type indexStart, size_type count, const T &str,
+                  size_type srcStart, size_type size = npos);
 
       template <class T>
       CsBasicString &replace(const_iterator first, const_iterator last, const T &str,
-                  size_type srcStart, size_type srcSize = npos);
+                  size_type srcStart, size_type size = npos);
 
       iterator replace(const_iterator iter, const CsBasicString &str);
 
@@ -608,6 +629,13 @@ class CsBasicString
       const_reverse_iterator rend() const;
       const_reverse_iterator crend() const;
 
+      // storage iterators
+      const_storage_iterator storage_begin() const;
+      const_storage_iterator storage_end() const;
+
+      const_storage_reverse_iterator storage_rbegin() const;
+      const_storage_reverse_iterator storage_rend() const;
+
       // returns const ptr to the raw data
       const typename E::storage_unit *constData() const
       {
@@ -637,70 +665,61 @@ CsBasicString<E, A>::CsBasicString(CsBasicString &&str, const A &a)
 template <typename E, typename A>
 template <typename T, typename>
 CsBasicString<E, A>::CsBasicString(const T &str, const A &a)
-   : m_string(1, 0, a)
 {
 #ifndef CS_STRING_ALLOW_UNSAFE
    static_assert(! std::is_same<E, E>::value, "Unsafe operations not allowed, unknown encoding for this operation");
 #endif
 
-   // str is a const char *
-   if (str == nullptr) {
-      return;
-   }
-
-   const char *c = str;
-
-   while (*c != 0) {
-      E::insert(m_string, m_string.end() - 1, *c);
-      ++c;
-   }
+   // make this safe by treating str as utf8
+   *this = CsBasicString::fromUtf8(str, -1, a);
 }
 
 template <typename E, typename A>
 template <int N>
 CsBasicString<E, A>::CsBasicString(const char (&str)[N], const A &a)
-   : m_string(1, 0, a)
 {
-   // make this safe (find which encoding the compiler is using, convert str from X to E)
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   // str is an array of chars
-   const char *c = str;
-
-   while (*c != 0) {
-      E::insert(m_string, m_string.end() - 1, *c);
-      ++c;
-   }
+   // make this safe by treating str as utf8
+   *this = CsBasicString::fromUtf8(str, N-1, a);
 }
 
 template <typename E, typename A>
 template <typename T,  typename>
 CsBasicString<E, A>::CsBasicString(const T &str, size_type size, const A &a)
-   : m_string(1, 0, a)
 {
 #ifndef CS_STRING_ALLOW_UNSAFE
    static_assert(! std::is_same<E, E>::value, "Unsafe operations not allowed, unknown encoding for this operation");
 #endif
 
    // str is a const char *
-   if (str == nullptr) {
-      return;
-   }
-
-   for (size_type x = 0; x < size; ++x) {
-      E::insert(m_string, m_string.end() - 1, str[x]);
-   }
+   *this = CsBasicString::fromUtf8(str, size, a);
 }
 
 template <typename E, typename A>
 template <int N>
 CsBasicString<E, A>::CsBasicString(const char (&str)[N], size_type size, const A &a)
-   : m_string(1, 0, a)
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   for (size_type x = 0; x < size; ++x) {
-      E::insert(m_string, m_string.end() - 1, str[x]);
-   }
+   // make this safe by treating str as utf8
+   *this = CsBasicString::fromUtf8(str, size, a);
+}
+
+template <typename E, typename A>
+CsBasicString<E, A>::CsBasicString(const char16_t *str, const A &a)
+{
+   *this = CsBasicString::fromUtf16(str, -1, a);
+}
+
+template <typename E, typename A>
+CsBasicString<E, A>::CsBasicString(const char16_t *str, size_type size, const A &a)
+{
+   *this = CsBasicString::fromUtf16(str, size, a);
 }
 
 template <typename E, typename A>
@@ -710,6 +729,29 @@ CsBasicString<E, A>::CsBasicString(const char32_t *str, const A &a)
    const char32_t *c = str;
 
    while (*c != 0) {
+      E::insert(m_string, m_string.end() - 1, *c);
+      ++c;
+   }
+}
+
+template <typename E, typename A>
+CsBasicString<E, A>::CsBasicString(const char32_t *str, size_type size, const A &a)
+   : m_string(1, 0, a)
+{
+   const char32_t *c = str;
+
+   size_type count = 0;
+
+   while (*c != 0) {
+
+      if (size >= 0) {
+         if (count >= size) {
+            break;
+         }
+
+         ++count;
+      }
+
       E::insert(m_string, m_string.end() - 1, *c);
       ++c;
    }
@@ -791,8 +833,8 @@ CsBasicString<E, A>::CsBasicString(CsBasicStringView<U> str, size_type indexStar
       "Unable to construct a CsBasicString using a CsBasicStringView, encoding E is "
       "incompatible with the encoding for U");
 
-   const_iterator iter_begin = str.cbegin();
-   const_iterator iter_end;
+   typename U::const_iterator iter_begin = str.cbegin();
+   typename U::const_iterator iter_end;
 
    for (size_type i = 0; i < indexStart && iter_begin != str.cend(); ++i)  {
       ++iter_begin;
@@ -895,7 +937,7 @@ CsBasicString<E, A> &CsBasicString<E, A>::operator+=(const T &str)
    // str is a const char * -or- an array of chars
 
    append(str);
-   return *this;;
+   return *this;
 }
 
 template <typename E, typename A>
@@ -995,35 +1037,22 @@ CsBasicString<E, A> &CsBasicString<E, A>::append(const T &str, size_type size)
       return *this;
    }
 
-   const char *c = str;
-
-   int count = 0;
-
-   while (*c != 0 && count < size) {
-      E::insert(m_string, m_string.end() - 1, *c);
-      ++c;
-
-      ++count;
-   }
+   // make this safe by treating str as utf8
+   this->append(CsBasicString::fromUtf8(str, size));
 
    return *this;
 }
 
 template <typename E, typename A>
 template <int N>
-CsBasicString<E, A> &CsBasicString<E, A>::append(const char (&str)[N], size_type size )
+CsBasicString<E, A> &CsBasicString<E, A>::append(const char (&str)[N], size_type size)
 {
-   // make this safe
-   const char *c = str;
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   int count = 0;
-
-   while (*c != 0 && count < size) {
-      E::insert(m_string, m_string.end() - 1, *c);
-      ++c;
-
-      ++count;
-   }
+   // make this safe by treating str as utf8
+   this->append(CsBasicString::fromUtf8(str, size));
 
    return *this;
 }
@@ -1041,12 +1070,8 @@ CsBasicString<E, A> &CsBasicString<E, A>::append(const T &str)
       return *this;
    }
 
-   const char *c = str;
-
-   while (*c != 0) {
-      E::insert(m_string, m_string.end() - 1, *c);
-      ++c;
-   }
+   // make this safe by treating str as utf8
+   this->append(CsBasicString::fromUtf8(str));
 
    return *this;
 }
@@ -1055,13 +1080,12 @@ template <typename E, typename A>
 template <int N>
 CsBasicString<E, A> &CsBasicString<E, A>::append(const char (&str)[N])
 {
-   // make this safe
-   const char *c = str;
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   while (*c != 0) {
-      E::insert(m_string, m_string.end() - 1, *c);
-      ++c;
-   }
+   // make this safe by treating str as utf8
+   this->append(CsBasicString::fromUtf8(str, N-1));
 
    return *this;
 }
@@ -1086,8 +1110,8 @@ CsBasicString<E, A> &CsBasicString<E, A>::append(CsBasicStringView<U> str, size_
       "Unable to construct a CsBasicString using a CsBasicStringView, encoding E is "
       "incompatible with the encoding for U");
 
-   const_iterator iter_begin = str.cbegin();
-   const_iterator iter_end;
+   typename U::const_iterator iter_begin = str.cbegin();
+   typename U::const_iterator iter_end;
 
    for (size_type i = 0; i < indexStart && iter_begin != str.cend(); ++i)  {
       ++iter_begin;
@@ -1349,51 +1373,18 @@ typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::find_fast(cons
    static_assert(! std::is_same<E, E>::value, "Unsafe operations not allowed, unknown encoding for this operation");
 #endif
 
-   const_iterator iter_end = end();
+   const_iterator iter_end = cend();
 
    if (iter_begin == iter_end) {
       return iter_end;
    }
 
-   if (str == nullptr || str[0] == 0) {
+   if (str == nullptr || str[0] == '\0') {
       return iter_begin;
    }
 
-   auto iter = iter_begin;
-   auto ch   = str[0];
-
-   while (iter != iter_end)   {
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         int count = 0;
-
-         while (text_iter != iter_end && *pattern_iter != 0 && count < size)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-               ++count;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == 0) {
-            // found a match
-            return iter;
-         }
-      }
-
-      ++iter;
-   }
-
-   return iter_end;
+   // make this safe by treating str as utf8
+   return find_fast(CsBasicString::fromUtf8(str, size), iter_begin);
 }
 
 // for an array of chars
@@ -1402,53 +1393,12 @@ template <int N>
 typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::find_fast(const char (&str)[N], const_iterator iter_begin,
                   size_type size) const
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   const_iterator iter_end = end();
-
-   if (iter_begin == iter_end) {
-      return iter_end;
-   }
-
-   if (str == nullptr || str[0] == 0) {
-      return iter_begin;
-   }
-
-   auto iter = iter_begin;
-   auto ch   = str[0];
-
-   while (iter != iter_end)   {
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         int count = 0;
-
-         while (text_iter != iter_end && *pattern_iter != 0 && count < size)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-               ++count;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == 0) {
-            // found a match
-            return iter;
-         }
-      }
-
-      ++iter;
-   }
-
-   return iter_end;
+   // make this safe by treating str as utf8
+   return find_fast(CsBasicString::fromUtf8(str, size), iter_begin);
 }
 
 // for a const char * and char *
@@ -1456,7 +1406,7 @@ template <typename E, typename A>
 template <typename T,  typename>
 typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::find_fast(const T &str) const
 {
-   return find_fast(str, begin());
+   return find_fast(str, cbegin());
 }
 
 // for a const char * and char *
@@ -1468,47 +1418,18 @@ typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::find_fast(cons
    static_assert(! std::is_same<E, E>::value, "Unsafe operations not allowed, unknown encoding for this operation");
 #endif
 
-   const_iterator iter_end = end();
+   const_iterator iter_end = cend();
 
    if (iter_begin == iter_end) {
       return iter_end;
    }
 
-   if (str == nullptr || str[0] == 0) {
+   if (str == nullptr || str[0] == '\0') {
       return iter_begin;
    }
 
-   auto iter = iter_begin;
-   auto ch   = str[0];
-
-   while (iter != iter_end)   {
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != iter_end && *pattern_iter != 0)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == 0) {
-            // found a match
-            return iter;
-         }
-      }
-
-      ++iter;
-   }
-
-   return iter_end;
+   // make this safe by treating str as utf8
+   return find_fast(CsBasicString::fromUtf8(str), iter_begin);
 }
 
 // for an array of chars
@@ -1516,58 +1437,20 @@ template <typename E, typename A>
 template <int N>
 typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::find_fast(const char (&str)[N]) const
 {
-   return find_fast(str, begin());
+   return find_fast(str, cbegin());
 }
 
 // for an array of chars
 template <typename E, typename A>
 template <int N>
-typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::find_fast(const char (&str)[N],
-                  const_iterator iter_begin) const
+typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::find_fast(const char (&str)[N], const_iterator iter_begin) const
 {
-   // make this safe (find which encoding the compiler is using, convert str from X to E)
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   const_iterator iter_end = end();
-
-   if (iter_begin == iter_end) {
-      return iter_end;
-   }
-
-   if (N == 0) {
-      return iter_begin;
-   }
-
-   auto iter = iter_begin;
-   auto ch   = str[0];
-
-   while (iter != iter_end)   {
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != iter_end && pattern_iter != str + N)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (pattern_iter == str + N) {
-            // found a match
-            return iter;
-         }
-      }
-
-      ++iter;
-   }
-
-   return iter_end;
+   // make this safe by treating str as utf8
+   return find_fast(CsBasicString::fromUtf8(str, N-1), iter_begin);
 }
 
 template <typename E, typename A>
@@ -1721,63 +1604,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find(const T &str, 
    static_assert(! std::is_same<E, E>::value, "Unsafe operations not allowed, unknown encoding for this operation");
 #endif
 
-   // str is a const char *
-   const_iterator iter_begin = cbegin();
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (str == nullptr || *str == '\0') {
-
-      if (i != indexStart) {
-         return -1;
-      } else {
-         return indexStart;
-      }
-   }
-
-   if (iter_begin == cend()) {
-      // indexStart > length
-      return -1;
-   }
-
-   size_type retval = indexStart;
-   auto ch  = str[0];
-
-   while (iter_begin != end())   {
-
-      if (*iter_begin == ch)  {
-
-         size_type count   = 1;
-         auto text_iter    = iter_begin + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0' && count < size)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++ count;
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0' || count == size) {
-            // found a match
-            return retval;
-         }
-      }
-
-      ++iter_begin;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -1785,58 +1613,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find(const char (&str)[N], size_type indexStart,
                   size_type size) const
 {
-   // make this one safe
-   size_type stringLen = this->size();
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   if (str == nullptr || *str == '\0') {
-
-      if (indexStart > stringLen) {
-         return -1;
-      } else {
-         return indexStart;
-      }
-   }
-
-   if (indexStart >= stringLen) {
-      return -1;
-   }
-
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-   auto ch          = str[0];
-
-   while (iter != end())   {
-
-      if (*iter == ch)  {
-
-         size_type count   = 1;
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0' && count < size)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++ count;
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0' || count == size) {
-            // found a match
-            return retval;
-         }
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -1863,94 +1645,20 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find(const T &str, 
       return -1;
    }
 
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-   auto ch          = str[0];
-
-   while (iter != end())   {
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0')  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0') {
-            // found a match
-            return retval;
-         }
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find(CsBasicString::fromUtf8(str), indexStart);
 }
 
 template <typename E, typename A>
 template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find(const char (&str)[N], size_type indexStart) const
 {
-   // make this safe
-   size_type stringLen = this->size();
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   if (*str == '\0') {
-
-      if (indexStart > stringLen) {
-         return -1;
-      } else {
-         return indexStart;
-      }
-   }
-
-   if (indexStart >= stringLen) {
-      return -1;
-   }
-
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-   auto ch          = str[0];
-
-   while (iter != end())   {
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0')  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0') {
-            // found a match
-            return retval;
-         }
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find(CsBasicString::fromUtf8(str, N-1), indexStart);
 }
 
 template <typename E, typename A>
@@ -2026,29 +1734,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_of(const
       return -1;
    }
 
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2056,34 +1743,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_of(const char (&str)[N], size_type indexStart,
                   size_type size) const
 {
-   // make this safe
-   if (str == nullptr || *str == '\0' || indexStart >= this->size()) {
-      return -1;
-   }
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2099,27 +1764,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_of(const
       return -1;
    }
 
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' )  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++pattern_iter;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_of(CsBasicString::fromUtf8(str), indexStart);
 }
 
 template <typename E, typename A>
@@ -2127,32 +1773,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_of(const char (&str)[N],
                   size_type indexStart) const
 {
-   // make this safe
-   if (str == nullptr || *str == '\0' || indexStart >= this->size()) {
-      return -1;
-   }
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' )  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++pattern_iter;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_of(CsBasicString::fromUtf8(str, N-1), indexStart);
 }
 
 template <typename E, typename A>
@@ -2204,39 +1830,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_of(const 
       return -1;
    }
 
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2244,47 +1839,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_of(const char (&str)[N],
                   size_type indexStart, size_type size) const
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   size_type stringLen = this->size();
-
-   if (str == nullptr || *str == '\0' || indexStart >= stringLen) {
-      return -1;
-   }
-
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2302,37 +1862,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_of(const 
       return -1;
    }
 
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0')  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++pattern_iter;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_of(CsBasicString::fromUtf8(str), indexStart);
 }
 
 template <typename E, typename A>
@@ -2340,45 +1871,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_of(const char (&str)[N],
                   size_type indexStart) const
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   size_type stringLen = this->size();
-
-   if (str == nullptr || *str == '\0' || indexStart >= stringLen) {
-      return -1;
-   }
-
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0')  {
-
-         if (*iter == *pattern_iter) {
-            // found a match
-            return retval;
-         }
-
-         ++pattern_iter;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_of(CsBasicString::fromUtf8(str, N-1), indexStart);
 }
 
 template <typename E, typename A>
@@ -2468,34 +1966,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_not_of(c
       return -1;
    }
 
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0' || count == size) {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_not_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2503,50 +1975,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_not_of(const char (&str)[N],
                   size_type indexStart, size_type size) const
 {
-   // make this safe
-   size_type stringLen = this->size();
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   if (str == nullptr || *str == '\0') {
-
-      if (indexStart >= stringLen) {
-         return -1;
-      } else {
-         return indexStart;
-      }
-   }
-
-   if (indexStart >= stringLen) {
-      return -1;
-   }
-
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0' || count == size) {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_not_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2574,32 +2008,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_not_of(c
       return -1;
    }
 
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0')  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0') {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_not_of(CsBasicString::fromUtf8(str), indexStart);
 }
 
 template <typename E, typename A>
@@ -2607,49 +2017,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_not_of(const char (&str)[N],
                   size_type indexStart) const
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   size_type stringLen = this->size();
-
-   if (*str == '\0') {
-
-      if (indexStart >= stringLen) {
-         return -1;
-      } else {
-         return indexStart;
-      }
-   }
-
-   if (indexStart >= stringLen) {
-      return -1;
-   }
-
-   size_type retval = indexStart;
-   auto iter        = begin() + indexStart;
-
-   while (iter != end())   {
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0')  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0') {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-
-      ++iter;
-      ++retval;
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_first_not_of(CsBasicString::fromUtf8(str, N-1), indexStart);
 }
 
 template <typename E, typename A>
@@ -2690,7 +2063,7 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_first_not_of(c
       }
 
       if (pattern_iter == str_end) {
-         // current charactor in m_string did not match the pattern
+         // current character in m_string did not match the pattern
          return retval;
       }
 
@@ -2756,44 +2129,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_not_of(co
       }
    }
 
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0' || count == size) {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_not_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2801,56 +2138,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_not_of(const char (&str)[N],
                   size_type indexStart, size_type size) const
 {
-   // make this safe
-   size_type stringLen = this->size();
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   if (str == nullptr || *str == '\0') {
-
-      if (indexStart > stringLen || indexStart == -1) {
-         return stringLen - 1;
-      } else {
-         return indexStart;
-      }
-   }
-
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      size_type count   = 0;
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0' && count < size)  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++count;
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0' || count == size) {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_not_of(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -2873,42 +2166,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_not_of(co
       }
    }
 
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0')  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0') {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_not_of(CsBasicString::fromUtf8(str), indexStart);
 }
 
 template <typename E, typename A>
@@ -2916,55 +2175,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_not_of(const char (&str)[N],
                   size_type indexStart) const
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   size_type stringLen = this->size();
-
-   if (*str == '\0') {
-
-      if (indexStart > stringLen || indexStart == -1) {
-         return stringLen - 1;
-      } else {
-         return indexStart;
-      }
-   }
-
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      auto pattern_iter = str;
-
-      while (*pattern_iter != '\0')  {
-
-         if (*iter == *pattern_iter) {
-            // found a match between the current character in m_string and the pattern
-            break;
-         }
-
-         ++pattern_iter;
-      }
-
-      if (*pattern_iter == '\0') {
-         // current charactor in m_string did not match the pattern
-         return retval;
-      }
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return find_last_not_of(CsBasicString::fromUtf8(str, N-1), indexStart);
 }
 
 template <typename E, typename A>
@@ -3014,7 +2230,7 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::find_last_not_of(co
       }
 
       if (pattern_iter == str_end) {
-         // current charactor in m_string did not match the pattern
+         // current character in m_string did not match the pattern
          return retval;
       }
    }
@@ -3073,53 +2289,8 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::rfind(const T &str,
       }
    }
 
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   auto ch = str[0];
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      if (*iter == ch)  {
-
-         size_type count   = 1;
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0' && count < size)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++ count;
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0' || count == size) {
-            // found a match
-            return retval;
-         }
-      }
-
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return rfind(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -3127,65 +2298,12 @@ template <int N>
 typename CsBasicString<E, A>::size_type CsBasicString<E, A>::rfind(const char (&str)[N],
                   size_type indexStart, size_type size) const
 {
-   // make this safe
-   size_type stringLen = this->size();
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   if (str == nullptr || *str == '\0') {
-
-      if (indexStart > stringLen || indexStart == -1) {
-         return stringLen;
-      } else {
-         return indexStart;
-      }
-   }
-
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   auto ch = str[0];
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      if (*iter == ch)  {
-
-         size_type count   = 1;
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0' && count < size)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++ count;
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0' || count == size) {
-            // found a match
-            return retval;
-         }
-      }
-
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return rfind(CsBasicString::fromUtf8(str, size), indexStart);
 }
 
 template <typename E, typename A>
@@ -3208,113 +2326,20 @@ typename CsBasicString<E, A>::size_type CsBasicString<E, A>::rfind(const T &str,
       }
    }
 
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   auto ch = str[0];
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0')  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0') {
-            // found a match
-            return retval;
-         }
-      }
-
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return rfind(CsBasicString::fromUtf8(str), indexStart);
 }
 
 template <typename E, typename A>
 template <int N>
-typename CsBasicString<E, A>::size_type CsBasicString<E, A>::rfind(const char (&str)[N],
-                  size_type indexStart) const
+typename CsBasicString<E, A>::size_type CsBasicString<E, A>::rfind(const char (&str)[N], size_type indexStart) const
 {
-   // make this safe
-   size_type stringLen = this->size();
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   if (str == nullptr || *str == '\0') {
-
-      if (indexStart > stringLen || indexStart == -1) {
-         return stringLen;
-      } else {
-         return indexStart;
-      }
-   }
-
-   size_type retval;
-   const_iterator iter;
-
-   if (indexStart >= 0 && indexStart < stringLen) {
-      retval = indexStart + 1;
-      iter   = begin() + indexStart + 1;
-
-   } else {
-      retval = stringLen;
-      iter   = end();
-
-   }
-
-   auto ch = str[0];
-
-   while (iter != begin())   {
-      --iter;
-      --retval;
-
-      if (*iter == ch)  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != end() && *pattern_iter != '\0')  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == '\0') {
-            // found a match
-            return retval;
-         }
-      }
-
-   }
-
-   return -1;
+   // make this safe by treating str as utf8
+   return rfind(CsBasicString::fromUtf8(str, N-1), indexStart);
 }
 
 template <typename E, typename A>
@@ -3386,21 +2411,17 @@ CsChar CsBasicString<E, A>::front() const
 }
 
 template <typename E, typename A>
-CsBasicString<E,A> CsBasicString<E, A>::fromUtf8(const char *str, size_type numOfChars)
+CsBasicString<E,A> CsBasicString<E, A>::fromUtf8(const char *str, size_type numOfChars, const A &a)
 {
+   CsBasicString retval(a);
+
    if (str == nullptr) {
-      return CsBasicString();
+      return retval;
    }
 
    if (numOfChars < 0) {
-      numOfChars = 0;
-
-      while (str[numOfChars] != 0) {
-         ++numOfChars;
-      }
+      numOfChars = std::strlen(str);
    }
-
-   CsBasicString retval;
 
    int multi_size = 0;
    char32_t data  = 0;
@@ -3416,7 +2437,6 @@ CsBasicString<E,A> CsBasicString<E, A>::fromUtf8(const char *str, size_type numO
          }
 
          retval.append(static_cast<char32_t>(str[i]));
-
 
       } else if ((str[i] & 0xC0) == 0x80) {
          // continuation char
@@ -3480,11 +2500,193 @@ CsBasicString<E,A> CsBasicString<E, A>::fromUtf8(const char *str, size_type numO
          }
 
          retval.append(UCHAR('\uFFFD'));
-
       }
    }
 
    if (multi_size != 0) {
+      // invalid character at the end of the string
+      retval.append(UCHAR('\uFFFD'));
+   }
+
+   return retval;
+}
+
+#if defined(__cpp_char8_t)
+   // support new data type added in C++20
+
+template <typename E, typename A>
+CsBasicString<E,A> CsBasicString<E, A>::fromUtf8(const char8_t *str, size_type numOfChars, const A &a)
+{
+   CsBasicString retval(a);
+
+   if (str == nullptr) {
+      return retval;
+   }
+
+   if (numOfChars < 0) {
+      numOfChars = std::char_traits<char8_t>::length(str);
+   }
+
+   int multi_size = 0;
+   char32_t data  = 0;
+
+   for (int i = 0; i < numOfChars; ++i) {
+
+      if ((str[i] & 0x80) == 0) {
+
+         if (multi_size != 0) {
+            // multi byte sequence was too short
+            multi_size = 0;
+            retval.append(UCHAR('\uFFFD'));
+         }
+
+         retval.append(static_cast<char32_t>(str[i]));
+
+      } else if ((str[i] & 0xC0) == 0x80) {
+         // continuation char
+
+         data = (data << 6) | (static_cast<char32_t>(str[i]) & 0x3F);
+
+         if (multi_size == 2 && data >= 0x80 && data <= 0x7FF) {
+            multi_size = 0;
+            retval.append(data);
+
+         } else if (multi_size == 3 && data >= 0x800 && data <= 0xFFFF) {
+            multi_size = 0;
+            retval.append(data);
+
+         } else if (multi_size == 4 && data >= 0x10000 && data <= 0x10FFFF) {
+            multi_size = 0;
+            retval.append(data);
+
+         }
+
+      } else if ((str[i] & 0xE0) == 0xC0) {
+         // begin two byte sequence
+
+         if (multi_size != 0) {
+            // preceding multi byte sequence was too short
+            retval.append(UCHAR('\uFFFD'));
+         }
+
+         multi_size = 2;
+         data = static_cast<char32_t>(str[i]) & 0x1F;
+
+      } else if ((str[i] & 0xF0) == 0xE0) {
+         // begin three byte sequence
+
+         if (multi_size != 0) {
+            // preceding multi byte sequence was too short
+            retval.append(UCHAR('\uFFFD'));
+         }
+
+         multi_size = 3;
+         data = static_cast<char32_t>(str[i]) & 0x0F;
+
+      } else if ((str[i] & 0xF8) == 0xF0) {
+        // begin four byte sequence
+
+         if (multi_size != 0) {
+            // preceding multi byte sequence was too short
+            retval.append(UCHAR('\uFFFD'));
+         }
+
+         multi_size = 4;
+         data = static_cast<char32_t>(str[i]) & 0x07;
+
+      } else {
+         // invalid character
+
+         if (multi_size != 0) {
+            // preceding multi byte sequence was too short
+            multi_size = 0;
+            retval.append(UCHAR('\uFFFD'));
+         }
+
+         retval.append(UCHAR('\uFFFD'));
+      }
+   }
+
+   if (multi_size != 0) {
+      // invalid character at the end of the string
+      retval.append(UCHAR('\uFFFD'));
+   }
+
+   return retval;
+}
+
+#endif
+
+template <typename E, typename A>
+CsBasicString<E,A> CsBasicString<E, A>::fromUtf16(const char16_t *str, size_type numOfChars, const A &a)
+{
+   CsBasicString retval(a);
+
+   if (str == nullptr) {
+      return retval;
+   }
+
+   if (numOfChars < 0) {
+      numOfChars = std::char_traits<char16_t>::length(str);
+   }
+
+   char32_t data = 0;
+
+   for (int i = 0; i < numOfChars; ++i) {
+
+      char16_t value = str[i];
+
+      if (value < 0xD800 || value > 0xDFFF) {
+         // not a surrogate, value must be less than 0xFFFF
+
+         if (data == 0) {
+            // do nothing
+
+         } else {
+            // invalid character
+            retval.append(UCHAR('\uFFFD'));
+            data = 0;
+         }
+
+         retval.append(static_cast<char32_t>(str[i]));
+
+      } else if (value >= 0xD800 && value <= 0xDBFF) {
+         // high surrogates
+
+         if (data == 0) {
+            // do nothing
+
+         } else {
+            // invalid character
+            retval.append(UCHAR('\uFFFD'));
+            data = 0;
+         }
+
+         data = static_cast<char32_t>(value) & 0x3FF;
+
+      } else if (value >= 0xDC00 && value <= 0xDFFF) {
+         // low surrogates
+
+         if (data == 0) {
+            // invalid character
+            retval.append(UCHAR('\uFFFD'));
+
+         } else {
+            data = (data << 10) | (static_cast<char32_t>(value) & 0x3FF);
+            data |= 0x010000;
+
+            retval.append(data);
+         }
+
+         data = 0;
+
+      } else {
+         // invalid character ( unreachable code )
+         retval.append(UCHAR('\uFFFD'));
+      }
+   }
+
+   if (data != 0) {
       // invalid character at the end of the string
       retval.append(UCHAR('\uFFFD'));
    }
@@ -3530,60 +2732,20 @@ CsBasicString<E, A> &CsBasicString<E, A>::insert(size_type indexStart, const T &
       return *this;
    }
 
-   const_iterator iter_begin = cbegin();
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::insert index out of range");
-   }
-
-   const char *c = str;
-
-   while (*c != 0) {
-      str_iter iter_tmp = E::insert(m_string, iter_begin.codePointBegin(), *c);
-
-      iter_begin = CsStringIterator<E, A>(iter_tmp);
-      ++iter_begin;
-
-      ++c;
-   }
-
-   return *this;
+   // make this safe by treating str as utf8
+   return insert(indexStart, CsBasicString::fromUtf8(str));
 }
 
 template <typename E, typename A>
 template <int N>
 CsBasicString<E, A> &CsBasicString<E, A>::insert(size_type indexStart, const char (&str)[N])
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   const_iterator iter_begin = cbegin();
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::insert index out of range");
-   }
-
-   const char *c = str;
-
-   while (*c != 0) {
-      str_iter iter_tmp = E::insert(m_string, iter_begin.codePointBegin(), *c);
-
-      iter_begin = CsStringIterator<E, A>(iter_tmp);
-      ++iter_begin;
-
-      ++c;
-   }
-
-   return *this;
+   // make this safe by treating str as utf8
+   return insert(indexStart, CsBasicString::fromUtf8(str, N -1));
 }
 
 template <typename E, typename A>
@@ -3599,66 +2761,20 @@ CsBasicString<E, A> &CsBasicString<E, A>::insert(size_type indexStart, const T &
       return *this;
    }
 
-   const_iterator iter_begin = cbegin();
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::insert index out of range");
-   }
-
-   const char *c = str;
-
-   int count = 0;
-
-   while (*c != 0 && count < size) {
-      str_iter iter_tmp = E::insert(m_string, iter_begin.codePointBegin(), *c);
-
-      iter_begin = CsStringIterator<E, A>(iter_tmp);
-      ++iter_begin;
-
-      ++c;
-      ++count;
-   }
-
-   return *this;
+   // make this safe by treating str as utf8
+   return insert(indexStart, CsBasicString::fromUtf8(str, size));
 }
 
 template <typename E, typename A>
 template <int N>
 CsBasicString<E, A> &CsBasicString<E, A>::insert(size_type indexStart, const char (&str)[N], size_type size)
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   const_iterator iter_begin = cbegin();
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::insert index out of range");
-   }
-
-   const char *c = str;
-
-   int count = 0;
-
-   while (*c != 0 && count < size) {
-      str_iter iter_tmp = E::insert(m_string, iter_begin.codePointBegin(), *c);
-
-      iter_begin = CsStringIterator<E, A>(iter_tmp);
-      ++iter_begin;
-
-      ++c;
-      ++count;
-   }
-
-   return *this;
+   // make this safe by treating str as utf8
+   return insert(indexStart, CsBasicString::fromUtf8(str, size));
 }
 
 template <typename E, typename A>
@@ -3687,7 +2803,7 @@ CsBasicString<E, A> &CsBasicString<E, A>::insert(size_type indexStart, const CsB
 
 template <typename E, typename A>
 CsBasicString<E, A> &CsBasicString<E, A>::insert(size_type indexStart, const CsBasicString &str,
-                  size_type srcStart, size_type srcSize)
+                  size_type srcStart, size_type size)
 {
    const_iterator iter_begin = cbegin();
    size_type i;
@@ -3701,7 +2817,7 @@ CsBasicString<E, A> &CsBasicString<E, A>::insert(size_type indexStart, const CsB
    }
 
    const_iterator srcIter_begin = str.begin() + srcStart;
-   const_iterator srcIter_end   = srcIter_begin + srcSize;
+   const_iterator srcIter_end   = srcIter_begin + size;
 
    for (auto srcIter = srcIter_begin; srcIter != srcIter_end; ++srcIter) {
       // *srcIter is a CsChar
@@ -3760,50 +2876,20 @@ typename CsBasicString<E, A>::iterator CsBasicString<E, A>::insert(const_iterato
       return posStart;
    }
 
-   const_iterator iter = posStart;
-   const char *c = str;
-
-   int count = 0;
-
-   while (*c != 0 && count < size) {
-      str_iter iter_tmp = E::insert(m_string, iter.codePointBegin(), *c);
-
-      iter = CsStringIterator<E, A>(iter_tmp);
-      ++iter;
-
-      ++c;
-      ++count;
-   }
-
-   return (iter - count);
+   // make this safe by treating str as utf8
+   return insert(posStart, CsBasicString::fromUtf8(str, size));
 }
 
 template <typename E, typename A>
 template <int N>
-typename CsBasicString<E, A>::iterator CsBasicString<E, A>::insert(const_iterator posStart,
-                  const char (&str)[N], size_type size)
+typename CsBasicString<E, A>::iterator CsBasicString<E, A>::insert(const_iterator posStart, const char (&str)[N], size_type size)
 {
-   // make this safe
-   if (str == nullptr || *str == '\0') {
-      return posStart;
-   }
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   const_iterator iter = posStart;
-   const char *c = str;
-
-   int count = 0;
-
-   while (*c != 0 && count < size) {
-      str_iter iter_tmp = E::insert(m_string, iter.codePointBegin(), *c);
-
-      iter = CsStringIterator<E, A>(iter_tmp);
-      ++iter;
-
-      ++c;
-      ++count;
-   }
-
-   return (iter - count);
+   // make this safe by treating str as utf8
+   return insert(posStart, CsBasicString::fromUtf8(str, size));
 }
 
 template <typename E, typename A>
@@ -3860,7 +2946,7 @@ typename CsBasicString<E, A>::iterator CsBasicString<E, A>::insert(size_type ind
 template <typename E, typename A>
 template <typename U,  typename>
 typename CsBasicString<E, A>::iterator CsBasicString<E, A>::insert(size_type indexStart, CsBasicStringView<U> str,
-                  size_type srcStart, size_type srcSize)
+                  size_type srcStart, size_type size)
 {
    static_assert(std::is_base_of<CsBasicString<E,A>, U>::value,
       "Unable to construct a CsBasicString using a CsBasicStringView, encoding E is "
@@ -3877,8 +2963,8 @@ typename CsBasicString<E, A>::iterator CsBasicString<E, A>::insert(size_type ind
       throw std::out_of_range("CsString::insert index out of range");
    }
 
-   const_iterator srcIter_begin = str.begin() + srcStart;
-   const_iterator srcIter_end   = srcIter_begin + srcSize;
+   typename U::const_iterator srcIter_begin = str.begin() + srcStart;
+   typename U::const_iterator srcIter_end   = srcIter_begin + size;
 
    for (auto srcIter = srcIter_begin; srcIter != srcIter_end; ++srcIter) {
       // *srcIter is a CsChar
@@ -3957,8 +3043,8 @@ CsBasicString<E, A> &CsBasicString<E, A>::replace(const_iterator first, const_it
 }
 
 template <typename E, typename A>
-CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type size, const CsBasicString &str,
-                  size_type srcStart, size_type srcSize)
+CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type count, const CsBasicString &str,
+                  size_type srcStart, size_type size)
 {
    const_iterator iter_begin = cbegin();
    const_iterator iter_end;
@@ -3972,10 +3058,10 @@ CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_typ
       throw std::out_of_range("CsString::replace index out of range");
    }
 
-   if (size >= 0) {
+   if (count >= 0) {
       iter_end = iter_begin;
 
-      for (size_type j = 0; j < size && iter_end != cend(); ++j)  {
+      for (size_type j = 0; j < count && iter_end != cend(); ++j)  {
          ++iter_end;
       }
 
@@ -3985,7 +3071,7 @@ CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_typ
    }
 
    const_iterator srcIter_begin = str.begin() + srcStart;
-   const_iterator srcIter_end   = srcIter_begin + srcSize;
+   const_iterator srcIter_end   = srcIter_begin + size;
 
    auto iter = erase(iter_begin, iter_end);
    insert(iter, srcIter_begin, srcIter_end);
@@ -4006,87 +3092,36 @@ CsBasicString<E, A> &CsBasicString<E, A>::replace(const_iterator first1, const_i
 
 template <typename E, typename A>
 template <typename T,  typename>
-CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type size,
-                  const T &str, size_type srcSize)
+CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type count,
+                  const T &str, size_type size)
 {
    // str is a const char *
 
-   const_iterator iter_begin = cbegin();
-   const_iterator iter_end;
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::replace index out of range");
-   }
-
-   if (size >= 0) {
-      iter_end = iter_begin;
-
-      for (size_type j = 0; j < size && iter_end != cend(); ++j)  {
-         ++iter_end;
-      }
-
-   } else {
-      iter_end = cend();
-
-   }
-
-   auto iter = erase(iter_begin, iter_end);
-   insert(iter, str, srcSize);
-
-   return *this;
+   // make this safe by treating str as utf8
+   return replace(indexStart, count, CsBasicString::fromUtf8(str, size));
 }
 
 template <typename E, typename A>
 template <int N>
-CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type size,
-                  const char (&str)[N], size_type srcSize)
+CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type count, const char (&str)[N], size_type size)
 {
-   // make this safe
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   const_iterator iter_begin = cbegin();
-   const_iterator iter_end;
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::replace index out of range");
-   }
-
-   if (size >= 0) {
-      iter_end = iter_begin;
-
-      for (size_type j = 0; j < size && iter_end != cend(); ++j)  {
-         ++iter_end;
-      }
-
-   } else {
-      iter_end = cend();
-
-   }
-
-   auto iter = erase(iter_begin, iter_end);
-   insert(iter, str, srcSize);
-
-   return *this;
+   // make this safe by treating str as utf8
+   return replace(indexStart, count, CsBasicString::fromUtf8(str, size));
 }
 
 template <typename E, typename A>
 template <typename T,  typename>
 CsBasicString<E, A> &CsBasicString<E, A>::replace(const_iterator first, const_iterator last,
-                  const T &str, size_type srcSize)
+                  const T &str, size_type size)
 {
    // str is a const char *
 
    auto iter = erase(first, last);
-   insert(iter, str, srcSize);
+   insert(iter, str, size);
 
    return *this;
 }
@@ -4094,84 +3129,34 @@ CsBasicString<E, A> &CsBasicString<E, A>::replace(const_iterator first, const_it
 template <typename E, typename A>
 template <int N>
 CsBasicString<E, A> &CsBasicString<E, A>::replace(const_iterator first, const_iterator last,
-                  const char (&str)[N], size_type srcSize )
+                  const char (&str)[N], size_type size )
 {
-   // make this safe
-
    auto iter = erase(first, last);
-   insert(iter, str, srcSize);
+   insert(iter, str, size);
 
    return *this;
 }
 
 template <typename E, typename A>
 template <typename T,  typename>
-CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type size, const T &str)
+CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type count, const T &str)
 {
    // str is a const char *
 
-   const_iterator iter_begin = cbegin();
-   const_iterator iter_end;
-   size_type i;
-
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::replace index out of range");
-   }
-
-   if (size >= 0) {
-      iter_end = iter_begin;
-
-      for (size_type j = 0; j < size && iter_end != cend(); ++j)  {
-         ++iter_end;
-      }
-
-   } else {
-      iter_end = cend();
-
-   }
-
-   auto iter = erase(iter_begin, iter_end);
-   insert(iter, str);
-
-   return *this;
+   // make this safe by treating str as utf8
+   return replace(indexStart, count, CsBasicString::fromUtf8(str));
 }
 
 template <typename E, typename A>
 template <int N>
-CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type size, const char (&str)[N])
+CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type count, const char (&str)[N])
 {
-   const_iterator iter_begin = cbegin();
-   const_iterator iter_end;
-   size_type i;
+#if defined(Q_CC_MSVC)
+ static_assert("¿"[0] == static_cast<char>(0xC2), "Compiler runtime encoding was not set to UTF-8");
+#endif
 
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::replace index out of range");
-   }
-
-   if (size >= 0) {
-      iter_end = iter_begin;
-
-      for (size_type j = 0; j < size && iter_end != cend(); ++j)  {
-         ++iter_end;
-      }
-
-   } else {
-      iter_end = cend();
-
-   }
-
-   auto iter = erase(iter_begin, iter_end);
-   insert(iter, str);
-
-   return *this;
+   // make this safe by treating str as utf8
+   return replace(indexStart, count, CsBasicString::fromUtf8(str, N-1));
 }
 
 template <typename E, typename A>
@@ -4243,46 +3228,22 @@ CsBasicString<E, A> &CsBasicString<E, A>::replace(const_iterator first, const_it
 
 template <typename E, typename A>
 template <class T>
-CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type size, const T &str,
-                  size_type srcStart, size_type srcSize)
+CsBasicString<E, A> &CsBasicString<E, A>::replace(size_type indexStart, size_type count, const T &str,
+                  size_type srcStart, size_type size)
 {
-   const_iterator iter_begin = cbegin();
-   const_iterator iter_end;
-   size_type i;
+   // str is a const char *
 
-   for (i = 0; i < indexStart && iter_begin != cend(); ++i)  {
-      ++iter_begin;
-   }
-
-   if (i != indexStart) {
-      throw std::out_of_range("CsString::replace index out of range");
-   }
-
-   if (size >= 0) {
-      iter_end = iter_begin;
-
-      for (size_type j = 0; j < size && iter_end != cend(); ++j)  {
-         ++iter_end;
-      }
-
-   } else {
-      iter_end = cend();
-
-   }
-
-   auto iter = erase(iter_begin, iter_end);
-   insert(iter, str, srcStart, srcSize);
-
-   return *this;
+   // make this safe by treating str as utf8
+   return replace(indexStart, count, CsBasicString::fromUtf8(str + srcStart, size));
 }
 
 template <typename E, typename A>
 template <class T>
 CsBasicString<E, A> &CsBasicString<E, A>::replace(const_iterator first, const_iterator last, const T &str,
-                  size_type srcStart, size_type srcSize)
+                  size_type srcStart, size_type size)
 {
    auto iter = erase(first, last);
-   insert(iter, str, srcStart, srcSize);
+   insert(iter, str, srcStart, size);
 
    return *this;
 }
@@ -4397,8 +3358,7 @@ void CsBasicString<E, A>::swap(CsBasicString &str)
    m_string.swap(str.m_string);
 }
 
-
-// iterators
+// iterator methods
 template <typename E, typename A>
 typename CsBasicString<E, A>::const_iterator CsBasicString<E, A>::begin() const
 {
@@ -4449,6 +3409,30 @@ typename CsBasicString<E, A>::const_reverse_iterator CsBasicString<E, A>::crend(
    return const_reverse_iterator(cbegin());
 }
 
+template <typename E, typename A>
+typename CsBasicString<E, A>::const_storage_iterator CsBasicString<E, A>::storage_begin() const
+{
+   return m_string.cbegin();
+}
+
+template <typename E, typename A>
+typename CsBasicString<E, A>::const_storage_iterator CsBasicString<E, A>::storage_end() const
+{
+   return m_string.cend() - 1;
+}
+
+template <typename E, typename A>
+typename CsBasicString<E, A>::const_storage_reverse_iterator CsBasicString<E, A>::storage_rbegin() const
+{
+   return m_string.crbegin() + 1;
+}
+
+template <typename E, typename A>
+typename CsBasicString<E, A>::const_storage_reverse_iterator CsBasicString<E, A>::storage_rend() const
+{
+   return m_string.crend();
+}
+
 // functions
 template <typename E_FROM, typename A_FROM, typename E_TO, typename A_TO>
 void convert(const CsBasicString<E_FROM, A_FROM> &str_from, CsBasicString<E_TO, A_TO> &str_to)
@@ -4465,6 +3449,8 @@ void swap(CsBasicString<E, A> &str1, CsBasicString<E, A> &str2)
 template <typename E1, typename A1, typename E2, typename A2>
 bool operator==(const CsBasicString<E1, A1> &str1, const CsBasicString<E2, A2> &str2)
 {
+   // E1 and E2 are different
+
    auto iter1 = str1.begin();
    auto iter2 = str2.begin();
 
@@ -4488,39 +3474,51 @@ bool operator==(const CsBasicString<E1, A1> &str1, const CsBasicString<E2, A2> &
    return false;
 }
 
-template <typename E, typename A, typename T, typename = typename std::enable_if<std::is_array<T>::value &&
-                  std::is_same<char, typename std::remove_extent<T>::type>::value>::type>
-bool operator==(const CsBasicString<E, A> &str1, const T &str2)
+template <typename E, typename A>
+bool operator==(const CsBasicString<E, A> &str1, const CsBasicString<E, A> &str2)
 {
-   // make this safe
+   // E is the same
 
-   auto iter1 = str1.begin();
-   auto end1  = str1.end();
-
-   const char *ptr2 = str2;
-
-   while (iter1 != end1 && *ptr2 != '\0') {
-
-      if (*iter1 != *ptr2) {
-        return false;
-      }
-
-      ++iter1;
-      ++ptr2;
-   }
-
-   if (iter1 == end1 && *ptr2 == '\0') {
-      return true;
-   }
-
-   return false;
+   // are the vectors equal
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2.storage_begin(), str2.storage_end());
 }
 
-template <typename E, typename A, typename T, typename = typename std::enable_if<std::is_array<T>::value &&
-                  std::is_same<char, typename std::remove_extent<T>::type>::value>::type>
-bool operator==(const T &str1, const CsBasicString<E, A> &str2)
+inline bool operator==(const CsString_utf8 &str1, const CsString_utf8 &str2)
 {
-   return (str2 == str1);
+   // are the vectors equal
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2.storage_begin(), str2.storage_end());
+}
+
+inline bool operator==(const CsString_utf16 &str1, const CsString_utf16 &str2)
+{
+   // are the vectors equal
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2.storage_begin(), str2.storage_end());
+}
+
+template <int N>
+inline bool operator==(const CsString_utf8 &str1, const char (& str2)[N])
+{
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1,
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
+}
+
+template <int N>
+inline bool operator==(const char (& str1)[N], const CsString_utf8 &str2)
+{
+   return std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end(),
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
+}
+
+template <int N>
+inline bool operator==(const CsString_utf16 &str1, const char16_t (& str2)[N])
+{
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1);
+}
+
+template <int N>
+inline bool operator==(const char16_t (& str1)[N], const CsString_utf16 &str2)
+{
+   return std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end());
 }
 
 template <typename E1, typename A1, typename E2, typename A2>
@@ -4529,18 +3527,34 @@ bool operator!=(const CsBasicString<E1, A1> &str1, const CsBasicString<E2, A2> &
    return ! (str1 == str2);
 }
 
-template <typename E, typename A, typename T, typename = typename std::enable_if<std::is_array<T>::value &&
-                  std::is_same<char, typename std::remove_extent<T>::type>::value>::type>
-bool operator!=(const CsBasicString<E, A> &str1, const T &str2)
+template <typename E, typename A>
+bool operator!=(const CsBasicString<E, A> &str1, const CsBasicString<E, A> &str2)
 {
    return ! (str1 == str2);
 }
 
-template <typename E, typename A, typename T, typename = typename std::enable_if<std::is_array<T>::value &&
-                  std::is_same<char, typename std::remove_extent<T>::type>::value>::type>
-bool operator!=(const T &str1, const CsBasicString<E, A> &str2)
+inline bool operator!=(const CsString_utf8 &str1, const CsString_utf8 &str2)
 {
    return ! (str1 == str2);
+}
+
+inline bool operator!=(const CsString_utf16 &str1, const CsString_utf16 &str2)
+{
+   return ! (str1 == str2);
+}
+
+inline CsString_utf8 operator+(CsString_utf8 str1, const CsString_utf8 &str2)
+{
+   str1.append(str2);
+
+   return str1;
+}
+
+inline CsString_utf16 operator+(CsString_utf16 str1, const CsString_utf16 &str2)
+{
+   str1.append(str2);
+
+   return str1;
 }
 
 template <typename E, typename A>
@@ -4619,7 +3633,23 @@ bool operator>=(const CsBasicString<E1, A1> &str1, const CsBasicString<E2, A2> &
    return ! (str1 < str2);
 }
 
+#if defined(__cpp_char8_t)
+   // support new data type added in C++20
 
-}
+   template <typename E, typename A>
+   CsBasicString<E, A>::CsBasicString(const char8_t *str, const A &a)
+   {
+      *this = CsBasicString::fromUtf8(str, -1, a);
+   }
+
+   template <typename E, typename A>
+   CsBasicString<E, A>::CsBasicString(const char8_t *str, size_type size, const A &a)
+   {
+      *this = CsBasicString::fromUtf8(str, size, a);
+   }
+#endif
+
+
+}  // namespace
 
 #endif

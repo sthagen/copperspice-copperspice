@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,13 +30,16 @@
 
 #include <qframe_p.h>
 
-
 class QStackedWidgetPrivate : public QFramePrivate
 {
    Q_DECLARE_PUBLIC(QStackedWidget)
 
  public:
-   QStackedWidgetPrivate(): layout(0) {}
+   QStackedWidgetPrivate()
+      : layout(nullptr)
+   {
+   }
+
    QStackedLayout *layout;
    bool blockChildAdd;
 };
@@ -50,7 +53,6 @@ QStackedWidget::QStackedWidget(QWidget *parent)
    connect(d->layout, SIGNAL(widgetRemoved(int)),  this, SLOT(widgetRemoved(int)));
    connect(d->layout, SIGNAL(currentChanged(int)), this, SLOT(currentChanged(int)));
 }
-
 
 QStackedWidget::~QStackedWidget()
 {
@@ -66,12 +68,10 @@ int QStackedWidget::insertWidget(int index, QWidget *widget)
    return d_func()->layout->insertWidget(index, widget);
 }
 
-
 void QStackedWidget::removeWidget(QWidget *widget)
 {
    d_func()->layout->removeWidget(widget);
 }
-
 
 void QStackedWidget::setCurrentIndex(int index)
 {
@@ -83,12 +83,10 @@ int QStackedWidget::currentIndex() const
    return d_func()->layout->currentIndex();
 }
 
-
 QWidget *QStackedWidget::currentWidget() const
 {
    return d_func()->layout->currentWidget();
 }
-
 
 void QStackedWidget::setCurrentWidget(QWidget *widget)
 {
@@ -100,12 +98,10 @@ void QStackedWidget::setCurrentWidget(QWidget *widget)
    d->layout->setCurrentWidget(widget);
 }
 
-
 int QStackedWidget::indexOf(QWidget *widget) const
 {
    return d_func()->layout->indexOf(widget);
 }
-
 
 QWidget *QStackedWidget::widget(int index) const
 {
@@ -117,7 +113,6 @@ int QStackedWidget::count() const
    return d_func()->layout->count();
 }
 
-/*! \reimp */
 bool QStackedWidget::event(QEvent *e)
 {
    return QFrame::event(e);

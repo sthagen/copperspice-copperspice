@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -50,18 +50,18 @@ class Q_CORE_EXPORT QTextBoundaryFinder
    using BoundaryReasons = QFlags<BoundaryReason>;
 
    QTextBoundaryFinder();
+
    QTextBoundaryFinder(const QTextBoundaryFinder &other);
+   QTextBoundaryFinder(QTextBoundaryFinder &&other);
+
    QTextBoundaryFinder(BoundaryType type, const QString &str);
 
    ~QTextBoundaryFinder();
 
    QTextBoundaryFinder &operator=(const QTextBoundaryFinder &other);
+   QTextBoundaryFinder &operator=(QTextBoundaryFinder &&other);
 
-   inline bool isValid() const {
-      return d;
-   }
-
-   inline BoundaryType type() const {
+   BoundaryType type() const {
       return m_type;
    }
 

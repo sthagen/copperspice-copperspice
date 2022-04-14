@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,8 +34,17 @@
 
 #ifndef QT_NO_ACCESSIBILITY
 
-Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, bridgeloader, (QAccessibleBridgeInterface_ID, "/accessiblebridge"))
-Q_GLOBAL_STATIC(QVector<QAccessibleBridge *>, bridges)
+static QFactoryLoader *bridgeloader()
+{
+   static QFactoryLoader retval(QAccessibleBridgeInterface_ID, "/accessiblebridge");
+   return &retval;
+}
+
+static QVector<QAccessibleBridge *> *bridges()
+{
+   static QVector<QAccessibleBridge *> retval;
+   return &retval;
+}
 
 QPlatformAccessibility::QPlatformAccessibility()
    : m_active(false)

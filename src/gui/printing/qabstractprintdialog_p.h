@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,7 +30,6 @@
 
 #include <qabstractprintdialog.h>
 
-
 #ifndef QT_NO_PRINTER
 
 class QPrinter;
@@ -42,9 +41,9 @@ class QAbstractPrintDialogPrivate : public QDialogPrivate
 
  public:
    QAbstractPrintDialogPrivate()
-      : printer(0), pd(0), ownsPrinter(false)
+      : printer(nullptr), pd(nullptr), ownsPrinter(false)
       , options(QAbstractPrintDialog::PrintToFile | QAbstractPrintDialog::PrintPageRange |
-           QAbstractPrintDialog::PrintCollateCopies | QAbstractPrintDialog::PrintShowPageSize),
+                QAbstractPrintDialog::PrintCollateCopies | QAbstractPrintDialog::PrintShowPageSize),
         minPage(0), maxPage(INT_MAX)
    {  }
 

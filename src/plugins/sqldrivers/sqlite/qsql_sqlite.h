@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,13 +28,13 @@
 #include <qsqlresult.h>
 
 struct sqlite3;
+struct sqlite3_stmt;
 
 #ifdef QT_PLUGIN
 #define Q_EXPORT_SQLDRIVER_SQLITE
 #else
 #define Q_EXPORT_SQLDRIVER_SQLITE Q_SQL_EXPORT
 #endif
-
 
 class QSQLiteDriverPrivate;
 class QSQLiteDriver;
@@ -71,5 +71,7 @@ class Q_EXPORT_SQLDRIVER_SQLITE QSQLiteDriver : public QSqlDriver
 
 };
 
+CS_DECLARE_METATYPE(sqlite3)
+CS_DECLARE_METATYPE(sqlite3_stmt)
 
-#endif // QSQL_SQLITE_H
+#endif

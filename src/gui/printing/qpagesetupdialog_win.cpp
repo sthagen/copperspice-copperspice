@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,11 +26,11 @@
 #ifndef QT_NO_PRINTDIALOG
 
 #include <qapplication.h>
+#include <qprinter.h>
+#include <qplatform_nativeinterface.h>
 
 #include <qprintengine_win_p.h>
 #include <qpagesetupdialog_p.h>
-#include <qprinter.h>
-#include <qplatform_nativeinterface.h>
 
 QPageSetupDialog::QPageSetupDialog(QPrinter *printer, QWidget *parent)
    : QDialog(*(new QPageSetupDialogPrivate(printer)), parent)
@@ -40,7 +40,7 @@ QPageSetupDialog::QPageSetupDialog(QPrinter *printer, QWidget *parent)
 }
 
 QPageSetupDialog::QPageSetupDialog(QWidget *parent)
-   : QDialog(*(new QPageSetupDialogPrivate(0)), parent)
+   : QDialog(*(new QPageSetupDialogPrivate(nullptr)), parent)
 {
    setWindowTitle(QCoreApplication::translate("QPrintPreviewDialog", "Page Setup"));
    setAttribute(Qt::WA_DontShowOnScreen);
@@ -62,8 +62,8 @@ int QPageSetupDialog::exec()
    psd.lStructSize = sizeof(PAGESETUPDLG);
 
    // we need a temp DEVMODE struct if we don't have a global DEVMODE
-   HGLOBAL hDevMode = 0;
-   int devModeSize = 0;
+   HGLOBAL hDevMode = nullptr;
+   int devModeSize  = 0;
 
    if (!engine->globalDevMode()) {
       devModeSize = sizeof(DEVMODE) + ep->devMode->dmDriverExtra;
@@ -84,8 +84,9 @@ int QPageSetupDialog::exec()
    QWidget *parent = parentWidget();
    parent = parent ? parent->window() : QApplication::activeWindow();
    Q_ASSERT(!parent || parent->testAttribute(Qt::WA_WState_Created));
-   QWindow *parentWindow = parent ? parent->windowHandle() : 0;
-   psd.hwndOwner = parentWindow ? (HWND)QGuiApplication::platformNativeInterface()->nativeResourceForWindow("handle", parentWindow) : 0;
+
+   QWindow *parentWindow = parent ? parent->windowHandle() : nullptr;
+   psd.hwndOwner = parentWindow ? (HWND)QGuiApplication::platformNativeInterface()->nativeResourceForWindow("handle", parentWindow) : nullptr;
 
    psd.Flags = PSD_MARGINS;
    QPageLayout layout = d->printer->pageLayout();
@@ -94,11 +95,16 @@ int QPageSetupDialog::exec()
       case QPageSize::Unit::Millimeter:
       case QPageSize::Unit::Inch:
          break;
+
       case QPageSize::Unit::Point:
       case QPageSize::Unit::Pica:
       case QPageSize::Unit::Didot:
       case QPageSize::Unit::Cicero:
-         layout.setUnits(QLocale::system().measurementSystem() == QLocale::MetricSystem ? QPageSize::Unit::Millimeter : QPageSize::Unit::Inch);
+         layout.setUnits(QLocale::system().measurementSystem() == QLocale::MetricSystem ?
+                  QPageSize::Unit::Millimeter : QPageSize::Unit::Inch);
+         break;
+
+      case QPageSize::Unit::DevicePixel:
          break;
    }
 
@@ -108,7 +114,7 @@ int QPageSetupDialog::exec()
       multiplier = 100.0;
 
    } else {
-      //QPageSize::Unit::Inch)
+      // QPageSize::Unit::Inch)
 
       psd.Flags |= PSD_INTHOUSANDTHSOFINCHES;
       multiplier = 1000.0;

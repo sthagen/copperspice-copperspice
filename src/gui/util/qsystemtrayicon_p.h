@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,11 +28,11 @@
 
 #ifndef QT_NO_SYSTEMTRAYICON
 
-#include <QtGui/qmenu.h>
-#include <QtGui/qpixmap.h>
+#include <qmenu.h>
+#include <qpixmap.h>
 #include <qplatform_systemtrayicon.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qpointer.h>
+#include <qstring.h>
+#include <qpointer.h>
 
 class QSystemTrayIconSys;
 class QPlatformSystemTrayIcon;
@@ -102,10 +102,10 @@ class QBalloonTip : public QWidget
    void balloon(const QPoint &, int, bool);
 
  protected:
-   void paintEvent(QPaintEvent *) override;
-   void resizeEvent(QResizeEvent *) override;
-   void mousePressEvent(QMouseEvent *e) override;
-   void timerEvent(QTimerEvent *e) override;
+   void paintEvent(QPaintEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
+   void mousePressEvent(QMouseEvent *event) override;
+   void timerEvent(QTimerEvent *event) override;
 
  private:
    QSystemTrayIcon *trayIcon;
@@ -113,7 +113,6 @@ class QBalloonTip : public QWidget
    int timerId;
 
    bool showArrow;
-
 };
 
 #endif // QT_NO_SYSTEMTRAYICON

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -47,15 +47,12 @@
 #include <AvailabilityMacros.h>
 #include <qcore_mac_p.h>
 
-QT_BEGIN_NAMESPACE
-
 #if ! defined(Q_OS_IOS)
 // Static operator overloading so for the sake of some convieniece.
 // They only live in this compilation unit to avoid polluting Qt in general.
 static bool operator==(const struct ::timespec &left, const struct ::timespec &right)
 {
-   return left.tv_sec == right.tv_sec
-          && left.tv_nsec == right.tv_nsec;
+   return left.tv_sec == right.tv_sec && left.tv_nsec == right.tv_nsec;
 }
 
 static bool operator==(const struct ::stat &left, const struct ::stat &right)
@@ -76,13 +73,10 @@ static bool operator!=(const struct ::stat &left, const struct ::stat &right)
    return !(operator==(left, right));
 }
 
-
-static void addPathToHash(PathHash &pathHash, const QString &key, const QFileInfo &fileInfo,
-                          const QString &path)
+static void addPathToHash(PathHash &pathHash, const QString &key, const QFileInfo &fileInfo, const QString &path)
 {
    PathInfoList &list = pathHash[key];
-   list.push_back(PathInfo(path,
-                           fileInfo.canonicalFilePath().normalized(QString::NormalizationForm_D).toUtf8()));
+   list.push_back(PathInfo(path, fileInfo.canonicalFilePath().normalized(QString::NormalizationForm_D).toUtf8()));
    pathHash.insert(key, list);
 }
 
@@ -101,6 +95,7 @@ static void removePathFromHash(PathHash &pathHash, const QString &key, const QSt
       }
       ++it;
    }
+
    if (list.isEmpty()) {
       pathHash.remove(key);
    }
@@ -137,7 +132,7 @@ const CFTimeInterval Latency = 0.033; // This will do updates 30 times a second 
 #endif
 
 QFSEventsFileSystemWatcherEngine::QFSEventsFileSystemWatcherEngine()
-   : fsStream(0), pathsToWatch(0), threadsRunLoop(0)
+   : fsStream(nullptr), pathsToWatch(nullptr), threadsRunLoop(nullptr)
 {
 }
 
@@ -148,6 +143,7 @@ QFSEventsFileSystemWatcherEngine::~QFSEventsFileSystemWatcherEngine()
    // on me, so I don't need to invalidate or stop my stream, simply
    // release it.
    cleanupFSStream(fsStream);
+
    if (pathsToWatch) {
       CFRelease(pathsToWatch);
    }
@@ -160,14 +156,14 @@ QFSEventsFileSystemWatcherEngine *QFSEventsFileSystemWatcherEngine::create()
 }
 
 QStringList QFSEventsFileSystemWatcherEngine::addPaths(const QStringList &paths,
-      QStringList *files,
-      QStringList *directories)
+      QStringList *files, QStringList *directories)
 {
 #if ! defined(Q_OS_IOS)
    stop();
    wait();
    QMutexLocker locker(&mutex);
    QStringList failedToAdd;
+
    // if we have a running FSStreamEvent, we have to kill it, we'll re-add the stream soon.
    FSEventStreamEventId idToCheck;
    if (fsStream) {
@@ -202,9 +198,10 @@ QStringList QFSEventsFileSystemWatcherEngine::addPaths(const QStringList &paths,
             directories->append(path);
             // Full file path for dirs.
             QCFString cfpath(createFSStreamPath(fileInfo.canonicalFilePath()));
-            addPathToHash(dirPathInfoHash, cfpath, fileInfo, path);
-            CFArrayAppendValue(tmpArray, cfpath);
+            addPathToHash(dirPathInfoHash, cfpath.toQString(), fileInfo, path);
+            CFArrayAppendValue(tmpArray, cfpath.toCFStringRef());
          }
+
       } else {
          if (files->contains(path)) {
             failedToAdd.append(path);
@@ -213,8 +210,8 @@ QStringList QFSEventsFileSystemWatcherEngine::addPaths(const QStringList &paths,
             // Just the absolute path (minus it's filename) for files.
             QCFString cfpath(createFSStreamPath(fileInfo.canonicalPath()));
             files->append(path);
-            addPathToHash(filePathInfoHash, cfpath, fileInfo, path);
-            CFArrayAppendValue(tmpArray, cfpath);
+            addPathToHash(filePathInfoHash, cfpath.toQString(), fileInfo, path);
+            CFArrayAppendValue(tmpArray, cfpath.toCFStringRef());
          }
       }
    }
@@ -231,11 +228,10 @@ QStringList QFSEventsFileSystemWatcherEngine::addPaths(const QStringList &paths,
       pathsToWatch = CFArrayCreateCopy(kCFAllocatorDefault, tmpArray);
    }
 
-   FSEventStreamContext context = { 0, this, 0, 0, 0 };
-   fsStream = FSEventStreamCreate(kCFAllocatorDefault,
-                                  QFSEventsFileSystemWatcherEngine::fseventsCallback,
-                                  &context, pathsToWatch,
-                                  idToCheck, Latency, QtFSEventFlags);
+   FSEventStreamContext context = { 0, this, nullptr, nullptr, nullptr };
+   fsStream = FSEventStreamCreate(kCFAllocatorDefault, QFSEventsFileSystemWatcherEngine::fseventsCallback,
+                  &context, pathsToWatch, idToCheck, Latency, QtFSEventFlags);
+
    warmUpFSEvents();
 
    return failedToAdd;
@@ -258,33 +254,35 @@ void QFSEventsFileSystemWatcherEngine::warmUpFSEvents()
 }
 
 QStringList QFSEventsFileSystemWatcherEngine::removePaths(const QStringList &paths,
-      QStringList *files,
-      QStringList *directories)
+      QStringList *files, QStringList *directories)
 {
 #if ! defined(Q_OS_IOS)
    stop();
    wait();
+
    QMutexLocker locker(&mutex);
    // short circuit for smarties that call remove before add and we have nothing.
-   if (pathsToWatch == 0) {
+   if (pathsToWatch == nullptr) {
       return paths;
    }
+
    QStringList failedToRemove;
    // if we have a running FSStreamEvent, we have to stop it, we'll re-add the stream soon.
    FSEventStreamEventId idToCheck;
+
    if (fsStream) {
       idToCheck = FSEventStreamGetLatestEventId(fsStream);
       cleanupFSStream(fsStream);
-      fsStream = 0;
+      fsStream = nullptr;
    } else {
       idToCheck = kFSEventStreamEventIdSinceNow;
    }
 
    CFIndex itemCount = CFArrayGetCount(pathsToWatch);
-   QCFType<CFMutableArrayRef> tmpArray = CFArrayCreateMutableCopy(kCFAllocatorDefault, itemCount,
-                                         pathsToWatch);
+   QCFType<CFMutableArrayRef> tmpArray = CFArrayCreateMutableCopy(kCFAllocatorDefault, itemCount, pathsToWatch);
    CFRelease(pathsToWatch);
-   pathsToWatch = 0;
+   pathsToWatch = nullptr;
+
    for (int i = 0; i < paths.size(); ++i) {
       // Get the itemCount at the beginning to avoid any overruns during the iteration.
       itemCount = CFArrayGetCount(tmpArray);
@@ -292,39 +290,45 @@ QStringList QFSEventsFileSystemWatcherEngine::removePaths(const QStringList &pat
       QFileInfo fi(path);
       QCFString cfpath(createFSStreamPath(fi.canonicalPath()));
 
-      CFIndex index = CFArrayGetFirstIndexOfValue(tmpArray, CFRangeMake(0, itemCount), cfpath);
+      CFIndex index = CFArrayGetFirstIndexOfValue(tmpArray, CFRangeMake(0, itemCount), cfpath.toCFStringRef());
+
       if (index != -1) {
          CFArrayRemoveValueAtIndex(tmpArray, index);
          files->removeAll(path);
-         removePathFromHash(filePathInfoHash, cfpath, path);
+         removePathFromHash(filePathInfoHash, cfpath.toQString(), path);
+
       } else {
          // Could be a directory we are watching instead.
          QCFString cfdirpath(createFSStreamPath(fi.canonicalFilePath()));
-         index = CFArrayGetFirstIndexOfValue(tmpArray, CFRangeMake(0, itemCount), cfdirpath);
+         index = CFArrayGetFirstIndexOfValue(tmpArray, CFRangeMake(0, itemCount), cfdirpath.toCFStringRef());
+
          if (index != -1) {
             CFArrayRemoveValueAtIndex(tmpArray, index);
             directories->removeAll(path);
-            removePathFromHash(dirPathInfoHash, cfpath, path);
+            removePathFromHash(dirPathInfoHash, cfpath.toQString(), path);
          } else {
             failedToRemove.append(path);
          }
       }
    }
+
    itemCount = CFArrayGetCount(tmpArray);
    if (itemCount != 0) {
       pathsToWatch = CFArrayCreateCopy(kCFAllocatorDefault, tmpArray);
 
-      FSEventStreamContext context = { 0, this, 0, 0, 0 };
-      fsStream = FSEventStreamCreate(kCFAllocatorDefault,
-                                     QFSEventsFileSystemWatcherEngine::fseventsCallback,
-                                     &context, pathsToWatch, idToCheck, Latency, QtFSEventFlags);
+      FSEventStreamContext context = { 0, this, nullptr, nullptr, nullptr };
+      fsStream = FSEventStreamCreate(kCFAllocatorDefault, QFSEventsFileSystemWatcherEngine::fseventsCallback,
+                  &context, pathsToWatch, idToCheck, Latency, QtFSEventFlags);
       warmUpFSEvents();
    }
+
    return failedToRemove;
+
 #else
    Q_UNUSED(paths);
    Q_UNUSED(files);
    Q_UNUSED(directories);
+
    return QStringList();
 #endif
 }
@@ -342,15 +346,18 @@ void QFSEventsFileSystemWatcherEngine::updateList(PathInfoList &list, bool direc
          if (emitSignals) {
             if (newInfo != it->savedInfo) {
                it->savedInfo = newInfo;
+
                if (directory) {
                   emit directoryChanged(it->originalPath, false);
                } else {
                   emit fileChanged(it->originalPath, false);
                }
             }
+
          } else {
             it->savedInfo = newInfo;
          }
+
       } else {
          if (errno == ENOENT) {
             if (emitSignals) {
@@ -360,14 +367,17 @@ void QFSEventsFileSystemWatcherEngine::updateList(PathInfoList &list, bool direc
                   emit fileChanged(it->originalPath, true);
                }
             }
+
             it = list.erase(it);
             continue;
+
          } else {
             qWarning("%s:%d:QFSEventsFileSystemWatcherEngine: stat error on %s:%s",
-                     __FILE__, __LINE__, qPrintable(it->originalPath), strerror(errno));
+                     __FILE__, __LINE__, csPrintable(it->originalPath), strerror(errno));
 
          }
       }
+
       ++it;
    }
 }
@@ -377,8 +387,10 @@ void QFSEventsFileSystemWatcherEngine::updateHash(PathHash &pathHash)
    PathHash::iterator HashEnd = pathHash.end();
    PathHash::iterator it = pathHash.begin();
    const bool IsDirectory = (&pathHash == &dirPathInfoHash);
+
    while (it != HashEnd) {
       updateList(it.value(), IsDirectory, false);
+
       if (it.value().isEmpty()) {
          it = pathHash.erase(it);
       } else {
@@ -388,11 +400,9 @@ void QFSEventsFileSystemWatcherEngine::updateHash(PathHash &pathHash)
 }
 #endif
 
-void QFSEventsFileSystemWatcherEngine::fseventsCallback(ConstFSEventStreamRef ,
-      void *clientCallBackInfo, size_t numEvents,
-      void *eventPaths,
-      const FSEventStreamEventFlags eventFlags[],
-      const FSEventStreamEventId [])
+void QFSEventsFileSystemWatcherEngine::fseventsCallback(ConstFSEventStreamRef,
+      void *clientCallBackInfo, size_t numEvents, void *eventPaths,
+      const FSEventStreamEventFlags eventFlags[], const FSEventStreamEventId [])
 {
 #if ! defined(Q_OS_IOS)
    QFSEventsFileSystemWatcherEngine *watcher = static_cast<QFSEventsFileSystemWatcherEngine *>(clientCallBackInfo);
@@ -475,22 +485,24 @@ void QFSEventsFileSystemWatcherEngine::run()
    threadsRunLoop = CFRunLoopGetCurrent();
    FSEventStreamScheduleWithRunLoop(fsStream, threadsRunLoop, kCFRunLoopDefaultMode);
    bool startedOK = FSEventStreamStart(fsStream);
+
    // It's recommended by Apple that you only update the files after you've started
    // the stream, because otherwise you might miss an update in between starting it.
    updateFiles();
+
 #ifdef QT_NO_DEBUG
    Q_UNUSED(startedOK);
 #else
    Q_ASSERT(startedOK);
 #endif
+
    // If for some reason we called stop up above (and invalidated our stream), this call will return
    // immediately.
    CFRunLoopRun();
-   threadsRunLoop = 0;
+
+   threadsRunLoop = nullptr;
    QMutexLocker locker(&mutex);
    waitForStop.wakeAll();
 #endif
 }
-
-QT_END_NAMESPACE
 #endif //QT_NO_FILESYSTEMWATCHER

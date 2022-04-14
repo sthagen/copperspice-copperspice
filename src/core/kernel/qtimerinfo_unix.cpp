@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -65,7 +65,7 @@ QTimerInfoList::QTimerInfoList()
    }
 #endif
 
-   firstTimerInfo = 0;
+   firstTimerInfo = nullptr;
 }
 
 timespec QTimerInfoList::updateCurrentTime()
@@ -235,7 +235,7 @@ static void calculateCoarseTimerTimeout(QTimerInfo_Unix *t, timespec currentTime
    // The objective is to make most timers wake up at the same time, thereby reducing CPU wakeups.
 
    uint interval = uint(t->interval);
-   uint msec = uint(t->timeout.tv_nsec) / 1000 / 1000;
+   uint msec     = uint(t->timeout.tv_nsec) / 1000 / 1000;
    Q_ASSERT(interval >= 20);
 
    // Calculate how much we can round and still keep within 5% error
@@ -243,6 +243,7 @@ static void calculateCoarseTimerTimeout(QTimerInfo_Unix *t, timespec currentTime
 
    if (interval < 100 && interval != 25 && interval != 50 && interval != 75) {
       // special mode for timers of less than 100 ms
+
       if (interval < 50) {
          // round to even
          // round towards multiples of 50 ms
@@ -250,6 +251,7 @@ static void calculateCoarseTimerTimeout(QTimerInfo_Unix *t, timespec currentTime
          msec >>= 1;
          msec |= uint(roundUp);
          msec <<= 1;
+
       } else {
          // round to multiple of 4
          // round towards multiples of 100 ms
@@ -260,15 +262,15 @@ static void calculateCoarseTimerTimeout(QTimerInfo_Unix *t, timespec currentTime
       }
 
    } else {
-      uint min = qMax<int>(0, msec - absMaxRounding);
+      uint min = qMax(0, static_cast<int>(msec) - static_cast<int>(absMaxRounding));
       uint max = qMin(1000u, msec + absMaxRounding);
 
-      // find the boundary that we want, according to the rules above
-      // extra rules:
+      // find the boundary that we want, according to the rules above extra rules:
       // 1) whatever the interval, we'll take any round-to-the-second timeout
       if (min == 0) {
          msec = 0;
          goto recalculate;
+
       } else if (max == 1000) {
          msec = 1000;
          goto recalculate;
@@ -284,6 +286,7 @@ static void calculateCoarseTimerTimeout(QTimerInfo_Unix *t, timespec currentTime
          if (interval >= 5000) {
             msec = msec >= 500 ? max : min;
             goto recalculate;
+
          } else {
             wantedBoundaryMultiple = 500;
          }
@@ -456,7 +459,7 @@ void QTimerInfoList::registerTimer(int timerId, int interval, Qt::TimerType time
    t->interval = interval;
    t->timerType = timerType;
    t->obj = object;
-   t->activateRef = 0;
+   t->activateRef = nullptr;
 
    timespec expected = updateCurrentTime() + interval;
 
@@ -468,24 +471,28 @@ void QTimerInfoList::registerTimer(int timerId, int interval, Qt::TimerType time
          break;
 
       case Qt::CoarseTimer:
-         // this timer has up to 5% coarseness
-         // so our boundaries are 20 ms and 20 s
+         // this timer has up to 5% coarseness so the boundaries are 20 ms and 20 s
          // below 20 ms, 5% inaccuracy is below 1 ms, so we convert to high precision
          // above 20 s, 5% inaccuracy is above 1 s, so we convert to VeryCoarseTimer
+
          if (interval >= 20000) {
             t->timerType = Qt::VeryCoarseTimer;
-            // fall through
+            // do nothing
+
          } else {
             t->timeout = expected;
+
             if (interval <= 20) {
                t->timerType = Qt::PreciseTimer;
                // no adjustment is necessary
+
             } else if (interval <= 20000) {
                calculateCoarseTimerTimeout(t, currentTime);
             }
             break;
          }
-      // fall through
+         [[fallthrough]];
+
       case Qt::VeryCoarseTimer:
          // the very coarse timer is based on full second precision,
          // so we keep the interval in seconds (round to closest second)
@@ -525,11 +532,11 @@ bool QTimerInfoList::unregisterTimer(int timerId)
          removeAt(i);
 
          if (t == firstTimerInfo) {
-            firstTimerInfo = 0;
+            firstTimerInfo = nullptr;
          }
 
          if (t->activateRef) {
-            *(t->activateRef) = 0;
+            *(t->activateRef) = nullptr;
          }
 
          delete t;
@@ -553,11 +560,11 @@ bool QTimerInfoList::unregisterTimers(QObject *object)
          // object found
          removeAt(i);
          if (t == firstTimerInfo) {
-            firstTimerInfo = 0;
+            firstTimerInfo = nullptr;
          }
 
          if (t->activateRef) {
-            *(t->activateRef) = 0;
+            *(t->activateRef) = nullptr;
          }
 
          delete t;
@@ -594,8 +601,9 @@ int QTimerInfoList::activateTimers()
       return 0;   // nothing to do
    }
 
-   int n_act = 0, maxCount = 0;
-   firstTimerInfo = 0;
+   int n_act      = 0;
+   int maxCount   = 0;
+   firstTimerInfo = nullptr;
 
    timespec currentTime = updateCurrentTime();
    // qDebug() << "Thread" << QThread::currentThreadId() << "woken up at" << currentTime;
@@ -677,12 +685,12 @@ int QTimerInfoList::activateTimers()
          QCoreApplication::sendEvent(currentTimerInfo->obj, &e);
 
          if (currentTimerInfo) {
-            currentTimerInfo->activateRef = 0;
+            currentTimerInfo->activateRef = nullptr;
          }
       }
    }
 
-   firstTimerInfo = 0;
+   firstTimerInfo = nullptr;
    // qDebug() << "Thread" << QThread::currentThreadId() << "activated" << n_act << "timers";
 
    return n_act;

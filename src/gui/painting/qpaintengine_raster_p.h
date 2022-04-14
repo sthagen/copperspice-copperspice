@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,10 @@
 #ifndef QPAINTENGINE_RASTER_P_H
 #define QPAINTENGINE_RASTER_P_H
 
-#include <qpaintengineex_p.h>
-
 #include <qpainterpath.h>
-#include <qdatabuffer_p.h>
+#include <qvector.h>
+
+#include <qpaintengineex_p.h>
 #include <qdrawhelper_p.h>
 #include <qpaintengine_p.h>
 #include <qrasterizer_p.h>
@@ -129,33 +129,34 @@ class Q_GUI_EXPORT QRasterPaintEngine : public QPaintEngineEx
 
    void updateMatrix(const QTransform &matrix);
 
-   void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode) override;
-   void drawPolygon(const QPoint *points, int pointCount, PolygonDrawMode mode) override;
+   void drawPolygon(const QPointF *pointPtr, int pointCount, PolygonDrawMode mode) override;
+   void drawPolygon(const QPoint *pointPtr, int pointCount, PolygonDrawMode mode) override;
    void fillPath(const QPainterPath &path, QSpanData *fillData);
-   void fillPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode);
+   void fillPolygon(const QPointF *pointPtr, int pointCount, PolygonDrawMode mode);
 
    void drawEllipse(const QRectF &rect) override;
 
    void fillRect(const QRectF &rect, const QBrush &brush) override;
    void fillRect(const QRectF &rect, const QColor &color) override;
 
-   void drawRects(const QRect  *rects, int rectCount) override;
-   void drawRects(const QRectF *rects, int rectCount) override;
+   void drawRects(const QRect  *rectPtr, int rectCount) override;
+   void drawRects(const QRectF *rectPtr, int rectCount) override;
 
-   void drawPixmap(const QPointF &p, const QPixmap &pm) override;
-   void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr) override;
+   void drawPixmap(const QPointF &point, const QPixmap &pixmap) override;
+   void drawPixmap(const QRectF &rect, const QPixmap &pixmap, const QRectF &srcRect) override;
 
-   void drawImage(const QPointF &p, const QImage &img) override;
-   void drawImage(const QRectF &r, const QImage &pm, const QRectF &sr, Qt::ImageConversionFlags flags = Qt::AutoColor) override;
+   void drawImage(const QPointF &point, const QImage &image) override;
+   void drawImage(const QRectF &rect, const QImage &image, const QRectF &srcRect,
+         Qt::ImageConversionFlags flags = Qt::AutoColor) override;
 
-   void drawTiledPixmap(const QRectF &r, const QPixmap &pm, const QPointF &sr) override;
-   void drawTextItem(const QPointF &p, const QTextItem &textItem) override;
+   void drawTiledPixmap(const QRectF &rect, const QPixmap &pixmap, const QPointF &srcRect) override;
+   void drawTextItem(const QPointF &point, const QTextItem &textItem) override;
 
-   void drawLines(const QLine *line, int lineCount) override;
-   void drawLines(const QLineF *line, int lineCount) override;
+   void drawLines(const QLine *linePtr, int lineCount) override;
+   void drawLines(const QLineF *linePtr, int lineCount) override;
 
-   void drawPoints(const QPointF *points, int pointCount) override;
-   void drawPoints(const QPoint *points, int pointCount) override;
+   void drawPoints(const QPointF *pointPtr, int pointCount) override;
+   void drawPoints(const QPoint *pointPtr, int pointCount) override;
 
    void stroke(const QVectorPath &path, const QPen &pen) override;
    void fill(const QVectorPath &path, const QBrush &brush) override;
@@ -310,7 +311,7 @@ class QRasterPaintEnginePrivate : public QPaintEngineExPrivate
 
    QScopedPointer<QT_FT_Raster> grayRaster;
 
-   QDataBuffer<QLineF> cachedLines;
+   QVector<QLineF> cachedLines;
    QSpanData image_filler;
    QSpanData image_filler_xform;
    QSpanData solid_color_filler;
@@ -411,7 +412,9 @@ inline void QClipData::appendSpans(const QSpan *s, int num)
 class QRasterBuffer
 {
  public:
-   QRasterBuffer() : m_width(0), m_height(0), m_buffer(0) {
+   QRasterBuffer()
+      : m_width(0), m_height(0), m_buffer(nullptr)
+   {
       init();
    }
 

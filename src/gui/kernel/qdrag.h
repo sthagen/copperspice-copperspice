@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,16 +38,19 @@ class QDragManager;
 class Q_GUI_EXPORT QDrag : public QObject
 {
    GUI_CS_OBJECT(QDrag)
-   Q_DECLARE_PRIVATE(QDrag)
 
  public:
    explicit QDrag(QObject *dragSource);
+
+   QDrag(const QDrag &) = delete;
+   QDrag &operator=(const QDrag &) = delete;
+
    ~QDrag();
 
    void setMimeData(QMimeData *data);
    QMimeData *mimeData() const;
 
-   void setPixmap(const QPixmap &);
+   void setPixmap(const QPixmap &pixmap);
    QPixmap pixmap() const;
 
    void setHotSpot(const QPoint &hotspot);
@@ -75,12 +78,11 @@ class Q_GUI_EXPORT QDrag : public QObject
    QScopedPointer<QDragPrivate> d_ptr;
 
  private:
+   Q_DECLARE_PRIVATE(QDrag)
    friend class QDragManager;
-   Q_DISABLE_COPY(QDrag)
-
 };
 
 #endif // QT_NO_DRAGANDDROP
 
 
-#endif // QDRAG_H
+#endif

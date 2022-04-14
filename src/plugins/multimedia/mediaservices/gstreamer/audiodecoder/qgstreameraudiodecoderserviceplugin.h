@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,19 +24,17 @@
 #ifndef QGSTREAMERAUDIODECODERSERVICEPLUGIN_H
 #define QGSTREAMERAUDIODECODERSERVICEPLUGIN_H
 
-#include <qmediaservice_provider_plugin.h>
 #include <qaudiodecodercontrol.h>
-
-#include <qset.h>
+#include <qmediaservice_provider_plugin.h>
 #include <qobject.h>
+#include <qset.h>
 
-class QGstreamerAudioDecoderServicePlugin
-   : public QMediaServiceProviderPlugin, public QMediaServiceSupportedFormatsInterface
+class QGstreamerAudioDecoderServicePlugin : public QMediaServiceProviderPlugin, public QMediaServiceSupportedFormatsInterface
 {
    CS_OBJECT_MULTIPLE(QGstreamerAudioDecoderServicePlugin, QMediaServiceProviderPlugin)
 
    CS_PLUGIN_IID(QMediaServiceProviderInterface_ID)
-   CS_PLUGIN_KEY(QAudioDecoderControl_Key)
+   CS_PLUGIN_KEY(Q_MEDIASERVICE_AUDIODECODER)
 
    CS_INTERFACES(QMediaServiceSupportedFormatsInterface)
 

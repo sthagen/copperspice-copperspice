@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QCOLUMNVIEW_H
 #define QCOLUMNVIEW_H
 
-#include <QtGui/qabstractitemview.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractitemview.h>
 
 #ifndef QT_NO_COLUMNVIEW
 
@@ -41,6 +39,10 @@ class Q_GUI_EXPORT QColumnView : public QAbstractItemView
 
  public:
    explicit QColumnView(QWidget *parent = nullptr);
+
+   QColumnView(const QColumnView &) = delete;
+   QColumnView &operator=(const QColumnView &) = delete;
+
    ~QColumnView();
 
    // QAbstractItemView overloads
@@ -73,7 +75,8 @@ class Q_GUI_EXPORT QColumnView : public QAbstractItemView
    bool isIndexHidden(const QModelIndex &index) const override;
    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
    void resizeEvent(QResizeEvent *event) override;
-   void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) override;
+   void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags flags) override;
+
    QRegion visualRegionForSelection(const QItemSelection &selection) const override;
    int horizontalOffset() const override;
    int verticalOffset() const override;
@@ -82,12 +85,11 @@ class Q_GUI_EXPORT QColumnView : public QAbstractItemView
 
    // QColumnView functions
    void scrollContentsBy(int dx, int dy) override;
-   virtual QAbstractItemView *createColumn(const QModelIndex &rootIndex);
+   virtual QAbstractItemView *createColumn(const QModelIndex &index);
    void initializeColumn(QAbstractItemView *column) const;
 
  private:
    Q_DECLARE_PRIVATE(QColumnView)
-   Q_DISABLE_COPY(QColumnView)
 
    GUI_CS_SLOT_1(Private, void _q_gripMoved(int un_named_arg1))
    GUI_CS_SLOT_2(_q_gripMoved)
@@ -100,7 +102,6 @@ class Q_GUI_EXPORT QColumnView : public QAbstractItemView
 };
 
 #endif // QT_NO_COLUMNVIEW
-
 
 #endif // QCOLUMNVIEW_H
 

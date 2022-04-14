@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,13 @@
 #ifndef QPAINTENGINE_MAC_P_H
 #define QPAINTENGINE_MAC_P_H
 
-#include "qpaintengine.h"
-#include "qpaintengine_p.h"
-#include "qpolygonclipper_p.h"
-#include "qfont_p.h"
-#include "qhash.h"
+#include <qpaintengine.h>
+#include <qhash.h>
 
-#include "qt_mac_p.h"
+#include <qpaintengine_p.h>
+#include <qpolygonclipper_p.h>
+#include <qfont_p.h>
+#include <qt_mac_p.h>
 
 typedef struct CGColorSpace *CGColorSpaceRef;
 
@@ -42,12 +42,16 @@ class QCoreGraphicsPaintEngine : public QPaintEngine
 
  public:
    QCoreGraphicsPaintEngine();
+
+   QCoreGraphicsPaintEngine(const QCoreGraphicsPaintEngine &) = delete;
+   QCoreGraphicsPaintEngine &operator=(const QCoreGraphicsPaintEngine &) = delete;
+
    ~QCoreGraphicsPaintEngine();
 
    bool begin(QPaintDevice *pdev);
    bool end();
    static CGColorSpaceRef macGenericColorSpace();
-   static CGColorSpaceRef macDisplayColorSpace(const QWidget *widget = 0);
+   static CGColorSpaceRef macDisplayColorSpace(const QWidget *widget = nullptr);
 
    void updateState(const QPaintEngineState &state);
 
@@ -114,18 +118,14 @@ class QCoreGraphicsPaintEngine : public QPaintEngine
    static CGColorSpaceRef m_genericColorSpace;
    static QHash<CGDirectDisplayID, CGColorSpaceRef> m_displayColorSpaceHash;
    static void cleanUpMacColorSpaces();
-   Q_DISABLE_COPY(QCoreGraphicsPaintEngine)
 };
 
-/*****************************************************************************
-  Private data
- *****************************************************************************/
 class QCoreGraphicsPaintEnginePrivate : public QPaintEnginePrivate
 {
    Q_DECLARE_PUBLIC(QCoreGraphicsPaintEngine)
  public:
    QCoreGraphicsPaintEnginePrivate()
-      : hd(0), shading(0), stackCount(0), complexXForm(false), disabledSmoothFonts(false) {
+      : hd(nullptr), shading(nullptr), stackCount(0), complexXForm(false), disabledSmoothFonts(false) {
    }
 
    struct {
@@ -151,10 +151,10 @@ class QCoreGraphicsPaintEnginePrivate : public QPaintEnginePrivate
    QPointF pixelSize;
    float cosmeticPenSize;
 
-   //internal functions
    enum { CGStroke = 0x01, CGEOFill = 0x02, CGFill = 0x04 };
-   void drawPath(uchar ops, CGMutablePathRef path = 0);
-   void setClip(const QRegion *rgn = 0);
+
+   void drawPath(uchar ops, CGMutablePathRef path = nullptr);
+   void setClip(const QRegion *rgn = nullptr);
    void resetClip();
    void setFillBrush(const QPointF &origin = QPoint());
    void setStrokePen(const QPen &pen);
@@ -163,13 +163,16 @@ class QCoreGraphicsPaintEnginePrivate : public QPaintEnginePrivate
    float penOffset();
    QPointF devicePixelSize(CGContextRef context);
    float adjustPenWidth(float penWidth);
-   inline void setTransform(const QTransform *matrix = 0) {
+
+   void setTransform(const QTransform *matrix = nullptr) {
       CGContextConcatCTM(hd, CGAffineTransformInvert(CGContextGetCTM(hd)));
       CGAffineTransform xform = orig_xform;
+
       if (matrix) {
          extern CGAffineTransform qt_mac_convert_transform_to_cg(const QTransform &);
          xform = CGAffineTransformConcat(qt_mac_convert_transform_to_cg(*matrix), xform);
       }
+
       CGContextConcatCTM(hd, xform);
       CGContextSetTextMatrix(hd, xform);
    }

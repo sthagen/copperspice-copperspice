@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,11 @@
 #ifndef QABSTRACTFILEENGINE_H
 #define QABSTRACTFILEENGINE_H
 
-#include <QtCore/qdir.h>
+#include <qdir.h>
 
 #ifdef open
 #error qabstractfileengine.h must be included before any header file that defines open
 #endif
-
-QT_BEGIN_NAMESPACE
 
 class QFileExtension;
 class QFileExtensionResult;
@@ -92,14 +90,17 @@ class Q_CORE_EXPORT QAbstractFileEngine
       AccessTime
    };
 
+   QAbstractFileEngine(const QAbstractFileEngine &) = delete;
+   QAbstractFileEngine &operator=(const QAbstractFileEngine &) = delete;
+
    virtual ~QAbstractFileEngine();
 
-   virtual bool open(QIODevice::OpenMode openMode);
+   virtual bool open(QIODevice::OpenMode mode);
    virtual bool close();
    virtual bool flush();
    virtual qint64 size() const;
    virtual qint64 pos() const;
-   virtual bool seek(qint64 pos);
+   virtual bool seek(qint64 offset);
    virtual bool isSequential() const;
    virtual bool remove();
    virtual bool copy(const QString &newName);
@@ -116,14 +117,14 @@ class Q_CORE_EXPORT QAbstractFileEngine
    virtual FileFlags fileFlags(FileFlags type = FileInfoAll) const;
    virtual bool setPermissions(uint perms);
    virtual QString fileName(FileName file = DefaultName) const;
-   virtual uint ownerId(FileOwner) const;
-   virtual QString owner(FileOwner) const;
+   virtual uint ownerId(FileOwner owner) const;
+   virtual QString owner(FileOwner owner) const;
    virtual QDateTime fileTime(FileTime time) const;
    virtual void setFileName(const QString &file);
    virtual int handle() const;
    bool atEnd() const;
    uchar *map(qint64 offset, qint64 size, QFile::MemoryMapFlags flags);
-   bool unmap(uchar *ptr);
+   bool unmap(uchar *address);
 
    typedef QAbstractFileEngineIterator Iterator;
    virtual Iterator *beginEntryList(QDir::Filters filters, const QStringList &filterNames);
@@ -169,22 +170,22 @@ class Q_CORE_EXPORT QAbstractFileEngine
       uchar *address;
    };
 
-   virtual bool extension(Extension extension, const ExtensionOption *option = 0, ExtensionReturn *output = 0);
+   virtual bool extension(Extension extension, const ExtensionOption *option = nullptr, ExtensionReturn *output = nullptr);
    virtual bool supportsExtension(Extension extension) const;
 
    // Factory
    static QAbstractFileEngine *create(const QString &fileName);
 
  protected:
-   void setError(QFile::FileError error, const QString &str);
+   void setError(QFile::FileError error, const QString &errorString);
 
    QAbstractFileEngine();
    QAbstractFileEngine(QAbstractFileEnginePrivate &);
 
    QScopedPointer<QAbstractFileEnginePrivate> d_ptr;
+
  private:
    Q_DECLARE_PRIVATE(QAbstractFileEngine)
-   Q_DISABLE_COPY(QAbstractFileEngine)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAbstractFileEngine::FileFlags)
@@ -201,6 +202,10 @@ class Q_CORE_EXPORT QAbstractFileEngineIterator
 {
  public:
    QAbstractFileEngineIterator(QDir::Filters filters, const QStringList &nameFilters);
+
+   QAbstractFileEngineIterator(const QAbstractFileEngineIterator &) = delete;
+   QAbstractFileEngineIterator &operator=(const QAbstractFileEngineIterator &) = delete;
+
    virtual ~QAbstractFileEngineIterator();
 
    virtual QString next() = 0;
@@ -214,19 +219,11 @@ class Q_CORE_EXPORT QAbstractFileEngineIterator
    virtual QFileInfo currentFileInfo() const;
    QString currentFilePath() const;
 
- protected:
-   enum EntryInfoType {
-   };
-   virtual QVariant entryInfo(EntryInfoType type) const;
-
  private:
-   Q_DISABLE_COPY(QAbstractFileEngineIterator)
    friend class QDirIterator;
    friend class QDirIteratorPrivate;
    void setPath(const QString &path);
    QScopedPointer<QAbstractFileEngineIteratorPrivate> d;
 };
 
-QT_END_NAMESPACE
-
-#endif // QABSTRACTFILEENGINE_H
+#endif

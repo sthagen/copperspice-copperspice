@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,33 +27,36 @@
 #include <qobject.h>
 #include <qhashfunc.h>
 
-QT_BEGIN_NAMESPACE
-
 class QVariant;
 class QSizePolicy;
+
 inline uint qHash(QSizePolicy key, uint seed = 0);
+
 class Q_GUI_EXPORT QSizePolicy
 {
    GUI_CS_GADGET(QSizePolicy)
+
    GUI_CS_ENUM(Policy)
 
  public:
    enum PolicyFlag {
-      GrowFlag = 1,
-      ExpandFlag = 2,
-      ShrinkFlag = 4,
-      IgnoreFlag = 8
+      GrowFlag   = 0x1,
+      ExpandFlag = 0x2,
+      ShrinkFlag = 0x4,
+      IgnoreFlag = 0x8,
    };
 
-   enum Policy {
-      Fixed = 0,
-      Minimum = GrowFlag,
-      Maximum = ShrinkFlag,
-      Preferred = GrowFlag | ShrinkFlag,
-      MinimumExpanding = GrowFlag | ExpandFlag,
-      Expanding = GrowFlag | ShrinkFlag | ExpandFlag,
-      Ignored = ShrinkFlag | GrowFlag | IgnoreFlag
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum Policy {
+         Fixed            = 0x0,
+         Minimum          = 0x1,
+         Maximum          = 0x4,
+         Preferred        = 0x5,
+         MinimumExpanding = 0x3,
+         Expanding        = 0x7,
+         Ignored          = 0xD
+      };
+   )
 
    enum ControlType {
       DefaultType      = 0x00000001,
@@ -91,12 +94,12 @@ class Q_GUI_EXPORT QSizePolicy
    }
    ControlType controlType() const;
 
-   void setHorizontalPolicy(Policy d) {
-      bits.horPolicy = d;
+   void setHorizontalPolicy(Policy policy) {
+      bits.horPolicy = policy;
    }
 
-   void setVerticalPolicy(Policy d) {
-      bits.verPolicy = d;
+   void setVerticalPolicy(Policy policy) {
+      bits.verPolicy = policy;
    }
    void setControlType(ControlType type);
 
@@ -105,26 +108,27 @@ class Q_GUI_EXPORT QSizePolicy
          | ( (horizontalPolicy() & ExpandFlag) ? Qt::Horizontal : Qt::Orientations() ) ;
    }
 
-   void setHeightForWidth(bool b) {
-      bits.hfw = b;
+   void setHeightForWidth(bool isHeightForWidth) {
+      bits.hfw = isHeightForWidth;
    }
 
    bool hasHeightForWidth() const {
       return bits.hfw;
    }
-   void setWidthForHeight(bool b) {
-      bits.wfh = b;
+   void setWidthForHeight(bool isWidthForHeight) {
+      bits.wfh = isWidthForHeight;
    }
 
    bool hasWidthForHeight() const {
       return bits.wfh;
    }
 
-   bool operator==(const QSizePolicy &s) const {
-      return data == s.data;
+   bool operator==(const QSizePolicy &other) const {
+      return data == other.data;
    }
-   bool operator!=(const QSizePolicy &s) const {
-      return data != s.data;
+
+   bool operator!=(const QSizePolicy &other) const {
+      return data != other.data;
    }
 
    operator QVariant() const;
@@ -132,7 +136,6 @@ class Q_GUI_EXPORT QSizePolicy
    friend uint qHash(QSizePolicy key, uint seed) {
       return qHash(key.data, seed);
    }
-
 
    int horizontalStretch() const {
       return static_cast<int>(bits.horStretch);
@@ -155,8 +158,8 @@ class Q_GUI_EXPORT QSizePolicy
    void transpose();
 
  private:
-   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &, const QSizePolicy &);
-   friend Q_GUI_EXPORT QDataStream &operator>>(QDataStream &, QSizePolicy &);
+   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QSizePolicy &policy);
+   friend Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QSizePolicy &policy);
 
    QSizePolicy(int i) : data(i) { }
 
@@ -179,12 +182,11 @@ class Q_GUI_EXPORT QSizePolicy
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QSizePolicy::ControlTypes)
 
+Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QSizePolicy &policy);
+Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QSizePolicy &policy);
 
-Q_GUI_EXPORT QDataStream &operator<<(QDataStream &, const QSizePolicy &);
-Q_GUI_EXPORT QDataStream &operator>>(QDataStream &, QSizePolicy &);
+Q_GUI_EXPORT QDebug operator<<(QDebug dbg, const QSizePolicy &policy);
 
-
-Q_GUI_EXPORT QDebug operator<<(QDebug dbg, const QSizePolicy &);
 inline void QSizePolicy::transpose()
 {
    Policy hData = horizontalPolicy();
@@ -196,6 +198,5 @@ inline void QSizePolicy::transpose()
    setHorizontalStretch(vStretch);
    setVerticalStretch(hStretch);
 }
-
 
 #endif // QSIZEPOLICY_H

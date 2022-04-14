@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,8 +48,6 @@
 #include <qvector.h>
 
 #include <stdlib.h>
-
-QT_BEGIN_NAMESPACE
 
 #ifdef DBNTWIN32
 #define QMSGHANDLE DBMSGHANDLE_PROC
@@ -329,7 +327,7 @@ void QTDSResult::cleanup()
 
 QVariant QTDSResult::handle() const
 {
-   return QVariant(qRegisterMetaType<DBPROCESS *>("DBPROCESS*"), &d->dbproc);
+   return QVariant::fromValue<DBPROCESS *>(d->dbproc);
 }
 
 static inline bool qIsNull(const void *ind)
@@ -529,7 +527,7 @@ QTDSDriver::QTDSDriver(LOGINREC *rec, const QString &host, const QString &db, QO
 
 QVariant QTDSDriver::handle() const
 {
-   return QVariant(qRegisterMetaType<LOGINREC *>("LOGINREC*"), &d->login);
+   return QVariant::fromValue<LOGINREC *>(d->login);
 }
 
 void QTDSDriver::init()
@@ -844,5 +842,3 @@ QString QTDSDriver::escapeIdentifier(const QString &identifier, IdentifierType t
    }
    return res;
 }
-
-QT_END_NAMESPACE

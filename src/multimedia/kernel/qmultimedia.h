@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,10 +25,10 @@
 #define QMULTIMEDIA_H
 
 #include <qpair.h>
-#include <qmetatype.h>
 #include <qstring.h>
 
 namespace QMultimedia {
+
 enum SupportEstimate {
    NotSupported,
    MaybeSupported,
@@ -57,11 +57,7 @@ enum AvailabilityStatus {
    Busy,
    ResourceError
 };
-}
 
-Q_DECLARE_METATYPE(QMultimedia::AvailabilityStatus)
-Q_DECLARE_METATYPE(QMultimedia::SupportEstimate)
-Q_DECLARE_METATYPE(QMultimedia::EncodingMode)
-Q_DECLARE_METATYPE(QMultimedia::EncodingQuality)
+} // namespace
 
 #endif

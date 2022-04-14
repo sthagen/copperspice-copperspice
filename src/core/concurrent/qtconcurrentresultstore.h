@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,9 @@
 #ifndef QTCONCURRENTRESULTSTORE_H
 #define QTCONCURRENTRESULTSTORE_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qmap.h>
-#include <QtCore/qdebug.h>
-
-QT_BEGIN_NAMESPACE
-
+#include <qglobal.h>
+#include <qmap.h>
+#include <qdebug.h>
 
 /*
     ResultStore stores indexed results. Results can be added and retrieved
@@ -44,20 +41,32 @@ namespace QtConcurrent {
 class ResultItem
 {
  public:
-   ResultItem(const void *_result, int _count) : m_count(_count), result(_result) { } // contruct with vector of results
-   ResultItem(const void *_result) : m_count(0), result(_result) { } // construct with result
-   ResultItem() : m_count(0), result(0) { }
+   ResultItem(const void *_result, int _count)
+      : m_count(_count), result(_result)
+   { }
+
+   ResultItem(const void *_result)
+      : m_count(0), result(_result)
+   { }
+
+   ResultItem()
+      : m_count(0), result(nullptr)
+   { }
+
    bool isValid() const {
-      return result != 0;
+      return result != nullptr;
    }
+
    bool isVector() const {
       return m_count != 0;
    }
+
    int count() const {
       return (m_count == 0) ?  1 : m_count;
    }
-   int m_count;          // result is either a pointer to a result or to a vector of results,
-   const void *result; // if count is 0 it's a result, otherwise it's a vector.
+
+   int m_count;           // result is either a pointer to a result or to a vector of results,
+   const void *result;   // if count is 0 it's a result, otherwise it's a vector.
 };
 
 class Q_CORE_EXPORT ResultIteratorBase
@@ -205,8 +214,5 @@ class ResultStore : public ResultStoreBase
 };
 
 } // namespace QtConcurrent
-
-
-QT_END_NAMESPACE
 
 #endif

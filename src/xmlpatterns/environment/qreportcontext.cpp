@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -104,7 +104,7 @@ QString ReportContext::codeFromURI(const QString &typeURI, QString &uri)
 
 QString ReportContext::codeToString(const ReportContext::ErrorCode code)
 {
-   const char *result = 0;
+   const char *result = nullptr;
 
    switch (code) {
       /* Alphabetically. */
@@ -1038,14 +1038,14 @@ QString ReportContext::codeToString(const ReportContext::ErrorCode code)
 
 QUrl ReportContext::resolveURI(const QUrl &relative, const QUrl &baseURI) const
 {
-   Q_ASSERT_X(!baseURI.isRelative(), Q_FUNC_INFO, "The base URI passed from the engine wasn't absolute.");
+   Q_ASSERT_X(!baseURI.isRelative(), Q_FUNC_INFO, "The base URI passed from the engine was not absolute.");
 
    const QAbstractUriResolver *const resolver(uriResolver());
 
    if (resolver) {
       const QUrl final(resolver->resolve(relative, baseURI));
-      Q_ASSERT_X(final.isValid() || final.isEmpty(), Q_FUNC_INFO, "The QAbstractUriResolver must return a valid URI.");
-      Q_ASSERT_X(!final.isRelative(), Q_FUNC_INFO, "The QAbstractUriResolver must return an absolute URI.");
+      Q_ASSERT_X(final.isValid() || final.isEmpty(), Q_FUNC_INFO, "QAbstractUriResolver must return a valid URI.");
+      Q_ASSERT_X(!final.isRelative(), Q_FUNC_INFO, "QAbstractUriResolver must return an absolute URI.");
 
       return final;
 

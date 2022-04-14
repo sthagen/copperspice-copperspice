@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,12 +25,12 @@
 #define QSQLQUERYMODEL_P_H
 
 #include <qabstractitemmodel_p.h>
-#include <QtSql/qsqlerror.h>
-#include <QtSql/qsqlquery.h>
-#include <QtSql/qsqlrecord.h>
-#include <QtCore/qhash.h>
-#include <QtCore/qvarlengtharray.h>
-#include <QtCore/qvector.h>
+#include <qsqlerror.h>
+#include <qsqlquery.h>
+#include <qsqlrecord.h>
+#include <qhash.h>
+#include <qvarlengtharray.h>
+#include <qvector.h>
 
 
 class QSqlQueryModelPrivate: public QAbstractItemModelPrivate

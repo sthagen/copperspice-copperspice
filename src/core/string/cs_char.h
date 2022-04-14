@@ -1,9 +1,9 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
 *
-* This file is part of CopperSpice.
+* This file is part of CsString.
 *
 * CsString is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
@@ -48,7 +48,6 @@ class CsChar
       CsChar()
          : m_char(0)
       {
-
       }
 
       template <typename T = int>
@@ -70,19 +69,33 @@ class CsChar
       {
       }
 
-      bool operator!=(const CsChar &other) const;
-      bool operator==(const CsChar &other) const;
+      CsChar(const CsChar &other)
+         : m_char(other.m_char)
+      {
+      }
 
-      bool operator<(const CsChar &other) const;
-      bool operator<=(const CsChar &other) const;
-      bool operator>(const CsChar &other) const;
-      bool operator>=(const CsChar &other) const;
+#ifdef __cpp_char8_t
+      // support new data type added in C++20
 
-      CsChar &operator=(char c) &;
-      CsChar &operator=(char32_t c) &;
-      CsChar &operator=(CsChar c) &;
+      CsChar(char8_t c)
+         : m_char(c)
+      {
+      }
+#endif
 
-      uint32_t unicode() const;
+      inline bool operator!=(const CsChar &other) const;
+      inline bool operator==(const CsChar &other) const;
+
+      inline bool operator<(const CsChar &other) const;
+      inline bool operator<=(const CsChar &other) const;
+      inline bool operator>(const CsChar &other) const;
+      inline bool operator>=(const CsChar &other) const;
+
+      inline CsChar &operator=(char c) &;
+      inline CsChar &operator=(char32_t c) &;
+      inline CsChar &operator=(CsChar c) &;
+
+      inline uint32_t unicode() const;
 
    private:
       uint32_t m_char;

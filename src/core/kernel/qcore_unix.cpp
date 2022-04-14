@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,7 @@
 #ifdef Q_OS_NACL
 
 #else
-# if !defined(Q_OS_HPUX) || defined(__ia64)
+# if ! defined(Q_OS_HPUX) || defined(__ia64)
 #  include <sys/select.h>
 # endif
 
@@ -39,8 +39,6 @@
 #ifdef Q_OS_DARWIN
 #include <mach/mach_time.h>
 #endif
-
-QT_BEGIN_NAMESPACE
 
 static inline bool time_update(struct timespec *tv, const struct timespec &start,
                                const struct timespec &timeout)
@@ -58,7 +56,7 @@ int qt_safe_select(int nfds, fd_set *fdread, fd_set *fdwrite, fd_set *fdexcept,
    if (!orig_timeout) {
       // no timeout -> block forever
       int ret;
-      EINTR_LOOP(ret, select(nfds, fdread, fdwrite, fdexcept, 0));
+      EINTR_LOOP(ret, select(nfds, fdread, fdwrite, fdexcept, nullptr));
       return ret;
    }
 
@@ -69,7 +67,7 @@ int qt_safe_select(int nfds, fd_set *fdread, fd_set *fdwrite, fd_set *fdexcept,
    int ret;
    while (true) {
 
-      ret = ::pselect(nfds, fdread, fdwrite, fdexcept, &timeout, 0);
+      ret = ::pselect(nfds, fdread, fdwrite, fdexcept, &timeout, nullptr);
       if (ret != -1 || errno != EINTR) {
          return ret;
       }
@@ -86,11 +84,10 @@ int qt_safe_select(int nfds, fd_set *fdread, fd_set *fdwrite, fd_set *fdexcept,
 int qt_select_msecs(int nfds, fd_set *fdread, fd_set *fdwrite, int timeout)
 {
     if (timeout < 0)
-        return qt_safe_select(nfds, fdread, fdwrite, 0, 0);
+        return qt_safe_select(nfds, fdread, fdwrite, nullptr, nullptr);
 
     struct timespec tv;
     tv.tv_sec = timeout / 1000;
     tv.tv_nsec = (timeout % 1000) * 1000 * 1000;
-    return qt_safe_select(nfds, fdread, fdwrite, 0, &tv);
+    return qt_safe_select(nfds, fdread, fdwrite, nullptr, &tv);
 }
-QT_END_NAMESPACE

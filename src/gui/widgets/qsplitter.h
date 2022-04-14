@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -41,28 +41,35 @@ class Q_GUI_EXPORT QSplitter : public QFrame
 
    GUI_CS_PROPERTY_READ(orientation, orientation)
    GUI_CS_PROPERTY_WRITE(orientation, setOrientation)
+
    GUI_CS_PROPERTY_READ(opaqueResize, opaqueResize)
    GUI_CS_PROPERTY_WRITE(opaqueResize, setOpaqueResize)
+
    GUI_CS_PROPERTY_READ(handleWidth, handleWidth)
    GUI_CS_PROPERTY_WRITE(handleWidth, setHandleWidth)
+
    GUI_CS_PROPERTY_READ(childrenCollapsible, childrenCollapsible)
    GUI_CS_PROPERTY_WRITE(childrenCollapsible, setChildrenCollapsible)
 
  public:
    explicit QSplitter(QWidget *parent = nullptr);
-   explicit QSplitter(Qt::Orientation, QWidget *parent = nullptr);
+   explicit QSplitter(Qt::Orientation orientation, QWidget *parent = nullptr);
+
+   QSplitter(const QSplitter &) = delete;
+   QSplitter &operator=(const QSplitter &) = delete;
+
    ~QSplitter();
 
    void addWidget(QWidget *widget);
    void insertWidget(int index, QWidget *widget);
 
-   void setOrientation(Qt::Orientation);
+   void setOrientation(Qt::Orientation value);
    Qt::Orientation orientation() const;
 
-   void setChildrenCollapsible(bool);
+   void setChildrenCollapsible(bool value);
    bool childrenCollapsible() const;
 
-   void setCollapsible(int index, bool);
+   void setCollapsible(int index, bool collapse);
    bool isCollapsible(int index) const;
    void setOpaqueResize(bool opaque = true);
    bool opaqueResize() const;
@@ -78,13 +85,13 @@ class Q_GUI_EXPORT QSplitter : public QFrame
    bool restoreState(const QByteArray &state);
 
    int handleWidth() const;
-   void setHandleWidth(int);
+   void setHandleWidth(int width);
 
-   int indexOf(QWidget *w) const;
+   int indexOf(QWidget *widget) const;
    QWidget *widget(int index) const;
    int count() const;
 
-   void getRange(int index, int *, int *) const;
+   void getRange(int index, int *min, int *max) const;
    QSplitterHandle *handle(int index) const;
 
    void setStretchFactor(int index, int stretch);
@@ -95,18 +102,17 @@ class Q_GUI_EXPORT QSplitter : public QFrame
  protected:
    virtual QSplitterHandle *createHandle();
 
-   void childEvent(QChildEvent *) override;
+   void childEvent(QChildEvent *event) override;
 
-   bool event(QEvent *) override;
-   void resizeEvent(QResizeEvent *) override;
+   bool event(QEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
 
-   void changeEvent(QEvent *) override;
+   void changeEvent(QEvent *event) override;
    void moveSplitter(int pos, int index);
-   void setRubberBand(int position);
-   int closestLegalPosition(int, int);
+   void setRubberBand(int pos);
+   int closestLegalPosition(int pos, int index);
 
  private:
-   Q_DISABLE_COPY(QSplitter)
    Q_DECLARE_PRIVATE(QSplitter)
 
    friend class QSplitterHandle;
@@ -120,9 +126,14 @@ class Q_GUI_EXPORT QSplitterHandle : public QWidget
    GUI_CS_OBJECT(QSplitterHandle)
 
  public:
-   explicit QSplitterHandle(Qt::Orientation o, QSplitter *parent);
+   explicit QSplitterHandle(Qt::Orientation orientation, QSplitter *parent);
+
+   QSplitterHandle(const QSplitterHandle &) = delete;
+   QSplitterHandle &operator=(const QSplitterHandle &) = delete;
+
    ~QSplitterHandle();
-   void setOrientation(Qt::Orientation o);
+
+   void setOrientation(Qt::Orientation orientation);
    Qt::Orientation orientation() const;
    bool opaqueResize() const;
    QSplitter *splitter() const;
@@ -130,22 +141,20 @@ class Q_GUI_EXPORT QSplitterHandle : public QWidget
    QSize sizeHint() const override;
 
  protected:
-   void paintEvent(QPaintEvent *) override;
-   void mouseMoveEvent(QMouseEvent *) override;
-   void mousePressEvent(QMouseEvent *) override;
-   void mouseReleaseEvent(QMouseEvent *) override;
-   void resizeEvent(QResizeEvent *) override;
-   bool event(QEvent *) override;
+   void paintEvent(QPaintEvent *event) override;
+   void mouseMoveEvent(QMouseEvent *event) override;
+   void mousePressEvent(QMouseEvent *event) override;
+   void mouseReleaseEvent(QMouseEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
+   bool event(QEvent *event) override;
 
-   void moveSplitter(int p);
-   int closestLegalPosition(int p);
+   void moveSplitter(int pos);
+   int closestLegalPosition(int pos);
 
  private:
-   Q_DISABLE_COPY(QSplitterHandle)
    Q_DECLARE_PRIVATE(QSplitterHandle)
 };
 
 #endif // QT_NO_SPLITTER
 
-
-#endif // QSPLITTER_H
+#endif

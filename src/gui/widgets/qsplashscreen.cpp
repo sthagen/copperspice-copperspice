@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -54,27 +54,23 @@ class QSplashScreenPrivate : public QWidgetPrivate
    inline QSplashScreenPrivate();
 };
 
-QSplashScreen::QSplashScreen(const QPixmap &pixmap, Qt::WindowFlags f)
-   : QWidget(*(new QSplashScreenPrivate()), 0, Qt::SplashScreen | Qt::FramelessWindowHint | f)
+QSplashScreen::QSplashScreen(const QPixmap &pixmap, Qt::WindowFlags flags)
+   : QWidget(*(new QSplashScreenPrivate()), nullptr, Qt::SplashScreen | Qt::FramelessWindowHint | flags)
 {
    setPixmap(pixmap);  // Does an implicit repaint
 }
 
-QSplashScreen::QSplashScreen(QWidget *parent, const QPixmap &pixmap, Qt::WindowFlags f)
-   : QWidget(*new QSplashScreenPrivate, parent, Qt::SplashScreen | f)
+QSplashScreen::QSplashScreen(QWidget *parent, const QPixmap &pixmap, Qt::WindowFlags flags)
+   : QWidget(*new QSplashScreenPrivate, parent, Qt::SplashScreen | flags)
 {
    d_func()->pixmap = pixmap;
    setPixmap(d_func()->pixmap);  // Does an implicit repaint
 }
 
-
 QSplashScreen::~QSplashScreen()
 {
 }
 
-/*!
-    \reimp
-*/
 void QSplashScreen::mousePressEvent(QMouseEvent *)
 {
    hide();
@@ -92,31 +88,6 @@ void QSplashScreen::repaint()
    QApplication::flush();
 }
 
-/*!
-    \fn QSplashScreen::messageChanged(const QString &message)
-
-    This signal is emitted when the message on the splash screen
-    changes. \a message is the new message and is a null-string
-    when the message has been removed.
-
-    \sa showMessage(), clearMessage()
-*/
-
-
-
-/*!
-    Draws the \a message text onto the splash screen with color \a
-    color and aligns the text according to the flags in \a alignment.
-
-    To make sure the splash screen is repainted immediately, you can
-    call \l{QCoreApplication}'s
-    \l{QCoreApplication::}{processEvents()} after the call to
-    showMessage(). You usually want this to make sure that the message
-    is kept up to date with what your application is doing (e.g.,
-    loading files).
-
-    \sa Qt::Alignment, clearMessage()
-*/
 void QSplashScreen::showMessage(const QString &message, int alignment,
    const QColor &color)
 {
@@ -127,7 +98,6 @@ void QSplashScreen::showMessage(const QString &message, int alignment,
    emit messageChanged(d->currStatus);
    repaint();
 }
-
 
 QString QSplashScreen::message() const
 {
@@ -154,16 +124,16 @@ inline static bool waitForWindowExposed(QWindow *window, int timeout = 1000)
          break;
       }
       QCoreApplication::processEvents(QEventLoop::AllEvents, remaining);
-      QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
-#if defined(Q_OS_WINRT)
-      WaitForSingleObjectEx(GetCurrentThread(), TimeOutMs, false);
-#elif defined(Q_OS_WIN)
+      QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+#if defined(Q_OS_WIN)
       Sleep(uint(TimeOutMs));
 #else
       struct timespec ts = { TimeOutMs / 1000, (TimeOutMs % 1000) * 1000 * 1000 };
-      nanosleep(&ts, NULL);
+      nanosleep(&ts, nullptr);
 #endif
    }
+
    return window->isExposed();
 }
 
@@ -177,7 +147,6 @@ void QSplashScreen::finish(QWidget *mainWin)
    }
    close();
 }
-
 
 void QSplashScreen::setPixmap(const QPixmap &pixmap)
 {
@@ -199,7 +168,6 @@ const QPixmap QSplashScreen::pixmap() const
 {
    return d_func()->pixmap;
 }
-
 
 inline QSplashScreenPrivate::QSplashScreenPrivate() : currAlign(Qt::AlignLeft)
 {

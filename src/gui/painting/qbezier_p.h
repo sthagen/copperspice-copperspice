@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,13 @@
 #ifndef QBEZIER_P_H
 #define QBEZIER_P_H
 
-#include <QtCore/qpoint.h>
-#include <QtCore/qline.h>
-#include <QtCore/qrect.h>
-#include <QtCore/qvector.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qpair.h>
-#include <QtGui/qtransform.h>
-
-#include <qdatabuffer_p.h>
-
+#include <qpoint.h>
+#include <qline.h>
+#include <qrect.h>
+#include <qvector.h>
+#include <qlist.h>
+#include <qpair.h>
+#include <qtransform.h>
 
 class QPolygonF;
 
@@ -52,7 +49,7 @@ class Q_GUI_EXPORT QBezier
 
    QPolygonF toPolygon(qreal bezier_flattening_threshold = 0.5) const;
    void addToPolygon(QPolygonF *p, qreal bezier_flattening_threshold = 0.5) const;
-   void addToPolygon(QDataBuffer<QPointF> &polygon, qreal bezier_flattening_threshold) const;
+   void addToPolygon(QVector<QPointF> &polygon, qreal bezier_flattening_threshold) const;
 
    QRectF bounds() const;
    qreal length(qreal error = 0.01) const;
@@ -66,12 +63,15 @@ class Q_GUI_EXPORT QBezier
    QPointF pt1() const {
       return QPointF(x1, y1);
    }
+
    QPointF pt2() const {
       return QPointF(x2, y2);
    }
+
    QPointF pt3() const {
       return QPointF(x3, y3);
    }
+
    QPointF pt4() const {
       return QPointF(x4, y4);
    }

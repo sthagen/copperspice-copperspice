@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,15 +27,13 @@
 #include <qobject.h>
 #include <qabstractsocket.h>
 #include <qhostaddress.h>
-#include <QScopedPointer>
-
-
+#include <qscopedpointer.h>
 
 class QTcpServerPrivate;
 class QTcpSocket;
 
 #ifndef QT_NO_NETWORKPROXY
-class QNetworkProxy;
+   class QNetworkProxy;
 #endif
 
 class Q_NETWORK_EXPORT QTcpServer : public QObject
@@ -44,6 +42,10 @@ class Q_NETWORK_EXPORT QTcpServer : public QObject
 
  public:
    explicit QTcpServer(QObject *parent = nullptr);
+
+   QTcpServer(const QTcpServer &) = delete;
+   QTcpServer &operator=(const QTcpServer &) = delete;
+
    virtual ~QTcpServer();
 
    bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
@@ -84,16 +86,13 @@ class Q_NETWORK_EXPORT QTcpServer : public QObject
  protected:
    QTcpServer(QTcpServerPrivate &dd, QObject *parent = nullptr);
 
-   virtual void incomingConnection(qintptr handle);
+   virtual void incomingConnection(qintptr socketDescriptor);
    void addPendingConnection(QTcpSocket *socket);
 
    QScopedPointer<QTcpServerPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QTcpServer)
    Q_DECLARE_PRIVATE(QTcpServer)
 };
 
-
-
-#endif // QTCPSERVER_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,7 +26,7 @@
 #include <qalgorithms.h>
 #include <qsqlquery.h>
 
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 // Conflicting declarations of LPCBYTE in sqlfront.h and winscard.h
 #define _WINSCARD_H_
 #endif
@@ -49,6 +49,7 @@
 
 #ifdef QT_SQL_TDS
 // conflicting RETCODE typedef between odbc and freetds
+
 #define RETCODE DBRETCODE
 #include "./../plugins/sqldrivers/tds/qsql_tds.h"
 #undef RETCODE
@@ -523,7 +524,7 @@ void QSqlDatabasePrivate::init(const QString &type)
       qWarning("QSqlDatabase: %s driver not loaded", csPrintable(type));
       qWarning("QSqlDatabase: available drivers: %s", QSqlDatabase::drivers().join(" ").toLatin1().data());
 
-      if (QCoreApplication::instance() == 0) {
+      if (QCoreApplication::instance() == nullptr) {
          qWarning("QSqlDatabase: an instance of QCoreApplication is required to load an SQL driver plugin");
       }
 

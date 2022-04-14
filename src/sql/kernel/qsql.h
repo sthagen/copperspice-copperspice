@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QSQL_H
 #define QSQL_H
 
-#include <QtCore/qglobal.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
 
 namespace QSql {
 enum Location {
@@ -60,7 +58,5 @@ enum NumericalPrecisionPolicy {
 }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QSql::ParamType)
-
-QT_END_NAMESPACE
 
 #endif // QSQL_H

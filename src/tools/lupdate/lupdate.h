@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -47,16 +47,15 @@ enum UpdateOption {
    NoUiLines = 2048
 };
 
-Q_DECLARE_FLAGS(UpdateOptions, UpdateOption)
+using UpdateOptions = QFlags<UpdateOption>;
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(UpdateOptions)
 
-Translator merge(const Translator &tor, const Translator &virginTor, UpdateOptions options, QString &err);
+Translator merge(const Translator &tor, const Translator &virginTor, const QList<Translator> &aliens,
+                 UpdateOptions options, QString &err);
 
-void fetchtrInlinedCpp(const QString &in, Translator &translator, const QString &context);
 void loadCPP(Translator &translator, const QStringList &filenames, ConversionData &cd);
 bool loadJava(Translator &translator, const QString &filename, ConversionData &cd);
-bool loadQScript(Translator &translator, const QString &filename, ConversionData &cd);
 bool loadUI(Translator &translator, const QString &filename, ConversionData &cd);
-bool loadQml(Translator &translator, const QString &filename, ConversionData &cd);
 
 #endif

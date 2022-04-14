@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,9 +45,9 @@ class Q_MULTIMEDIA_EXPORT QMediaPlaylistProvider : public QObject
    QMediaPlaylistProvider(QObject *parent = nullptr);
    virtual ~QMediaPlaylistProvider();
 
-   virtual bool load(const QNetworkRequest &request, const char *format = 0);
-   virtual bool load(QIODevice *device, const char *format = 0);
-   virtual bool save(const QUrl &location, const char *format = 0);
+   virtual bool load(const QNetworkRequest &request, const char *format = nullptr);
+   virtual bool load(QIODevice *device, const char *format = nullptr);
+   virtual bool save(const QUrl &location, const char *format = nullptr);
    virtual bool save(QIODevice *device, const char *format);
 
    virtual int mediaCount() const = 0;

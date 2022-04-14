@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,26 +24,26 @@
 #ifndef QCOMBOBOX_P_H
 #define QCOMBOBOX_P_H
 
-#include <QtGui/qcombobox.h>
+#include <qcombobox.h>
 
 #ifndef QT_NO_COMBOBOX
-#include <QtGui/qabstractslider.h>
-#include <QtGui/qapplication.h>
-#include <QtGui/qitemdelegate.h>
-#include <QtGui/qstandarditemmodel.h>
-#include <QtGui/qlineedit.h>
-#include <QtGui/qlistview.h>
-#include <QtGui/qpainter.h>
-#include <QtGui/qstyle.h>
-#include <QtGui/qstyleoption.h>
+#include <qabstractslider.h>
+#include <qapplication.h>
+#include <qitemdelegate.h>
+#include <qstandarditemmodel.h>
+#include <qlineedit.h>
+#include <qlistview.h>
+#include <qpainter.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
 
-#include <QtCore/qpair.h>
-#include <QtCore/qtimer.h>
+#include <qpair.h>
+#include <qtimer.h>
 #include <qwidget_p.h>
-#include <QtCore/qpointer.h>
-#include <QtGui/qcompleter.h>
-#include <QtGui/qevent.h>
-#include <QtCore/qdebug.h>
+#include <qpointer.h>
+#include <qcompleter.h>
+#include <qevent.h>
+#include <qdebug.h>
 
 #include <limits.h>
 
@@ -56,7 +56,10 @@ class QComboBoxListView : public QListView
    GUI_CS_OBJECT(QComboBoxListView)
 
  public:
-   QComboBoxListView(QComboBox *cmb = 0) : combo(cmb) {}
+   QComboBoxListView(QComboBox *cmb = nullptr)
+      : combo(cmb)
+   {
+   }
 
  protected:
    void resizeEvent(QResizeEvent *event)  override {
@@ -163,7 +166,7 @@ class QComboBoxPrivateScroller : public QWidget
    void paintEvent(QPaintEvent *) override {
       QPainter p(this);
       QStyleOptionMenuItem menuOpt;
-      menuOpt.init(this);
+      menuOpt.initFrom(this);
       menuOpt.checkType = QStyleOptionMenuItem::NotCheckable;
       menuOpt.menuRect = rect();
       menuOpt.maxIconWidth = 0;
@@ -310,7 +313,7 @@ class QComboBoxDelegate : public QItemDelegate
 
    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override {
       if (isSeparator(index)) {
-         int pm = mCombo->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, 0, mCombo);
+         int pm = mCombo->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, mCombo);
          return QSize(pm, pm);
       }
 

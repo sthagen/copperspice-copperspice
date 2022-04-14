@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -81,16 +81,19 @@ QAccessible::Id QAccessibleCache::insert(QObject *object, QAccessibleInterface *
       objectToId.insert(obj, id);
       connect(obj, &QObject::destroyed, this, &QAccessibleCache::objectDestroyed);
    }
+
    idToInterface.insert(id, iface);
    interfaceToId.insert(iface, id);
+
    return id;
 }
 
 void QAccessibleCache::objectDestroyed(QObject *obj)
 {
    QAccessible::Id id = objectToId.value(obj);
+
    if (id) {
-      Q_ASSERT_X(idToInterface.contains(id), "", "QObject with accessible interface deleted, where interface not in cache!");
+      Q_ASSERT_X(idToInterface.contains(id), "", "QObject with accessible interface deleted");
       deleteInterface(id, obj);
    }
 }

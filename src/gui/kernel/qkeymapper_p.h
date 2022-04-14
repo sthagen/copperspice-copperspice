@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,7 @@
 #include <qlist.h>
 #include <qlocale.h>
 #include <qevent.h>
-#include <QScopedPointer>
-
+#include <qscopedpointer.h>
 
 class QKeyEvent;
 class QKeyMapperPrivate;
@@ -43,6 +42,10 @@ class QKeyMapper : public QObject
 
  public:
    explicit QKeyMapper();
+
+   QKeyMapper(const QKeyMapper &) = delete;
+   QKeyMapper &operator=(const QKeyMapper &) = delete;
+
    ~QKeyMapper();
 
    static QKeyMapper *instance();
@@ -54,15 +57,11 @@ class QKeyMapper : public QObject
 
  private:
    Q_DECLARE_PRIVATE(QKeyMapper)
-   Q_DISABLE_COPY(QKeyMapper)
-
    friend QKeyMapperPrivate *qt_keymapper_private();
 };
 
 class QKeyMapperPrivate
 {
-   Q_DECLARE_PUBLIC(QKeyMapper)
-
  public:
    QKeyMapperPrivate();
    virtual ~QKeyMapperPrivate();
@@ -74,8 +73,8 @@ class QKeyMapperPrivate
    Qt::LayoutDirection keyboardInputDirection;
 
  protected:
+   Q_DECLARE_PUBLIC(QKeyMapper)
    QKeyMapper *q_ptr;
-
 };
 
 QKeyMapperPrivate *qt_keymapper_private(); // from qkeymapper.cpp

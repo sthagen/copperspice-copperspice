@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,17 +24,18 @@
 #ifndef PHRASEBOOKBOX_H
 #define PHRASEBOOKBOX_H
 
-#include "ui_phrasebookbox.h"
-#include "phrase.h"
-#include "phrasemodel.h"
-#include <QDialog>
+#include <ui_phrasebookbox.h>
+#include <phrase.h>
+#include <phrasemodel.h>
 
-class TranslationSettingsDialog;
+#include <qdialog.h>
+
+class SettingsDialog;
 class QSortFilterProxyModel;
 
 class PhraseBookBox : public QDialog, public Ui::PhraseBookBox
 {
-   Q_OBJECT
+   CS_OBJECT(PhraseBookBox)
 
  public:
    PhraseBookBox(PhraseBook *phraseBook, QWidget *parent = nullptr);
@@ -42,17 +43,31 @@ class PhraseBookBox : public QDialog, public Ui::PhraseBookBox
  protected:
    bool eventFilter(QObject *obj, QEvent *event);
 
- private slots:
-   void newPhrase();
-   void removePhrase();
-   void settings();
-   void save();
-   void sourceChanged(const QString &source);
-   void targetChanged(const QString &target);
-   void definitionChanged(const QString &definition);
-   void selectionChanged();
-
  private:
+   CS_SLOT_1(Private, void newPhrase())
+   CS_SLOT_2(newPhrase)
+
+   CS_SLOT_1(Private, void removePhrase())
+   CS_SLOT_2(removePhrase)
+
+   CS_SLOT_1(Private, void settings())
+   CS_SLOT_2(settings)
+
+   CS_SLOT_1(Private, void save())
+   CS_SLOT_2(save)
+
+   CS_SLOT_1(Private, void sourceChanged(const QString &source))
+   CS_SLOT_2(sourceChanged)
+
+   CS_SLOT_1(Private, void targetChanged(const QString &target))
+   CS_SLOT_2(targetChanged)
+
+   CS_SLOT_1(Private, void definitionChanged(const QString &definition))
+   CS_SLOT_2(definitionChanged)
+
+   CS_SLOT_1(Private, void selectionChanged())
+   CS_SLOT_2(selectionChanged)
+
    void selectItem(const QModelIndex &index);
    void enableDisable();
    QModelIndex currentPhraseIndex() const;
@@ -61,7 +76,7 @@ class PhraseBookBox : public QDialog, public Ui::PhraseBookBox
    PhraseBook *m_phraseBook;
    PhraseModel *phrMdl;
    QSortFilterProxyModel *m_sortedPhraseModel;
-   TranslationSettingsDialog *m_translationSettingsDialog;
+   SettingsDialog *m_settingsDialog;
 };
 
 #endif

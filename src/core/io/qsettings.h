@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,8 +33,6 @@
 
 #include <ctype.h>
 
-QT_BEGIN_NAMESPACE
-
 #ifdef Status // we seem to pick up a macro Status --> int somewhere
 #undef Status
 #endif
@@ -45,7 +43,6 @@ class QSettingsPrivate;
 class Q_CORE_EXPORT QSettings : public QObject
 {
    CORE_CS_OBJECT(QSettings)
-   Q_DECLARE_PRIVATE(QSettings)
 
  public:
    enum Status {
@@ -83,13 +80,19 @@ class Q_CORE_EXPORT QSettings : public QObject
    };
 
    explicit QSettings(const QString &organization,
-                      const QString &application = QString(), QObject *parent = nullptr);
+                  const QString &application = QString(), QObject *parent = nullptr);
+
    QSettings(Scope scope, const QString &organization,
-             const QString &application = QString(), QObject *parent = nullptr);
+                  const QString &application = QString(), QObject *parent = nullptr);
+
    QSettings(Format format, Scope scope, const QString &organization,
-             const QString &application = QString(), QObject *parent = nullptr);
+                  const QString &application = QString(), QObject *parent = nullptr);
+
    QSettings(const QString &fileName, Format format, QObject *parent = nullptr);
    explicit QSettings(QObject *parent = nullptr);
+
+   QSettings(const QSettings &) = delete;
+   QSettings &operator=(const QSettings &) = delete;
 
    ~QSettings();
 
@@ -150,12 +153,9 @@ class Q_CORE_EXPORT QSettings : public QObject
    QScopedPointer<QSettingsPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QSettings)
-
+   Q_DECLARE_PRIVATE(QSettings)
 };
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_SETTINGS
 
-#endif // QSETTINGS_H
+#endif

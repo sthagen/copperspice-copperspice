@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -95,16 +95,9 @@ QDialog *QPushButtonPrivate::dialogParent() const
          return const_cast<QDialog *>(dialog);
       }
    }
-   return 0;
+   return nullptr;
 }
 
-/*!
-    Initialize \a option with the values from this QPushButton. This method is useful
-    for subclasses when they need a QStyleOptionButton, but don't want to fill
-    in all the information themselves.
-
-    \sa QStyleOption::initFrom()
-*/
 void QPushButton::initStyleOption(QStyleOptionButton *option) const
 {
    if (!option) {
@@ -117,6 +110,7 @@ void QPushButton::initStyleOption(QStyleOptionButton *option) const
    if (d->flat) {
       option->features |= QStyleOptionButton::Flat;
    }
+
 #ifndef QT_NO_MENU
    if (d->menu) {
       option->features |= QStyleOptionButton::HasMenu;
@@ -161,8 +155,9 @@ bool QPushButton::autoDefault() const
 {
    Q_D(const QPushButton);
    if (d->autoDefault == QPushButtonPrivate::Auto) {
-      return ( d->dialogParent() != 0 );
+      return ( d->dialogParent() != nullptr);
    }
+
    return d->autoDefault;
 }
 
@@ -196,9 +191,6 @@ bool QPushButton::isDefault() const
    return d->defaultButton;
 }
 
-/*!
-    \reimp
-*/
 QSize QPushButton::sizeHint() const
 {
    Q_D(const QPushButton);
@@ -252,9 +244,6 @@ QSize QPushButton::sizeHint() const
    return d->sizeHint;
 }
 
-/*!
-    \reimp
- */
 QSize QPushButton::minimumSizeHint() const
 {
    return sizeHint();
@@ -271,6 +260,7 @@ void QPushButton::paintEvent(QPaintEvent *)
 void QPushButton::keyPressEvent(QKeyEvent *e)
 {
    Q_D(QPushButton);
+
    switch (e->key()) {
       case Qt::Key_Enter:
       case Qt::Key_Return:
@@ -278,15 +268,13 @@ void QPushButton::keyPressEvent(QKeyEvent *e)
             click();
             break;
          }
-      // fall through
+         [[fallthrough]];
+
       default:
          QAbstractButton::keyPressEvent(e);
    }
 }
 
-/*!
-    \reimp
-*/
 void QPushButton::focusInEvent(QFocusEvent *e)
 {
    Q_D(QPushButton);
@@ -300,24 +288,24 @@ void QPushButton::focusInEvent(QFocusEvent *e)
    QAbstractButton::focusInEvent(e);
 }
 
-/*!
-    \reimp
-*/
 void QPushButton::focusOutEvent(QFocusEvent *e)
 {
    Q_D(QPushButton);
    if (e->reason() != Qt::PopupFocusReason && autoDefault() && d->defaultButton) {
       QDialog *dlg = qobject_cast<QDialog *>(window());
+
       if (dlg) {
-         dlg->d_func()->setDefault(0);
+         dlg->d_func()->setDefault(nullptr);
       } else {
          d->defaultButton = false;
       }
    }
 
    QAbstractButton::focusOutEvent(e);
+
 #ifndef QT_NO_MENU
-   if (d->menu && d->menu->isVisible()) {      // restore pressed status
+   if (d->menu && d->menu->isVisible()) {
+      // restore pressed status
       setDown(true);
    }
 #endif
@@ -332,12 +320,14 @@ void QPushButton::setMenu(QMenu *menu)
       return;
    }
 
-   if (menu && !d->menu) {
-      connect(this, SIGNAL(pressed()), this, SLOT(_q_popupPressed()), Qt::UniqueConnection);
+   if (menu && ! d->menu) {
+      connect(this, &QPushButton::pressed, this, &QPushButton::_q_popupPressed, Qt::UniqueConnection);
    }
+
    if (d->menu) {
       removeAction(d->menu->menuAction());
    }
+
    d->menu = menu;
    if (d->menu) {
       addAction(d->menu->menuAction());
@@ -349,23 +339,12 @@ void QPushButton::setMenu(QMenu *menu)
    updateGeometry();
 }
 
-/*!
-    Returns the button's associated popup menu or 0 if no popup menu
-    has been set.
-
-    \sa setMenu()
-*/
 QMenu *QPushButton::menu() const
 {
    Q_D(const QPushButton);
    return d->menu;
 }
 
-/*!
-    Shows (pops up) the associated popup menu. If there is no such
-    menu, this function does nothing. This function does not return
-    until the popup menu has been closed by the user.
-*/
 void QPushButton::showMenu()
 {
    Q_D(QPushButton);
@@ -501,4 +480,3 @@ void QPushButton::_q_popupPressed()
    Q_D(QPushButton);
    d->_q_popupPressed();
 }
-

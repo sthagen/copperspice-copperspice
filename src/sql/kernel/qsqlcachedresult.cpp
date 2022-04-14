@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 #include <qvariant.h>
 #include <qdatetime.h>
 #include <qvector.h>
-
-
 
 static const uint initial_cache_size = 128;
 
@@ -239,11 +237,12 @@ QVariant QSqlCachedResult::data(int i)
 bool QSqlCachedResult::isNull(int i)
 {
    int idx = d->forwardOnly ? i : at() * d->colCount + i;
+
    if (i >= d->colCount || i < 0 || at() < 0 || idx >= d->rowCacheEnd) {
       return true;
    }
 
-   return d->cache.at(idx).isNull();
+   return ! d->cache.at(idx).isValid();
 }
 
 void QSqlCachedResult::cleanup()

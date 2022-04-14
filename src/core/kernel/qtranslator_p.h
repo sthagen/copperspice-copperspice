@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,27 +24,60 @@
 #ifndef QTRANSLATOR_P_H
 #define QTRANSLATOR_P_H
 
-enum {
-   Q_EQ          = 0x01,
-   Q_LT          = 0x02,
-   Q_LEQ         = 0x03,
-   Q_BETWEEN     = 0x04,
-
-   Q_NOT         = 0x08,
-   Q_MOD_10      = 0x10,
-   Q_MOD_100     = 0x20,
-   Q_LEAD_1000   = 0x40,
-
-   Q_AND         = 0xFD,
-   Q_OR          = 0xFE,
-   Q_NEWRULE     = 0xFF,
-
-   Q_OP_MASK     = 0x07,
-
-   Q_NEQ         = Q_NOT | Q_EQ,
-   Q_GT          = Q_NOT | Q_LEQ,
-   Q_GEQ         = Q_NOT | Q_LT,
-   Q_NOT_BETWEEN = Q_NOT | Q_BETWEEN
+enum class TranslatorCategory {
+   Invalid      = 0,
+   Contexts     = 0x2f,
+   Hashes       = 0x42,
+   Messages     = 0x69,
+   CountRules   = 0x88,
+   Dependencies = 0x96
 };
+
+enum class TranslatorTag {
+   End           = 1,
+   Obsolete1     = 2,
+   SourceText    = 3,
+   Context       = 4,
+   Comment       = 5,
+   Translation   = 6,
+};
+
+enum class CountGuide  {
+   Equal            = 0x01,
+   LessThan         = 0x02,
+   LessThanEqual    = 0x03,
+   Between          = 0x04,
+
+   Not              = 0x08,
+   Remainder_10     = 0x10,
+   Remainder_100    = 0x20,
+   Divide_1000      = 0x40,
+
+   And              = 0xFD,
+   Or               = 0xFE,
+   LastEntry        = 0xFF,
+
+   OperatorMask     = 0x07,
+   OperatorInvalid  = 0x80,
+
+   NotEqual         = Not | Equal,
+   GreaterThan      = Not | LessThanEqual,
+   GreaterThanEqual = Not | LessThan,
+   NotBetween       = Not | Between
+};
+
+inline constexpr CountGuide operator|(CountGuide a, CountGuide b)
+{
+   using T = std::underlying_type_t<CountGuide>;
+
+   return static_cast<CountGuide>( static_cast<T>(a) | static_cast<T>(b) );
+}
+
+inline constexpr auto operator&(CountGuide a, CountGuide b)
+{
+   using T = std::underlying_type_t<CountGuide>;
+
+   return static_cast<T>(a) & static_cast<T>(b);
+}
 
 #endif

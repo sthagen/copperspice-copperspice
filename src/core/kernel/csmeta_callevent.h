@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,7 +31,7 @@ class Q_CORE_EXPORT CSMetaCallEvent : public QEvent
 {
  public:
    CSMetaCallEvent(const CsSignal::Internal::BentoAbstract *bento, const CsSignal::Internal::TeaCupAbstract *dataPack,
-                   const QObject *sender, int signal_index, QSemaphore *semaphore = 0);
+                   const QObject *sender, int signal_index, QSemaphore *semaphore = nullptr);
 
    ~CSMetaCallEvent();
 

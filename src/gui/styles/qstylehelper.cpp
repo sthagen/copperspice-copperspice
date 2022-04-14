@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -89,11 +89,13 @@ bool isInstanceOf(QObject *obj, QAccessible::Role role)
    match = iface && iface->role() == role;
    return match;
 }
+
 // Searches for an ancestor of a particular accessible role
 bool hasAncestor(QObject *obj, QAccessible::Role role)
 {
    bool found = false;
-   QObject *parent = obj ? obj->parent() : 0;
+   QObject *parent = obj ? obj->parent() : nullptr;
+
    while (parent && !found) {
       if (isInstanceOf(parent, role)) {
          found = true;
@@ -103,7 +105,6 @@ bool hasAncestor(QObject *obj, QAccessible::Role role)
    return found;
 }
 #endif // QT_NO_ACCESSIBILITY
-
 
 #ifndef QT_NO_DIAL
 
@@ -414,7 +415,7 @@ QWindow *styleObjectWindow(QObject *so)
       return so->property("_q_styleObjectWindow").value<QWindow *>();
    }
 
-   return 0;
+   return nullptr;
 }
 
 } // namespace

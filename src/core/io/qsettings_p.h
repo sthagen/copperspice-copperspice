@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -164,13 +164,11 @@ class QConfFile
 
    QConfFile(const QString &name, bool _userPerms);
 
-   friend class QConfFile_createsItself; // silences compiler warning
+   friend class QConfFile_createsItself;
 };
 
 class QSettingsPrivate
 {
-   Q_DECLARE_PUBLIC(QSettings)
-
  public:
    QSettingsPrivate(QSettings::Format format);
    QSettingsPrivate(QSettings::Format format, QSettings::Scope scope, const QString &organization, const QString &application);
@@ -224,11 +222,11 @@ class QSettingsPrivate
    because their values are respectively 1 and 2.
    */
    enum {
-      F_Application = 0x0,
+      F_Application  = 0x0,
       F_Organization = 0x1,
-      F_User = 0x0,
-      F_System = 0x2,
-      NumConfFiles = 4
+      F_User         = 0x0,
+      F_System       = 0x2,
+      NumConfFiles   = 4
    };
 
    QSettings::Format format;
@@ -246,12 +244,16 @@ class QSettingsPrivate
    mutable QSettings::Status status;
 
    QSettings *q_ptr;
+
+ private:
+   Q_DECLARE_PUBLIC(QSettings)
 };
 
 class QConfFileSettingsPrivate : public QSettingsPrivate
 {
  public:
-   QConfFileSettingsPrivate(QSettings::Format format, QSettings::Scope scope, const QString &organization, const QString &application);
+   QConfFileSettingsPrivate(QSettings::Format format, QSettings::Scope scope,
+                  const QString &organization, const QString &application);
 
    QConfFileSettingsPrivate(const QString &fileName, QSettings::Format format);
    ~QConfFileSettingsPrivate();

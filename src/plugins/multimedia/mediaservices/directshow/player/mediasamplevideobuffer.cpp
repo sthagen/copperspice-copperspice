@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,7 +48,7 @@ uchar *MediaSampleVideoBuffer::map(MapMode mode, int *numBytes, int *bytesPerLin
          *bytesPerLine = m_bytesPerLine;
       }
 
-      BYTE *bytes = 0;
+      BYTE *bytes = nullptr;
 
       if (m_sample->GetPointer(&bytes) == S_OK) {
          m_mapMode = mode;
@@ -56,7 +56,8 @@ uchar *MediaSampleVideoBuffer::map(MapMode mode, int *numBytes, int *bytesPerLin
          return reinterpret_cast<uchar *>(bytes);
       }
    }
-   return 0;
+
+   return nullptr;
 }
 
 void MediaSampleVideoBuffer::unmap()

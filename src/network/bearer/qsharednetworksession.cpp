@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 #include <QThreadStorage>
 
 #ifndef QT_NO_BEARERMANAGEMENT
-
-QT_BEGIN_NAMESPACE
 
 QThreadStorage<QSharedNetworkSessionManager *> tls;
 
@@ -56,6 +54,7 @@ QSharedPointer<QNetworkSession> QSharedNetworkSessionManager::getSession(QNetwor
          return p;
       }
    }
+
    //otherwise make one
    QSharedPointer<QNetworkSession> session(new QNetworkSession(config), doDeleteLater);
    m->sessions[config] = session;
@@ -72,7 +71,5 @@ uint qHash(const QNetworkConfiguration &config)
 {
    return ((uint)config.type()) | (((uint)config.bearerType()) << 8) | (((uint)config.purpose()) << 16);
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_BEARERMANAGEMENT

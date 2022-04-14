@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,18 @@
 #ifndef QSCRIPTCLASSPROPERTYITERATOR_H
 #define QSCRIPTCLASSPROPERTYITERATOR_H
 
-#include <QtCore/qstring.h>
-#include <QtCore/qscopedpointer.h>
-#include <QtScript/qscriptvalue.h>
+#include <qstring.h>
+#include <qscopedpointer.h>
+#include <qscriptvalue.h>
 
 class QScriptClassPropertyIteratorPrivate;
 
 class Q_SCRIPT_EXPORT QScriptClassPropertyIterator
 {
-
  public:
+   QScriptClassPropertyIterator(const QScriptClassPropertyIterator &) = delete;
+   QScriptClassPropertyIterator &operator=(const QScriptClassPropertyIterator &) = delete;
+
    virtual ~QScriptClassPropertyIterator();
 
    QScriptValue object() const;
@@ -58,8 +60,6 @@ class Q_SCRIPT_EXPORT QScriptClassPropertyIterator
 
  private:
    Q_DECLARE_PRIVATE(QScriptClassPropertyIterator)
-   Q_DISABLE_COPY(QScriptClassPropertyIterator)
 };
-
 
 #endif

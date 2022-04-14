@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 #include <qhash.h>
 #include <qpair.h>
 
-QT_BEGIN_NAMESPACE
-
 struct QSimplexVariable {
    QSimplexVariable() : result(0), index(0) {}
 
@@ -49,7 +47,7 @@ struct QSimplexVariable {
     Where (ci, Xi) are the pairs in "variables" and K the real "constant".
 */
 struct QSimplexConstraint {
-   QSimplexConstraint() : constant(0), ratio(Equal), artificial(0) {}
+   QSimplexConstraint() : constant(0), ratio(Equal), artificial(nullptr) {}
 
    enum Ratio {
       LessOrEqual = 0,
@@ -118,10 +116,12 @@ struct QSimplexConstraint {
 
 class QSimplex
 {
-   Q_DISABLE_COPY(QSimplex)
-
  public:
    QSimplex();
+
+   QSimplex(const QSimplex &) = delete;
+   QSimplex &operator=(const QSimplex &) = delete;
+
    ~QSimplex();
 
    qreal solveMin();
@@ -176,6 +176,5 @@ inline void QSimplex::setValueAt(int rowIndex, int columnIndex, qreal value)
 {
    matrix[rowIndex * columns + columnIndex] = value;
 }
-
 
 #endif // QSIMPLEX_P_H

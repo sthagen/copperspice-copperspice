@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -97,7 +97,7 @@ static QTextLine currentTextLine(const QTextCursor &cursor)
 }
 
 QTextControlPrivate::QTextControlPrivate()
-   : doc(0), cursorOn(false), cursorIsFocusIndicator(false),
+   : doc(nullptr), cursorOn(false), cursorIsFocusIndicator(false),
 
 #ifndef Q_OS_ANDROID
      interactionFlags(Qt::TextEditorInteraction),
@@ -111,22 +111,17 @@ QTextControlPrivate::QTextControlPrivate()
      mousePressed(false), mightStartDrag(false),
 #endif
 
-     lastSelectionPosition(0),
-     lastSelectionAnchor(0),
-     ignoreAutomaticScrollbarAdjustement(false),
-     overwriteMode(false),
-     acceptRichText(true),
-     preeditCursor(0), hideCursor(false),
-     hasFocus(false),
+     lastSelectionPosition(0), lastSelectionAnchor(0), ignoreAutomaticScrollbarAdjustement(false),
+     overwriteMode(false), acceptRichText(true), preeditCursor(0), hideCursor(false), hasFocus(false),
+
 #ifdef QT_KEYPAD_NAVIGATION
      hasEditFocus(false),
 #endif
-     isEnabled(true),
-     hadSelectionOnMousePress(false),
-     ignoreUnusedNavigationEvents(false),
-     openExternalLinks(false),
-     wordSelectionEnabled(false)
-{}
+
+     isEnabled(true), hadSelectionOnMousePress(false), ignoreUnusedNavigationEvents(false),
+     openExternalLinks(false), wordSelectionEnabled(false)
+{
+}
 
 bool QTextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 {
@@ -649,7 +644,8 @@ void QTextControlPrivate::_q_contentsChanged(int from, int charsRemoved, int cha
       // always report the right number of removed chars, but in lack of the real string use spaces
       QString oldText = QString(charsRemoved, QLatin1Char(' '));
 
-      QAccessibleEvent *ev = 0;
+      QAccessibleEvent *ev = nullptr;
+
       if (charsRemoved == 0) {
          ev = new QAccessibleTextInsertEvent(q->parent(), from, newText);
       } else if (charsAdded == 0) {
@@ -881,13 +877,13 @@ void QTextControl::setDocument(QTextDocument *document)
 
    d->doc->disconnect(this);
    d->doc->documentLayout()->disconnect(this);
-   d->doc->documentLayout()->setPaintDevice(0);
+   d->doc->documentLayout()->setPaintDevice(nullptr);
 
    if (d->doc->parent() == this) {
       delete d->doc;
    }
 
-   d->doc = 0;
+   d->doc = nullptr;
    d->setContent(Qt::RichText, QString(), document);
 }
 
@@ -1356,7 +1352,7 @@ void QTextControlPrivate::keyPressEvent(QKeyEvent *e)
       QClipboard::Mode mode = QClipboard::Clipboard;
 
       if (QGuiApplication::clipboard()->supportsSelection()) {
-         if (e->modifiers() == (Qt::CTRL | Qt::SHIFT) && e->key() == Qt::Key_Insert) {
+         if (e->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier) && e->key() == Qt::Key_Insert) {
             mode = QClipboard::Selection;
          }
       }
@@ -1963,10 +1959,15 @@ void QTextControlPrivate::mouseDoubleClickEvent(QEvent *e, Qt::MouseButton butto
    }
 }
 
-bool QTextControlPrivate::sendMouseEventToInputContext(
-   QEvent *e, QEvent::Type eventType, Qt::MouseButton button, const QPointF &pos,
-   Qt::KeyboardModifiers modifiers, Qt::MouseButtons buttons, const QPoint &globalPos)
+bool QTextControlPrivate::sendMouseEventToInputContext(QEvent *e, QEvent::Type eventType,
+            Qt::MouseButton button, const QPointF &pos, Qt::KeyboardModifiers modifiers,
+            Qt::MouseButtons buttons, const QPoint &globalPos)
 {
+   (void) button;
+   (void) modifiers;
+   (void) buttons;
+   (void) globalPos;
+
 #if ! defined(QT_NO_IM)
    Q_Q(QTextControl);
 
@@ -2146,7 +2147,7 @@ void QTextControlPrivate::inputMethodEvent(QInputMethodEvent *e)
          hideCursor = !a.length;
 
       } else if (a.type == QInputMethodEvent::TextFormat) {
-         QTextCharFormat f = qvariant_cast<QTextFormat>(a.value).toCharFormat();
+         QTextCharFormat f = (a.value).value<QTextFormat>().toCharFormat();
 
          if (f.isValid()) {
             QTextLayout::FormatRange o;
@@ -3386,13 +3387,17 @@ QAbstractTextDocumentLayout::PaintContext QTextControl::getPaintContext(QWidget 
          if (d->cursorIsFocusIndicator) {
             QStyleOption opt;
             opt.palette = ctx.palette;
+
             QStyleHintReturnVariant ret;
             QStyle *style = QApplication::style();
+
             if (widget) {
                style = widget->style();
             }
+
             style->styleHint(QStyle::SH_TextControl_FocusIndicatorTextCharFormat, &opt, widget, &ret);
-            selection.format = qvariant_cast<QTextFormat>(ret.variant).toCharFormat();
+            selection.format = ret.variant.value<QTextFormat>().toCharFormat();
+
          } else {
             QPalette::ColorGroup cg = d->hasFocus ? QPalette::Active : QPalette::Inactive;
             selection.format.setBackground(ctx.palette.brush(cg, QPalette::Highlight));
@@ -3455,20 +3460,20 @@ const struct QUnicodeControlCharacter {
    const char *text;
    ushort character;
 } qt_controlCharacters[NUM_CONTROL_CHARACTERS] = {
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "LRM Left-to-right mark"), 0x200e },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "RLM Right-to-left mark"), 0x200f },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "ZWJ Zero width joiner"), 0x200d },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "ZWNJ Zero width non-joiner"), 0x200c },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "ZWSP Zero width space"), 0x200b },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "LRE Start of left-to-right embedding"), 0x202a },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "RLE Start of right-to-left embedding"), 0x202b },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "LRO Start of left-to-right override"), 0x202d },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "RLO Start of right-to-left override"), 0x202e },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "PDF Pop directional formatting"), 0x202c },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "LRI Left-to-right isolate"), 0x2066 },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "RLI Right-to-left isolate"), 0x2067 },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "FSI First strong isolate"), 0x2068 },
-   { QT_TRANSLATE_NOOP("QUnicodeControlCharacterMenu", "PDI Pop directional isolate"), 0x2069 }
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "LRM Left-to-right mark"), 0x200e },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "RLM Right-to-left mark"), 0x200f },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "ZWJ Zero width joiner"), 0x200d },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "ZWNJ Zero width non-joiner"), 0x200c },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "ZWSP Zero width space"), 0x200b },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "LRE Start of left-to-right embedding"), 0x202a },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "RLE Start of right-to-left embedding"), 0x202b },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "LRO Start of left-to-right override"), 0x202d },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "RLO Start of right-to-left override"), 0x202e },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "PDF Pop directional formatting"), 0x202c },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "LRI Left-to-right isolate"), 0x2066 },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "RLI Right-to-left isolate"), 0x2067 },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "FSI First strong isolate"), 0x2068 },
+   { cs_mark_tr("QUnicodeControlCharacterMenu", "PDI Pop directional isolate"), 0x2069 }
 };
 
 QUnicodeControlCharacterMenu::QUnicodeControlCharacterMenu(QObject *_editWidget, QWidget *parent)

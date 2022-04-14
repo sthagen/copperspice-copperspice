@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -25,14 +25,12 @@
 #ifndef QOPENGLVERSIONFUNCTIONS_4_5_COMPATIBILITY_H
 #define QOPENGLVERSIONFUNCTIONS_4_5_COMPATIBILITY_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
-#if !defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_2)
+#if ! defined(QT_NO_OPENGL) && ! defined(QT_OPENGL_ES_2)
 
-#include <QtGui/QOpenGLVersionFunctions>
-#include <QtGui/qopenglcontext.h>
-
-QT_BEGIN_NAMESPACE
+#include <qopengl_versionfunctions.h>
+#include <qopenglcontext.h>
 
 class Q_GUI_EXPORT QOpenGLFunctions_4_5_Compatibility : public QAbstractOpenGLFunctions
 {
@@ -6649,10 +6647,6 @@ inline void QOpenGLFunctions_4_5_Compatibility::glGetnMapdv(GLenum target, GLenu
 {
     d_4_5_Deprecated->GetnMapdv(target, query, bufSize, v);
 }
-
-
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_OPENGL && !QT_OPENGL_ES_2
 

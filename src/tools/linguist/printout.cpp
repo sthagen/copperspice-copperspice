@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,23 +21,25 @@
 *
 ***********************************************************************/
 
-#include "printout.h"
+#include <printout.h>
 
 #include <QPrinter>
 #include <QFontMetrics>
-
-QT_BEGIN_NAMESPACE
 
 PrintOut::PrintOut(QPrinter *printer)
    : pr(printer), nextRule(NoRule), page(0)
 {
    p.begin(pr);
-   QFont f(QLatin1String("Arial"));
+
+   QFont f("Arial");
    f8 = f;
    f8.setPointSize(8);
+
    f10 = f;
    f10.setPointSize(10);
+
    p.setFont(f10);
+
    fmetrics = new QFontMetrics(p.fontMetrics());
    hmargin = 5 * printer->width() / printer->widthMM(); // 5 mm
    vmargin = 5 * printer->height() / printer->heightMM(); // 5 mm
@@ -69,16 +71,16 @@ void PrintOut::setGuide(const QString &guide)
 
 void PrintOut::vskip()
 {
-   if (!firstParagraph) {
+   if (! firstParagraph) {
       voffset += 14;
    }
 }
 
-void PrintOut::flushLine(bool /* mayBreak */)
+void PrintOut::flushLine(bool)
 {
    if (voffset + cp.rect.height() > vsize) {
       breakPage();
-   } else if (!firstParagraph) {
+   } else if (! firstParagraph) {
       drawRule(nextRule);
    }
 
@@ -101,12 +103,14 @@ void PrintOut::addBox(int percent, const QString &text, Style style, Qt::Alignme
    QTextOption options;
    options.setAlignment(halign | Qt::AlignTop);
    options.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+
    QFont f = f10;
    if (style == Strong) {
       f.setBold(true);
    } else if (style == Emphasis) {
       f.setItalic(true);
    }
+
    int wd = hsize * percent / 100;
    QRect r(cp.rect.x() + cp.rect.width(), 0, wd, vsize);
    const int ht = static_cast<int>(p.boundingRect(r, text, options).height());
@@ -129,7 +133,7 @@ void PrintOut::breakPage(bool init)
       pr->newPage();
    }
 
-   if (!init) {
+   if (! init) {
       page++;
    }
 
@@ -138,27 +142,32 @@ void PrintOut::breakPage(bool init)
    p.setFont(f10);
    r1 = QRect(hmargin, voffset, 3 * hsize / 4, vsize);
    r2 = QRect(r1.x() + r1.width(), voffset, hsize - r1.width(), vsize);
+
    h1 = p.boundingRect(r1, LeftAlign, pr->docName()).height();
-   if (!init) {
+
+   if (! init) {
       p.drawText(r1, LeftAlign, pr->docName());
    }
+
    h2 = p.boundingRect(r2, RightAlign, QString::number(page)).height();
-   if (!init) {
+   if (! init) {
       p.drawText(r2, RightAlign, QString::number(page));
    }
    voffset += qMax(h1, h2 );
 
    r1 = QRect(hmargin, voffset, hsize / 2, LeftAlign);
    p.setFont(f8);
+
    h1 = p.boundingRect(r1, LeftAlign, dateTime.toString()).height();
    if (!init) {
       p.drawText(r1, LeftAlign, dateTime.toString());
    }
+
    p.setFont(f10);
    voffset += qMax(h1, h2);
 
    voffset += 4;
-   if (!init) {
+   if (! init) {
       p.drawLine(QPoint(hmargin, voffset), QPoint(hmargin + hsize, voffset));
    }
    voffset += 14;
@@ -169,7 +178,6 @@ void PrintOut::breakPage(bool init)
       vsize -= voffset;
       breakPage(); // now draw it when the vsize is ok
    }
-
 }
 
 void PrintOut::drawRule(Rule rule)
@@ -180,23 +188,23 @@ void PrintOut::drawRule(Rule rule)
       case NoRule:
          voffset += 5;
          break;
+
       case ThinRule:
          pen.setColor(QColor(192, 192, 192));
          pen.setStyle(Qt::DotLine);
          pen.setWidth(0);
          p.setPen(pen);
          voffset += 5;
-         p.drawLine(QPoint(hmargin, voffset),
-                    QPoint(hmargin + hsize, voffset));
+
+         p.drawLine(QPoint(hmargin, voffset), QPoint(hmargin + hsize, voffset));
          p.setPen(QPen());
          voffset += 2;
          break;
+
       case ThickRule:
          voffset += 7;
-         p.drawLine(QPoint(hmargin, voffset),
-                    QPoint(hmargin + hsize, voffset));
+         p.drawLine(QPoint(hmargin, voffset), QPoint(hmargin + hsize, voffset));
          voffset += 4;
    }
 }
 
-QT_END_NAMESPACE

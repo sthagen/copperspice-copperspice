@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,8 @@
 #ifndef QSQLQUERYMODEL_H
 #define QSQLQUERYMODEL_H
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtSql/qsqldatabase.h>
-
+#include <qabstractitemmodel.h>
+#include <qsqldatabase.h>
 
 class QSqlQueryModelPrivate;
 class QSqlError;
@@ -42,8 +41,8 @@ class Q_SQL_EXPORT QSqlQueryModel: public QAbstractTableModel
    explicit QSqlQueryModel(QObject *parent = nullptr);
    virtual ~QSqlQueryModel();
 
-   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+   int rowCount(const QModelIndex &index = QModelIndex()) const override;
+   int columnCount(const QModelIndex &index = QModelIndex()) const override;
    QSqlRecord record(int row) const;
    QSqlRecord record() const;
 

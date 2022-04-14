@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,9 +21,55 @@
 *
 ***********************************************************************/
 
-#include <qmargins.h>
 #include <qdatastream.h>
 #include <qdebug.h>
+#include <qmargins.h>
+
+QDataStream &operator<<(QDataStream &stream, const QMargins &margin)
+{
+    stream << margin.left() << margin.top() << margin.right() << margin.bottom();
+
+    return stream;
+}
+
+QDataStream &operator>>(QDataStream &stream, QMargins &margin)
+{
+   int left, top, right, bottom;
+
+   stream >> left;
+   margin.setLeft(left);
+
+   stream >> top;
+   margin.setTop(top);
+
+   stream >> right;
+   margin.setRight(right);
+
+   stream >> bottom;
+   margin.setBottom(bottom);
+
+   return stream;
+}
+
+QDataStream &operator<<(QDataStream &stream, const QMarginsF &marginF)
+{
+   stream << double(marginF.left()) << double(marginF.top()) << double(marginF.right()) << double(marginF.bottom());
+
+   return stream;
+}
+
+QDataStream &operator>>(QDataStream &stream, QMarginsF &marginF)
+{
+    double left, top, right, bottom;
+    stream >> left;
+    stream >> top;
+    stream >> right;
+    stream >> bottom;
+
+    marginF = QMarginsF(qreal(left), qreal(top), qreal(right), qreal(bottom));
+
+    return stream;
+}
 
 QDebug operator<<(QDebug dbg, const QMargins &m)
 {
@@ -32,4 +78,3 @@ QDebug operator<<(QDebug dbg, const QMargins &m)
 
    return dbg.space();
 }
-

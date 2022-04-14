@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,13 +27,11 @@
 #include <qabstractfileengine_p.h>
 #include <qresource_p.h>
 
-QT_BEGIN_NAMESPACE
-
 /*!
     \internal
 
-    Returns the canonicalized form of \a path (i.e., with all symlinks
-    resolved, and all redundant path elements removed.
+    Returns the canonicalized form of \a path (i.e., with all symlinks resolved,
+    and all redundant path elements removed.
 */
 QString QFileSystemEngine::slowCanonicalized(const QString &path)
 {
@@ -117,7 +115,7 @@ static inline bool _q_checkEntry(QAbstractFileEngine *&engine, bool resolvingEnt
    if (resolvingEntry) {
       if (!(engine->fileFlags(QAbstractFileEngine::FlagsMask) & QAbstractFileEngine::ExistsFlag)) {
          delete engine;
-         engine = 0;
+         engine = nullptr;
          return false;
       }
    }
@@ -385,4 +383,3 @@ QString QFileSystemEngine::resolveGroupName(const QFileSystemEntry &entry, QFile
 #endif
 }
 
-QT_END_NAMESPACE

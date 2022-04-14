@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,7 +33,11 @@
 #include <stdlib.h>
 
 #if ! defined(QT_NO_SETTINGS)
-   Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, loader, (QPlatformInputContextInterface_ID, "/platforminputcontexts", Qt::CaseInsensitive))
+   static QFactoryLoader *loader()
+   {
+      static QFactoryLoader retval(QPlatformInputContextInterface_ID, "/platforminputcontexts", Qt::CaseInsensitive);
+      return &retval;
+   }
 #endif
 
 QStringList QPlatformInputContextFactory::keys()

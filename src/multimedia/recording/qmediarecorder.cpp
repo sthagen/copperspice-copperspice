@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,8 +23,8 @@
 
 #include <qmediarecorder.h>
 
-// emerald  #include <qcamera.h>
-// emerald  #include <qcameracontrol.h>
+#include <qcamera.h>
+#include <qcameracontrol.h>
 #include <qmediarecordercontrol.h>
 #include <qmediaservice.h>
 #include <qmediaserviceprovider_p.h>
@@ -41,22 +41,13 @@
 
 #include <qmediaobject_p.h>
 #include <qmediarecorder_p.h>
-static int qRegisterMediaRecorderMetaTypes()
-{
-   qRegisterMetaType<QMediaRecorder::State>("QMediaRecorder::State");
-   qRegisterMetaType<QMediaRecorder::Status>("QMediaRecorder::Status");
-   qRegisterMetaType<QMediaRecorder::Error>("QMediaRecorder::Error");
-
-   return 0;
-}
 
 #define ENUM_NAME(c,e,v) (c::staticMetaObject.enumerator(c::staticMetaObject.indexOfEnumerator(e)).valueToKey((v)))
-Q_CONSTRUCTOR_FUNCTION(qRegisterMediaRecorderMetaTypes)
 
 QMediaRecorderPrivate::QMediaRecorderPrivate()
-   : mediaObject(0), control(0), formatControl(0), audioControl(0),
-     videoControl(0), metaDataControl(0), availabilityControl(0), settingsChanged(false),
-     notifyTimer(0), state(QMediaRecorder::StoppedState), error(QMediaRecorder::NoError)
+   : mediaObject(nullptr), control(nullptr), formatControl(nullptr), audioControl(nullptr),
+     videoControl(nullptr), metaDataControl(nullptr), availabilityControl(nullptr), settingsChanged(false),
+     notifyTimer(nullptr), state(QMediaRecorder::StoppedState), error(QMediaRecorder::NoError)
 {
 }
 
@@ -90,14 +81,14 @@ void QMediaRecorderPrivate::_q_error(int error, const QString &errorString)
 
 void QMediaRecorderPrivate::_q_serviceDestroyed()
 {
-   mediaObject     = 0;
-   control         = 0;
-   formatControl   = 0;
-   audioControl    = 0;
-   videoControl    = 0;
-   metaDataControl = 0;
-   availabilityControl = 0;
-   settingsChanged = true;
+   mediaObject         = nullptr;
+   control             = nullptr;
+   formatControl       = nullptr;
+   audioControl        = nullptr;
+   videoControl        = nullptr;
+   metaDataControl     = nullptr;
+   availabilityControl = nullptr;
+   settingsChanged     = true;
 }
 
 void QMediaRecorderPrivate::_q_updateActualLocation(const QUrl &location)
@@ -136,6 +127,8 @@ void QMediaRecorderPrivate::_q_applySettings()
 
 void QMediaRecorderPrivate::_q_availabilityChanged(QMultimedia::AvailabilityStatus availability)
 {
+   (void) availability;
+
    Q_Q(QMediaRecorder);
 
    // should not always emit, but we can not tell from here (isAvailable may not have changed,
@@ -147,20 +140,13 @@ void QMediaRecorderPrivate::_q_availabilityChanged(QMultimedia::AvailabilityStat
 
 void QMediaRecorderPrivate::restartCamera()
 {
-
-/*  emerald
-
    //restart camera if it can't apply new settings in the Active state
-   QCamera *camera = qobject_cast<QCamera *>(mediaObject);
+   QCamera *camera = dynamic_cast<QCamera *>(mediaObject);
 
    if (camera && camera->captureMode() == QCamera::CaptureVideo) {
-      QMetaObject::invokeMethod(camera,
-         "_q_preparePropertyChange",
-         Qt::DirectConnection,
-         Q_ARG(int, QCameraControl::VideoEncodingSettings));
+      QMetaObject::invokeMethod(camera, "_q_preparePropertyChange",
+         Qt::DirectConnection, Q_ARG(int, QCameraControl::VideoEncodingSettings));
    }
-*/
-
 }
 
 QMediaRecorder::QMediaRecorder(QMediaObject *mediaObject, QObject *parent)
@@ -170,7 +156,7 @@ QMediaRecorder::QMediaRecorder(QMediaObject *mediaObject, QObject *parent)
    d->q_ptr = this;
 
    d->notifyTimer = new QTimer(this);
-   connect(d->notifyTimer, SIGNAL(timeout()), SLOT(_q_notify()));
+   connect(d->notifyTimer, &QTimer::timeout, this, &QMediaRecorder::_q_notify);
 
    setMediaObject(mediaObject);
 }
@@ -186,7 +172,7 @@ QMediaRecorder::QMediaRecorder(QMediaRecorderPrivate &dd, QMediaObject *mediaObj
    d->q_ptr = this;
 
    d->notifyTimer = new QTimer(this);
-   connect(d->notifyTimer, SIGNAL(timeout()), SLOT(_q_notify()));
+   connect(d->notifyTimer, &QTimer::timeout, this, &QMediaRecorder::_q_notify);
 
    setMediaObject(mediaObject);
 }
@@ -201,9 +187,7 @@ QMediaObject *QMediaRecorder::mediaObject() const
    return d_func()->mediaObject;
 }
 
-/*!
-    \internal
-*/
+// internal
 bool QMediaRecorder::setMediaObject(QMediaObject *object)
 {
    Q_D(QMediaRecorder);
@@ -214,34 +198,21 @@ bool QMediaRecorder::setMediaObject(QMediaObject *object)
 
    if (d->mediaObject) {
       if (d->control) {
-         disconnect(d->control, SIGNAL(stateChanged(QMediaRecorder::State)),
-            this, SLOT(_q_stateChanged(QMediaRecorder::State)));
-
-         disconnect(d->control, SIGNAL(statusChanged(QMediaRecorder::Status)),
-            this, SLOT(statusChanged(QMediaRecorder::Status)));
-
-         disconnect(d->control, SIGNAL(mutedChanged(bool)),
-            this, SLOT(mutedChanged(bool)));
-
-         disconnect(d->control, SIGNAL(volumeChanged(qreal)),
-            this, SLOT(volumeChanged(qreal)));
-
-         disconnect(d->control, SIGNAL(durationChanged(qint64)),
-            this, SLOT(durationChanged(qint64)));
-
-         disconnect(d->control, SIGNAL(actualLocationChanged(QUrl)),
-            this, SLOT(_q_updateActualLocation(QUrl)));
-
-         disconnect(d->control, SIGNAL(error(int, QString)),
-            this, SLOT(_q_error(int, QString)));
+         disconnect(d->control, &QMediaRecorderControl::stateChanged,          this, &QMediaRecorder::_q_stateChanged);
+         disconnect(d->control, &QMediaRecorderControl::statusChanged,         this, &QMediaRecorder::statusChanged);
+         disconnect(d->control, &QMediaRecorderControl::mutedChanged,          this, &QMediaRecorder::mutedChanged);
+         disconnect(d->control, &QMediaRecorderControl::volumeChanged,         this, &QMediaRecorder::volumeChanged);
+         disconnect(d->control, &QMediaRecorderControl::durationChanged,       this, &QMediaRecorder::durationChanged);
+         disconnect(d->control, &QMediaRecorderControl::actualLocationChanged, this, &QMediaRecorder::_q_updateActualLocation);
+         disconnect(d->control, &QMediaRecorderControl::error,                 this, &QMediaRecorder::_q_error);
       }
 
-      disconnect(d->mediaObject, SIGNAL(notifyIntervalChanged(int)), this, SLOT(_q_updateNotifyInterval(int)));
+      disconnect(d->mediaObject, &QMediaObject::notifyIntervalChanged, this, &QMediaRecorder::_q_updateNotifyInterval);
 
       QMediaService *service = d->mediaObject->service();
 
       if (service) {
-         disconnect(service, SIGNAL(destroyed()), this, SLOT(_q_serviceDestroyed()));
+         disconnect(service, &QMediaService::destroyed, this, &QMediaRecorder::_q_serviceDestroyed);
 
          if (d->control) {
             service->releaseControl(d->control);
@@ -260,88 +231,92 @@ bool QMediaRecorder::setMediaObject(QMediaObject *object)
          }
 
          if (d->metaDataControl) {
-            disconnect(d->metaDataControl, SIGNAL(metaDataChanged()),
-               this, SLOT(metaDataChanged()));
 
-            disconnect(d->metaDataControl, SIGNAL(metaDataChanged(QString, QVariant)),
-               this, SLOT(metaDataChanged(QString, QVariant)));
+            disconnect(d->metaDataControl, cs_mp_cast<>(&QMetaDataWriterControl::metaDataChanged),
+                  this, cs_mp_cast<>(&QMediaRecorder::metaDataChanged));
 
-            disconnect(d->metaDataControl, SIGNAL(metaDataAvailableChanged(bool)),
-               this, SLOT(metaDataAvailableChanged(bool)));
+            disconnect(d->metaDataControl, cs_mp_cast<const QString &, const QVariant &>(&QMetaDataWriterControl::metaDataChanged),
+                  this, cs_mp_cast<const QString &, const QVariant &>(&QMediaRecorder::metaDataChanged));
 
-            disconnect(d->metaDataControl, SIGNAL(writableChanged(bool)),
-               this, SLOT(metaDataWritableChanged(bool)));
+            disconnect(d->metaDataControl, &QMetaDataWriterControl::metaDataAvailableChanged,
+                  this, &QMediaRecorder::metaDataAvailableChanged);
+
+            disconnect(d->metaDataControl, &QMetaDataWriterControl::writableChanged,
+                  this, &QMediaRecorder::metaDataWritableChanged);
 
             service->releaseControl(d->metaDataControl);
          }
+
          if (d->availabilityControl) {
-            disconnect(d->availabilityControl, SIGNAL(availabilityChanged(QMultimedia::AvailabilityStatus)),
-               this, SLOT(_q_availabilityChanged(QMultimedia::AvailabilityStatus)));
+            disconnect(d->availabilityControl, &QMediaAvailabilityControl::availabilityChanged,
+                  this, &QMediaRecorder::_q_availabilityChanged);
 
             service->releaseControl(d->availabilityControl);
          }
       }
    }
 
-   d->control = 0;
-   d->formatControl = 0;
-   d->audioControl = 0;
-   d->videoControl = 0;
-   d->metaDataControl = 0;
-   d->availabilityControl = 0;
-
-   d->mediaObject = object;
+   d->control             = nullptr;
+   d->formatControl       = nullptr;
+   d->audioControl        = nullptr;
+   d->videoControl        = nullptr;
+   d->metaDataControl     = nullptr;
+   d->availabilityControl = nullptr;
+   d->mediaObject         = object;
 
    if (d->mediaObject) {
       QMediaService *service = d->mediaObject->service();
 
       d->notifyTimer->setInterval(d->mediaObject->notifyInterval());
-      connect(d->mediaObject, SIGNAL(notifyIntervalChanged(int)), SLOT(_q_updateNotifyInterval(int)));
+      connect(d->mediaObject, &QMediaObject::notifyIntervalChanged, this, &QMediaRecorder::_q_updateNotifyInterval);
 
       if (service) {
-         d->control = qobject_cast<QMediaRecorderControl *>(service->requestControl(QMediaRecorderControl_iid));
+         d->control = dynamic_cast<QMediaRecorderControl *>(service->requestControl(QMediaRecorderControl_iid));
 
          if (d->control) {
-            d->formatControl = qobject_cast<QMediaContainerControl *>(service->requestControl(QMediaContainerControl_iid));
-            d->audioControl  = qobject_cast<QAudioEncoderSettingsControl *>(service->requestControl(QAudioEncoderSettingsControl_iid));
-            d->videoControl  = qobject_cast<QVideoEncoderSettingsControl *>(service->requestControl(QVideoEncoderSettingsControl_iid));
+            d->formatControl = dynamic_cast<QMediaContainerControl *>(service->requestControl(QMediaContainerControl_iid));
+            d->audioControl  = dynamic_cast<QAudioEncoderSettingsControl *>(service->requestControl(QAudioEncoderSettingsControl_iid));
+            d->videoControl  = dynamic_cast<QVideoEncoderSettingsControl *>(service->requestControl(QVideoEncoderSettingsControl_iid));
 
             QMediaControl *control = service->requestControl(QMetaDataWriterControl_iid);
+
             if (control) {
-               d->metaDataControl = qobject_cast<QMetaDataWriterControl *>(control);
+               d->metaDataControl = dynamic_cast<QMetaDataWriterControl *>(control);
 
-               if (!d->metaDataControl) {
+               if (! d->metaDataControl) {
                   service->releaseControl(control);
+
                } else {
-                  connect(d->metaDataControl, SIGNAL(metaDataChanged()), SLOT(metaDataChanged()));
+                  connect(d->metaDataControl, cs_mp_cast<>(&QMetaDataWriterControl::metaDataChanged),
+                        this, cs_mp_cast<>(&QMediaRecorder::metaDataChanged));
 
-                  connect(d->metaDataControl, SIGNAL(metaDataChanged(QString, QVariant)),
-                     this, SLOT(metaDataChanged(QString, QVariant)));
+                  connect(d->metaDataControl, cs_mp_cast<const QString &, const QVariant &>(&QMetaDataWriterControl::metaDataChanged),
+                        this, cs_mp_cast<const QString &, const QVariant &>(&QMediaRecorder::metaDataChanged));
 
-                  connect(d->metaDataControl, SIGNAL(metaDataAvailableChanged(bool)), SLOT(metaDataAvailableChanged(bool)));
-                  connect(d->metaDataControl, SIGNAL(writableChanged(bool)),          SLOT(metaDataWritableChanged(bool)));               }
+                  connect(d->metaDataControl, &QMetaDataWriterControl::metaDataAvailableChanged,
+                        this, &QMediaRecorder::metaDataAvailableChanged);
+
+                  connect(d->metaDataControl, &QMetaDataWriterControl::writableChanged,
+                        this, &QMediaRecorder::metaDataWritableChanged);
+               }
             }
 
             d->availabilityControl = service->requestControl<QMediaAvailabilityControl *>();
 
             if (d->availabilityControl) {
-               connect(d->availabilityControl, SIGNAL(availabilityChanged(QMultimedia::AvailabilityStatus)),
-                  this, SLOT(_q_availabilityChanged(QMultimedia::AvailabilityStatus)));
+               connect(d->availabilityControl, &QMediaAvailabilityControl::availabilityChanged,
+                        this, &QMediaRecorder::_q_availabilityChanged);
             }
 
-            connect(d->control, SIGNAL(stateChanged(QMediaRecorder::State)),
-               this, SLOT(_q_stateChanged(QMediaRecorder::State)));
+            connect(d->control, &QMediaRecorderControl::stateChanged,    this, &QMediaRecorder::_q_stateChanged);
+            connect(d->control, &QMediaRecorderControl::statusChanged,   this, &QMediaRecorder::statusChanged);
+            connect(d->control, &QMediaRecorderControl::mutedChanged,    this, &QMediaRecorder::mutedChanged);
+            connect(d->control, &QMediaRecorderControl::volumeChanged,   this, &QMediaRecorder::volumeChanged);
+            connect(d->control, &QMediaRecorderControl::durationChanged, this, &QMediaRecorder::durationChanged);
 
-            connect(d->control, SIGNAL(statusChanged(QMediaRecorder::Status)),
-               this, SLOT(statusChanged(QMediaRecorder::Status)));
-
-            connect(d->control, SIGNAL(mutedChanged(bool)),      this, SLOT(mutedChanged(bool)));
-            connect(d->control, SIGNAL(volumeChanged(qreal)),    this, SLOT(volumeChanged(qreal)));
-            connect(d->control, SIGNAL(durationChanged(qint64)), this, SLOT(durationChanged(qint64)));
-
-            connect(d->control, SIGNAL(actualLocationChanged(QUrl)), this, SLOT(_q_updateActualLocation(QUrl)));
-            connect(d->control, SIGNAL(error(int, QString)), this, SLOT(_q_error(int, QString)));
-            connect(service, SIGNAL(destroyed()), this, SLOT(_q_serviceDestroyed()));
+            connect(d->control, &QMediaRecorderControl::actualLocationChanged, this, &QMediaRecorder::_q_updateActualLocation);
+            connect(d->control, &QMediaRecorderControl::error,                 this, &QMediaRecorder::_q_error);
+            connect(service,    &QMediaService::destroyed,                     this, &QMediaRecorder::_q_serviceDestroyed);
 
             d->applySettingsLater();
 
@@ -349,7 +324,7 @@ bool QMediaRecorder::setMediaObject(QMediaObject *object)
          }
       }
 
-      d->mediaObject = 0;
+      d->mediaObject = nullptr;
       return false;
    }
 
@@ -363,7 +338,7 @@ bool QMediaRecorder::isAvailable() const
 
 QMultimedia::AvailabilityStatus QMediaRecorder::availability() const
 {
-   if (d_func()->control == NULL) {
+   if (d_func()->control == nullptr) {
       return QMultimedia::ServiceMissing;
    }
 
@@ -459,20 +434,17 @@ QString QMediaRecorder::containerDescription(const QString &format) const
 
 QString QMediaRecorder::containerFormat() const
 {
-   return d_func()->formatControl ?
-      d_func()->formatControl->containerFormat() : QString();
+   return d_func()->formatControl ? d_func()->formatControl->containerFormat() : QString();
 }
 
 QStringList QMediaRecorder::supportedAudioCodecs() const
 {
-   return d_func()->audioControl ?
-      d_func()->audioControl->supportedAudioCodecs() : QStringList();
+   return d_func()->audioControl ? d_func()->audioControl->supportedAudioCodecs() : QStringList();
 }
 
 QString QMediaRecorder::audioCodecDescription(const QString &codec) const
 {
-   return d_func()->audioControl ?
-      d_func()->audioControl->codecDescription(codec) : QString();
+   return d_func()->audioControl ? d_func()->audioControl->codecDescription(codec) : QString();
 }
 
 QList<int> QMediaRecorder::supportedAudioSampleRates(const QAudioEncoderSettings &settings, bool *continuous) const
@@ -533,8 +505,6 @@ void QMediaRecorder::setAudioSettings(const QAudioEncoderSettings &settings)
 {
    Q_D(QMediaRecorder);
 
-/*  emerald
-
    //restart camera if it can't apply new settings in the Active state
    d->restartCamera();
 
@@ -542,50 +512,34 @@ void QMediaRecorder::setAudioSettings(const QAudioEncoderSettings &settings)
       d->audioControl->setAudioSettings(settings);
       d->applySettingsLater();
    }
-*/
-
 }
 
 void QMediaRecorder::setVideoSettings(const QVideoEncoderSettings &settings)
 {
    Q_D(QMediaRecorder);
-
-
-/*  emerald
-
    d->restartCamera();
 
    if (d->videoControl) {
       d->videoControl->setVideoSettings(settings);
       d->applySettingsLater();
    }
-*/
-
 }
 
 void QMediaRecorder::setContainerFormat(const QString &container)
 {
    Q_D(QMediaRecorder);
-
-/*  emerald
    d->restartCamera();
 
    if (d->formatControl) {
       d->formatControl->setContainerFormat(container);
       d->applySettingsLater();
    }
-*/
-
 }
 
 void QMediaRecorder::setEncodingSettings(const QAudioEncoderSettings &audio,
          const QVideoEncoderSettings &video, const QString &container)
 {
    Q_D(QMediaRecorder);
-
-
-/*  emerald
-
    d->restartCamera();
 
    if (d->audioControl) {
@@ -601,9 +555,6 @@ void QMediaRecorder::setEncodingSettings(const QAudioEncoderSettings &audio,
    }
 
    d->applySettingsLater();
-*/
-
-
 }
 
 void QMediaRecorder::record()

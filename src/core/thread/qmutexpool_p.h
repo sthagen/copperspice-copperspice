@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,38 +24,38 @@
 #ifndef QMUTEXPOOL_P_H
 #define QMUTEXPOOL_P_H
 
-#include <QtCore/qatomic.h>
-#include <QtCore/qmutex.h>
-#include <QtCore/qvarlengtharray.h>
-
-QT_BEGIN_NAMESPACE
+#include <qatomic.h>
+#include <qmutex.h>
+#include <qvarlengtharray.h>
 
 class Q_CORE_EXPORT QMutexPool
 {
  public:
-   explicit QMutexPool(QMutex::RecursionMode recursionMode = QMutex::NonRecursive, int size = 131);
+   explicit QMutexPool(int size = DEFAULT_SIZE);
+
    ~QMutexPool();
 
-   inline QMutex *get(const void *address) {
-      int index = uint(quintptr(address)) % mutexes.count();
-      QMutex *m = mutexes[index].load();
-      if (m) {
-         return m;
+   QRecursiveMutex *get(const void *address) {
+      int index = uint(quintptr(address)) % m_mutexArray.count();
+      QRecursiveMutex *mutex = m_mutexArray[index].load();
+
+      if (mutex != nullptr) {
+         return mutex;
       } else {
          return createMutex(index);
       }
    }
+
    static QMutexPool *instance();
-   static QMutex *globalInstanceGet(const void *address);
+   static QRecursiveMutex *globalInstanceGet(const void *address);
+
+   static constexpr const int DEFAULT_SIZE = 131;
 
  private:
-   QMutex *createMutex(int index);
-   QVarLengthArray<QAtomicPointer<QMutex>, 131> mutexes;
-   QMutex::RecursionMode recursionMode;
+   QRecursiveMutex *createMutex(int index);
+   QVarLengthArray<QAtomicPointer<QRecursiveMutex>, DEFAULT_SIZE> m_mutexArray;
 };
 
 extern Q_CORE_EXPORT QMutexPool *qt_global_mutexpool;
 
-QT_END_NAMESPACE
-
-#endif // QMUTEXPOOL_P_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,11 @@
 #ifndef QSQLDRIVER_H
 #define QSQLDRIVER_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qstringlist.h>
-#include <QtSql/qsql.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qobject.h>
+#include <qstring.h>
+#include <qstringlist.h>
+#include <qsql.h>
+#include <qscopedpointer.h>
 
 class QSqlDatabase;
 class QSqlDriverPrivate;
@@ -44,7 +42,6 @@ class QVariant;
 class Q_SQL_EXPORT QSqlDriver : public QObject
 {
    SQL_CS_OBJECT(QSqlDriver)
-   Q_DECLARE_PRIVATE(QSqlDriver)
 
  public:
    enum DriverFeature { Transactions, QuerySize, BLOB, Unicode, PreparedQueries,
@@ -72,8 +69,14 @@ class Q_SQL_EXPORT QSqlDriver : public QObject
       Interbase,
       DB2
    };
+
    explicit QSqlDriver(QObject *parent = nullptr);
+
+   QSqlDriver(const QSqlDriver &) = delete;
+   QSqlDriver &operator=(const QSqlDriver &) = delete;
+
    ~QSqlDriver();
+
    virtual bool isOpen() const;
    bool isOpenError() const;
 
@@ -93,16 +96,12 @@ class Q_SQL_EXPORT QSqlDriver : public QObject
    QSqlError lastError() const;
 
    virtual QVariant handle() const;
-   virtual bool hasFeature(DriverFeature f) const = 0;
+   virtual bool hasFeature(DriverFeature feature) const = 0;
    virtual void close() = 0;
    virtual QSqlResult *createResult() const = 0;
 
-   virtual bool open(const QString &db,
-      const QString &user = QString(),
-      const QString &password = QString(),
-      const QString &host = QString(),
-      int port = -1,
-      const QString &connOpts = QString()) = 0;
+   virtual bool open(const QString &db, const QString &user = QString(), const QString &password = QString(),
+            const QString &host = QString(), int port = -1, const QString &options = QString()) = 0;
 
    virtual bool subscribeToNotification(const QString &name);
    virtual bool unsubscribeFromNotification(const QString &name);
@@ -124,14 +123,14 @@ class Q_SQL_EXPORT QSqlDriver : public QObject
  protected:
    QSqlDriver(QSqlDriverPrivate &dd, QObject *parent = nullptr);
 
-   virtual void setOpen(bool o);
-   virtual void setOpenError(bool e);
-   virtual void setLastError(const QSqlError &e);
+   virtual void setOpen(bool open);
+   virtual void setOpenError(bool error);
+   virtual void setLastError(const QSqlError &error);
 
    QScopedPointer<QSqlDriverPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QSqlDriver)
+   Q_DECLARE_PRIVATE(QSqlDriver)
 
    friend class QSqlDatabase;
    friend class QSqlResultPrivate;

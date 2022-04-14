@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,13 +26,11 @@
 
 #include <dshow.h>
 
-#include <QtCore/qmutex.h>
-#include <QtCore/qobject.h>
-#include <QtCore/qwaitcondition.h>
+#include <qmutex.h>
+#include <qobject.h>
+#include <qwaitcondition.h>
 
-QT_BEGIN_NAMESPACE
 class QIODevice;
-QT_END_NAMESPACE
 
 class DirectShowEventLoop;
 class DirectShowIOSource;
@@ -41,6 +39,7 @@ class DirectShowSampleRequest;
 class DirectShowIOReader : public QObject, public IAsyncReader
 {
    CS_OBJECT(DirectShowIOReader)
+
  public:
    DirectShowIOReader(QIODevice *device, DirectShowIOSource *source, DirectShowEventLoop *loop);
    ~DirectShowIOReader();
@@ -71,11 +70,10 @@ class DirectShowIOReader : public QObject, public IAsyncReader
  protected:
    void customEvent(QEvent *event);
 
- private :
+ private:
    CS_SLOT_1(Private, void readyRead())
    CS_SLOT_2(readyRead)
 
- private:
    HRESULT blockingRead(LONGLONG position, LONG length, BYTE *buffer, qint64 *bytesRead);
    bool nonBlockingRead(
       LONGLONG position, LONG length, BYTE *buffer, qint64 *bytesRead, HRESULT *result);

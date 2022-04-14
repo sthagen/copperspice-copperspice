@@ -194,9 +194,13 @@ private:
 };
 
 class StylePainter {
-public:
+ public:
     explicit StylePainter(RenderThemeQt*, const PaintInfo&);
     explicit StylePainter(ScrollbarThemeQt*, GraphicsContext*);
+
+    StylePainter(const StylePainter &) = delete;
+    StylePainter &operator=(const StylePainter &) = delete;
+
     ~StylePainter();
 
     bool isValid() const { return painter && style; }
@@ -212,13 +216,11 @@ public:
     void drawComplexControl(QStyle::ComplexControl cc, const QStyleOptionComplex& opt)
     { style->drawComplexControl(cc, &opt, painter, widget); }
 
-private:
+ private:
     void init(GraphicsContext* context, QStyle*);
 
     QBrush oldBrush;
     bool oldAntialiasing;
-
-    Q_DISABLE_COPY(StylePainter)
 };
 
 }

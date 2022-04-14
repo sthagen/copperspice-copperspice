@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -67,9 +67,9 @@ QAccessibleInterface *QAccessibleMenu::childAt(int x, int y) const
 {
    QAction *act = menu()->actionAt(menu()->mapFromGlobal(QPoint(x, y)));
    if (act && act->isSeparator()) {
-      act = 0;
+      act = nullptr;
    }
-   return act ? getOrCreateMenu(menu(), act) : 0;
+   return act ? getOrCreateMenu(menu(), act) : nullptr;
 }
 
 QString QAccessibleMenu::text(QAccessible::Text t) const
@@ -148,7 +148,7 @@ QAccessibleInterface *QAccessibleMenuBar::child(int index) const
    if (index < childCount()) {
       return getOrCreateMenu(menuBar(), menuBar()->actions().at(index));
    }
-   return 0;
+   return nullptr;
 }
 
 int QAccessibleMenuBar::indexOfChild(const QAccessibleInterface *child) const
@@ -178,7 +178,7 @@ QAccessibleInterface *QAccessibleMenuItem::childAt(int x, int y ) const
          return childInterface;
       }
    }
-   return 0;
+   return nullptr;
 }
 
 int QAccessibleMenuItem::childCount() const
@@ -209,7 +209,7 @@ QAccessibleInterface *QAccessibleMenuItem::child(int index) const
    if (index == 0 && action()->menu()) {
       return QAccessible::queryAccessibleInterface(action()->menu());
    }
-   return 0;
+   return nullptr;
 }
 
 void *QAccessibleMenuItem::interface_cast(QAccessible::InterfaceType t)
@@ -217,7 +217,7 @@ void *QAccessibleMenuItem::interface_cast(QAccessible::InterfaceType t)
    if (t == QAccessible::ActionInterface) {
       return static_cast<QAccessibleActionInterface *>(this);
    }
-   return 0;
+   return nullptr;
 }
 
 QObject *QAccessibleMenuItem::object() const

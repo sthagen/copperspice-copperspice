@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -244,7 +244,7 @@ QString QUuid::toString() const
 
 QByteArray QUuid::toByteArray() const
 {
-   QByteArray result(38, Qt::Uninitialized);
+   QByteArray result(38, Qt::NoData);
    char *data = result.data();
 
    _q_uuidToHex(data, data1, data2, data3, data4);
@@ -254,8 +254,8 @@ QByteArray QUuid::toByteArray() const
 
 QByteArray QUuid::toRfc4122() const
 {
-   // we know how many bytes a UUID has
-   QByteArray bytes(16, Qt::Uninitialized);
+   // a UUID has 16 btyes
+   QByteArray bytes(16, Qt::NoData);
    uchar *data = reinterpret_cast<uchar *>(bytes.data());
 
    qToBigEndian(data1, data);
@@ -275,14 +275,16 @@ QByteArray QUuid::toRfc4122() const
    return bytes;
 }
 
-QDataStream &operator<<(QDataStream &s, const QUuid &id)
+QDataStream &operator<<(QDataStream &stream, const QUuid &id)
 {
    QByteArray bytes;
-   if (s.byteOrder() == QDataStream::BigEndian) {
+
+   if (stream.byteOrder() == QDataStream::BigEndian) {
       bytes = id.toRfc4122();
+
    } else {
-      // we know how many bytes a UUID has, I hope :)
-      bytes = QByteArray(16, Qt::Uninitialized);
+      // a UUID has 16 bytes
+      bytes = QByteArray(16, Qt::NoData);
       uchar *data = reinterpret_cast<uchar *>(bytes.data());
 
       qToLittleEndian(id.data1, data);
@@ -298,25 +300,23 @@ QDataStream &operator<<(QDataStream &s, const QUuid &id)
       }
    }
 
-   if (s.writeRawData(bytes.data(), 16) != 16) {
-      s.setStatus(QDataStream::WriteFailed);
+   if (stream.writeRawData(bytes.data(), 16) != 16) {
+      stream.setStatus(QDataStream::WriteFailed);
    }
-   return s;
+
+   return stream;
 }
 
-/*!
-    \relates QUuid
-    Reads a UUID from the stream \a s into \a id.
-*/
-QDataStream &operator>>(QDataStream &s, QUuid &id)
+QDataStream &operator>>(QDataStream &stream, QUuid &id)
 {
-   QByteArray bytes(16, Qt::Uninitialized);
-   if (s.readRawData(bytes.data(), 16) != 16) {
-      s.setStatus(QDataStream::ReadPastEnd);
-      return s;
+   QByteArray bytes(16, Qt::NoData);
+
+   if (stream.readRawData(bytes.data(), 16) != 16) {
+      stream.setStatus(QDataStream::ReadPastEnd);
+      return stream;
    }
 
-   if (s.byteOrder() == QDataStream::BigEndian) {
+   if (stream.byteOrder() == QDataStream::BigEndian) {
       id = QUuid::fromRfc4122(bytes);
    } else {
       const uchar *data = reinterpret_cast<const uchar *>(bytes.constData());
@@ -334,7 +334,7 @@ QDataStream &operator>>(QDataStream &s, QUuid &id)
       }
    }
 
-   return s;
+   return stream;
 }
 
 /*!

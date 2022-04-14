@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,7 +30,7 @@
 #include <qglcolormap.h>
 #include <qmap.h>
 #include <qscopedpointer.h>
-#include <QSurfaceFormat>
+#include <qsurfaceformat.h>
 
 class QPixmap;
 class QGLWidgetPrivate;
@@ -132,14 +132,14 @@ class Q_OPENGL_EXPORT QGLFormat
    int plane() const;
    void setPlane(int plane);
 
-   void setOption(QGL::FormatOptions opt);
-   bool testOption(QGL::FormatOptions opt) const;
+   void setOption(QGL::FormatOptions options);
+   bool testOption(QGL::FormatOptions options) const;
 
    static QGLFormat defaultFormat();
-   static void setDefaultFormat(const QGLFormat &f);
+   static void setDefaultFormat(const QGLFormat &format);
 
    static QGLFormat defaultOverlayFormat();
-   static void setDefaultOverlayFormat(const QGLFormat &f);
+   static void setDefaultOverlayFormat(const QGLFormat &format);
 
    static bool hasOpenGL();
    static bool hasOpenGLOverlays();
@@ -192,17 +192,16 @@ class Q_OPENGL_EXPORT QGLFormat
 
    void detach();
 
-   friend Q_OPENGL_EXPORT bool operator==(const QGLFormat &, const QGLFormat &);
-   friend Q_OPENGL_EXPORT bool operator!=(const QGLFormat &, const QGLFormat &);
-   friend Q_OPENGL_EXPORT QDebug operator<<(QDebug, const QGLFormat &);
-
+   friend Q_OPENGL_EXPORT bool operator==(const QGLFormat &value_1, const QGLFormat &value_2);
+   friend Q_OPENGL_EXPORT bool operator!=(const QGLFormat &value_1, const QGLFormat &value_2);
+   friend Q_OPENGL_EXPORT QDebug operator<<(QDebug, const QGLFormat &value);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QGLFormat::OpenGLVersionFlags)
 
-Q_OPENGL_EXPORT bool operator==(const QGLFormat &, const QGLFormat &);
-Q_OPENGL_EXPORT bool operator!=(const QGLFormat &, const QGLFormat &);
-Q_OPENGL_EXPORT QDebug operator<<(QDebug, const QGLFormat &);
+Q_OPENGL_EXPORT bool operator==(const QGLFormat &value_1, const QGLFormat &value_2);
+Q_OPENGL_EXPORT bool operator!=(const QGLFormat &value_1, const QGLFormat &value_2);
+Q_OPENGL_EXPORT QDebug operator<<(QDebug, const QGLFormat &value);
 
 class Q_OPENGL_EXPORT QGLContext
 {
@@ -213,6 +212,10 @@ class Q_OPENGL_EXPORT QGLContext
 
    QGLContext(const QGLFormat &format, QPaintDevice *device);
    QGLContext(const QGLFormat &format);
+
+   QGLContext(const QGLContext &) = delete;
+   QGLContext &operator=(const QGLContext &) = delete;
+
    virtual ~QGLContext();
 
    virtual bool create(const QGLContext *shareContext = nullptr);
@@ -253,21 +256,16 @@ class Q_OPENGL_EXPORT QGLContext
    };
    using BindOptions = QFlags<BindOption>;
 
-   GLuint bindTexture(const QImage &image, GLenum target, GLint format,
-      BindOptions options);
-   GLuint bindTexture(const QPixmap &pixmap, GLenum target, GLint format,
-      BindOptions options);
-
-   GLuint bindTexture(const QImage &image, GLenum target = GL_TEXTURE_2D,
-      GLint format = GL_RGBA);
-   GLuint bindTexture(const QPixmap &pixmap, GLenum target = GL_TEXTURE_2D,
-      GLint format = GL_RGBA);
+   GLuint bindTexture(const QImage &image, GLenum target, GLint format, BindOptions options);
+   GLuint bindTexture(const QPixmap &pixmap, GLenum target, GLint format, BindOptions options);
+   GLuint bindTexture(const QImage &image, GLenum target = GL_TEXTURE_2D, GLint format = GL_RGBA);
+   GLuint bindTexture(const QPixmap &pixmap, GLenum target = GL_TEXTURE_2D, GLint format = GL_RGBA);
    GLuint bindTexture(const QString &fileName);
 
-   void deleteTexture(GLuint tx_id);
+   void deleteTexture(GLuint texture_id);
 
-   void drawTexture(const QRectF &target, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
-   void drawTexture(const QPointF &point, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QRectF &target, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QPointF &point, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
 
    static void setTextureCacheLimit(int size);
    static int textureCacheLimit();
@@ -316,7 +314,6 @@ class Q_OPENGL_EXPORT QGLContext
    friend class QGLTexture;
    friend QGLFormat::OpenGLVersionFlags QGLFormat::openGLVersionFlags();
 
-
    friend class QGLFramebufferObject;
    friend class QGLFramebufferObjectPrivate;
    friend class QGLFBOGLPaintDevice;
@@ -325,8 +322,6 @@ class Q_OPENGL_EXPORT QGLContext
    friend class QX11GLSharedContexts;
    friend class QGLContextResourceBase;
    friend class QSGDistanceFieldGlyphCache;
-
-   Q_DISABLE_COPY(QGLContext)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QGLContext::BindOptions)
@@ -334,17 +329,19 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QGLContext::BindOptions)
 class Q_OPENGL_EXPORT QGLWidget : public QWidget
 {
    OPENGL_CS_OBJECT(QGLWidget)
-   Q_DECLARE_PRIVATE(QGLWidget)
 
  public:
    explicit QGLWidget(QWidget *parent = nullptr,
-      const QGLWidget *shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+      const QGLWidget *shareWidget = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
 
    explicit QGLWidget(QGLContext *context, QWidget *parent = nullptr,
-      const QGLWidget *shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+      const QGLWidget *shareWidget = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
 
    explicit QGLWidget(const QGLFormat &format, QWidget *parent = nullptr,
-      const QGLWidget *shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+      const QGLWidget *shareWidget = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
+   QGLWidget(const QGLWidget &) = delete;
+   QGLWidget &operator=(const QGLWidget &) = delete;
 
    ~QGLWidget();
 
@@ -378,29 +375,24 @@ class Q_OPENGL_EXPORT QGLWidget : public QWidget
    const QGLColormap &colormap() const;
    void  setColormap(const QGLColormap &map);
 
-   void renderText(int x, int y, const QString &str, const QFont &fnt = QFont());
-   void renderText(double x, double y, double z, const QString &str, const QFont &fnt = QFont());
+   void renderText(int x, int y, const QString &str, const QFont &font = QFont());
+   void renderText(double x, double y, double z, const QString &str, const QFont &font = QFont());
 
    QPaintEngine *paintEngine() const override;
 
-   GLuint bindTexture(const QImage &image, GLenum target, GLint format,
-      QGLContext::BindOptions options);
-   GLuint bindTexture(const QPixmap &pixmap, GLenum target, GLint format,
-      QGLContext::BindOptions options);
+   GLuint bindTexture(const QImage &image, GLenum target, GLint format, QGLContext::BindOptions options);
+   GLuint bindTexture(const QPixmap &pixmap, GLenum target, GLint format, QGLContext::BindOptions options);
 
-   GLuint bindTexture(const QImage &image, GLenum target = GL_TEXTURE_2D,
-      GLint format = GL_RGBA);
-   GLuint bindTexture(const QPixmap &pixmap, GLenum target = GL_TEXTURE_2D,
-      GLint format = GL_RGBA);
+   GLuint bindTexture(const QImage &image, GLenum target = GL_TEXTURE_2D, GLint format = GL_RGBA);
+   GLuint bindTexture(const QPixmap &pixmap, GLenum target = GL_TEXTURE_2D, GLint format = GL_RGBA);
 
    GLuint bindTexture(const QString &fileName);
 
-   void deleteTexture(GLuint tx_id);
+   void deleteTexture(GLuint texture_id);
 
-   void drawTexture(const QRectF &target, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
-   void drawTexture(const QPointF &point, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QRectF &target, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QPointF &point, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
 
- public :
    OPENGL_CS_SLOT_1(Public, virtual void updateGL())
    OPENGL_CS_SLOT_2(updateGL)
 
@@ -408,30 +400,29 @@ class Q_OPENGL_EXPORT QGLWidget : public QWidget
    OPENGL_CS_SLOT_2(updateOverlayGL)
 
  protected:
-   bool event(QEvent *) override;
+   bool event(QEvent *event) override;
    virtual void initializeGL();
-   virtual void resizeGL(int w, int h);
+   virtual void resizeGL(int width, int height);
    virtual void paintGL();
 
    virtual void initializeOverlayGL();
-   virtual void resizeOverlayGL(int w, int h);
+   virtual void resizeOverlayGL(int width, int height);
    virtual void paintOverlayGL();
 
    void setAutoBufferSwap(bool on);
    bool autoBufferSwap() const;
 
-   void paintEvent(QPaintEvent *) override;
-   void resizeEvent(QResizeEvent *) override;
+   void paintEvent(QPaintEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
 
    virtual void glInit();
    virtual void glDraw();
-   QGLWidget(QGLWidgetPrivate &dd,
-      const QGLFormat &format = QGLFormat(),
-      QWidget *parent = nullptr,
-      const QGLWidget *shareWidget = nullptr,
-      Qt::WindowFlags f = Qt::WindowFlags());
+
+   QGLWidget(QGLWidgetPrivate &dd, const QGLFormat &format = QGLFormat(), QWidget *parent = nullptr,
+      const QGLWidget *shareWidget = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
  private:
-   Q_DISABLE_COPY(QGLWidget)
+   Q_DECLARE_PRIVATE(QGLWidget)
 
    friend class QGLDrawable;
    friend class QGLPixelBuffer;
@@ -497,6 +488,5 @@ inline bool QGLFormat::sampleBuffers() const
 {
    return testOption(QGL::SampleBuffers);
 }
-
 
 #endif

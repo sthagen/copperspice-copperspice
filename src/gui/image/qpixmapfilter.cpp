@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,19 +23,19 @@
 
 #include <qglobal.h>
 
-#include <QDebug>
-#include "qpainter.h"
-#include "qpixmap.h"
-#include "qpixmapfilter_p.h"
-#include "qvarlengtharray.h"
+#include <qdebug.h>
+#include <qmath.h>
+#include <qpainter.h>
+#include <qpixmap.h>
+#include <qvarlengtharray.h>
 
-#include "qguiapplication_p.h"
-#include "qpaintengineex_p.h"
-#include "qpaintengine_raster_p.h"
-#include "qmath.h"
-#include "qmath_p.h"
-#include "qmemrotate_p.h"
-#include "qdrawhelper_p.h"
+#include <qguiapplication_p.h>
+#include <qpaintengine_raster_p.h>
+#include <qpixmapfilter_p.h>
+#include <qpaintengineex_p.h>
+#include <qmath_p.h>
+#include <qmemrotate_p.h>
+#include <qdrawhelper_p.h>
 
 #ifndef QT_NO_GRAPHICSEFFECT
 
@@ -50,14 +50,7 @@ class QPixmapFilterPrivate
    QPixmapFilter *q_ptr;
 };
 
-/*!
-    Constructs a default QPixmapFilter with the given \a type.
-
-    This constructor should be used when subclassing QPixmapFilter to
-    create custom user filters.
-
-    \internal
-*/
+// internal
 QPixmapFilter::QPixmapFilter(FilterType type, QObject *parent)
    : QObject(parent), d_ptr(new QPixmapFilterPrivate)
 {
@@ -65,10 +58,7 @@ QPixmapFilter::QPixmapFilter(FilterType type, QObject *parent)
    d_func()->type = type;
 }
 
-
-/*!
-   \internal
-*/
+// internal
 QPixmapFilter::QPixmapFilter(QPixmapFilterPrivate &d, QPixmapFilter::FilterType type, QObject *parent)
    : QObject(parent), d_ptr(&d)
 {
@@ -80,35 +70,27 @@ QPixmapFilter::~QPixmapFilter()
 {
 }
 
-/*!
-    Returns the type of the filter. All standard pixmap filter classes
-    are associated with a unique value.
-
-    \internal
-*/
+// internal
 QPixmapFilter::FilterType QPixmapFilter::type() const
 {
    Q_D(const QPixmapFilter);
    return d->type;
 }
 
-/*!
-    Returns the bounding rectangle that is affected by the pixmap
-    filter if the filter is applied to the specified \a rect.
-
-    \internal
-*/
+// internal
 QRectF QPixmapFilter::boundingRectFor(const QRectF &rect) const
 {
    return rect;
 }
 
-
-
 class QPixmapConvolutionFilterPrivate : public QPixmapFilterPrivate
 {
  public:
-   QPixmapConvolutionFilterPrivate(): convolutionKernel(0), kernelWidth(0), kernelHeight(0), convoluteAlpha(false) {}
+   QPixmapConvolutionFilterPrivate()
+      : convolutionKernel(nullptr), kernelWidth(0), kernelHeight(0), convoluteAlpha(false)
+   {
+   }
+
    ~QPixmapConvolutionFilterPrivate() {
       delete[] convolutionKernel;
    }
@@ -119,14 +101,7 @@ class QPixmapConvolutionFilterPrivate : public QPixmapFilterPrivate
    bool convoluteAlpha;
 };
 
-
-/*!
-    Constructs a pixmap convolution filter.
-
-    By default there is no convolution kernel.
-
-    \internal
-*/
+// internal
 QPixmapConvolutionFilter::QPixmapConvolutionFilter(QObject *parent)
    : QPixmapFilter(*new QPixmapConvolutionFilterPrivate, ConvolutionFilter, parent)
 {
@@ -331,28 +306,30 @@ void QPixmapConvolutionFilter::draw(QPainter *painter, const QPointF &p, const Q
    }
 
    // raster implementation
+   QImage *target = nullptr;
 
-   QImage *target = 0;
    if (painter->paintEngine()->paintDevice()->devType() == QInternal::Image) {
       target = static_cast<QImage *>(painter->paintEngine()->paintDevice());
 
       QTransform mat = painter->combinedTransform();
 
       if (mat.type() > QTransform::TxTranslate) {
-         // Disabled because of transformation...
-         target = 0;
+         // Disabled because of transformation
+         target = nullptr;
+
       } else {
          QRasterPaintEngine *pe = static_cast<QRasterPaintEngine *>(painter->paintEngine());
          if (pe->clipType() == QRasterPaintEngine::ComplexClip)
             // disabled because of complex clipping...
          {
-            target = 0;
+            target = nullptr;
+
          } else {
             QRectF clip = pe->clipBoundingRect();
             QRectF rect = boundingRectFor(srcRect.isEmpty() ? src.rect() : srcRect);
             QTransform x = painter->deviceTransform();
             if (!clip.contains(rect.translated(x.dx() + p.x(), x.dy() + p.y()))) {
-               target = 0;
+               target = nullptr;
             }
 
          }
@@ -365,47 +342,21 @@ void QPixmapConvolutionFilter::draw(QPainter *painter, const QPointF &p, const Q
 
       convolute(target, p + offset, src.toImage(), srcRect, QPainter::CompositionMode_SourceOver, d->convolutionKernel, d->kernelWidth,
          d->kernelHeight);
+
    } else {
       QRect srect = srcRect.isNull() ? src.rect() : srcRect.toRect();
       QRect rect = boundingRectFor(srect).toRect();
       QImage result = QImage(rect.size(), QImage::Format_ARGB32_Premultiplied);
       QPoint offset = srect.topLeft() - rect.topLeft();
-      convolute(&result,
-         offset,
-         src.toImage(),
-         srect,
-         QPainter::CompositionMode_Source,
-         d->convolutionKernel,
-         d->kernelWidth,
-         d->kernelHeight);
+
+      convolute(&result, offset, src.toImage(), srect, QPainter::CompositionMode_Source, d->convolutionKernel,
+               d->kernelWidth, d->kernelHeight);
+
       painter->drawImage(p - offset, result);
    }
 }
 
-/*!
-    \class QPixmapBlurFilter
-    \since 4.6
-    \ingroup multimedia
-
-    \brief The QPixmapBlurFilter class provides blur filtering
-    for pixmaps.
-
-    QPixmapBlurFilter implements a blur pixmap filter,
-    which is applied when \l{QPixmapFilter::}{draw()} is called.
-
-    The filter lets you specialize the radius of the blur as well
-    as hints as to whether to prefer performance or quality.
-
-    By default, the blur effect is produced by applying an exponential
-    filter generated from the specified blurRadius().  Paint engines
-    may override this with a custom blur that is faster on the
-    underlying hardware.
-
-    \sa {Pixmap Filters Example}, QPixmapConvolutionFilter, QPixmapDropShadowFilter
-
-    \internal
-*/
-
+// internal
 class QPixmapBlurFilterPrivate : public QPixmapFilterPrivate
 {
  public:
@@ -415,31 +366,18 @@ class QPixmapBlurFilterPrivate : public QPixmapFilterPrivate
    QGraphicsBlurEffect::BlurHints hints;
 };
 
-
-/*!
-    Constructs a pixmap blur filter.
-
-    \internal
-*/
+// internal
 QPixmapBlurFilter::QPixmapBlurFilter(QObject *parent)
    : QPixmapFilter(*new QPixmapBlurFilterPrivate, BlurFilter, parent)
 {
 }
 
-/*!
-    Destructor of pixmap blur filter.
-
-    \internal
-*/
+// internal
 QPixmapBlurFilter::~QPixmapBlurFilter()
 {
 }
 
-/*!
-    Sets the radius of the blur filter. Higher radius produces increased blurriness.
-
-    \internal
-*/
+// internal
 void QPixmapBlurFilter::setRadius(qreal radius)
 {
    Q_D(QPixmapBlurFilter);

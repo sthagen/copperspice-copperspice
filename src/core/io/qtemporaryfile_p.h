@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,20 +28,22 @@
 #include <qfilesystemengine_p.h>
 #include <qfile_p.h>
 
-QT_BEGIN_NAMESPACE
-
 class QTemporaryFilePrivate : public QFilePrivate
 {
-   Q_DECLARE_PUBLIC(QTemporaryFile)
-
  protected:
    QTemporaryFilePrivate();
    ~QTemporaryFilePrivate();
 
+   QAbstractFileEngine *engine() const;
+   void resetFileEngine() const;
    bool autoRemove;
    QString templateName;
 
    static QString defaultTemplateName();
+
+ private:
+   Q_DECLARE_PUBLIC(QTemporaryFile)
+   friend class QLockFilePrivate;
 };
 
 class QTemporaryFileEngine : public QFSFileEngine
@@ -49,13 +51,14 @@ class QTemporaryFileEngine : public QFSFileEngine
    Q_DECLARE_PRIVATE(QFSFileEngine)
 
  public:
-   QTemporaryFileEngine(const QString &file, bool fileIsTemplate = true)
-      : QFSFileEngine(), filePathIsTemplate(fileIsTemplate),
-        filePathWasTemplate(fileIsTemplate) {
+   QTemporaryFileEngine(const QString &file, quint32 mode, bool nameIsTemplate = true)
+      : QFSFileEngine(), fileMode(mode), filePathIsTemplate(nameIsTemplate), filePathWasTemplate(nameIsTemplate)
+   {
       Q_D(QFSFileEngine);
+
       d->fileEntry = QFileSystemEntry(file);
 
-      if (!filePathIsTemplate) {
+      if (! filePathIsTemplate) {
          QFSFileEngine::setFileName(file);
       }
    }
@@ -72,11 +75,10 @@ class QTemporaryFileEngine : public QFSFileEngine
    bool renameOverwrite(const QString &newName) override;
    bool close() override;
 
+   quint32 fileMode;
+
    bool filePathIsTemplate;
    bool filePathWasTemplate;
 };
 
-QT_END_NAMESPACE
-
-#endif /* QTEMPORARYFILE_P_H */
-
+#endif

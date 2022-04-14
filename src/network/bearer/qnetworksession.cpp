@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,6 +22,7 @@
 ***********************************************************************/
 
 #include <qnetworksession.h>
+
 #include <qnetworksession_p.h>
 #include <qbearerengine_p.h>
 #include <qnetworkconfigmanager_p.h>
@@ -30,18 +31,18 @@
 #include <QTimer>
 #include <QThread>
 
-
 #ifdef interface
+   // avoid conflict with our method named interface()
 #  undef interface
 #endif
 
 #ifndef QT_NO_BEARERMANAGEMENT
 
 QNetworkSession::QNetworkSession(const QNetworkConfiguration &connectionConfig, QObject *parent)
-   : QObject(parent), d(0)
+   : QObject(parent), d(nullptr)
 {
    // invalid configuration
-   if (!connectionConfig.identifier().isEmpty()) {
+   if (! connectionConfig.identifier().isEmpty()) {
       for (QBearerEngine *engine : qNetworkConfigurationManagerPrivate()->engines()) {
          if (engine->hasIdentifier(connectionConfig.identifier())) {
             d = engine->createSessionBackend();
@@ -68,9 +69,6 @@ QNetworkSession::QNetworkSession(const QNetworkConfiguration &connectionConfig, 
    }
 }
 
-/*!
-    Frees the resources associated with the QNetworkSession object.
-*/
 QNetworkSession::~QNetworkSession()
 {
    delete d;
@@ -128,11 +126,6 @@ void QNetworkSession::stop()
    }
 }
 
-/*!
-    Returns the QNetworkConfiguration that this network session object is based on.
-
-    \sa QNetworkConfiguration
-*/
 QNetworkConfiguration QNetworkSession::configuration() const
 {
    return d ? d->publicConfig : QNetworkConfiguration();
@@ -156,22 +149,11 @@ QNetworkSession::State QNetworkSession::state() const
    return d ? d->state : QNetworkSession::Invalid;
 }
 
-/*!
-    Returns the type of error that last occurred.
-
-    \sa state(), errorString()
-*/
 QNetworkSession::SessionError QNetworkSession::error() const
 {
    return d ? d->error() : InvalidConfigurationError;
 }
 
-/*!
-    Returns a human-readable description of the last device error that
-    occurred.
-
-    \sa error()
-*/
 QString QNetworkSession::errorString() const
 {
    return d ? d->errorString() : tr("Invalid configuration.");
@@ -216,14 +198,6 @@ void QNetworkSession::setSessionProperty(const QString &key, const QVariant &val
    d->setSessionProperty(key, value);
 }
 
-/*!
-    Instructs the session to roam to the new access point. The old access point remains active
-    until the application calls accept().
-
-   The newConfigurationActivated() signal is emitted once roaming has been completed.
-
-    \sa accept()
-*/
 void QNetworkSession::migrate()
 {
    if (d) {
@@ -231,11 +205,6 @@ void QNetworkSession::migrate()
    }
 }
 
-/*!
-    This function indicates that the application does not wish to roam the session.
-
-    \sa migrate()
-*/
 void QNetworkSession::ignore()
 {
    // Needed on at least Symbian platform: the roaming must be explicitly
@@ -252,20 +221,12 @@ void QNetworkSession::accept()
    }
 }
 
-/*!
-    The new access point is not suitable for the application. By calling this function the
-    session returns to the previous access point/configuration. This action may invalidate
-    any socket that has been created via the not desired access point.
-
-    \sa accept()
-*/
 void QNetworkSession::reject()
 {
    if (d) {
       d->reject();
    }
 }
-
 quint64 QNetworkSession::bytesWritten() const
 {
    return d ? d->bytesWritten() : Q_UINT64_C(0);
@@ -276,14 +237,10 @@ quint64 QNetworkSession::bytesReceived() const
    return d ? d->bytesReceived() : Q_UINT64_C(0);
 }
 
-/*!
-    Returns the number of seconds that the session has been active.
-*/
 quint64 QNetworkSession::activeTime() const
 {
    return d ? d->activeTime() : Q_UINT64_C(0);
 }
-
 
 QNetworkSession::UsagePolicies QNetworkSession::usagePolicies() const
 {
@@ -292,13 +249,13 @@ QNetworkSession::UsagePolicies QNetworkSession::usagePolicies() const
 
 void QNetworkSessionPrivate::setUsagePolicies(QNetworkSession &session, QNetworkSession::UsagePolicies policies)
 {
-   if (!session.d) {
+   if (! session.d) {
       return;
    }
    session.d->setUsagePolicies(policies);
 }
 
-
+// internal
 void QNetworkSession::connectNotify(const QMetaMethod &signal) const
 {
    QObject::connectNotify(signal);
@@ -318,14 +275,7 @@ void QNetworkSession::connectNotify(const QMetaMethod &signal) const
    }
 }
 
-/*!
-    \internal
-
-    This function is called when the client disconnects from the
-    preferredConfigurationChanged() signal.
-
-    \sa connectNotify()
-*/
+// internal
 void QNetworkSession::disconnectNotify(const QMetaMethod &signal) const
 {
    QObject::disconnectNotify(signal);
@@ -335,7 +285,7 @@ void QNetworkSession::disconnectNotify(const QMetaMethod &signal) const
    }
 
    //check for preferredConfigurationChanged() signal disconnect notification
-   //This is not required on all platforms
+   // not required on all platforms
    static const QMetaMethod preferredConfigurationChangedSignal =
       QMetaMethod::fromSignal(&QNetworkSession::preferredConfigurationChanged);
 
@@ -343,6 +293,5 @@ void QNetworkSession::disconnectNotify(const QMetaMethod &signal) const
       d->setALREnabled(false);
    }
 }
-
 
 #endif // QT_NO_BEARERMANAGEMENT

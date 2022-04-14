@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,8 +35,8 @@
 
 #ifdef QMEDIA_DIRECTSHOW_CAMERA
 
-#include <dsvideodevicecontrol.h>
-#include <dscameraservice.h>
+#include <dsvideo_devicecontrol.h>
+#include <dscamera_service.h>
 
 extern const CLSID CLSID_VideoInputDeviceCategory;
 
@@ -65,7 +65,7 @@ static int g_refCount = 0;
 void addRefCount()
 {
    if (++g_refCount == 1) {
-      CoInitialize(NULL);
+      CoInitialize(nullptr);
    }
 }
 
@@ -80,6 +80,7 @@ QMediaService *DSServicePlugin::create(QString const &key)
 {
 
 #ifdef QMEDIA_DIRECTSHOW_CAMERA
+
    if (key == Q_MEDIASERVICE_CAMERA) {
       addRefCount();
       return new DSCameraService;
@@ -87,7 +88,7 @@ QMediaService *DSServicePlugin::create(QString const &key)
 #endif
 
 #ifdef QMEDIA_DIRECTSHOW_PLAYER
-   if (key == QMediaPlayerControl_Key) {
+   if (key == Q_MEDIASERVICE_MEDIAPLAYER) {
       addRefCount();
       return new DirectShowPlayerService;
    }
@@ -104,7 +105,7 @@ void DSServicePlugin::release(QMediaService *service)
 
 QMediaServiceProviderHint::Features DSServicePlugin::supportedFeatures(const QString &service) const
 {
-   if (service == QMediaPlayerControl_Key) {
+   if (service == Q_MEDIASERVICE_MEDIAPLAYER) {
       return QMediaServiceProviderHint::StreamPlayback | QMediaServiceProviderHint::VideoSurface;
    } else {
       return QMediaServiceProviderHint::Features();
@@ -116,8 +117,8 @@ QString DSServicePlugin::defaultDevice(const QString &service) const
 
 #ifdef QMEDIA_DIRECTSHOW_CAMERA
    if (service == Q_MEDIASERVICE_CAMERA) {
-
       const QList<DSVideoDeviceInfo> &devs = DSVideoDeviceControl::availableDevices();
+
       if (! devs.isEmpty()) {
          return devs.first().first;
       }
@@ -137,8 +138,8 @@ QList<QString> DSServicePlugin::devices(const QString &service) const
    if (service == Q_MEDIASERVICE_CAMERA) {
       const QList<DSVideoDeviceInfo> &devs = DSVideoDeviceControl::availableDevices();
 
-      for (const DSVideoDeviceInfo &info : devs) {
-         result.append(info.first);
+      for (const DSVideoDeviceInfo &item : devs) {
+         result.append(item.first);
       }
    }
 #else
@@ -154,12 +155,13 @@ QString DSServicePlugin::deviceDescription(const QString &service, const QString
    if (service == Q_MEDIASERVICE_CAMERA) {
       const QList<DSVideoDeviceInfo> &devs = DSVideoDeviceControl::availableDevices();
 
-      for (const DSVideoDeviceInfo &info : devs) {
-         if (info.first == device) {
-            return info.second;
+      for (const DSVideoDeviceInfo &item : devs) {
+         if (item.first == device) {
+            return item.second;
          }
       }
    }
+
 #else
    (void) service;
    (void) device;

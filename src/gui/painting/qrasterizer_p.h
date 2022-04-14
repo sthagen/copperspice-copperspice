@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QRASTERIZER_P_H
 #define QRASTERIZER_P_H
 
-#include <QtCore/qglobal.h>
-#include <QtGui/qpainter.h>
+#include <qglobal.h>
+#include <qpainter.h>
 #include <qdrawhelper_p.h>
 #include <qrasterdefs_p.h>
 

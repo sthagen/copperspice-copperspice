@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,7 +35,6 @@ class QLocalServerPrivate;
 class Q_NETWORK_EXPORT QLocalServer : public QObject
 {
    NET_CS_OBJECT(QLocalServer)
-   Q_DECLARE_PRIVATE(QLocalServer)
 
    NET_CS_PROPERTY_READ(socketOptions,  socketOptions)
    NET_CS_PROPERTY_WRITE(socketOptions, setSocketOptions)
@@ -51,6 +50,10 @@ class Q_NETWORK_EXPORT QLocalServer : public QObject
    using SocketOptions = QFlags<SocketOption>;
 
    explicit QLocalServer(QObject *parent = nullptr);
+
+   QLocalServer(const QLocalServer &) = delete;
+   QLocalServer &operator=(const QLocalServer &) = delete;
+
    ~QLocalServer();
 
    void close();
@@ -79,14 +82,13 @@ class Q_NETWORK_EXPORT QLocalServer : public QObject
    QScopedPointer<QLocalServerPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QLocalServer)
+   Q_DECLARE_PRIVATE(QLocalServer)
 
    NET_CS_SLOT_1(Private, void _q_onNewConnection())
    NET_CS_SLOT_2(_q_onNewConnection)
 };
 
 #endif // QT_NO_LOCALSERVER
-
 
 #endif // QLOCALSERVER_H
 

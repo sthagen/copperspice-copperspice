@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,7 +32,7 @@ class QFontSubset
    explicit QFontSubset(QFontEngine *fe, int obj_id = 0)
       : object_id(obj_id), noEmbed(false), fontEngine(fe), downloaded_glyphs(0), standard_font(false)
    {
-      fontEngine->ref.ref();
+      fontEngine->m_refCount.ref();
 
 #ifndef QT_NO_PDF
       addGlyph(0);
@@ -40,7 +40,7 @@ class QFontSubset
    }
 
    ~QFontSubset() {
-      if (! fontEngine->ref.deref()) {
+      if (! fontEngine->m_refCount.deref()) {
          delete fontEngine;
       }
    }
@@ -73,7 +73,5 @@ class QFontSubset
    mutable QFixed emSquare;
    mutable QVector<QFixed> widths;
 };
-
-
 
 #endif

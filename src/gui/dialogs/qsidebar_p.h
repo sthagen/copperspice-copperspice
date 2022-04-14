@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,8 +30,6 @@
 #include <qurl.h>
 
 #ifndef QT_NO_FILEDIALOG
-
-QT_BEGIN_NAMESPACE
 
 class QFileSystemModel;
 
@@ -71,7 +69,7 @@ class QUrlModel : public QStandardItemModel
    void setFileSystemModel(QFileSystemModel *model);
    bool showFullPath;
 
- private :
+ private:
    GUI_CS_SLOT_1(Private, void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight))
    GUI_CS_SLOT_2(dataChanged)
 
@@ -113,7 +111,7 @@ class QSidebar : public QListView
    void selectUrl(const QUrl &url);
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
    void focusInEvent(QFocusEvent *event) override;
 
 #ifndef QT_NO_DRAGANDDROP
@@ -134,8 +132,6 @@ class QSidebar : public QListView
 
    QUrlModel *urlModel;
 };
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_FILEDIALOG
 

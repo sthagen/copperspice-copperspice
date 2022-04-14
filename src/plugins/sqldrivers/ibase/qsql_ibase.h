@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,8 +28,6 @@
 #include <qsqldriver.h>
 #include <qsqlcachedresult_p.h>
 #include <ibase.h>
-
-QT_BEGIN_NAMESPACE
 
 class QIBaseDriverPrivate;
 class QIBaseResultPrivate;
@@ -98,18 +96,16 @@ class QIBaseDriver : public QSqlDriver
 
    QString escapeIdentifier(const QString &identifier, IdentifierType type) const;
 
- protected :
+ protected:
    bool subscribeToNotificationImplementation(const QString &name);
    bool unsubscribeFromNotificationImplementation(const QString &name);
    QStringList subscribedToNotificationsImplementation();
 
- private :
+ private:
    SQL_CS_SLOT_1(Private, void qHandleEventNotification(void *updatedResultBuffer))
    SQL_CS_SLOT_2(qHandleEventNotification)
 
    QIBaseDriverPrivate *d;
 };
-
-QT_END_NAMESPACE
 
 #endif // QSQL_IBASE_H

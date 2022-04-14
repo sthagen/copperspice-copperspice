@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,12 +27,14 @@
 QGstreamerBufferProbe::QGstreamerBufferProbe(Flags flags)
 
 #if GST_CHECK_VERSION(1,0,0)
-   : m_capsProbeId(-1)
+   : m_capsProbeId(-1),
+
 #else
-   : m_caps(0)
+   : m_caps(nullptr),
+
 #endif
-   , m_bufferProbeId(-1)
-   , m_flags(flags)
+
+     m_bufferProbeId(-1), m_flags(flags)
 {
 }
 
@@ -79,17 +81,20 @@ void QGstreamerBufferProbe::removeProbeFromPad(GstPad *pad)
       gst_pad_remove_probe(pad, m_capsProbeId);
       m_capsProbeId = -1;
    }
+
    if (m_bufferProbeId != -1) {
       gst_pad_remove_probe(pad, m_bufferProbeId);
       m_bufferProbeId = -1;
    }
+
 #else
    if (m_bufferProbeId != -1) {
       gst_pad_remove_buffer_probe(pad, m_bufferProbeId);
       m_bufferProbeId = -1;
+
       if (m_caps) {
          gst_caps_unref(m_caps);
-         m_caps = 0;
+         m_caps = nullptr;
       }
    }
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qwidget.h>
 
-
-
 class QFocusFramePrivate;
 class QStyleOption;
 
@@ -37,23 +35,24 @@ class Q_GUI_EXPORT QFocusFrame : public QWidget
 
  public:
    QFocusFrame(QWidget *parent = nullptr);
+
+   QFocusFrame(const QFocusFrame &) = delete;
+   QFocusFrame &operator=(const QFocusFrame &) = delete;
+
    ~QFocusFrame();
 
    void setWidget(QWidget *widget);
    QWidget *widget() const;
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
 
-   bool eventFilter(QObject *, QEvent *) override;
-   void paintEvent(QPaintEvent *) override;
+   bool eventFilter(QObject *object, QEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
    void initStyleOption(QStyleOption *option) const;
 
  private:
    Q_DECLARE_PRIVATE(QFocusFrame)
-   Q_DISABLE_COPY(QFocusFrame)
 };
 
-
-
-#endif // QFOCUSFRAME_H
+#endif

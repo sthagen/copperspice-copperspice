@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -55,17 +55,24 @@ class QWindowsXPStyle : public QWindowsStyle
  public:
    QWindowsXPStyle();
    QWindowsXPStyle(QWindowsXPStylePrivate &dd);
+
+   QWindowsXPStyle(const QWindowsXPStyle &) = delete;
+   QWindowsXPStyle &operator=(const QWindowsXPStyle &) = delete;
+
    ~QWindowsXPStyle();
 
-   void drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QPainter *p, const QWidget *widget = nullptr) const override;
-   void drawControl(ControlElement element, const QStyleOption *option, QPainter *p, const QWidget *wwidget = nullptr) const override;
-
-   QRect subElementRect(SubElement r, const QStyleOption *option, const QWidget *widget = nullptr) const override;
-
-   QRect subControlRect(ComplexControl cc, const QStyleOptionComplex *option, SubControl sc,
+   void drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QPainter *painter,
       const QWidget *widget = nullptr) const override;
 
-   void drawComplexControl(ComplexControl cc, const QStyleOptionComplex *option, QPainter *p,
+   void drawControl(ControlElement element, const QStyleOption *option,
+      QPainter *painter, const QWidget *widget = nullptr) const override;
+
+   QRect subElementRect(SubElement subElement, const QStyleOption *option, const QWidget *widget = nullptr) const override;
+
+   QRect subControlRect(ComplexControl cc, const QStyleOptionComplex *option, SubControl subControl,
+      const QWidget *widget = nullptr) const override;
+
+   void drawComplexControl(ComplexControl cc, const QStyleOptionComplex *option, QPainter *painter,
       const QWidget *widget = nullptr) const override;
 
    QSize sizeFromContents(ContentsType ct, const QStyleOption *option, const QSize &contentsSize,
@@ -73,25 +80,24 @@ class QWindowsXPStyle : public QWindowsStyle
 
    int pixelMetric(PixelMetric pm, const QStyleOption *option = nullptr, const QWidget *widget = nullptr) const override;
 
-   int styleHint(StyleHint hint, const QStyleOption *option = nullptr, const QWidget *widget = 0,
-      QStyleHintReturn *returnData = 0) const override;
+   int styleHint(StyleHint hint, const QStyleOption *option = nullptr, const QWidget *widget = nullptr,
+      QStyleHintReturn *styleHintReturn = nullptr) const override;
 
    QPalette standardPalette() const override;
 
-   QPixmap standardPixmap(StandardPixmap standardIcon, const QStyleOption *option,
+   QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option,
       const QWidget *widget = nullptr) const override;
 
-   QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption *option = nullptr,
+   QIcon standardIcon(StandardPixmap standardPixmap, const QStyleOption *option = nullptr,
       const QWidget *widget = nullptr) const override;
 
-   void polish(QApplication *) override;
-   void polish(QWidget *) override;
-   void polish(QPalette &) override;
-   void unpolish(QApplication *) override;
-   void unpolish(QWidget *) override;
+   void polish(QApplication *app) override;
+   void polish(QWidget *widget) override;
+   void polish(QPalette &palette) override;
+   void unpolish(QApplication *app) override;
+   void unpolish(QWidget *widget) override;
 
  private:
-   Q_DISABLE_COPY(QWindowsXPStyle)
    Q_DECLARE_PRIVATE(QWindowsXPStyle)
 
    friend class QStyleFactory;
@@ -226,12 +232,13 @@ typedef struct _DTBGOPTS {
 class XPThemeData
 {
  public:
-   explicit XPThemeData(const QWidget *w = 0, QPainter *p = 0, int themeIn = -1,
+   explicit XPThemeData(const QWidget *w = nullptr, QPainter *p = nullptr, int themeIn = -1,
       int part = 0, int state = 0, const QRect &r = QRect())
-      : widget(w), painter(p), theme(themeIn), htheme(0), partId(part), stateId(state),
+      : widget(w), painter(p), theme(themeIn), htheme(nullptr), partId(part), stateId(state),
         mirrorHorizontally(false), mirrorVertically(false), noBorder(false),
         noContent(false), rotate(0), rect(r)
-   {}
+   {
+   }
 
    HRGN mask(QWidget *widget);
    HTHEME handle();
@@ -242,11 +249,16 @@ class XPThemeData
    QSizeF size();
    QMarginsF margins(const QRect &rect, int propId = TMT_CONTENTMARGINS);
    QMarginsF margins(int propId = TMT_CONTENTMARGINS);
-   static QSizeF themeSize(const QWidget *w = 0, QPainter *p = 0, int themeIn = -1, int part = 0, int state = 0);
-   static QMarginsF themeMargins(const QRect &rect, const QWidget *w = 0, QPainter *p = 0, int themeIn = -1,
-      int part = 0, int state = 0, int propId = TMT_CONTENTMARGINS);
-   static QMarginsF themeMargins(const QWidget *w = 0, QPainter *p = 0, int themeIn = -1,
-      int part = 0, int state = 0, int propId = TMT_CONTENTMARGINS);
+
+   static QSizeF themeSize(const QWidget *widget = nullptr, QPainter *painter = nullptr, int themeIn = -1,
+               int part = 0, int state = 0);
+
+   static QMarginsF themeMargins(const QRect &rect, const QWidget *widget = nullptr, QPainter *painter = nullptr,
+               int themeIn = -1, int part = 0, int state = 0, int propId = TMT_CONTENTMARGINS);
+
+   static QMarginsF themeMargins(const QWidget *widget = nullptr, QPainter *painter = nullptr, int themeIn = -1,
+               int part = 0, int state = 0, int propId = TMT_CONTENTMARGINS);
+
    const QWidget *widget;
    QPainter *painter;
 
@@ -314,39 +326,55 @@ struct QWindowsUxThemeLib {
    typedef bool (WINAPI *PtrIsThemeActive)();
    typedef HTHEME (WINAPI *PtrOpenThemeData)(HWND hwnd, LPCWSTR pszClassList);
    typedef HRESULT (WINAPI *PtrCloseThemeData)(HTHEME hTheme);
-   typedef HRESULT (WINAPI *PtrDrawThemeBackground)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect,
-      OPTIONAL const RECT *pClipRect);
-   typedef HRESULT (WINAPI *PtrDrawThemeBackgroundEx)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect,
-      OPTIONAL const DTBGOPTS *pOptions);
-   typedef HRESULT (WINAPI *PtrGetCurrentThemeName)(OUT LPWSTR pszThemeFileName, int cchMaxNameChars, OUT OPTIONAL LPWSTR pszColorBuff,
-      int cchMaxColorChars, OUT OPTIONAL LPWSTR pszSizeBuff, int cchMaxSizeChars);
-   typedef HRESULT (WINAPI *PtrGetThemeDocumentationProperty)(LPCWSTR pszThemeName, LPCWSTR pszPropertyName, OUT LPWSTR pszValueBuff,
-      int cchMaxValChars);
+
+   typedef HRESULT (WINAPI *PtrDrawThemeBackground)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId,
+      const RECT *pRect, OPTIONAL const RECT *pClipRect);
+
+   typedef HRESULT (WINAPI *PtrDrawThemeBackgroundEx)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId,
+      const RECT *pRect, OPTIONAL const DTBGOPTS *pOptions);
+
+   typedef HRESULT (WINAPI *PtrGetCurrentThemeName)(OUT LPWSTR pszThemeFileName, int cchMaxNameChars,
+      OUT OPTIONAL LPWSTR pszColorBuff, int cchMaxColorChars, OUT OPTIONAL LPWSTR pszSizeBuff, int cchMaxSizeChars);
+
+   typedef HRESULT (WINAPI *PtrGetThemeDocumentationProperty)(LPCWSTR pszThemeName, LPCWSTR pszPropertyName,
+      OUT LPWSTR pszValueBuff, int cchMaxValChars);
+
    typedef HRESULT (WINAPI *PtrGetThemeBool)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT BOOL *pfVal);
    typedef HRESULT (WINAPI *PtrGetThemeColor)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor);
    typedef HRESULT (WINAPI *PtrGetThemeEnumValue)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT int *piVal);
-   typedef HRESULT (WINAPI *PtrGetThemeFilename)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT LPWSTR pszThemeFileName,
-      int cchMaxBuffChars);
-   typedef HRESULT (WINAPI *PtrGetThemeFont)(HTHEME hTheme, OPTIONAL HDC hdc, int iPartId, int iStateId, int iPropId, OUT LOGFONT *pFont);
+   typedef HRESULT (WINAPI *PtrGetThemeFilename)(HTHEME hTheme, int iPartId, int iStateId, int iPropId,
+      OUT LPWSTR pszThemeFileName, int cchMaxBuffChars);
+
+   typedef HRESULT (WINAPI *PtrGetThemeFont)(HTHEME hTheme, OPTIONAL HDC hdc, int iPartId, int iStateId,
+      int iPropId, OUT LOGFONT *pFont);
+
    typedef HRESULT (WINAPI *PtrGetThemeInt)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT int *piVal);
    typedef HRESULT (WINAPI *PtrGetThemeIntList)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT INTLIST *pIntList);
    typedef HRESULT (WINAPI *PtrGetThemeMargins)(HTHEME hTheme, OPTIONAL HDC hdc, int iPartId, int iStateId, int iPropId,
       OPTIONAL RECT *prc, OUT MARGINS *pMargins);
-   typedef HRESULT (WINAPI *PtrGetThemeMetric)(HTHEME hTheme, OPTIONAL HDC hdc, int iPartId, int iStateId, int iPropId, OUT int *piVal);
+
+   typedef HRESULT (WINAPI *PtrGetThemeMetric)(HTHEME hTheme, OPTIONAL HDC hdc, int iPartId, int iStateId,
+      int iPropId, OUT int *piVal);
+
    typedef HRESULT (WINAPI *PtrGetThemePartSize)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, OPTIONAL RECT *prc,
       enum THEMESIZE eSize, OUT SIZE *psz);
+
    typedef HRESULT (WINAPI *PtrGetThemePosition)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT POINT *pPoint);
    typedef HRESULT (WINAPI *PtrGetThemePropertyOrigin)(HTHEME hTheme, int iPartId, int iStateId, int iPropId,
       OUT enum PROPERTYORIGIN *pOrigin);
+
    typedef HRESULT (WINAPI *PtrGetThemeRect)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT RECT *pRect);
    typedef HRESULT (WINAPI *PtrGetThemeString)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT LPWSTR pszBuff,
       int cchMaxBuffChars);
-   typedef HRESULT (WINAPI *PtrGetThemeBackgroundRegion)(HTHEME hTheme, OPTIONAL HDC hdc, int iPartId, int iStateId, const RECT *pRect,
-      OUT HRGN *pRegion);
+
+   typedef HRESULT (WINAPI *PtrGetThemeBackgroundRegion)(HTHEME hTheme, OPTIONAL HDC hdc, int iPartId,
+      int iStateId, const RECT *pRect, OUT HRGN *pRegion);
+
    typedef BOOL (WINAPI *PtrIsThemeBackgroundPartiallyTransparent)(HTHEME hTheme, int iPartId, int iStateId);
    typedef HRESULT (WINAPI *PtrSetWindowTheme)(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList);
-   typedef HRESULT (WINAPI *PtrGetThemeTransitionDuration)(HTHEME hTheme, int iPartId, int iStateFromId, int iStateToId, int iPropId,
-      int *pDuration);
+
+   typedef HRESULT (WINAPI *PtrGetThemeTransitionDuration)(HTHEME hTheme, int iPartId, int iStateFromId,
+      int iStateToId, int iPropId, int *pDuration);
 
    static bool resolveSymbols();
 
@@ -405,9 +433,11 @@ class QWindowsXPStylePrivate : public QWindowsStylePrivate, public QWindowsUxThe
       VistaTreeViewTheme,   // arrow shape treeview indicators (Vista) obtained from "explorer" theme.
       NThemes
    };
+
    QWindowsXPStylePrivate()
-      : QWindowsStylePrivate(), hasInitColors(false), bufferDC(0), bufferBitmap(0), nullBitmap(0),
-        bufferPixels(0), bufferW(0), bufferH(0) {
+      : QWindowsStylePrivate(), hasInitColors(false), bufferDC(nullptr), bufferBitmap(nullptr),
+        nullBitmap(nullptr), bufferPixels(nullptr), bufferW(0), bufferH(0)
+   {
       init();
    }
 
@@ -415,8 +445,10 @@ class QWindowsXPStylePrivate : public QWindowsStylePrivate, public QWindowsUxThe
       cleanup();
    }
 
-   static int pixelMetricFromSystemDp(QStyle::PixelMetric pm, const QStyleOption *option = 0, const QWidget *widget = 0);
-   static int fixedPixelMetric(QStyle::PixelMetric pm, const QStyleOption *option = 0, const QWidget *widget = 0);
+   static int pixelMetricFromSystemDp(QStyle::PixelMetric pm, const QStyleOption *option = nullptr,
+               const QWidget *widget = nullptr);
+   static int fixedPixelMetric(QStyle::PixelMetric pm, const QStyleOption *option = nullptr,
+               const QWidget *widget = nullptr);
 
    static HWND winId(const QWidget *widget);
 
@@ -446,7 +478,6 @@ class QWindowsXPStylePrivate : public QWindowsStylePrivate, public QWindowsUxThe
    bool fixAlphaChannel(const QRect &rect);
    bool swapAlphaChannel(const QRect &rect, bool allPixels = false);
 
-
    QRgb groupBoxTextColor;
    QRgb groupBoxTextColorDisabled;
    QRgb sliderTickColor;
@@ -460,7 +491,8 @@ class QWindowsXPStylePrivate : public QWindowsStylePrivate, public QWindowsUxThe
    static bool isItemViewDelegateLineEdit(const QWidget *widget);
    static bool isLineEditBaseColorSet(const QStyleOption *option, const QWidget *widget);
 
-   QIcon dockFloat, dockClose;
+   QIcon dockFloat;
+   QIcon dockClose;
 
  private:
 
@@ -488,9 +520,10 @@ class QWindowsXPStylePrivate : public QWindowsStylePrivate, public QWindowsUxThe
 inline QSizeF XPThemeData::size()
 {
    QSizeF result(0, 0);
+
    if (isValid()) {
       SIZE size;
-      if (SUCCEEDED(QWindowsXPStylePrivate::pGetThemePartSize(handle(), 0, partId, stateId, 0, TS_TRUE, &size))) {
+      if (SUCCEEDED(QWindowsXPStylePrivate::pGetThemePartSize(handle(), nullptr, partId, stateId, nullptr, TS_TRUE, &size))) {
          result = QSize(size.cx, size.cy);
       }
    }
@@ -500,25 +533,29 @@ inline QSizeF XPThemeData::size()
 inline QMarginsF XPThemeData::margins(const QRect &qRect, int propId)
 {
    QMarginsF result(0, 0, 0, 0);
+
    if (isValid()) {
       MARGINS margins;
       RECT rect = XPThemeData::toRECT(qRect);
-      if (SUCCEEDED(QWindowsXPStylePrivate::pGetThemeMargins(handle(), 0, partId, stateId, propId, &rect, &margins))) {
+      if (SUCCEEDED(QWindowsXPStylePrivate::pGetThemeMargins(handle(), nullptr, partId, stateId, propId, &rect, &margins))) {
          result = QMargins(margins.cxLeftWidth, margins.cyTopHeight, margins.cxRightWidth, margins.cyBottomHeight);
       }
    }
+
    return result;
 }
 
 inline QMarginsF XPThemeData::margins(int propId)
 {
    QMarginsF result(0, 0, 0, 0);
+
    if (isValid()) {
       MARGINS margins;
-      if (SUCCEEDED(QWindowsXPStylePrivate::pGetThemeMargins(handle(), 0, partId, stateId, propId, NULL, &margins))) {
+      if (SUCCEEDED(QWindowsXPStylePrivate::pGetThemeMargins(handle(), nullptr, partId, stateId, propId, nullptr, &margins))) {
          result = QMargins(margins.cxLeftWidth, margins.cyTopHeight, margins.cxRightWidth, margins.cyBottomHeight);
       }
    }
+
    return result;
 }
 

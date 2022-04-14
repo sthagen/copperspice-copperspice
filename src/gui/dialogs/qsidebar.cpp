@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -42,14 +42,14 @@ void QSideBarDelegate::initStyleOption(QStyleOptionViewItem *option, const QMode
 
    if (value.isValid()) {
       // if the bookmark/entry is not enabled then we paint it in gray
-      if (!qvariant_cast<bool>(value)) {
+      if (! value.value<bool>()) {
          option->state &= ~QStyle::State_Enabled;
       }
    }
 }
 
 QUrlModel::QUrlModel(QObject *parent)
-   : QStandardItemModel(parent), showFullPath(false), fileSystemModel(0)
+   : QStandardItemModel(parent), showFullPath(false), fileSystemModel(nullptr)
 {
 }
 
@@ -58,7 +58,7 @@ QUrlModel::QUrlModel(QObject *parent)
 */
 QStringList QUrlModel::mimeTypes() const
 {
-   return QStringList(QLatin1String("text/uri-list"));
+   return QStringList("text/uri-list");
 }
 
 /*!
@@ -74,7 +74,7 @@ Qt::ItemFlags QUrlModel::flags(const QModelIndex &index) const
       flags &= ~Qt::ItemIsDropEnabled;
    }
 
-   if (index.data(Qt::DecorationRole).isNull()) {
+   if (! index.data(Qt::DecorationRole).isValid()) {
       flags &= ~Qt::ItemIsEnabled;
    }
 
@@ -186,7 +186,7 @@ void QUrlModel::setUrl(const QModelIndex &index, const QUrl &url, const QModelIn
          newName = dirIndex.data().toString();
       }
 
-      QIcon newIcon = qvariant_cast<QIcon>(dirIndex.data(Qt::DecorationRole));
+      QIcon newIcon = (dirIndex.data(Qt::DecorationRole)).value<QIcon>();
       if (!dirIndex.isValid()) {
          const QFileIconProvider *provider = fileSystemModel->iconProvider();
          if (provider) {
@@ -216,7 +216,8 @@ void QUrlModel::setUrl(const QModelIndex &index, const QUrl &url, const QModelIn
       if (index.data().toString() != newName) {
          setData(index, newName);
       }
-      QIcon oldIcon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+
+      QIcon oldIcon = (index.data(Qt::DecorationRole)).value<QIcon>();
       if (oldIcon.cacheKey() != newIcon.cacheKey()) {
          setData(index, newIcon, Qt::DecorationRole);
       }
@@ -240,7 +241,7 @@ void QUrlModel::addUrls(const QList<QUrl> &list, int row, bool move)
    row = qMin(row, rowCount());
    for (int i = list.count() - 1; i >= 0; --i) {
       QUrl url = list.at(i);
-      if (!url.isValid() || url.scheme() != QLatin1String("file")) {
+      if (! url.isValid() || url.scheme() != "file") {
          continue;
       }
 
@@ -299,14 +300,14 @@ void QUrlModel::setFileSystemModel(QFileSystemModel *model)
       return;
    }
 
-   if (fileSystemModel != 0) {
+   if (fileSystemModel != nullptr) {
       disconnect(model, &QFileSystemModel::dataChanged,   this, &QUrlModel::dataChanged);
       disconnect(model, &QFileSystemModel::layoutChanged, this, &QUrlModel::layoutChanged);
       disconnect(model, &QFileSystemModel::rowsRemoved,   this, &QUrlModel::layoutChanged);
    }
 
    fileSystemModel = model;
-   if (fileSystemModel != 0) {
+   if (fileSystemModel != nullptr) {
       connect(model, &QFileSystemModel::dataChanged,   this, &QUrlModel::dataChanged);
       connect(model, &QFileSystemModel::layoutChanged, this, &QUrlModel::layoutChanged);
       connect(model, &QFileSystemModel::rowsRemoved,   this, &QUrlModel::layoutChanged);

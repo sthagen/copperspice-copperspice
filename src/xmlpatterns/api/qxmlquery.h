@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QXMLQUERY_H
 #define QXMLQUERY_H
 
-#include <QtCore/QUrl>
-#include <QtXmlPatterns/QAbstractXmlNodeModel>
-#include <QtXmlPatterns/QAbstractXmlReceiver>
-#include <QtXmlPatterns/QXmlNamePool>
-
-QT_BEGIN_NAMESPACE
+#include <QUrl>
+#include <QAbstractXmlNodeModel>
+#include <QAbstractXmlReceiver>
+#include <QXmlNamePool>
 
 class QAbstractMessageHandler;
 class QAbstractUriResolver;
@@ -72,7 +70,7 @@ class Q_XMLPATTERNS_EXPORT QXmlQuery
    ~QXmlQuery();
    QXmlQuery &operator=(const QXmlQuery &other);
 
-   void setMessageHandler(QAbstractMessageHandler *messageHandler);
+   void setMessageHandler(QAbstractMessageHandler *msgHandler);
    QAbstractMessageHandler *messageHandler() const;
 
    void setQuery(const QString &sourceCode, const QUrl &documentURI = QUrl());
@@ -84,8 +82,8 @@ class Q_XMLPATTERNS_EXPORT QXmlQuery
    void bindVariable(const QXmlName &name, const QXmlItem &value);
    void bindVariable(const QString &localName, const QXmlItem &value);
 
-   void bindVariable(const QXmlName &name, QIODevice *);
-   void bindVariable(const QString &localName, QIODevice *);
+   void bindVariable(const QXmlName &name, QIODevice *device);
+   void bindVariable(const QString &localName, QIODevice *device);
    void bindVariable(const QXmlName &name, const QXmlQuery &query);
    void bindVariable(const QString &localName, const QXmlQuery &query);
 
@@ -103,7 +101,7 @@ class Q_XMLPATTERNS_EXPORT QXmlQuery
    void setFocus(const QXmlItem &item);
    bool setFocus(const QUrl &documentURI);
    bool setFocus(QIODevice *document);
-   bool setFocus(const QString &focus);
+   bool setFocus(const QString &focusText);
 
    void setInitialTemplateName(const QXmlName &name);
    void setInitialTemplateName(const QString &name);
@@ -113,6 +111,7 @@ class Q_XMLPATTERNS_EXPORT QXmlQuery
    QNetworkAccessManager *networkAccessManager() const;
 
    QueryLanguage queryLanguage() const;
+
  private:
    friend class QXmlName;
    friend class QXmlSerializer;
@@ -120,11 +119,9 @@ class Q_XMLPATTERNS_EXPORT QXmlQuery
    friend class QPatternist::XsdSchemaParser;
    friend class QPatternist::XsdValidatingInstanceReader;
    friend class QPatternist::VariableLoader;
-   template<typename TInputType> friend bool setFocusHelper(QXmlQuery *const queryInstance,
-         const TInputType &focusValue);
+
+   template<typename TInputType> friend bool setFocusHelper(QXmlQuery *const queryInstance, const TInputType &focusValue);
    QXmlQueryPrivate *d;
 };
-
-QT_END_NAMESPACE
 
 #endif

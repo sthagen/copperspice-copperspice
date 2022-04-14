@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,42 +36,44 @@ class QCupsJobWidget : public QWidget
 {
     GUI_CS_OBJECT(QCupsJobWidget)
 
-public:
-    explicit QCupsJobWidget(QWidget *parent = nullptr);
-    ~QCupsJobWidget();
+ public:
+   explicit QCupsJobWidget(QWidget *parent = nullptr);
 
-    void setPrinter(QPrinter *printer);
-    void setupPrinter();
+   QCupsJobWidget(const QCupsJobWidget &) = delete;
+   QCupsJobWidget &operator=(const QCupsJobWidget &) = delete;
 
-private:
-    void setJobHold(QCUPSSupport::JobHoldUntil jobHold = QCUPSSupport::NoHold, const QTime &holdUntilTime = QTime());
-    QCUPSSupport::JobHoldUntil jobHold() const;
-    QTime jobHoldTime() const;
+   ~QCupsJobWidget();
 
-    void setJobBilling(const QString &jobBilling = QString());
-    QString jobBilling() const;
+   void setPrinter(QPrinter *printer);
+   void setupPrinter();
 
-    void setJobPriority(int priority = 50);
-    int jobPriority() const;
+ private:
+   void setJobHold(QCUPSSupport::JobHoldUntil jobHold = QCUPSSupport::NoHold, const QTime &holdUntilTime = QTime());
+   QCUPSSupport::JobHoldUntil jobHold() const;
+   QTime jobHoldTime() const;
 
-    void setStartBannerPage(const QCUPSSupport::BannerPage bannerPage = QCUPSSupport::NoBanner);
-    QCUPSSupport::BannerPage startBannerPage() const;
+   void setJobBilling(const QString &jobBilling = QString());
+   QString jobBilling() const;
 
-    void setEndBannerPage(const QCUPSSupport::BannerPage bannerPage = QCUPSSupport::NoBanner);
-    QCUPSSupport::BannerPage endBannerPage() const;
+   void setJobPriority(int priority = 50);
+   int jobPriority() const;
 
-    void initJobHold();
-    void initJobBilling();
-    void initJobPriority();
-    void initBannerPages();
+   void setStartBannerPage(const QCUPSSupport::BannerPage bannerPage = QCUPSSupport::NoBanner);
+   QCUPSSupport::BannerPage startBannerPage() const;
 
-    QPrinter *m_printer;
-    Ui::QCupsJobWidget m_ui;
+   void setEndBannerPage(const QCUPSSupport::BannerPage bannerPage = QCUPSSupport::NoBanner);
+   QCUPSSupport::BannerPage endBannerPage() const;
 
-    Q_DISABLE_COPY(QCupsJobWidget)
+   void initJobHold();
+   void initJobBilling();
+   void initJobPriority();
+   void initBannerPages();
 
-    GUI_CS_SLOT_1(Private, void toggleJobHoldTime())
-    GUI_CS_SLOT_2(toggleJobHoldTime)
+   QPrinter *m_printer;
+   Ui::QCupsJobWidget m_ui;
+
+   GUI_CS_SLOT_1(Private, void toggleJobHoldTime())
+   GUI_CS_SLOT_2(toggleJobHoldTime)
 };
 
 #endif // QT_NO_PRINTER / QT_NO_CUPS

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,6 @@
 #include <qstringlist.h>
 #include <qlist.h>
 
-QT_BEGIN_NAMESPACE
-
 class QResourcePrivate;
 
 class Q_CORE_EXPORT QResource
@@ -55,8 +53,8 @@ class Q_CORE_EXPORT QResource
    static void addSearchPath(const QString &path);
    static QStringList searchPaths();
 
-   static bool registerResource(const QString &rccFilename, const QString &resourceRoot = QString());
-   static bool unregisterResource(const QString &rccFilename, const QString &resourceRoot = QString());
+   static bool registerResource(const QString &fileName, const QString &resourceRoot = QString());
+   static bool unregisterResource(const QString &fileName, const QString &resourceRoot = QString());
 
    static bool registerResource(const uchar *rccData, const QString &resourceRoot = QString());
    static bool unregisterResource(const uchar *rccData, const QString &resourceRoot = QString());
@@ -65,6 +63,7 @@ class Q_CORE_EXPORT QResource
    friend class QResourceFileEngine;
    friend class QResourceFileEngineIterator;
    bool isDir() const;
+
    inline bool isFile() const {
       return !isDir();
    }
@@ -76,7 +75,4 @@ class Q_CORE_EXPORT QResource
    Q_DECLARE_PRIVATE(QResource)
 };
 
-QT_END_NAMESPACE
-
-
-#endif // QRESOURCE_H
+#endif

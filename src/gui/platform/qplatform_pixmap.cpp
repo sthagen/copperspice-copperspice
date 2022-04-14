@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,34 +22,27 @@
 ***********************************************************************/
 
 #include <qplatform_pixmap.h>
-#include <qplatform_integration.h>
 
 #include <qbuffer.h>
 #include <qbitmap.h>
 #include <qimagereader.h>
+#include <qplatform_integration.h>
 
 #include <qguiapplication_p.h>
 #include <qimagepixmapcleanuphooks_p.h>
 
 QPlatformPixmap *QPlatformPixmap::create(int w, int h, PixelType type)
 {
-   QPlatformPixmap *data = QGuiApplicationPrivate::platformIntegration()->createPlatformPixmap(static_cast<QPlatformPixmap::PixelType>
-         (type));
+   QPlatformPixmap *data = QGuiApplicationPrivate::platformIntegration()->
+                  createPlatformPixmap(static_cast<QPlatformPixmap::PixelType>(type));
    data->resize(w, h);
+
    return data;
 }
 
 QPlatformPixmap::QPlatformPixmap(PixelType pixelType, int objectId)
-   : w(0),
-     h(0),
-     d(0),
-     is_null(true),
-     ref(0),
-     detach_no(0),
-     type(pixelType),
-     id(objectId),
-     ser_no(0),
-     is_cached(false)
+   : w(0), h(0), d(0), is_null(true), ref(0), detach_no(0), type(pixelType),
+     id(objectId), ser_no(0), is_cached(false)
 {
 }
 
@@ -81,11 +74,13 @@ static QImage makeBitmapCompliantIfNeeded(QPlatformPixmap *d, const QImage &imag
       // and image.color(1) == Qt::color1 (black)
       const QRgb c0 = QColor(Qt::black).rgb();
       const QRgb c1 = QColor(Qt::white).rgb();
+
       if (img.color(0) == c0 && img.color(1) == c1) {
          img.invertPixels();
          img.setColor(0, c1);
          img.setColor(1, c0);
       }
+
       return img;
    }
 
@@ -98,8 +93,7 @@ void QPlatformPixmap::fromImageReader(QImageReader *imageReader, Qt::ImageConver
    fromImage(image, flags);
 }
 
-bool QPlatformPixmap::fromFile(const QString &fileName, const char *format,
-   Qt::ImageConversionFlags flags)
+bool QPlatformPixmap::fromFile(const QString &fileName, const QString &format, Qt::ImageConversionFlags flags)
 {
    QImage image = QImageReader(fileName, format).read();
    if (image.isNull()) {
@@ -110,7 +104,7 @@ bool QPlatformPixmap::fromFile(const QString &fileName, const char *format,
    return !isNull();
 }
 
-bool QPlatformPixmap::fromData(const uchar *buf, uint len, const char *format, Qt::ImageConversionFlags flags)
+bool QPlatformPixmap::fromData(const uchar *buf, uint len, const QString &format, Qt::ImageConversionFlags flags)
 {
    QByteArray a = QByteArray::fromRawData(reinterpret_cast<const char *>(buf), len);
    QBuffer b(&a);
@@ -132,6 +126,10 @@ void QPlatformPixmap::copy(const QPlatformPixmap *data, const QRect &rect)
 
 bool QPlatformPixmap::scroll(int dx, int dy, const QRect &rect)
 {
+   (void) dx;
+   (void) dy;
+   (void) rect;
+
    return false;
 }
 
@@ -161,7 +159,7 @@ QImage QPlatformPixmap::toImage(const QRect &rect) const
 
 QImage *QPlatformPixmap::buffer()
 {
-   return 0;
+   return nullptr;
 }
 
 

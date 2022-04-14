@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,14 @@
 #ifndef QTCONCURRENTREDUCEKERNEL_H
 #define QTCONCURRENTREDUCEKERNEL_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qatomic.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qmap.h>
-#include <QtCore/qmutex.h>
-#include <QtCore/qthread.h>
-#include <QtCore/qthreadpool.h>
-#include <QtCore/qvector.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
+#include <qatomic.h>
+#include <qlist.h>
+#include <qmap.h>
+#include <qmutex.h>
+#include <qthread.h>
+#include <qthreadpool.h>
+#include <qvector.h>
 
 namespace QtConcurrent {
 
@@ -63,8 +61,8 @@ class IntermediateResults
 enum ReduceOption {
    UnorderedReduce = 0x1,
    OrderedReduce = 0x2,
-   SequentialReduce = 0x4
-                      // ParallelReduce = 0x8
+   SequentialReduce = 0x4,
+// ParallelReduce = 0x8
 };
 using ReduceOptions = QFlags<ReduceOption>;
 Q_DECLARE_OPERATORS_FOR_FLAGS(ReduceOptions)
@@ -193,7 +191,5 @@ struct SequenceHolder2 : public Base {
 };
 
 } // namespace QtConcurrent
-
-QT_END_NAMESPACE
 
 #endif

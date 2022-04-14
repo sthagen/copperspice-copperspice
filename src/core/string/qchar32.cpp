@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,7 @@
 #include <qdatastream.h>
 #include <qunicodetables_p.h>
 
-#include "../tools/qunicodetables.cpp"      // do not change to < >
+#include "../locale/qunicodetables.cpp"      // do not change to < >
 
 #define FLAG(x) (1 << (x))
 
@@ -76,7 +76,7 @@ static const char32_t * cs_internal_decomposition(uint value, int *length, int *
       *length = 0;
       *tag    = QChar32::NoDecomposition;
 
-      return 0;
+      return nullptr;
    }
 
    const char32_t *decomposition = QUnicodeTables::uc_decomposition_map + index;
@@ -366,19 +366,19 @@ QChar32::UnicodeVersion QChar32::currentUnicodeVersion()
    return UNICODE_DATA_VERSION;
 }
 
-QDataStream &operator>>(QDataStream &in, QChar32 &ch)
+QDataStream &operator>>(QDataStream &stream, QChar32 &ch)
 {
    quint32 tmp;
-   in >> tmp;
+   stream >> tmp;
 
    ch = static_cast<char32_t>(tmp);
 
-   return in;
+   return stream;
 }
 
-QDataStream &operator<<(QDataStream &out, const QChar32 &ch)
+QDataStream &operator<<(QDataStream &stream, const QChar32 &ch)
 {
-   out << static_cast<quint32>(ch.unicode());
-   return out;
+   stream << static_cast<quint32>(ch.unicode());
+   return stream;
 }
 

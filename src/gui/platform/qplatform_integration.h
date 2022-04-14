@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,9 +23,6 @@
 
 #ifndef QPLATFORM_INTEGRATION_H
 #define QPLATFORM_INTEGRATION_H
-
-
-
 
 #include <qopenglcontext.h>
 #include <qsurfaceformat.h>
@@ -132,20 +129,16 @@ class Q_GUI_EXPORT QPlatformIntegration
       ItemViewActivateItemOnSingleClick
    };
 
-
    virtual QVariant styleHint(StyleHint hint) const;
-
-   virtual Qt::WindowState defaultWindowState(Qt::WindowFlags) const;
-
-
+   virtual Qt::WindowState defaultWindowState(Qt::WindowFlags flags) const;
    virtual Qt::KeyboardModifiers queryKeyboardModifiers() const;
-   virtual QList<int> possibleKeys(const QKeyEvent *) const;
-
+   virtual QList<int> possibleKeys(const QKeyEvent *event) const;
 
    virtual QStringList themeNames() const;
    virtual QPlatformTheme *createPlatformTheme(const QString &name) const;
 
    virtual QPlatformOffscreenSurface *createPlatformOffscreenSurface(QOffscreenSurface *surface) const;
+
 #ifndef QT_NO_SESSIONMANAGER
    virtual QPlatformSessionManager *createPlatformSessionManager(const QString &id, const QString &key) const;
 #endif

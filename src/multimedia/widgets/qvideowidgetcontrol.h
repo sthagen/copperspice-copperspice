@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -72,7 +72,7 @@ class Q_MULTIMEDIA_EXPORT QVideoWidgetControl : public QMediaControl
    explicit QVideoWidgetControl(QObject *parent = nullptr);
 };
 
-#define QVideoWidgetControl_iid "com.copperpsice.CS.videoWidgetControl/1.0"
+#define QVideoWidgetControl_iid "com.copperspice.CS.videoWidgetControl/1.0"
 CS_DECLARE_INTERFACE(QVideoWidgetControl, QVideoWidgetControl_iid)
 
 #endif

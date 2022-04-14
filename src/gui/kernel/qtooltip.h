@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qwidget.h>
 
-QT_BEGIN_NAMESPACE
-
 #ifndef QT_NO_TOOLTIP
 
 class Q_GUI_EXPORT QToolTip
@@ -35,9 +33,9 @@ class Q_GUI_EXPORT QToolTip
    QToolTip() = delete;
 
  public:
-   static void showText(const QPoint &pos, const QString &text, QWidget *w = nullptr);
-   static void showText(const QPoint &pos, const QString &text, QWidget *w, const QRect &rect);
-   static void showText(const QPoint &pos, const QString &text, QWidget *w, const QRect &rect, int msecShowTime);
+   static void showText(const QPoint &pos, const QString &text, QWidget *widget = nullptr);
+   static void showText(const QPoint &pos, const QString &text, QWidget *widget, const QRect &rect);
+   static void showText(const QPoint &pos, const QString &text, QWidget *widget, const QRect &rect, int msecShowTime);
 
    static inline void hideText() {
       showText(QPoint(), QString());
@@ -47,12 +45,11 @@ class Q_GUI_EXPORT QToolTip
    static QString text();
 
    static QPalette palette();
-   static void setPalette(const QPalette &);
+   static void setPalette(const QPalette &palette);
    static QFont font();
-   static void setFont(const QFont &);
+   static void setFont(const QFont &font);
 };
 
 #endif // QT_NO_TOOLTIP
-
 
 #endif // QTOOLTIP_H

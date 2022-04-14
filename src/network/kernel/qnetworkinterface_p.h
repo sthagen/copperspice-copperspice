@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,17 +24,16 @@
 #ifndef QNETWORKINTERFACE_P_H
 #define QNETWORKINTERFACE_P_H
 
-#include <QtCore/qatomic.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qreadwritelock.h>
-#include <QtCore/qstring.h>
-#include <QtNetwork/qhostaddress.h>
-#include <QtNetwork/qabstractsocket.h>
+#include <qatomic.h>
+#include <qlist.h>
+#include <qreadwritelock.h>
+#include <qstring.h>
+#include <qhostaddress.h>
+#include <qabstractsocket.h>
+
 #include <qhostaddress_p.h>
 
 #ifndef QT_NO_NETWORKINTERFACE
-
-QT_BEGIN_NAMESPACE
 
 class QNetworkAddressEntryPrivate
 {
@@ -47,13 +46,16 @@ class QNetworkAddressEntryPrivate
 class QNetworkInterfacePrivate: public QSharedData
 {
  public:
-   QNetworkInterfacePrivate() : index(0), flags(0) {
+   QNetworkInterfacePrivate()
+      : index(0), flags(Qt::EmptyFlag)
+   {
    }
 
-   ~QNetworkInterfacePrivate() {
+   ~QNetworkInterfacePrivate()
+   {
    }
 
-   int index;                  // interface index, if know
+   int index;                                 // interface index, if know
    QNetworkInterface::InterfaceFlags flags;
 
    QString name;
@@ -80,14 +82,12 @@ class QNetworkInterfaceManager
    QSharedDataPointer<QNetworkInterfacePrivate> interfaceFromIndex(int index);
    QList<QSharedDataPointer<QNetworkInterfacePrivate> > allInterfaces();
 
-   // convenience:
+   // convenience
    QSharedDataPointer<QNetworkInterfacePrivate> empty;
 
  private:
    QList<QNetworkInterfacePrivate *> scan();
 };
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_NETWORKINTERFACE
 

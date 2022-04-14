@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,7 @@
 
 // in qurlrecode.cpp
 extern int qt_urlRecode(QString &appendTo, QString::const_iterator begin, QString::const_iterator end,
-                        QUrl::FormattingOptions encoding, const ushort *tableModifications = 0);
+                        QUrl::FormattingOptions encoding, const ushort *tableModifications = nullptr);
 
 // in qurlidna.cpp
 enum AceLeadingDot { AllowLeadingDot, ForbidLeadingDot };

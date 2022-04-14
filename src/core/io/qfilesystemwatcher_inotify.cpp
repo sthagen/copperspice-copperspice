@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -118,15 +118,15 @@
 # define __NR_inotify_add_watch 27
 # define __NR_inotify_rm_watch  28
 // no inotify_init for aarch64
+
 #else
 # error "This architecture is not supported."
+
 #endif
 
 #if !defined(IN_CLOEXEC) && defined(O_CLOEXEC) && defined(__NR_inotify_init1)
-# define IN_CLOEXEC              O_CLOEXEC
+# define IN_CLOEXEC O_CLOEXEC
 #endif
-
-QT_BEGIN_NAMESPACE
 
 #ifdef QT_LINUXBASE
 // ### the LSB doesn't standardize syscall, need to wait until glib2.4 is standardized
@@ -193,17 +193,13 @@ extern "C" {
 #define IN_MOVE                 (IN_MOVED_FROM | IN_MOVED_TO)
 }
 
-QT_END_NAMESPACE
-
 // --------- inotify.h end ----------
 
-#else /* QT_NO_INOTIFY */
+#else // QT_NO_INOTIFY
 
 #include <sys/inotify.h>
 
 #endif
-
-QT_BEGIN_NAMESPACE
 
 QInotifyFileSystemWatcherEngine *QInotifyFileSystemWatcherEngine::create()
 {
@@ -214,7 +210,7 @@ QInotifyFileSystemWatcherEngine *QInotifyFileSystemWatcherEngine::create()
    if (fd == -1) {
       fd = inotify_init();
       if (fd == -1) {
-         return 0;
+         return nullptr;
       }
       ::fcntl(fd, F_SETFD, FD_CLOEXEC);
    }
@@ -241,26 +237,27 @@ QInotifyFileSystemWatcherEngine::~QInotifyFileSystemWatcherEngine()
 void QInotifyFileSystemWatcherEngine::run()
 {
    QSocketNotifier sn(inotifyFd, QSocketNotifier::Read, this);
-   connect(&sn, SIGNAL(activated(int)), this, SLOT(readFromInotify()));
+   connect(&sn, &QSocketNotifier::activated, this, &QInotifyFileSystemWatcherEngine::readFromInotify);
    (void) exec();
 }
 
-QStringList QInotifyFileSystemWatcherEngine::addPaths(const QStringList &paths,
-      QStringList *files,
-      QStringList *directories)
+QStringList QInotifyFileSystemWatcherEngine::addPaths(const QStringList &paths, QStringList *files, QStringList *directories)
 {
    QMutexLocker locker(&mutex);
 
    QStringList p = paths;
    QMutableListIterator<QString> it(p);
+
    while (it.hasNext()) {
       QString path = it.next();
       QFileInfo fi(path);
       bool isDir = fi.isDir();
+
       if (isDir) {
          if (directories->contains(path)) {
             continue;
          }
+
       } else {
          if (files->contains(path)) {
             continue;
@@ -395,7 +392,5 @@ void QInotifyFileSystemWatcherEngine::readFromInotify()
       }
    }
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_FILESYSTEMWATCHER

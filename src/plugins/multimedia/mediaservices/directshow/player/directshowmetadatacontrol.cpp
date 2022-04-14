@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -90,7 +90,7 @@ DEFINE_PROPERTYKEY(PKEY_Video_Director, 0x64440492, 0x4C8B, 0x11D1, 0x8B, 0x70, 
 DEFINE_PROPERTYKEY(PKEY_Media_Writer, 0x64440492, 0x4C8B, 0x11D1, 0x8B, 0x70, 0x08, 0x00, 0x36, 0xB1, 0x1A, 0x03, 23);
 
 typedef HRESULT (WINAPI *q_SHCreateItemFromParsingName)(PCWSTR, IBindCtx *, const GUID &, void **);
-static q_SHCreateItemFromParsingName sHCreateItemFromParsingName = 0;
+static q_SHCreateItemFromParsingName sHCreateItemFromParsingName = nullptr;
 #endif
 
 #if defined(QT_USE_WMSDK)
@@ -366,7 +366,7 @@ static QString convertBSTR(BSTR *string)
    QString value = QString::fromStdWString(tmp);
 
    ::SysFreeString(*string);
-   string = 0;
+   string = nullptr;
 
    return value;
 }
@@ -398,9 +398,9 @@ void DirectShowMetaDataControl::updateMetadata(IFilterGraph2 *graph, IBaseFilter
 
       std::wstring tmp = fileSrc.toStdWString();
 
-      if (sHCreateItemFromParsingName(tmp.data(), 0, IID_PPV_ARGS(&shellItem)) == S_OK) {
+      if (sHCreateItemFromParsingName(tmp.data(), nullptr, IID_PPV_ARGS(&shellItem)) == S_OK) {
 
-         IPropertyStore *pStore = 0;
+         IPropertyStore *pStore = nullptr;
          if (shellItem->GetPropertyStore(GPS_DEFAULT, IID_PPV_ARGS(&pStore)) == S_OK) {
             DWORD cProps;
 
@@ -409,9 +409,11 @@ void DirectShowMetaDataControl::updateMetadata(IFilterGraph2 *graph, IBaseFilter
                   PROPERTYKEY key;
                   PROPVARIANT var;
                   PropVariantInit(&var);
+
                   if (FAILED(pStore->GetAt(i, &key))) {
                      continue;
                   }
+
                   if (FAILED(pStore->GetValue(key, &var))) {
                      continue;
                   }
@@ -529,18 +531,22 @@ void DirectShowMetaDataControl::updateMetadata(IFilterGraph2 *graph, IBaseFilter
             if (key.qtName == QMediaMetaData::Duration) {
                // duration is provided in 100-nanosecond units, convert to milliseconds
                var = (var.toLongLong() + 10000) / 10000;
+
             } else if (key.qtName == QMediaMetaData::Resolution) {
                QSize res;
                res.setHeight(var.toUInt());
                res.setWidth(getValue(info, L"WM/VideoWidth").toUInt());
                var = res;
+
             } else if (key.qtName == QMediaMetaData::VideoFrameRate) {
                var = var.toReal() / 1000.f;
+
             } else if (key.qtName == QMediaMetaData::PixelAspectRatio) {
                QSize aspectRatio;
                aspectRatio.setWidth(var.toUInt());
                aspectRatio.setHeight(getValue(info, L"AspectRatioY").toUInt());
                var = aspectRatio;
+
             } else if (key.qtName == QMediaMetaData::UserRating) {
                var = (var.toUInt() - 1) / qreal(98) * 100;
             }
@@ -561,13 +567,12 @@ void DirectShowMetaDataControl::updateMetadata(IFilterGraph2 *graph, IBaseFilter
       IAMMediaContent *content = nullptr;
 
       if ((! graph || graph->QueryInterface(IID_IAMMediaContent, reinterpret_cast<void **>(&content)) != S_OK)
-         && (! source || source->QueryInterface(IID_IAMMediaContent,
-               reinterpret_cast<void **>(&content)) != S_OK)) {
+         && (! source || source->QueryInterface(IID_IAMMediaContent, reinterpret_cast<void **>(&content)) != S_OK)) {
          content = nullptr;
       }
 
       if (content) {
-         BSTR string = 0;
+         BSTR string = nullptr;
 
          if (content->get_AuthorName(&string) == S_OK) {
             m_metadata.insert(QMediaMetaData::Author, convertBSTR(&string));

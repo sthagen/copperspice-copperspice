@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QSCRIPTSYNTAXCHECKER_P_H
 #define QSCRIPTSYNTAXCHECKER_P_H
 
-#include <QtCore/qstring.h>
-#include "qscriptgrammar_p.h"
-
-QT_BEGIN_NAMESPACE
+#include <qstring.h>
+#include <qscriptgrammar_p.h>
 
 namespace QScript {
 
@@ -79,7 +77,5 @@ inline void SyntaxChecker::reallocateStack()
 }
 
 } // namespace QScript
-
-QT_END_NAMESPACE
 
 #endif

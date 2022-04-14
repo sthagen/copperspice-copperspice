@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -69,7 +69,6 @@ class QDebug;
 class Q_GUI_EXPORT QWindow : public QObject, public QSurface
 {
    GUI_CS_OBJECT_MULTIPLE(QWindow, QObject)
-   Q_DECLARE_PRIVATE(QWindow)
 
    GUI_CS_ENUM(Visibility)
 
@@ -138,8 +137,17 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
       FullScreen
    };
 
+   enum AncestorMode {
+      ExcludeTransients,
+      IncludeTransients
+   };
+
    explicit QWindow(QScreen *screen = nullptr);
    explicit QWindow(QWindow *parent);
+
+   QWindow(const QWindow &) = delete;
+   QWindow &operator=(const QWindow &) = delete;
+
    virtual ~QWindow();
 
    void setSurfaceType(SurfaceType surfaceType);
@@ -192,25 +200,22 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
    void setTransientParent(QWindow *parent);
    QWindow *transientParent() const;
 
-   enum AncestorMode {
-      ExcludeTransients,
-      IncludeTransients
-   };
-
    bool isAncestorOf(const QWindow *child, AncestorMode mode = IncludeTransients) const;
-
    bool isExposed() const;
 
-   inline int minimumWidth() const {
+   int minimumWidth() const {
       return minimumSize().width();
    }
-   inline int minimumHeight() const {
+
+   int minimumHeight() const {
       return minimumSize().height();
    }
-   inline int maximumWidth() const {
+
+   int maximumWidth() const {
       return maximumSize().width();
    }
-   inline int maximumHeight() const {
+
+   int maximumHeight() const {
       return maximumSize().height();
    }
 
@@ -234,23 +239,27 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
    QPoint framePosition() const;
    void setFramePosition(const QPoint &point);
 
-   inline int width() const {
+   int width() const {
       return geometry().width();
    }
-   inline int height() const {
+
+   int height() const {
       return geometry().height();
    }
-   inline int x() const {
+
+   int x() const {
       return geometry().x();
    }
-   inline int y() const {
+
+   int y() const {
       return geometry().y();
    }
 
    QSize size() const override {
       return geometry().size();
    }
-   inline QPoint position() const {
+
+   QPoint position() const {
       return geometry().topLeft();
    }
 
@@ -284,7 +293,7 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
 
 #ifndef QT_NO_CURSOR
    QCursor cursor() const;
-   void setCursor(const QCursor &);
+   void setCursor(const QCursor &cursor);
    void unsetCursor();
 #endif
 
@@ -331,13 +340,13 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
    GUI_CS_SLOT_1(Public, void setHeight(int arg))
    GUI_CS_SLOT_2(setHeight)
 
-   GUI_CS_SLOT_1(Public, void setMinimumWidth(int w))
+   GUI_CS_SLOT_1(Public, void setMinimumWidth(int width))
    GUI_CS_SLOT_2(setMinimumWidth)
-   GUI_CS_SLOT_1(Public, void setMinimumHeight(int h))
+   GUI_CS_SLOT_1(Public, void setMinimumHeight(int height))
    GUI_CS_SLOT_2(setMinimumHeight)
-   GUI_CS_SLOT_1(Public, void setMaximumWidth(int w))
+   GUI_CS_SLOT_1(Public, void setMaximumWidth(int width))
    GUI_CS_SLOT_2(setMaximumWidth)
-   GUI_CS_SLOT_1(Public, void setMaximumHeight(int h))
+   GUI_CS_SLOT_1(Public, void setMaximumHeight(int height))
    GUI_CS_SLOT_2(setMaximumHeight)
 
    GUI_CS_SLOT_1(Public, void alert(int msec))
@@ -401,7 +410,7 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
 
    // emerald  add closeEvent virtual handler
 
-   bool event(QEvent *) override;
+   bool event(QEvent *event) override;
    bool cs_isWindowType() const override;
 
    virtual void keyPressEvent(QKeyEvent *event);
@@ -429,12 +438,12 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
    QScopedPointer<QWindowPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QWindow)
+   Q_DECLARE_PRIVATE(QWindow)
+
+   QPlatformSurface *surfaceHandle() const override;
 
    GUI_CS_SLOT_1(Private, void _q_clearAlert())
    GUI_CS_SLOT_2(_q_clearAlert)
-
-   QPlatformSurface *surfaceHandle() const override;
 
    friend class QApplication;
    friend class QApplicationPrivate;
@@ -445,5 +454,4 @@ class Q_GUI_EXPORT QWindow : public QObject, public QSurface
 
 Q_GUI_EXPORT QDebug operator<<(QDebug, const QWindow *);
 
-Q_DECLARE_METATYPE(QWindow *);
 #endif

@@ -87,10 +87,12 @@
 #include "TiledBackingStore.h"
 #include "htmlediting.h"
 #include "markup.h"
+
 #if USE(JSC)
 #include "qt_instance.h"
 #include "qt_runtime.h"
 #endif
+
 #include "qwebelement.h"
 #include "qwebframe_p.h"
 #include "qwebpage.h"
@@ -99,23 +101,26 @@
 #include "qwebsecurityorigin_p.h"
 #include "qwebscriptworld.h"
 #include "qwebscriptworld_p.h"
+
 #if USE(JSC)
 #include "runtime_object.h"
 #include "runtime_root.h"
 #endif
+
 #if USE(TEXTURE_MAPPER)
 #include "texmap/TextureMapper.h"
 #include "texmap/TextureMapperPlatformLayer.h"
 #endif
+
 #include "wtf/HashMap.h"
-#include <QMultiMap>
+#include <qmultimap.h>
 #include <qdebug.h>
 #include <qevent.h>
 #include <qfileinfo.h>
 #include <qpainter.h>
 #include <qprinter.h>
 #include <qregion.h>
-#include <qnetworkrequest.h>
+#include <qnetwork_request.h>
 
 using namespace WebCore;
 
@@ -1516,7 +1521,7 @@ QVariant QWebFrame::evaluateJavaScript(const QString& scriptSource)
         int distance = 0;
         JSC::JSValue v = d->frame->script()->executeScript(ScriptSourceCode(scriptSource)).jsValue();
 
-        rc = JSC::Bindings::convertValueToQVariant(proxy->globalObject(mainThreadNormalWorld())->globalExec(), v, QMetaType::Void, &distance);
+        rc = JSC::Bindings::convertValueToQVariant(proxy->globalObject(mainThreadNormalWorld())->globalExec(), v, QVariant::Void, &distance);
 #elif USE(V8)
         QScriptEngine* engine = d->frame->script()->qtScriptEngine();
         if (!engine)
@@ -1934,7 +1939,7 @@ QWebFrame *QWebHitTestResult::frame() const
 }
 
 void QWebFrame::_q_orientationChanged()
-{	
+{
 	d->_q_orientationChanged();
 }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,10 +22,10 @@
 ***********************************************************************/
 
 #include "config.h"
-#include "qscriptglobalobject_p.h"
+#include <qscriptglobalobject_p.h>
 
-#include "../api/qscriptengine.h"
-#include "../api/qscriptengine_p.h"
+#include <qscriptengine.h>
+#include <qscriptengine_p.h>
 
 namespace JSC {
 ASSERT_CLASS_FITS_IN_CELL(QScript::GlobalObject);
@@ -36,7 +36,7 @@ ASSERT_CLASS_FITS_IN_CELL(QScript::OriginalGlobalObjectProxy);
 namespace QScript {
 
 GlobalObject::GlobalObject()
-   : JSC::JSGlobalObject(), customGlobalObject(0)
+   : JSC::JSGlobalObject(), customGlobalObject(nullptr)
 {
 }
 

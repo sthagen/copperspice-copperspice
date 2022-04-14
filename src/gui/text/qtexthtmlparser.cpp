@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,6 +21,7 @@
 *
 ***********************************************************************/
 
+#include <qglobal.h>
 #include <qtexthtmlparser_p.h>
 #include <qbytearray.h>
 #include <qtextcodec.h>
@@ -34,7 +35,6 @@
 #include <qtextdocument_p.h>
 #include <qtextcursor.h>
 #include <qfont_p.h>
-#include <qfunctions_p.h>
 
 #include <algorithm>
 
@@ -447,7 +447,7 @@ static const QTextHtmlElement *lookupElementHelper(const QString &element)
    const QTextHtmlElement *e     = std::lower_bound(start, end, element);
 
    if (e == end || (element < *e)) {
-      return 0;
+      return nullptr;
    }
 
    return e;
@@ -501,7 +501,7 @@ void QTextHtmlParser::dumpHtml()
 QTextHtmlParserNode *QTextHtmlParser::newNode(int parent)
 {
    QTextHtmlParserNode *lastNode = &nodes.last();
-   QTextHtmlParserNode *newNode  = 0;
+   QTextHtmlParserNode *newNode  = nullptr;
 
    bool reuseLastNode = true;
 
@@ -1522,7 +1522,7 @@ void QTextHtmlParserNode::applyBackgroundImage(const QString &url, const QTextDo
          // must use images in non-GUI threads
 
          if (val.type() == QVariant::Image) {
-            QImage image = qvariant_cast<QImage>(val);
+            QImage image = val.value<QImage>();
             charFormat.setBackground(image);
 
          } else if (val.type() == QVariant::ByteArray) {
@@ -1534,7 +1534,7 @@ void QTextHtmlParserNode::applyBackgroundImage(const QString &url, const QTextDo
 
       } else {
          if (val.type() == QVariant::Image || val.type() == QVariant::Pixmap) {
-            charFormat.setBackground(qvariant_cast<QPixmap>(val));
+            charFormat.setBackground(val.value<QPixmap>());
          } else if (val.type() == QVariant::ByteArray) {
             QPixmap pm;
             if (pm.loadFromData(val.toByteArray())) {
@@ -2040,6 +2040,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
    QVector<QCss::Declaration> decls;
    QCss::Declaration decl;
    QCss::Value val;
+
    switch (node.id) {
       case Html_a:
       case Html_u: {
@@ -2061,6 +2062,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
                }
             }
          }
+
          if (needsUnderline) {
             decl = QCss::Declaration();
             decl.d->property = QLatin1String("text-decoration");
@@ -2073,6 +2075,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          }
          break;
       }
+
       case Html_b:
       case Html_strong:
       case Html_h1:
@@ -2092,7 +2095,8 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          if (node.id == Html_b || node.id == Html_strong) {
             break;
          }
-      // Delibrate fall through
+         [[fallthrough]];
+
       case Html_big:
       case Html_small:
          if (node.id != Html_th) {
@@ -2126,7 +2130,8 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
             decls << decl;
             break;
          }
-      // Delibrate fall through
+         [[fallthrough]];
+
       case Html_center:
       case Html_td:
          decl = QCss::Declaration();
@@ -2138,6 +2143,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          decl.d->inheritable = true;
          decls << decl;
          break;
+
       case Html_s:
          decl = QCss::Declaration();
          decl.d->property = QLatin1String("text-decoration");
@@ -2148,6 +2154,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          decl.d->inheritable = true;
          decls << decl;
          break;
+
       case Html_em:
       case Html_i:
       case Html_cite:
@@ -2163,6 +2170,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          decl.d->inheritable = true;
          decls << decl;
          break;
+
       case Html_sub:
       case Html_sup:
          decl = QCss::Declaration();
@@ -2174,6 +2182,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          decl.d->inheritable = true;
          decls << decl;
          break;
+
       case Html_ul:
       case Html_ol:
          decl = QCss::Declaration();
@@ -2185,6 +2194,7 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          decl.d->inheritable = true;
          decls << decl;
          break;
+
       case Html_code:
       case Html_tt:
       case Html_kbd:
@@ -2201,10 +2211,12 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          decl.d->inheritable = true;
          decls << decl;
       }
+
       if (node.id != Html_pre) {
          break;
       }
-      // Delibrate fall through
+      [[fallthrough]];
+
       case Html_br:
       case Html_nobr:
          decl = QCss::Declaration();
@@ -2228,9 +2240,11 @@ QVector<QCss::Declaration> standardDeclarationForNode(const QTextHtmlParserNode 
          decl.d->inheritable = true;
          decls << decl;
          break;
+
       default:
          break;
    }
+
    return decls;
 }
 
@@ -2262,7 +2276,7 @@ QVector<QCss::Declaration> QTextHtmlParser::declarationsForNode(int node) const
    QCss::StyleSelector::NodePtr n;
    n.id = node;
 
-   const char *extraPseudo = 0;
+   const char *extraPseudo = nullptr;
 
    if (nodes.at(node).id == Html_a && nodes.at(node).hasHref) {
       extraPseudo = "link";

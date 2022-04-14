@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -1223,9 +1223,10 @@ QXpmHandler::QXpmHandler()
 bool QXpmHandler::readHeader()
 {
    state = Error;
-   if (!read_xpm_header(device(), 0, index, buffer, &cpp, &ncols, &width, &height)) {
+   if (!read_xpm_header(device(), nullptr, index, buffer, &cpp, &ncols, &width, &height)) {
       return false;
    }
+
    state = ReadHeader;
    return true;
 }
@@ -1241,7 +1242,7 @@ bool QXpmHandler::readImage(QImage *image)
       return false;
    }
 
-   if (!read_xpm_body(device(), 0, index, buffer, cpp, ncols, width, height, *image)) {
+   if (!read_xpm_body(device(), nullptr, index, buffer, cpp, ncols, width, height, *image)) {
       state = Error;
       return false;
    }
@@ -1250,7 +1251,7 @@ bool QXpmHandler::readImage(QImage *image)
    return true;
 }
 
-bool QXpmHandler::canRead() const
+bool QXpmHandler::canRead()
 {
    if (state == Ready && !canRead(device())) {
       return false;
@@ -1299,7 +1300,7 @@ bool QXpmHandler::supportsOption(ImageOption option) const
       || option == ImageFormat;
 }
 
-QVariant QXpmHandler::option(ImageOption option) const
+QVariant QXpmHandler::option(ImageOption option)
 {
    if (option == Name) {
       return fileName;
@@ -1339,7 +1340,7 @@ void QXpmHandler::setOption(ImageOption option, const QVariant &value)
    }
 }
 
-QByteArray QXpmHandler::name() const
+QString QXpmHandler::name() const
 {
    return "xpm";
 }

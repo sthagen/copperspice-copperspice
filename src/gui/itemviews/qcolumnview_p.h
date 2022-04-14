@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,22 +30,21 @@
 
 #include <qabstractitemview_p.h>
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtCore/qpropertyanimation.h>
-#include <QtGui/qabstractitemdelegate.h>
-#include <QtGui/qabstractitemview.h>
-#include <QtGui/qitemdelegate.h>
+#include <qabstractitemmodel.h>
+#include <qpropertyanimation.h>
+#include <qabstractitemdelegate.h>
+#include <qabstractitemview.h>
+#include <qitemdelegate.h>
 #include <qlistview.h>
 #include <qevent.h>
 #include <qscrollbar.h>
 
-QT_BEGIN_NAMESPACE
-
 class QColumnViewPreviewColumn : public QAbstractItemView
 {
-
  public:
-   QColumnViewPreviewColumn(QWidget *parent) : QAbstractItemView(parent), previewWidget(0) {
+   QColumnViewPreviewColumn(QWidget *parent)
+      : QAbstractItemView(parent), previewWidget(nullptr)
+   {
    }
 
    void setPreviewWidget(QWidget *widget) {
@@ -153,7 +152,6 @@ class QColumnViewPrivate : public QAbstractItemViewPrivate
 
 class QColumnViewDelegate : public QItemDelegate
 {
-
  public:
    explicit QColumnViewDelegate(QObject *parent = nullptr) : QItemDelegate(parent) {}
    ~QColumnViewDelegate() {}
@@ -161,7 +159,6 @@ class QColumnViewDelegate : public QItemDelegate
    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 #endif // QT_NO_QCOLUMNVIEW
-
 
 #endif //QCOLUMNVIEW_P_H
 

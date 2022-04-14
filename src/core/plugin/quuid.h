@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -68,34 +68,34 @@ class Q_CORE_EXPORT QUuid
       uchar b4, uchar b5, uchar b6, uchar b7, uchar b8)
       : data1(l), data2(w1), data3(w2), data4{b1, b2, b3, b4, b5, b6, b7, b8} {}
 
-   QUuid(const QString &);
+   QUuid(const QString &text);
    QUuid(const char *);
 
    QString toString() const;
 
-   QUuid(const QByteArray &);
+   QUuid(const QByteArray &text);
    QByteArray toByteArray() const;
 
    QByteArray toRfc4122() const;
-   static QUuid fromRfc4122(const QByteArray &);
+   static QUuid fromRfc4122(const QByteArray &bytes);
    bool isNull() const;
 
-   constexpr bool operator==(const QUuid &orig) const {
-      if (data1 != orig.data1 || data2 != orig.data2 ||
-         data3 != orig.data3) {
+   constexpr bool operator==(const QUuid &other) const {
+      if (data1 != other.data1 || data2 != other.data2 ||
+         data3 != other.data3) {
          return false;
       }
 
       for (uint i = 0; i < 8; i++)
-         if (data4[i] != orig.data4[i]) {
+         if (data4[i] != other.data4[i]) {
             return false;
          }
 
       return true;
    }
 
-   constexpr bool operator!=(const QUuid &orig) const {
-      return !(*this == orig);
+   constexpr bool operator!=(const QUuid &other) const {
+      return ! (*this == other);
    }
 
    bool operator<(const QUuid &other) const;
@@ -106,17 +106,21 @@ class Q_CORE_EXPORT QUuid
    // provide convenience operators to cast from and to this type.
    constexpr QUuid(const GUID &guid)
       : data1(guid.Data1), data2(guid.Data2), data3(guid.Data3),
-        data4{guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
-           guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]} {}
+            data4{guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+            guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]}
+   {
+   }
 
    constexpr QUuid &operator=(const GUID &guid) {
       *this = QUuid(guid);
       return *this;
    }
 
-   // emerald - 'constexpr operator GUID()' constdoes not work in MSVC 19.15
+   // emerald - 'constexpr operator GUID()' const does not work in MSVC 19.15
    operator GUID() const {
-      GUID guid = { data1, data2, data3, { data4[0], data4[1], data4[2], data4[3], data4[4], data4[5], data4[6], data4[7] } };
+      GUID guid = { data1, data2, data3, { data4[0], data4[1], data4[2], data4[3],
+            data4[4], data4[5], data4[6], data4[7] } };
+
       return guid;
    }
 
@@ -140,6 +144,7 @@ class Q_CORE_EXPORT QUuid
    static inline QUuid createUuidV5(const QUuid &ns, const QString &baseData) {
       return QUuid::createUuidV5(ns, baseData.toUtf8());
    }
+
    QUuid::Variant variant() const;
    QUuid::Version version() const;
 
@@ -149,8 +154,8 @@ class Q_CORE_EXPORT QUuid
    uchar   data4[8];
 };
 
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QUuid &);
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QUuid &);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QUuid &uuid);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QUuid &uuid);
 
 Q_CORE_EXPORT uint qHash(const QUuid &uuid, uint seed = 0);
 

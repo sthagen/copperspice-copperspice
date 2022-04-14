@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,21 +48,21 @@
 
 #include "qxsdschemadebugger_p.h"
 
-#include <QtCore/QFile>
-#include <QtXmlPatterns/QXmlQuery>
-#include <QtXmlPatterns/QXmlResultItems>
-
-QT_BEGIN_NAMESPACE
+#include <QFile>
+#include <QXmlQuery>
+#include <QXmlResultItems>
 
 using namespace QPatternist;
 
 namespace QPatternist {
+
 template <>
 template <>
 bool XsdStateMachine<XsdTerm::Ptr>::inputEqualsTransition<QXmlName>(QXmlName name, XsdTerm::Ptr term) const
 {
    if (term->isElement()) {
       return (XsdElement::Ptr(term)->name(m_namePool) == name);
+
    } else if (term->isWildcard()) {
       // wildcards using XsdWildcard::absentNamespace, so we have to fix that here
       if (name.namespaceURI() == StandardNamespaces::empty) {
@@ -489,7 +489,8 @@ bool XsdValidatingInstanceReader::validateElement(const XsdElement::Ptr &declara
       }
 
       // 4.2
-      SchemaType::DerivationConstraints constraints = 0;
+      SchemaType::DerivationConstraints constraints = Qt::EmptyFlag;
+
       if (declaration->disallowedSubstitutions() & NamedSchemaComponent::ExtensionConstraint) {
          constraints |= SchemaType::ExtensionConstraint;
       }
@@ -1337,4 +1338,3 @@ XsdComplexType::Ptr XsdValidatingInstanceReader::anyType()
    return m_anyType;
 }
 
-QT_END_NAMESPACE

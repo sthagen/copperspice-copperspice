@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -784,10 +784,12 @@ static void convertPath(const QPainterPath &path, QVector<TTF_POINT> *points, QV
                }
                endPoints->append(points->size() - 1);
             }
-         // fall through
+            [[fallthrough]];
+
          case QPainterPath::LineToElement:
             p.flags = OnCurve;
             break;
+
          case QPainterPath::CurveToElement: {
             // cubic bezier curve, we need to reduce to a list of quadratic curves
             TTF_POINT list[3 * 16 + 4]; // we need max 16 subdivisions

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -68,22 +68,28 @@ class Q_GUI_EXPORT QMenu : public QWidget
  public:
    explicit QMenu(QWidget *parent = nullptr);
    explicit QMenu(const QString &title, QWidget *parent = nullptr);
+
+   QMenu(const QMenu &) = delete;
+   QMenu &operator=(const QMenu &) = delete;
+
    ~QMenu();
 
    using QWidget::addAction;
 
    QAction *addAction(const QString &text);
    QAction *addAction(const QIcon &icon,   const QString &text);
-   QAction *addAction(const QString &text, const QObject *receiver, const QString &member, const QKeySequence &shortcut = 0);
+   QAction *addAction(const QString &text, const QObject *receiver, const QString &member,
+                  const QKeySequence &shortcut = QKeySequence());
+
    QAction *addAction(const QIcon &icon,   const QString &text, const QObject *receiver, const QString &member,
-      const QKeySequence &shortcut = 0);
+                  const QKeySequence &shortcut = 0);
 
    // connect to a slot or function pointer (with context)
    template<class Obj, typename Func1>
    typename std::enable_if < ! std::is_convertible<Func1, QString>::value &&
          ! std::is_convertible<Func1, const char *>::value &&
          std::is_base_of<QObject, Obj>::value, QAction * >::type
-      addAction(const QString &text, const Obj *object, Func1 slot, const QKeySequence &shortcut = 0) {
+      addAction(const QString &text, const Obj *object, Func1 slot, const QKeySequence &shortcut = QKeySequence()) {
       QAction *result = addAction(text);
 
 #ifndef QT_NO_SHORTCUT
@@ -96,21 +102,22 @@ class Q_GUI_EXPORT QMenu : public QWidget
    // connect to a slot or function pointer (without context)
    template <typename Func1>
    typename std::enable_if < ! std::is_convertible<Func1, QObject *>::value, QAction * >::type
-      addAction(const QString &text, Func1 slot, const QKeySequence &shortcut = 0) {
+      addAction(const QString &text, Func1 slot, const QKeySequence &shortcut = QKeySequence()) {
       QAction *result = addAction(text);
 
 #ifndef QT_NO_SHORTCUT
       result->setShortcut(shortcut);
 #endif
       connect(result, &QAction::triggered, slot);
+
       return result;
    }
 
    // addAction(QIcon, QString): Connect to a QObject slot / functor or function pointer (with context)
    template<class Obj, typename Func1>
-   typename std::enable_if < ! std::is_convertible<Func1, QString>::value
-   &&std::is_base_of<QObject, Obj>::value, QAction * >::type addAction(const QIcon &actionIcon, const QString &text,
-      const Obj *object, Func1 slot, const QKeySequence &shortcut = 0) {
+   typename std::enable_if < ! std::is_convertible<Func1, QString>::value &&
+      std::is_base_of<QObject, Obj>::value, QAction * >::type addAction(const QIcon &actionIcon, const QString &text,
+      const Obj *object, Func1 slot, const QKeySequence &shortcut = QKeySequence()) {
       QAction *result = addAction(actionIcon, text);
 
 #ifndef QT_NO_SHORTCUT
@@ -122,13 +129,14 @@ class Q_GUI_EXPORT QMenu : public QWidget
 
    // addAction(QIcon, QString): Connect to a functor or function pointer (without context)
    template <typename Func1>
-   QAction *addAction(const QIcon &actionIcon, const QString &text, Func1 slot, const QKeySequence &shortcut = 0) {
-      QAction *result = addAction(actionIcon, text);
+   QAction *addAction(const QIcon &icon, const QString &text, Func1 slot, const QKeySequence &shortcut = QKeySequence()) {
+      QAction *result = addAction(icon, text);
 
 #ifndef QT_NO_SHORTCUT
 
       result->setShortcut(shortcut);
 #endif
+
       connect(result, &QAction::triggered, slot);
       return result;
    }
@@ -141,11 +149,11 @@ class Q_GUI_EXPORT QMenu : public QWidget
 
    QAction *addSection(const QString &text);
    QAction *addSection(const QIcon &icon, const QString &text);
-   QAction *insertMenu(QAction *before, QMenu *menu);
-   QAction *insertSeparator(QAction *before);
+   QAction *insertMenu(QAction *action, QMenu *menu);
+   QAction *insertSeparator(QAction *action);
 
-   QAction *insertSection(QAction *before, const QString &text);
-   QAction *insertSection(QAction *before, const QIcon &icon, const QString &text);
+   QAction *insertSection(QAction *action, const QString &text);
+   QAction *insertSection(QAction *action, const QIcon &icon, const QString &text);
 
    bool isEmpty() const;
    void clear();
@@ -156,22 +164,22 @@ class Q_GUI_EXPORT QMenu : public QWidget
    bool isTearOffMenuVisible() const;
    void hideTearOffMenu();
 
-   void setDefaultAction(QAction *);
+   void setDefaultAction(QAction *action);
    QAction *defaultAction() const;
 
-   void setActiveAction(QAction *act);
+   void setActiveAction(QAction *action);
    QAction *activeAction() const;
 
-   void popup(const QPoint &pos, QAction *at = nullptr);
+   void popup(const QPoint &point, QAction *action = nullptr);
 
    QAction *exec();
-   QAction *exec(const QPoint &pos, QAction *at = nullptr);
-   static QAction *exec(const QList<QAction *> &actions, const QPoint &pos, QAction *at = nullptr, QWidget *parent = nullptr);
+   QAction *exec(const QPoint &point, QAction *action = nullptr);
+   static QAction *exec(const QList<QAction *> &actionList, const QPoint &point, QAction *action = nullptr, QWidget *parent = nullptr);
 
    QSize sizeHint() const override;
 
-   QRect actionGeometry(QAction *) const;
-   QAction *actionAt(const QPoint &) const;
+   QRect actionGeometry(QAction *action) const;
+   QAction *actionAt(const QPoint &point) const;
 
    QAction *menuAction() const;
 
@@ -211,31 +219,29 @@ class Q_GUI_EXPORT QMenu : public QWidget
  protected:
    int columnCount() const;
 
-   void changeEvent(QEvent *) override;
-   void keyPressEvent(QKeyEvent *) override;
-   void mouseReleaseEvent(QMouseEvent *) override;
-   void mousePressEvent(QMouseEvent *) override;
-   void mouseMoveEvent(QMouseEvent *) override;
+   void changeEvent(QEvent *event) override;
+   void keyPressEvent(QKeyEvent *event) override;
+   void mouseReleaseEvent(QMouseEvent *event) override;
+   void mousePressEvent(QMouseEvent *event) override;
+   void mouseMoveEvent(QMouseEvent *event) override;
 
 #ifndef QT_NO_WHEELEVENT
-   void wheelEvent(QWheelEvent *) override;
+   void wheelEvent(QWheelEvent *event) override;
 #endif
 
-   void enterEvent(QEvent *) override;
-   void leaveEvent(QEvent *) override;
-   void hideEvent(QHideEvent *) override;
-   void paintEvent(QPaintEvent *) override;
-   void actionEvent(QActionEvent *) override;
-   void timerEvent(QTimerEvent *) override;
-   bool event(QEvent *) override;
+   void enterEvent(QEvent *event) override;
+   void leaveEvent(QEvent *event) override;
+   void hideEvent(QHideEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
+   void actionEvent(QActionEvent *event) override;
+   void timerEvent(QTimerEvent *event) override;
+   bool event(QEvent *event) override;
    bool focusNextPrevChild(bool next) override;
    void initStyleOption(QStyleOptionMenuItem *option, const QAction *action) const;
 
    QMenu(QMenuPrivate &dd, QWidget *parent = nullptr);
 
  private:
-   Q_DISABLE_COPY(QMenu)
-
    GUI_CS_SLOT_1(Private, void internalDelayedPopup())
    GUI_CS_SLOT_2(internalDelayedPopup)
 
@@ -264,6 +270,4 @@ class Q_GUI_EXPORT QMenu : public QWidget
 
 #endif // QT_NO_MENU
 
-QT_END_NAMESPACE
-
-#endif // QMENU_H
+#endif

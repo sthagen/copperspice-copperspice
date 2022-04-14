@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QCOMMANDLINKBUTTON_H
 #define QCOMMANDLINKBUTTON_H
 
-#include <QtGui/qpushbutton.h>
-
-
+#include <qpushbutton.h>
 
 class QCommandLinkButtonPrivate;
 
@@ -44,22 +42,24 @@ class Q_GUI_EXPORT QCommandLinkButton: public QPushButton
    explicit QCommandLinkButton(QWidget *parent = nullptr);
    explicit QCommandLinkButton(const QString &text, QWidget *parent = nullptr);
    QCommandLinkButton(const QString &text, const QString &description, QWidget *parent = nullptr);
+
+   QCommandLinkButton(const QCommandLinkButton &) = delete;
+   QCommandLinkButton &operator=(const QCommandLinkButton &) = delete;
+
    ~QCommandLinkButton();
+
    QString description() const;
    void setDescription(const QString &description);
 
  protected:
    QSize sizeHint() const override;
-   int heightForWidth(int) const override;
+   int heightForWidth(int width) const override;
    QSize minimumSizeHint() const override;
-   bool event(QEvent *e) override;
-   void paintEvent(QPaintEvent *) override;
+   bool event(QEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QCommandLinkButton)
    Q_DECLARE_PRIVATE(QCommandLinkButton)
 };
 
-
-
-#endif // QCOMMANDLINKBUTTON
+#endif

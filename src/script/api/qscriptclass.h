@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,21 +24,20 @@
 #ifndef QSCRIPTCLASS_H
 #define QSCRIPTCLASS_H
 
-#include <QtCore/qstring.h>
-
-#include <QtCore/qvariant.h>
-#include <QtCore/qscopedpointer.h>
-#include <QtScript/qscriptvalue.h>
+#include <qstring.h>
+#include <qvariant.h>
+#include <qscopedpointer.h>
+#include <qscriptvalue.h>
 
 class QScriptString;
 class QScriptClassPropertyIterator;
-
 class QScriptClassPrivate;
+
 class Q_SCRIPT_EXPORT QScriptClass
 {
  public:
    enum QueryFlag {
-      HandlesReadAccess = 0x01,
+      HandlesReadAccess  = 0x01,
       HandlesWriteAccess = 0x02
    };
    using QueryFlags = QFlags<QueryFlag>;
@@ -49,13 +48,16 @@ class Q_SCRIPT_EXPORT QScriptClass
    };
 
    QScriptClass(QScriptEngine *engine);
+
+   QScriptClass(const QScriptClass &) = delete;
+   QScriptClass &operator=(const QScriptClass &) = delete;
+
    virtual ~QScriptClass();
 
    QScriptEngine *engine() const;
 
    virtual QueryFlags queryProperty(const QScriptValue &object,
-      const QScriptString &name,
-      QueryFlags flags, uint *id);
+      const QScriptString &name, QueryFlags flags, uint *id);
 
    virtual QScriptValue property(const QScriptValue &object,
       const QScriptString &name, uint id);
@@ -82,7 +84,6 @@ class Q_SCRIPT_EXPORT QScriptClass
 
  private:
    Q_DECLARE_PRIVATE(QScriptClass)
-   Q_DISABLE_COPY(QScriptClass)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QScriptClass::QueryFlags)

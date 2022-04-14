@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 #include <qstring.h>
 #include <qscopedpointer.h>
 
-QT_BEGIN_NAMESPACE
-
 #ifndef QT_NO_SYSTEMSEMAPHORE
 
 class QSystemSemaphorePrivate;
@@ -53,6 +51,10 @@ class Q_CORE_EXPORT QSystemSemaphore
    };
 
    QSystemSemaphore(const QString &key, int initialValue = 0, AccessMode mode = Open);
+
+   QSystemSemaphore(const QSystemSemaphore &) = delete;
+   QSystemSemaphore &operator=(const QSystemSemaphore &) = delete;
+
    ~QSystemSemaphore();
 
    void setKey(const QString &key, int initialValue = 0, AccessMode mode = Open);
@@ -65,13 +67,10 @@ class Q_CORE_EXPORT QSystemSemaphore
    QString errorString() const;
 
  private:
-   Q_DISABLE_COPY(QSystemSemaphore)
    QScopedPointer<QSystemSemaphorePrivate> d;
 };
 
 #endif // QT_NO_SYSTEMSEMAPHORE
 
-QT_END_NAMESPACE
-
-#endif // QSYSTEMSEMAPHORE_H
+#endif
 

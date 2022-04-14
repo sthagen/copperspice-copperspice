@@ -1,13 +1,13 @@
 /***********************************************************************
 *
-* Copyright (c) 2017-2020 Barbara Geller
-* Copyright (c) 2017-2020 Ansel Sermersheim
-
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
+*
 * Copyright (c) 1998-2009 John Maddock
 *
-* This file is part of CsString.
+* This file is part of CopperSpice.
 *
-* CsString is free software, released under the BSD 2-Clause license.
+* CopperSpice is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
 *
 * CopperSpice is distributed in the hope that it will be useful,
@@ -93,60 +93,68 @@ class regex_iterator
    typedef std::shared_ptr<impl> pimpl;
 
  public:
-   typedef          basic_regex<charT, traits>                              regex_type;
-   typedef          match_results<BidirectionalIterator>                    value_type;
-   typedef          const value_type                                        *pointer;
-   typedef          const value_type                                        &reference;
-   typedef          std::forward_iterator_tag                               iterator_category;
+   typedef basic_regex<charT, traits> regex_type;
+   typedef match_results<BidirectionalIterator> value_type;
+   typedef const value_type *pointer;
+   typedef const value_type &reference;
+   typedef std::forward_iterator_tag iterator_category;
 
    typedef typename cs_regex_detail_ns::regex_iterator_traits<BidirectionalIterator>::difference_type difference_type;
 
-   regex_iterator() {}
+   regex_iterator() {
+   }
+
    regex_iterator(BidirectionalIterator a, BidirectionalIterator b,
-                  const regex_type &re,
-                  match_flag_type m = match_default)
+                  const regex_type &re, match_flag_type m = match_default)
       : pdata(new impl(&re, b, m)) {
-      if (!pdata->init(a)) {
+      if (! pdata->init(a)) {
          pdata.reset();
       }
    }
 
    regex_iterator(const regex_iterator &that)
       : pdata(that.pdata)
-   {}
+   {
+   }
 
    regex_iterator &operator=(const regex_iterator &that) {
       pdata = that.pdata;
       return *this;
    }
-   bool operator==(const regex_iterator &that)const {
-      if ((pdata.get() == 0) || (that.pdata.get() == 0)) {
+
+   bool operator==(const regex_iterator &that) const {
+      if ((pdata.get() == nullptr) || (that.pdata.get() == nullptr)) {
          return pdata.get() == that.pdata.get();
       }
       return pdata->compare(*(that.pdata.get()));
    }
 
-   bool operator!=(const regex_iterator &that)const {
+   bool operator!=(const regex_iterator &that) const {
       return !(*this == that);
    }
 
-   const value_type &operator*()const {
+   const value_type &operator*() const {
       return pdata->get();
    }
 
-   const value_type *operator->()const {
+   const value_type *operator->() const {
       return &(pdata->get());
    }
+
    regex_iterator &operator++() {
       cow();
-      if (0 == pdata->next()) {
+
+      if (pdata->next() == nullptr) {
          pdata.reset();
       }
+
       return *this;
    }
+
    regex_iterator operator++(int) {
       regex_iterator result(*this);
       ++(*this);
+
       return result;
    }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,15 @@
 #ifndef QXsdTypeChecker_P_H
 #define QXsdTypeChecker_P_H
 
-#include <QtXmlPatterns/QSourceLocation>
+#include <QSourceLocation>
 #include <qschematype_p.h>
 #include <qsourcelocationreflection_p.h>
 #include <qxsdschemacontext_p.h>
 
-QT_BEGIN_NAMESPACE
-
 class QXmlQuery;
 
 namespace QPatternist {
+
 class XsdSchemaSourceLocationReflection : public SourceLocationReflection
 {
  public:
@@ -75,12 +74,13 @@ class XsdTypeChecker
    static QString normalizedValue(const QString &value, const XsdFacet::Hash &facets);
 
    bool isValidString(const QString &normalizedString, const AnySimpleType::Ptr &type, QString &errorMsg,
-                      AnySimpleType::Ptr *boundType = 0) const;
+                      AnySimpleType::Ptr *boundType = nullptr) const;
 
    bool valuesAreEqual(const QString &value, const QString &otherValue, const AnySimpleType::Ptr &type) const;
 
  private:
-   Q_DISABLE_COPY(XsdTypeChecker)
+   XsdTypeChecker(const XsdTypeChecker &) = delete;
+   XsdTypeChecker &operator=(const XsdTypeChecker &) = delete;
 
    bool checkConstrainingFacets(const AtomicValue::Ptr &value, const QString &lexicalValue,
                                 const AnySimpleType::Ptr &type, QString &errorMsg) const;
@@ -134,7 +134,5 @@ class XsdTypeChecker
    SourceLocationReflection  *m_reflection;
 };
 }
-
-QT_END_NAMESPACE
 
 #endif

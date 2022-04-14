@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,8 +31,6 @@
 #ifndef QT_NO_FSFILEENGINE
 #ifndef QT_NO_FILESYSTEMITERATOR
 
-QT_BEGIN_NAMESPACE
-
 class QFSFileEngineIteratorPrivate;
 class QFSFileEngineIteratorPlatformSpecificData;
 
@@ -56,9 +54,7 @@ class QFSFileEngineIterator : public QAbstractFileEngineIterator
    mutable bool done;
 };
 
-QT_END_NAMESPACE
-
 #endif // QT_NO_FILESYSTEMITERATOR
 #endif // QT_NO_FSFILEENGINE
 
-#endif // QFSFILEENGINE_ITERATOR_P_H
+#endif

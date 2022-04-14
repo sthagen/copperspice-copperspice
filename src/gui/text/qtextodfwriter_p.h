@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,9 +27,9 @@
 #include <qglobal.h>
 #ifndef QT_NO_TEXTODFWRITER
 
-#include <QtCore/QXmlStreamWriter>
-#include <QtCore/qset.h>
-#include <QtCore/qstack.h>
+#include <QXmlStreamWriter>
+#include <qset.h>
+#include <qstack.h>
 #include <qtextdocument_p.h>
 #include <qtextdocumentwriter.h>
 
@@ -57,9 +57,11 @@ class QTextOdfWriter
    void setCodec(QTextCodec *codec) {
       m_codec = codec;
    }
+
    void setCreateArchive(bool on) {
       m_createArchive = on;
    }
+
    bool createArchive() const {
       return m_createArchive;
    }
@@ -74,7 +76,14 @@ class QTextOdfWriter
    void writeFrame(QXmlStreamWriter &writer, const QTextFrame *frame);
    void writeInlineCharacter(QXmlStreamWriter &writer, const QTextFragment &fragment) const;
 
-   const QString officeNS, textNS, styleNS, foNS, tableNS, drawNS, xlinkNS, svgNS;
+   const QString officeNS;
+   const QString textNS;
+   const QString styleNS;
+   const QString foNS;
+   const QString tableNS;
+   const QString drawNS;
+   const QString xlinkNS;
+   const QString svgNS;
 
  private:
    const QTextDocument *m_document;

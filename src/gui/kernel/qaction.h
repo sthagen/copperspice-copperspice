@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,7 @@
 #include <qwidget.h>
 #include <qvariant.h>
 #include <qicon.h>
-#include <QScopedPointer>
-
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_ACTION
 
@@ -122,7 +121,8 @@ class Q_GUI_EXPORT QAction : public QObject
       AboutRole, PreferencesRole, QuitRole
    };
 
-   enum Priority { LowPriority    = 0,
+   enum Priority {
+      LowPriority    = 0,
       NormalPriority = 128,
       HighPriority   = 256
    };
@@ -130,6 +130,9 @@ class Q_GUI_EXPORT QAction : public QObject
    explicit QAction(QObject *parent);
    QAction(const QString &text, QObject *parent);
    QAction(const QIcon &icon, const QString &text, QObject *parent);
+
+   QAction(const QAction &) = delete;
+   QAction &operator=(const QAction &) = delete;
 
    ~QAction();
 
@@ -169,7 +172,7 @@ class Q_GUI_EXPORT QAction : public QObject
    QKeySequence shortcut() const;
 
    void setShortcuts(const QList<QKeySequence> &shortcuts);
-   void setShortcuts(QKeySequence::StandardKey);
+   void setShortcuts(QKeySequence::StandardKey key);
    QList<QKeySequence> shortcuts() const;
 
    void setShortcutContext(Qt::ShortcutContext context);
@@ -186,12 +189,10 @@ class Q_GUI_EXPORT QAction : public QObject
    bool isCheckable() const;
 
    QVariant data() const;
-   void setData(const QVariant &var);
+   void setData(const QVariant &data);
 
    bool isChecked() const;
-
    bool isEnabled() const;
-
    bool isVisible() const;
 
    enum ActionEvent { Trigger, Hover };
@@ -218,19 +219,19 @@ class Q_GUI_EXPORT QAction : public QObject
    GUI_CS_SLOT_1(Public, void hover())
    GUI_CS_SLOT_2(hover)
 
-   GUI_CS_SLOT_1(Public, void setChecked(bool un_named_arg1))
+   GUI_CS_SLOT_1(Public, void setChecked(bool checked))
    GUI_CS_SLOT_2(setChecked)
 
    GUI_CS_SLOT_1(Public, void toggle())
    GUI_CS_SLOT_2(toggle)
 
-   GUI_CS_SLOT_1(Public, void setEnabled(bool un_named_arg1))
+   GUI_CS_SLOT_1(Public, void setEnabled(bool b))
    GUI_CS_SLOT_2(setEnabled)
 
    GUI_CS_SLOT_1(Public, void setDisabled(bool b))
    GUI_CS_SLOT_2(setDisabled)
 
-   GUI_CS_SLOT_1(Public, void setVisible(bool un_named_arg1))
+   GUI_CS_SLOT_1(Public, void setVisible(bool b))
    GUI_CS_SLOT_2(setVisible)
 
    GUI_CS_SIGNAL_1(Public, void changed())
@@ -242,18 +243,16 @@ class Q_GUI_EXPORT QAction : public QObject
    GUI_CS_SIGNAL_1(Public, void hovered())
    GUI_CS_SIGNAL_2(hovered)
 
-   GUI_CS_SIGNAL_1(Public, void toggled(bool un_named_arg1))
-   GUI_CS_SIGNAL_2(toggled, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void toggled(bool checked))
+   GUI_CS_SIGNAL_2(toggled, checked)
 
  protected:
-   bool event(QEvent *) override;
+   bool event(QEvent *event) override;
    QAction(QActionPrivate &dd, QObject *parent);
 
    QScopedPointer<QActionPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QAction)
-
    friend class QGraphicsWidget;
    friend class QWidget;
    friend class QActionGroup;

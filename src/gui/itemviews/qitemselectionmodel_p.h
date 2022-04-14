@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,6 @@
 #ifndef QITEMSELECTIONMODEL_P_H
 #define QITEMSELECTIONMODEL_P_H
 
-
-
 #ifndef QT_NO_ITEMVIEWS
 
 class QItemSelectionModelPrivate
@@ -34,8 +32,10 @@ class QItemSelectionModelPrivate
 
  public:
    QItemSelectionModelPrivate()
-      : model(0), currentCommand(QItemSelectionModel::NoUpdate),
-        tableSelected(false), tableColCount(0), tableRowCount(0) {}
+      : model(nullptr), currentCommand(QItemSelectionModel::NoUpdate),
+        tableSelected(false), tableColCount(0), tableRowCount(0)
+   {
+   }
 
    virtual ~QItemSelectionModelPrivate() {}
 

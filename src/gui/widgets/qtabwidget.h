@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QTABWIDGET_H
 #define QTABWIDGET_H
 
-#include <QtGui/qwidget.h>
-#include <QtGui/qicon.h>
+#include <qwidget.h>
+#include <qicon.h>
 
 #ifndef QT_NO_TABWIDGET
 
@@ -69,26 +69,42 @@ class Q_GUI_EXPORT QTabWidget : public QWidget
    GUI_CS_PROPERTY_WRITE(tabBarAutoHide, setTabBarAutoHide)
 
  public:
-   enum TabPosition { North, South, West, East };
+   GUI_CS_REGISTER_ENUM(
+      enum TabPosition {
+         North,
+         South,
+         West,
+         East
+      };
+   )
 
-   enum TabShape { Rounded, Triangular };
+   GUI_CS_REGISTER_ENUM(
+      enum TabShape {
+         Rounded,
+         Triangular
+      };
+   )
 
    explicit QTabWidget(QWidget *parent = nullptr);
+
+   QTabWidget(const QTabWidget &) = delete;
+   QTabWidget &operator=(const QTabWidget &) = delete;
+
    ~QTabWidget();
 
-   int addTab(QWidget *widget, const QString &);
+   int addTab(QWidget *widget, const QString &label);
    int addTab(QWidget *widget, const QIcon &icon, const QString &label);
 
-   int insertTab(int index, QWidget *widget, const QString &);
+   int insertTab(int index, QWidget *widget, const QString &label);
    int insertTab(int index, QWidget *widget, const QIcon &icon, const QString &label);
 
    void removeTab(int index);
 
    bool isTabEnabled(int index) const;
-   void setTabEnabled(int index, bool);
+   void setTabEnabled(int index, bool enable);
 
    QString tabText(int index) const;
-   void setTabText(int index, const QString &);
+   void setTabText(int index, const QString &label);
 
    QIcon tabIcon(int index) const;
    void setTabIcon(int index, const QIcon &icon);
@@ -110,7 +126,7 @@ class Q_GUI_EXPORT QTabWidget : public QWidget
    int count() const;
 
    TabPosition tabPosition() const;
-   void setTabPosition(TabPosition);
+   void setTabPosition(TabPosition value);
 
    bool tabsClosable() const;
    void setTabsClosable(bool closeable);
@@ -126,11 +142,11 @@ class Q_GUI_EXPORT QTabWidget : public QWidget
    int heightForWidth(int width) const override;
    bool hasHeightForWidth() const override;
 
-   void setCornerWidget(QWidget *w, Qt::Corner corner = Qt::TopRightCorner);
+   void setCornerWidget(QWidget *widget, Qt::Corner corner = Qt::TopRightCorner);
    QWidget *cornerWidget(Qt::Corner corner = Qt::TopRightCorner) const;
 
    Qt::TextElideMode elideMode() const;
-   void setElideMode(Qt::TextElideMode);
+   void setElideMode(Qt::TextElideMode value);
 
    QSize iconSize() const;
    void setIconSize(const QSize &size);
@@ -142,7 +158,7 @@ class Q_GUI_EXPORT QTabWidget : public QWidget
    void setDocumentMode(bool set);
 
    bool tabBarAutoHide() const;
-   void setTabBarAutoHide(bool enabled);
+   void setTabBarAutoHide(bool enable);
    void clear();
 
    QTabBar *tabBar() const;
@@ -168,19 +184,19 @@ class Q_GUI_EXPORT QTabWidget : public QWidget
    virtual void tabInserted(int index);
    virtual void tabRemoved(int index);
 
-   void showEvent(QShowEvent *) override;
-   void resizeEvent(QResizeEvent *) override;
-   void keyPressEvent(QKeyEvent *) override;
-   void paintEvent(QPaintEvent *) override;
-   void setTabBar(QTabBar *);
+   void showEvent(QShowEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
+   void keyPressEvent(QKeyEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
 
-   void changeEvent(QEvent *) override;
-   bool event(QEvent *) override;
+   void setTabBar(QTabBar *tabBar);
+
+   void changeEvent(QEvent *event) override;
+   bool event(QEvent *event) override;
    void initStyleOption(QStyleOptionTabWidgetFrame *option) const;
 
  private:
    Q_DECLARE_PRIVATE(QTabWidget)
-   Q_DISABLE_COPY(QTabWidget)
 
    GUI_CS_SLOT_1(Private, void _q_showTab(int un_named_arg1))
    GUI_CS_SLOT_2(_q_showTab)

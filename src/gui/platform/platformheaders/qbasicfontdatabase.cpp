@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -88,7 +88,7 @@ QFontEngine *QBasicFontDatabase::fontEngine(const QFontDef &fontDef, void *usrPt
 
     if (! engine->init(fid, antialias, format) || engine->invalid()) {
         delete engine;
-        engine = 0;
+        engine = nullptr;
     } else {
         engine->setQtDefaultHintStyle(static_cast<QFont::HintingPreference>(fontDef.hintingPreference));
     }
@@ -138,7 +138,7 @@ QFontEngine *QBasicFontDatabase::fontEngine(const QByteArray &fontData, qreal pi
     QFontEngineFTRawData *fe = new QFontEngineFTRawData(fontDef);
     if (!fe->initFromData(fontData)) {
         delete fe;
-        return 0;
+        return nullptr;
     }
 
     fe->updateFamilyNameAndStyle();

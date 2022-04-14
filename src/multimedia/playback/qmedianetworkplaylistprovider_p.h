@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,7 +34,11 @@ class Q_MULTIMEDIA_EXPORT QMediaNetworkPlaylistProvider : public QMediaPlaylistP
    MULTI_CS_OBJECT(QMediaNetworkPlaylistProvider)
 
  public:
-   QMediaNetworkPlaylistProvider(QObject *parent = 0);
+   QMediaNetworkPlaylistProvider(QObject *parent = nullptr);
+
+   QMediaNetworkPlaylistProvider(const QMediaNetworkPlaylistProvider &) = delete;
+   QMediaNetworkPlaylistProvider &operator=(const QMediaNetworkPlaylistProvider &) = delete;
+
    virtual ~QMediaNetworkPlaylistProvider();
 
    virtual bool load(const QNetworkRequest &request, const char *format = nullptr) override;
@@ -56,7 +60,6 @@ class Q_MULTIMEDIA_EXPORT QMediaNetworkPlaylistProvider : public QMediaPlaylistP
    MULTI_CS_SLOT_2(shuffle)
 
  private:
-   Q_DISABLE_COPY(QMediaNetworkPlaylistProvider)
    Q_DECLARE_PRIVATE(QMediaNetworkPlaylistProvider)
 
    MULTI_CS_SLOT_1(Private, void _q_handleParserError(QPlaylistFileParser::ParserError err, const QString &un_named_arg2))
@@ -67,5 +70,4 @@ class Q_MULTIMEDIA_EXPORT QMediaNetworkPlaylistProvider : public QMediaPlaylistP
 };
 
 #endif
-
 

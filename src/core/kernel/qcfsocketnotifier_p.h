@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,13 @@
 #ifndef QCFSOCKETNOTIFIER_P_H
 #define QCFSOCKETNOTIFIER_P_H
 
-
-#include <QtCore/qabstracteventdispatcher.h>
-#include <QtCore/qhash.h>
+#include <qabstracteventdispatcher.h>
+#include <qhash.h>
 
 #include <CoreFoundation/CoreFoundation.h>
 
-QT_BEGIN_NAMESPACE
-
 struct MacSocketInfo {
-    MacSocketInfo() : socket(0), runloop(0), readNotifier(0), writeNotifier(0),
+    MacSocketInfo() : socket(nullptr), runloop(nullptr), readNotifier(nullptr), writeNotifier(nullptr),
         readEnabled(false), writeEnabled(false) {}
     CFSocketRef socket;
     CFRunLoopSourceRef runloop;
@@ -79,7 +76,5 @@ private:
 
     friend void qt_mac_socket_callback(CFSocketRef, CFSocketCallBackType, CFDataRef, const void *, void *);
 };
-
-QT_END_NAMESPACE
 
 #endif

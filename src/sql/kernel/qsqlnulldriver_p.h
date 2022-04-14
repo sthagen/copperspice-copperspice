@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QSQLNULLDRIVER_P_H
 #define QSQLNULLDRIVER_P_H
 
-#include <QtCore/qvariant.h>
-#include <QtSql/qsqldriver.h>
-#include <QtSql/qsqlerror.h>
-#include <QtSql/qsqlresult.h>
-
-QT_BEGIN_NAMESPACE
+#include <qvariant.h>
+#include <qsqldriver.h>
+#include <qsqlerror.h>
+#include <qsqlresult.h>
 
 class QSqlNullResult : public QSqlResult
 {
@@ -123,7 +121,5 @@ class QSqlNullDriver : public QSqlDriver
    inline void setOpenError(bool) override {}
    inline void setLastError(const QSqlError &) override {}
 };
-
-QT_END_NAMESPACE
 
 #endif // QSQLNULLDRIVER_P_H

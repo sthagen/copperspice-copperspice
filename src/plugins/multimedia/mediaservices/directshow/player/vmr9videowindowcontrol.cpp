@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,12 +21,12 @@
 *
 ***********************************************************************/
 
-#include "vmr9videowindowcontrol.h"
+#include <vmr9videowindowcontrol.h>
 
-#include "directshowglobal.h"
+#include <qpalette.h>
+#include <qwidget.h>
 
-#include <QPalette>
-#include <QWidget>
+#include <dsplayer_global.h>
 
 Vmr9VideoWindowControl::Vmr9VideoWindowControl(QObject *parent)
    : QVideoWindowControl(parent)
@@ -66,16 +66,13 @@ void Vmr9VideoWindowControl::setWinId(WId id)
 {
    m_windowId = id;
 
-#ifndef QT_NO_WIDGETS
    if (QWidget *widget = QWidget::find(m_windowId)) {
       const QColor color = widget->palette().color(QPalette::Window);
 
       m_windowColor = RGB(color.red(), color.green(), color.blue());
    }
-#endif
 
-   if (IVMRWindowlessControl9 *control = com_cast<IVMRWindowlessControl9>(
-            m_filter, IID_IVMRWindowlessControl9)) {
+   if (IVMRWindowlessControl9 *control = com_cast<IVMRWindowlessControl9>(m_filter, IID_IVMRWindowlessControl9)) {
       control->SetVideoClippingWindow(reinterpret_cast<HWND>(m_windowId));
       control->SetBorderColor(m_windowColor);
       control->Release();
@@ -96,7 +93,7 @@ void Vmr9VideoWindowControl::setDisplayRect(const QRect &rect)
       RECT sourceRect = { 0, 0, 0, 0 };
       RECT displayRect = { rect.left(), rect.top(), rect.right() + 1, rect.bottom() + 1 };
 
-      control->GetNativeVideoSize(&sourceRect.right, &sourceRect.bottom, 0, 0);
+      control->GetNativeVideoSize(&sourceRect.right, &sourceRect.bottom, nullptr, nullptr);
 
       if (m_aspectRatioMode == Qt::KeepAspectRatioByExpanding) {
          QSize clippedSize = rect.size();
@@ -165,7 +162,7 @@ QSize Vmr9VideoWindowControl::nativeSize() const
       LONG width;
       LONG height;
 
-      if (control->GetNativeVideoSize(&width, &height, 0, 0) == S_OK) {
+      if (control->GetNativeVideoSize(&width, &height, nullptr, nullptr) == S_OK) {
          size = QSize(width, height);
       }
       control->Release();
@@ -188,13 +185,16 @@ void Vmr9VideoWindowControl::setAspectRatioMode(Qt::AspectRatioMode mode)
          case Qt::IgnoreAspectRatio:
             control->SetAspectRatioMode(VMR9ARMode_None);
             break;
+
          case Qt::KeepAspectRatio:
             control->SetAspectRatioMode(VMR9ARMode_LetterBox);
             break;
+
          case Qt::KeepAspectRatioByExpanding:
             control->SetAspectRatioMode(VMR9ARMode_LetterBox);
             setDisplayRect(m_displayRect);
             break;
+
          default:
             break;
       }
@@ -277,14 +277,17 @@ void Vmr9VideoWindowControl::setProcAmpValues()
          procAmp.Brightness = scaleProcAmpValue(
                control, ProcAmpControl9_Brightness, m_brightness);
       }
+
       if (m_dirtyValues & ProcAmpControl9_Contrast) {
          procAmp.Contrast = scaleProcAmpValue(
                control, ProcAmpControl9_Contrast, m_contrast);
       }
+
       if (m_dirtyValues & ProcAmpControl9_Hue) {
          procAmp.Hue = scaleProcAmpValue(
                control, ProcAmpControl9_Hue, m_hue);
       }
+
       if (m_dirtyValues & ProcAmpControl9_Saturation) {
          procAmp.Saturation = scaleProcAmpValue(
                control, ProcAmpControl9_Saturation, m_saturation);

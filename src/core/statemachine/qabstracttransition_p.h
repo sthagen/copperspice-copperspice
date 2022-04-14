@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,9 +25,8 @@
 #define QABSTRACTTRANSITION_P_H
 
 #include <qlist.h>
+#include <qvector.h>
 #include <qsharedpointer.h>
-
-QT_BEGIN_NAMESPACE
 
 class QAbstractState;
 class QState;
@@ -40,17 +39,21 @@ class Q_CORE_EXPORT QAbstractTransitionPrivate
 
  public:
    QAbstractTransitionPrivate();
-   virtual ~QAbstractTransitionPrivate() {}
+
+   virtual ~QAbstractTransitionPrivate()
+   { }
 
    static QAbstractTransitionPrivate *get(QAbstractTransition *q);
 
    bool callEventTest(QEvent *e);
    virtual void callOnTransition(QEvent *e);
+
    QState *sourceState() const;
    QStateMachine *machine() const;
    void emitTriggered();
 
-   QList<QWeakPointer<QAbstractState> > targetStates;
+   QVector<QPointer<QAbstractState>> targetStates;
+   QAbstractTransition::TransitionType transitionType;
 
 #ifndef QT_NO_ANIMATION
    QList<QAbstractAnimation *> animations;
@@ -59,7 +62,5 @@ class Q_CORE_EXPORT QAbstractTransitionPrivate
  protected:
    QAbstractTransition *q_ptr;
 };
-
-QT_END_NAMESPACE
 
 #endif

@@ -10,7 +10,7 @@ target_compile_definitions(CsCore
    -DBUILDING_LIB_CS_STRING
 )
 
-if(GTK2_FOUND)
+if (GTK2_FOUND)
    target_link_libraries(CsCore
       PRIVATE
       ${GLIB2_LIBRARIES}
@@ -37,13 +37,14 @@ include_directories(
    ${CMAKE_CURRENT_SOURCE_DIR}/guarded
    ${CMAKE_CURRENT_SOURCE_DIR}/io
    ${CMAKE_CURRENT_SOURCE_DIR}/json
+   ${CMAKE_CURRENT_SOURCE_DIR}/locale
    ${CMAKE_CURRENT_SOURCE_DIR}/kernel
    ${CMAKE_CURRENT_SOURCE_DIR}/plugin
+   ${CMAKE_CURRENT_SOURCE_DIR}/pointer
    ${CMAKE_CURRENT_SOURCE_DIR}/statemachine
    ${CMAKE_CURRENT_SOURCE_DIR}/thread
    ${CMAKE_CURRENT_SOURCE_DIR}/tools
    ${CMAKE_CURRENT_SOURCE_DIR}/xml
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src
 )
 
 include(animation/animation.cmake)
@@ -55,8 +56,10 @@ include(global/global.cmake)
 include(guarded/guarded.cmake)
 include(io/io.cmake)
 include(json/json.cmake)
+include(locale/locale.cmake)
 include(kernel/kernel.cmake)
 include(plugin/plugin.cmake)
+include(pointer/pointer.cmake)
 include(signal/signal.cmake)
 include(statemachine/statemachine.cmake)
 include(string/string.cmake)
@@ -69,10 +72,15 @@ macro_generate_private("${CORE_PRIVATE_INCLUDES}" QtCore)
 macro_generate_misc("${CORE_INCLUDES}" QtCore)
 macro_generate_misc("${CORE_REGEX_INCLUDES}" QtCore/regex)
 
-if(ZLIB_FOUND)
+if (ZLIB_FOUND)
    target_link_libraries(CsCore
       PUBLIC
       ${ZLIB_LIBRARIES}
+   )
+
+   target_include_directories(CsCore
+      PRIVATE
+      ${ZLIB_INCLUDE_DIR}
    )
 
 else()
@@ -122,7 +130,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
    target_link_libraries(CsCore
       PRIVATE
       ${CMAKE_THREAD_LIBS_INIT}
-      iconv
    )
    include_directories(${CMAKE_SOURCE_DIR}/src/3rdparty/forkfd)
 
@@ -145,19 +152,30 @@ target_sources(CsCore
    ${CORE_REGEX_INCLUDES}
 )
 
+target_include_directories(CsCore
+   PUBLIC
+   $<INSTALL_INTERFACE:include>
+   $<INSTALL_INTERFACE:include/QtCore>
+)
+
 if(MSVC)
    target_compile_options(CsCore
       PUBLIC
       /bigobj
       /DNOMINMAX
    )
-endif()
 
-target_include_directories(CsCore
-   PUBLIC
-   $<INSTALL_INTERFACE:include>
-   $<INSTALL_INTERFACE:include/QtCore>
-)
+   if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
+      # ensure method pointers have a unique address
+      target_link_options(CsCore
+         PUBLIC
+         /OPT:REF,NOICF
+      )
+   else()
+      message(FATAL_ERROR "CMake Version must be at least 3.13.0 for MSVC")
+
+   endif()
+endif()
 
 set_target_properties(CsCore
    PROPERTIES

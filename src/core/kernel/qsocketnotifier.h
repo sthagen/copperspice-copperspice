@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,25 +35,27 @@ class Q_CORE_EXPORT QSocketNotifier : public QObject
  public:
    enum Type { Read, Write, Exception };
 
-   QSocketNotifier(qintptr socket, Type, QObject *parent = nullptr);
+   QSocketNotifier(qintptr socket, Type type, QObject *parent = nullptr);
+
+   QSocketNotifier(const QSocketNotifier &) = delete;
+   QSocketNotifier &operator=(const QSocketNotifier &) = delete;
+
    ~QSocketNotifier();
 
    qintptr socket() const;
    Type type() const;
    bool isEnabled() const;
 
-   CORE_CS_SLOT_1(Public, void setEnabled(bool un_named_arg1))
+   CORE_CS_SLOT_1(Public, void setEnabled(bool enable))
    CORE_CS_SLOT_2(setEnabled)
 
    CORE_CS_SIGNAL_1(Public, void activated(int socket))
    CORE_CS_SIGNAL_2(activated, socket)
 
  protected:
-   bool event(QEvent *) override;
+   bool event(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QSocketNotifier)
-
    qintptr sockfd;
    QSocketNotifier::Type sntype;
    bool snenabled;

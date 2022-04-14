@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -41,17 +41,18 @@
 #   include <qsocketnotifier.h>
 #endif
 
-
-
 class QLocalServerPrivate
 {
    Q_DECLARE_PUBLIC(QLocalServer)
 
  public:
-   QLocalServerPrivate() :
-#if !defined(QT_LOCALSOCKET_TCP) && !defined(Q_OS_WIN)
-      listenSocket(-1), socketNotifier(0),
+   QLocalServerPrivate()
+      :
+
+#if ! defined(QT_LOCALSOCKET_TCP) && ! defined(Q_OS_WIN)
+      listenSocket(-1), socketNotifier(nullptr),
 #endif
+
       maxPendingConnections(30), error(QAbstractSocket::UnknownSocketError),
       socketOptions(QLocalServer::NoOptions) {
    }

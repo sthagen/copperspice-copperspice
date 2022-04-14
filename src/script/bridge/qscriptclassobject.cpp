@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,6 +22,8 @@
 ***********************************************************************/
 
 #include "config.h"
+#include "Error.h"
+#include "PropertyNameArray.h"
 
 #include <qscriptclassobject_p.h>
 
@@ -32,12 +34,6 @@
 
 #include <qscriptengine_p.h>
 #include <qscriptcontext_p.h>
-Q_DECLARE_METATYPE(QScriptContext *)
-Q_DECLARE_METATYPE(QScriptValue)
-Q_DECLARE_METATYPE(QScriptValueList)
-
-#include "Error.h"
-#include "PropertyNameArray.h"
 
 namespace QScript {
 
@@ -214,22 +210,25 @@ void ClassObjectDelegate::getOwnPropertyNames(QScriptObject *object, JSC::ExecSt
    QScriptValue scriptObject = engine->scriptValueFromJSCValue(object);
    QScriptClassPropertyIterator *it = m_scriptClass->newIterator(scriptObject);
 
-   if (it != 0) {
+   if (it != nullptr) {
       while (it->hasNext()) {
          it->next();
          QString name = it->name().toString();
          propertyNames.add(JSC::Identifier(exec, name));
       }
+
       delete it;
    }
 }
 
 JSC::CallType ClassObjectDelegate::getCallData(QScriptObject *, JSC::CallData &callData)
 {
-   if (!m_scriptClass->supportsExtension(QScriptClass::Callable)) {
+   if (! m_scriptClass->supportsExtension(QScriptClass::Callable)) {
       return JSC::CallTypeNone;
    }
+
    callData.native.function = call;
+
    return JSC::CallTypeHost;
 }
 
@@ -286,10 +285,11 @@ JSC::JSObject *ClassObjectDelegate::construct(JSC::ExecState *exec, JSC::JSObjec
    QScriptContext *ctx = eng_p->contextForFrame(eng_p->currentFrame);
 
    QScriptValue defaultObject = ctx->thisObject();
-   QScriptValue result = qvariant_cast<QScriptValue>(scriptClass->extension(QScriptClass::Callable,
-            QVariant::fromValue(ctx)));
 
-   if (!result.isObject()) {
+   QVariant variant    = scriptClass->extension(QScriptClass::Callable, QVariant::fromValue(ctx));
+   QScriptValue result = variant.value<QScriptValue>();
+
+   if (! result.isObject()) {
       result = defaultObject;
    }
 

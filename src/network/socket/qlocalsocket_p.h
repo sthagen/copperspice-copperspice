@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -47,19 +47,18 @@
 
 #endif
 
-QT_BEGIN_NAMESPACE
-
 #if ! defined(Q_OS_WIN) || defined(QT_LOCALSOCKET_TCP)
 class QLocalUnixSocket : public QTcpSocket
 {
-
  public:
-   QLocalUnixSocket() : QTcpSocket() {
-   };
+   QLocalUnixSocket()
+      : QTcpSocket()
+   {
+   }
 
    void setSocketState(QAbstractSocket::SocketState state) {
       QTcpSocket::setSocketState(state);
-   };
+   }
 
    void setErrorString(const QString &string) {
       QTcpSocket::setErrorString(string);
@@ -77,7 +76,7 @@ class QLocalUnixSocket : public QTcpSocket
       return QTcpSocket::writeData(data, maxSize);
    }
 };
-#endif //#if !defined(Q_OS_WIN) || defined(QT_LOCALSOCKET_TCP)
+#endif
 
 class QLocalSocketPrivate : public QIODevicePrivate
 {
@@ -121,6 +120,7 @@ class QLocalSocketPrivate : public QIODevicePrivate
    // GONE QRingBuffer readBuffer;
    // GONE int actualReadBufferSize;
    // GONE WinEventNotifier *dataReadNotifier;
+
    QLocalSocket::LocalSocketError error;
    // GONE bool readSequenceStarted;
    // GONE bool pendingReadyRead;

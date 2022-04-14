@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qstring8.h>
 
-QT_BEGIN_NAMESPACE
-
 class Q_CORE_EXPORT QSystemError
 {
  public:
@@ -44,7 +42,7 @@ class Q_CORE_EXPORT QSystemError
    inline ErrorScope scope();
    inline int error();
 
-   //data members
+   // data members
    int errorCode;
    ErrorScope errorScope;
 };
@@ -69,7 +67,4 @@ int QSystemError::error()
    return errorCode;
 }
 
-
-QT_END_NAMESPACE
-
-#endif // QSYSTEMERROR_P_H
+#endif

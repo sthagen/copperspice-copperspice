@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,10 @@
 #ifndef QPAINTERPATH_P_H
 #define QPAINTERPATH_P_H
 
-#include <QtGui/qpainterpath.h>
-#include <QtGui/qregion.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qvarlengtharray.h>
+#include <qpainterpath.h>
+#include <qregion.h>
+#include <qlist.h>
+#include <qvarlengtharray.h>
 
 #include <qdebug.h>
 #include <qvectorpath_p.h>
@@ -72,9 +72,13 @@ class QVectorPathConverter
 {
  public:
    QVectorPathConverter(const QVector<QPainterPath::Element> &path, uint fillRule, bool convex)
-      : pathData(path, fillRule, convex),
-        path(pathData.points.data(), path.size(),
-           pathData.elements.data(), pathData.flags) {}
+      : pathData(path, fillRule, convex), path(pathData.points.data(), path.size(),
+        pathData.elements.data(), pathData.flags)
+   {
+   }
+
+   QVectorPathConverter(const QVectorPathConverter &) = delete;
+   QVectorPathConverter &operator=(const QVectorPathConverter &) = delete;
 
    const QVectorPath &vectorPath() {
       return path;
@@ -125,33 +129,24 @@ class QVectorPathConverter
 
    QVectorPathData pathData;
    QVectorPath path;
-
- private:
-   Q_DISABLE_COPY(QVectorPathConverter)
 };
 
 class QPainterPathData : public QPainterPathPrivate
 {
  public:
-   QPainterPathData() :
-      cStart(0),
-      fillRule(Qt::OddEvenFill),
-      dirtyBounds(false),
-      dirtyControlBounds(false),
-      pathConverter(0) {
-
+   QPainterPathData()
+      : cStart(0), fillRule(Qt::OddEvenFill), dirtyBounds(false),
+        dirtyControlBounds(false), pathConverter(nullptr)
+   {
       require_moveTo = false;
       convex = false;
    }
 
-   QPainterPathData(const QPainterPathData &other) :
-      QPainterPathPrivate(), cStart(other.cStart), fillRule(other.fillRule),
-      bounds(other.bounds),
-      controlBounds(other.controlBounds),
-      dirtyBounds(other.dirtyBounds),
-      dirtyControlBounds(other.dirtyControlBounds),
-      convex(other.convex),
-      pathConverter(0) {
+   QPainterPathData(const QPainterPathData &other)
+      : QPainterPathPrivate(), cStart(other.cStart), fillRule(other.fillRule),
+        bounds(other.bounds), controlBounds(other.controlBounds), dirtyBounds(other.dirtyBounds),
+        dirtyControlBounds(other.dirtyControlBounds), convex(other.convex), pathConverter(nullptr)
+   {
       require_moveTo = false;
       elements = other.elements;
    }
@@ -224,7 +219,7 @@ inline const QPainterPath QVectorPath::convertToPainterPath() const
    return path;
 }
 
-void Q_GUI_EXPORT qt_find_ellipse_coords(const QRectF &r, qreal angle, qreal length,
+void Q_GUI_EXPORT qt_find_ellipse_coords(const QRectF &rect, qreal angle, qreal length,
    QPointF *startPoint, QPointF *endPoint);
 
 inline bool QPainterPathData::isClosed() const

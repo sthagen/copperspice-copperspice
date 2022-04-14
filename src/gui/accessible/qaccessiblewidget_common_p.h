@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,10 +28,8 @@
 
 #ifndef QT_NO_ACCESSIBILITY
 
-#include <QtCore/QPointer>
-#include <QtCore/QPair>
-
-QT_BEGIN_NAMESPACE
+#include <qpointer.h>
+#include <qpair.h>
 
 class QTextEdit;
 class QStackedWidget;
@@ -290,7 +288,5 @@ class QAccessibleMainWindow : public QAccessibleWidget
 #endif //QT_NO_MAINWINDOW
 
 #endif // QT_NO_ACCESSIBILITY
-
-QT_END_NAMESPACE
 
 #endif // QACESSIBLEWIDGETS_H

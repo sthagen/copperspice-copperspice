@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #include <qsql_odbc.h>
 #include <qsqlrecord.h>
 
-#if defined (Q_OS_WIN32)
+#if defined (Q_OS_WIN)
 #include <qt_windows.h>
 #endif
 
@@ -67,7 +67,7 @@ inline static QString fromSQLTCHAR(const QVarLengthArray<SQLTCHAR> &input, int s
          result = QString::fromUcs4((const uint *)input.constData(), realsize);
          break;
       default:
-         qCritical() << "sizeof(SQLTCHAR) is " << sizeof(SQLTCHAR) << "Don't know how to handle this";
+         qCritical() << "sizeof(SQLTCHAR) is " << sizeof(SQLTCHAR) << "Unable to handle this data type";
    }
    return result;
 }
@@ -87,9 +87,10 @@ inline static QVarLengthArray<SQLTCHAR> toSQLTCHAR(const QString &input)
          memcpy(result.data(), input.toUcs4().data(), input.size() * 4);
          break;
       default:
-         qCritical() << "sizeof(SQLTCHAR) is " << sizeof(SQLTCHAR) << "Don't know how to handle this";
+         qCritical() << "sizeof(SQLTCHAR) is " << sizeof(SQLTCHAR) << "Unable to handle this data type";
    }
-   result.append(0); // make sure it's null terminated, doesn't matter if it already is, it does if it isn't.
+
+   result.append(0);    // make sure it's null terminated
    return result;
 }
 
@@ -1572,7 +1573,7 @@ bool QODBCResult::exec()
                         qParamType[(QFlag)(bindValueType(i)) & QSql::InOut],
                         SQL_C_TCHAR,
                         strSize > 254 ? SQL_WLONGVARCHAR : SQL_WVARCHAR,
-                        0, // god knows... don't change this!
+                        0,    // do not change this value
                         0,
                         (void *)a.constData(),
                         a.size(),
@@ -1611,7 +1612,8 @@ bool QODBCResult::exec()
                      ind);
                break;
             }
-         // fall through
+            [[fallthrough]];
+
          default: {
             QByteArray &ba = tmpStorage[i];
             if (*ind != SQL_NULL_DATA) {
@@ -1689,6 +1691,7 @@ bool QODBCResult::exec()
                      QTime(dt.hour, dt.minute, dt.second, dt.fraction / 1000000)));
             break;
          }
+
          case QVariant::Bool:
          case QVariant::Int:
          case QVariant::UInt:
@@ -1698,6 +1701,7 @@ bool QODBCResult::exec()
          case QVariant::ULongLong:
             //nothing to do
             break;
+
          case QVariant::String:
             if (d->unicode) {
                if (bindValueType(i) & QSql::Out) {
@@ -1708,7 +1712,8 @@ bool QODBCResult::exec()
                }
                break;
             }
-         // fall through
+            [[fallthrough]];
+
          default: {
             if (bindValueType(i) & QSql::Out) {
                values[i] = tmpStorage.at(i);
@@ -1716,10 +1721,12 @@ bool QODBCResult::exec()
             break;
          }
       }
+
       if (indicators[i] == SQL_NULL_DATA) {
          values[i] = QVariant(values[i].type());
       }
    }
+
    return true;
 }
 
@@ -1733,7 +1740,7 @@ QSqlRecord QODBCResult::record() const
 
 QVariant QODBCResult::handle() const
 {
-   return QVariant(qRegisterMetaType<SQLHANDLE>("SQLHANDLE"), &d->hStmt);
+   return QVariant::fromValue<SQLHANDLE>(d->hStmt);
 }
 
 bool QODBCResult::nextResult()
@@ -1955,7 +1962,7 @@ bool QODBCDriver::open(const QString &db,
    }
 
    if (!d->checkDriver()) {
-      setLastError(qMakeError(tr("Unable to connect - Driver doesn't support all "
+      setLastError(qMakeError(tr("Unable to connect - Driver does not support all "
                "functionality required"), QSqlError::ConnectionError, d));
       setOpenError(true);
       return false;
@@ -2101,8 +2108,8 @@ bool QODBCDriverPrivate::checkDriver() const
          return false;
       }
       if (sup == SQL_FALSE) {
-         qWarning () << "QODBCDriver::open: Warning - Driver doesn't support all needed functionality (" << reqFunc[i] <<
-            ").\nPlease look at the Qt SQL Module Driver documentation for more information.";
+         qWarning () << "QODBCDriver::open: Warning - Driver does not support all needed functionality (" << reqFunc[i] <<
+            ").\nRefer to the SQL Driver documentation for more information.";
          return false;
       }
    }
@@ -2113,12 +2120,11 @@ bool QODBCDriverPrivate::checkDriver() const
       r = SQLGetFunctions(hDbc, optFunc[i], &sup);
 
       if (r != SQL_SUCCESS) {
-         qSqlWarning(QLatin1String("QODBCDriver::checkDriver: Cannot get list of supported functions"), this);
+         qSqlWarning(QLatin1String("QODBCDriver::checkDriver: Unable to retrieve list of supported functions"), this);
          return false;
       }
       if (sup == SQL_FALSE) {
-         qWarning() << "QODBCDriver::checkDriver: Warning - Driver doesn't support some non-critical functions (" << optFunc[i]
-            << ')';
+         qWarning() << "QODBCDriver::checkDriver: Driver is missing some optional functions (" << optFunc[i] << ')';
          return true;
       }
    }
@@ -2188,7 +2194,7 @@ void QODBCDriverPrivate::checkHasSQLFetchScroll()
    if ((r != SQL_SUCCESS && r != SQL_SUCCESS_WITH_INFO) || sup != SQL_TRUE) {
       hasSQLFetchScroll = false;
       qWarning() <<
-         "QODBCDriver::checkHasSQLFetchScroll: Warning - Driver doesn't support scrollable result sets, use forward only mode for queries";
+         "QODBCDriver::checkHasSQLFetchScroll: Warning - Driver does not support scrollable result sets, use forward only mode for queries";
    }
 }
 
@@ -2660,7 +2666,7 @@ QString QODBCDriver::formatValue(const QSqlField &field,
 
 QVariant QODBCDriver::handle() const
 {
-   return QVariant(qRegisterMetaType<SQLHANDLE>("SQLHANDLE"), &d->hDbc);
+   return QVariant::fromValue<SQLHANDLE>(d->hDbc);
 }
 
 QString QODBCDriver::escapeIdentifier(const QString &identifier, IdentifierType) const

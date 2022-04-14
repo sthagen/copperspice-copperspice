@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -72,7 +72,7 @@ class Q_CORE_EXPORT QEventDispatcherWin32 : public QAbstractEventDispatcher
    bool event(QEvent *e) override;
 
 protected:
-    QEventDispatcherWin32(QEventDispatcherWin32Private &dd, QObject *parent = 0);
+    QEventDispatcherWin32(QEventDispatcherWin32Private &dd, QObject *parent = nullptr);
     virtual void sendPostedEvents();
     void doUnregisterSocketNotifier(QSocketNotifier *notifier);
 

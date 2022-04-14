@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,9 +22,9 @@
 ***********************************************************************/
 
 #include <qaudiodevicefactory_p.h>
+
 #include <qaudiosystem.h>
 #include <qaudiodeviceinfo.h>
-
 #include <qmap.h>
 
 class QAudioDeviceInfoPrivate : public QSharedData
@@ -32,9 +32,12 @@ class QAudioDeviceInfoPrivate : public QSharedData
  public:
    QAudioDeviceInfoPrivate()
       : mode(QAudio::AudioOutput), info(nullptr)
-   { }
+   {
+   }
+
    QAudioDeviceInfoPrivate(const QString &r, const QString &h, QAudio::Mode m):
-      realm(r), handle(h), mode(m) {
+      realm(r), handle(h), mode(m)
+   {
       if (! handle.isEmpty()) {
          info = QAudioDeviceFactory::audioDeviceInfo(realm, handle, mode);
       } else {
@@ -127,7 +130,7 @@ bool QAudioDeviceInfo::operator !=(const QAudioDeviceInfo &other) const
 }
 bool QAudioDeviceInfo::isNull() const
 {
-   return d->info == 0;
+   return d->info == nullptr;
 }
 
 /*!

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,6 +25,7 @@
 #define QMESSAGEBOX_H
 
 #include <qdialog.h>
+#include <qplatform_dialoghelper.h>
 
 #ifndef QT_NO_MESSAGEBOX
 
@@ -65,11 +66,11 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
 
  public:
    enum Icon {
-      NoIcon   = 0,
+      NoIcon      = 0,
       Information = 1,
-      Warning  = 2,
-      Critical = 3,
-      Question = 4
+      Warning     = 2,
+      Critical    = 3,
+      Question    = 4
    };
 
    enum ButtonRole {
@@ -129,6 +130,9 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
    QMessageBox(Icon icon, const QString &title, const QString &text, StandardButtons buttons = NoButton,
       QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
+   QMessageBox(const QMessageBox &) = delete;
+   QMessageBox &operator=(const QMessageBox &) = delete;
+
    ~QMessageBox();
 
    void addButton(QAbstractButton *button, ButtonRole role);
@@ -174,6 +178,7 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
 
    void setCheckBox(QCheckBox *cb);
    QCheckBox *checkBox() const;
+
    static StandardButton information(QWidget *parent, const QString &title,
       const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
 
@@ -192,11 +197,10 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
    static void aboutQt(QWidget *parent, const QString &title = QString());
 
    QMessageBox(const QString &title, const QString &text, Icon icon,
-      int button0, int button1, int button2,
-      QWidget *parent = nullptr,
-      Qt::WindowFlags f = Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+      int button0, int button1, int button2, QWidget *parent = nullptr,
+      Qt::WindowFlags flags = Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
-   // the following functions are obsolete
+   // following are obsolete
    static int information(QWidget *parent, const QString &title, const QString &text,
       int button0, int button1 = 0, int button2 = 0);
 
@@ -261,7 +265,7 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
    GUI_CS_SIGNAL_2(buttonClicked, button)
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
    void resizeEvent(QResizeEvent *event) override;
    void showEvent(QShowEvent *event) override;
    void closeEvent(QCloseEvent *event) override;
@@ -269,10 +273,12 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
    void changeEvent(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QMessageBox)
    Q_DECLARE_PRIVATE(QMessageBox)
 
-   GUI_CS_SLOT_1(Private, void _q_buttonClicked(QAbstractButton *un_named_arg1))
+   GUI_CS_SLOT_1(Private, void _q_clicked(QPlatformDialogHelper::StandardButton button, QPlatformDialogHelper::ButtonRole role))
+   GUI_CS_SLOT_2(_q_clicked)
+
+   GUI_CS_SLOT_1(Private, void _q_buttonClicked(QAbstractButton *button))
    GUI_CS_SLOT_2(_q_buttonClicked)
 };
 

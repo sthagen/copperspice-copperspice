@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef CSOBJECT_INTERNAL_H
 #define CSOBJECT_INTERNAL_H
 
-#include <QCoreApplication>
+#include <qcoreapplication.h>
 #include <csmeta_callevent.h>
 #include <qsemaphore.h>
 #include <qstring8.h>
@@ -87,7 +87,7 @@ bool QObject::connect(const Sender *sender, void (SignalClass::*signalMethod)(Si
    kind = static_cast<CsSignal::ConnectionKind>(type & ~Qt::UniqueConnection);
 
    CsSignal::connect(*sender, signalMethod, *receiver, slotMethod, kind, uniqueConnection);
-   sender->connectNotify(signalMetaMethod);
+   sender->QObject::connectNotify(signalMetaMethod);
 
    return true;
 }
@@ -146,7 +146,7 @@ bool QObject::connect(const Sender *sender, void (SignalClass::*signalMethod)(Si
    kind = static_cast<CsSignal::ConnectionKind>(type & ~Qt::UniqueConnection);
 
    CsSignal::connect(*sender, signalMethod, *receiver, slotLambda, kind, uniqueConnection);
-   sender->connectNotify(signalMetaMethod);
+   sender->QObject::connectNotify(signalMetaMethod);
 
    return true;
 }
@@ -154,7 +154,7 @@ bool QObject::connect(const Sender *sender, void (SignalClass::*signalMethod)(Si
 // signal & slot method ptr
 template<class Sender, class SignalClass, class ...SignalArgs, class Receiver, class SlotClass, class ...SlotArgs, class SlotReturn>
 bool QObject::disconnect(const Sender *sender, void (SignalClass::*signalMethod)(SignalArgs...),
-                         const Receiver *receiver, SlotReturn (SlotClass::*slotMethod)(SlotArgs...))
+            const Receiver *receiver, SlotReturn (SlotClass::*slotMethod)(SlotArgs...))
 {
    static_assert(std::is_base_of<QObject, Sender>::value, "Sender must inherit from QObject");
 
@@ -170,7 +170,37 @@ bool QObject::disconnect(const Sender *sender, void (SignalClass::*signalMethod)
 
       if (senderMetaObject) {
          QMetaMethod signalMetaMethod = senderMetaObject->method(signalMethod);
-         const_cast<Sender *>(sender)->disconnectNotify(signalMetaMethod);
+         const_cast<Sender *>(sender)->QObject::disconnectNotify(signalMetaMethod);
+      }
+   }
+
+   return retval;
+}
+
+template<class Sender, class SignalClass, class ...SignalArgs, class Receiver>
+bool QObject::disconnect(const Sender *sender, void (SignalClass::*signalMethod)(SignalArgs...),
+            const Receiver *receiver, std::nullptr_t slotMethod)
+{
+   (void) slotMethod;
+
+   static_assert(std::is_base_of<QObject, Sender>::value, "Sender must inherit from QObject");
+
+   if (sender == nullptr) {
+      qWarning("QObject::disconnect() Unexpected null parameter");
+      return false;
+   }
+
+   const QMetaObject *senderMetaObject = sender->metaObject();
+   bool retval = false;
+
+   if (senderMetaObject) {
+      QMetaMethod signalMetaMethod = senderMetaObject->method(signalMethod);
+      const CSBentoAbstract *signalMethod_Bento = signalMetaMethod.getBentoBox();
+
+      retval = CsSignal::internal_disconnect(*sender, signalMethod_Bento, receiver, nullptr);
+
+      if (retval) {
+         const_cast<Sender *>(sender)->QObject::disconnectNotify(signalMetaMethod);
       }
    }
 
@@ -180,7 +210,7 @@ bool QObject::disconnect(const Sender *sender, void (SignalClass::*signalMethod)
 // signal method ptr, slot lambda or function ptr
 template<class Sender, class SignalClass, class ...SignalArgs, class Receiver, class T>
 bool QObject::disconnect(const Sender *sender, void (SignalClass::*signalMethod)(SignalArgs...),
-                         const Receiver *receiver, T slotMethod)
+             const Receiver *receiver, T slotMethod)
 {
    bool retval = CsSignal::disconnect(*sender, signalMethod, *receiver, slotMethod);
 
@@ -189,7 +219,7 @@ bool QObject::disconnect(const Sender *sender, void (SignalClass::*signalMethod)
 
       if (senderMetaObject) {
          QMetaMethod signalMetaMethod = senderMetaObject->method(signalMethod);
-         const_cast<Sender *>(sender)->disconnectNotify(signalMetaMethod);
+         const_cast<Sender *>(sender)->QObject::disconnectNotify(signalMetaMethod);
       }
    }
 
@@ -290,8 +320,8 @@ bool QMetaObject::invokeMethod(QObject *object, const QString &member, Qt::Conne
 
          int numOfChars = sig.indexOf('(') + 1;
 
-         QMetaMethod testMethod  = metaObject->method(k);
-         QString testSignature = testMethod.methodSignature();
+         QMetaMethod testMethod = metaObject->method(k);
+         QString testSignature  = testMethod.methodSignature();
 
          if (testSignature.leftView(numOfChars) == sig.leftView(numOfChars))  {
             msgList.append(testSignature);
@@ -349,7 +379,7 @@ bool QMetaMethod::invoke(QObject *object, Qt::ConnectionType type, CSReturnArgum
 
    }
 
-   if (m_bento == 0)  {
+   if (m_bento == nullptr)  {
       qWarning("QMetaMethod::invoke() MetaMethod registration issue, Receiver is %s", csPrintable(m_metaObject->className()));
       return false;
    }
@@ -374,7 +404,7 @@ bool QMetaMethod::invoke(QObject *object, Qt::ConnectionType type, CSReturnArgum
    }
 
    QThread *currentThread = QThread::currentThread();
-   QThread *objectThread  = 0;
+   QThread *objectThread  = nullptr;
 
    if (isConstructor) {
       // only allowed to create a new object in your own thread
@@ -413,7 +443,7 @@ bool QMetaMethod::invoke(QObject *object, Qt::ConnectionType type, CSReturnArgum
 
       // store the signal data, true indicates the data will be copied into a TeaCup Object (stored on the heap)
       CSMetaCallEvent *event = new CSMetaCallEvent(m_bento,
-                  new CsSignal::Internal::TeaCup_Data<Ts...>(true, std::forward<Ts>(Vs)...), 0, -1);
+                  new CsSignal::Internal::TeaCup_Data<Ts...>(true, std::forward<Ts>(Vs)...), nullptr, -1);
 
       QCoreApplication::postEvent(object, event);
 
@@ -432,7 +462,7 @@ bool QMetaMethod::invoke(QObject *object, Qt::ConnectionType type, CSReturnArgum
 
       // store the signal data, false indicates the data will not be copied
       CSMetaCallEvent *event = new CSMetaCallEvent(m_bento,
-                  new CsSignal::Internal::TeaCup_Data<Ts...>(false, std::forward<Ts>(Vs)...), 0, -1, &semaphore);
+                  new CsSignal::Internal::TeaCup_Data<Ts...>(false, std::forward<Ts>(Vs)...), nullptr, -1, &semaphore);
 
       QCoreApplication::postEvent(object, event);
 
@@ -485,7 +515,8 @@ bool QMetaMethod::invoke(QObject *object, Qt::ConnectionType type, Ts &&...Vs) c
    } else if (type == Qt::QueuedConnection) {
 
       // store the signal data, false indicates the data will not be copied
-      CSMetaCallEvent *event = new CSMetaCallEvent(m_bento, new CsSignal::Internal::TeaCup_Data<Ts...>(true, std::forward<Ts>(Vs)...), 0, -1);
+      CSMetaCallEvent *event = new CSMetaCallEvent(m_bento,
+                  new CsSignal::Internal::TeaCup_Data<Ts...>(true, std::forward<Ts>(Vs)...), nullptr, -1);
       QCoreApplication::postEvent(object, event);
 
    } else {
@@ -499,8 +530,8 @@ bool QMetaMethod::invoke(QObject *object, Qt::ConnectionType type, Ts &&...Vs) c
       QSemaphore semaphore;
 
       // store the signal data, false indicates the data will not be copied
-      CSMetaCallEvent *event = new CSMetaCallEvent(m_bento, new CsSignal::Internal::TeaCup_Data<Ts...>(false, std::forward<Ts>(Vs)...), 0, -1,
-            &semaphore);
+      CSMetaCallEvent *event = new CSMetaCallEvent(m_bento,
+                  new CsSignal::Internal::TeaCup_Data<Ts...>(false, std::forward<Ts>(Vs)...), nullptr, -1, &semaphore);
       QCoreApplication::postEvent(object, event);
 
       semaphore.acquire();

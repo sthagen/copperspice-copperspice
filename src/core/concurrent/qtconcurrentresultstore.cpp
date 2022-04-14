@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,14 +23,17 @@
 
 #include <qtconcurrentresultstore.h>
 
-QT_BEGIN_NAMESPACE
-
 namespace QtConcurrent {
 
 ResultIteratorBase::ResultIteratorBase()
-   : mapIterator(QMap<int, ResultItem>::const_iterator()), m_vectorIndex(0) { }
+   : mapIterator(QMap<int, ResultItem>::const_iterator()), m_vectorIndex(0)
+{
+}
+
 ResultIteratorBase::ResultIteratorBase(QMap<int, ResultItem>::const_iterator _mapIterator, int _vectorIndex)
-   : mapIterator(_mapIterator), m_vectorIndex(_vectorIndex) { }
+   : mapIterator(_mapIterator), m_vectorIndex(_vectorIndex)
+{
+}
 
 int ResultIteratorBase::vectorIndex() const
 {
@@ -148,7 +151,7 @@ void ResultStoreBase::syncPendingResults()
 
 int ResultStoreBase::addResult(int index, const void *result)
 {
-   ResultItem resultItem(result, 0); // 0 means "not a vector"
+   ResultItem resultItem(result, 0);                // 0 means "not a vector"
    return insertResultItem(index, resultItem);
 }
 
@@ -157,12 +160,14 @@ int ResultStoreBase::addResults(int index, const void *results, int vectorSize, 
    if (m_filterMode == false || vectorSize == totalCount) {
       ResultItem resultItem(results, vectorSize);
       return insertResultItem(index, resultItem);
+
    } else {
       if (vectorSize > 0) {
          ResultItem filteredIn(results, vectorSize);
          insertResultItem(index, filteredIn);
       }
-      ResultItem filteredAway(0, totalCount - vectorSize);
+
+      ResultItem filteredAway(nullptr, totalCount - vectorSize);
       return insertResultItem(index + vectorSize, filteredAway);
    }
 }
@@ -240,6 +245,4 @@ int ResultStoreBase::updateInsertIndex(int index, int _count)
 }
 
 } // namespace QtConcurrent
-
-QT_END_NAMESPACE
 

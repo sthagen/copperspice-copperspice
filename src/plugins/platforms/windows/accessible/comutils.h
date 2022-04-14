@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,9 +31,6 @@
 #include <qstring.h>
 
 #include <ocidl.h>
-
-// Originally QVariantToVARIANT copied from ActiveQt, renamed to avoid conflicts in static builds
-bool QVariant2VARIANT(const QVariant &var, VARIANT &arg, const QByteArray &typeName, bool out);
 
 inline BSTR QStringToBSTR(const QString &str)
 {

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,7 +33,7 @@ class QAbstractProxyModelPrivate : public QAbstractItemModelPrivate
    Q_DECLARE_PUBLIC(QAbstractProxyModel)
 
  public:
-   QAbstractProxyModelPrivate() : QAbstractItemModelPrivate(), model(0) {}
+   QAbstractProxyModelPrivate() : QAbstractItemModelPrivate(), model(nullptr) {}
    QAbstractItemModel *model;
    virtual void _q_sourceModelDestroyed();
 

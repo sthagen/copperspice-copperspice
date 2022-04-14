@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,18 +24,15 @@
 #ifndef QTHREADPOOL_P_H
 #define QTHREADPOOL_P_H
 
-#include <QtCore/qmutex.h>
-#include <QtCore/qwaitcondition.h>
-#include <QtCore/qset.h>
-#include <QtCore/qqueue.h>
+#include <qmutex.h>
+#include <qwaitcondition.h>
+#include <qset.h>
+#include <qqueue.h>
 
 class QThreadPoolThread;
 
 class QThreadPoolPrivate
 {
-   Q_DECLARE_PUBLIC(QThreadPool)
-   friend class QThreadPoolThread;
-
  public:
    QThreadPoolPrivate();
    virtual ~QThreadPoolPrivate() {}
@@ -47,7 +44,7 @@ class QThreadPoolPrivate
    void tryToStartMoreThreads();
    bool tooManyThreadsActive() const;
 
-   void startThread(QRunnable *runnable = 0);
+   void startThread(QRunnable *runnable = nullptr);
    void reset();
    bool waitForDone(int msecs);
 
@@ -71,6 +68,9 @@ class QThreadPoolPrivate
  protected:
    QThreadPool *q_ptr;
 
+ private:
+   Q_DECLARE_PUBLIC(QThreadPool)
+   friend class QThreadPoolThread;
 };
 
 

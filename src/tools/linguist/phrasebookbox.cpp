@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,28 +21,24 @@
 *
 ***********************************************************************/
 
-/*  TRANSLATOR PhraseBookBox
+#include <phrasebookbox.h>
+#include <settings_dialog.h>
 
-  Go to Phrase > Edit Phrase Book, The dialog that pops up is a PhraseBookBox.
-*/
-
-#include "phrasebookbox.h"
-#include "translationsettingsdialog.h"
-
-#include <QtEvents>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QHeaderView>
-#include <QSortFilterProxyModel>
+#include <qevent.h>
+#include <qlineedit.h>
+#include <qmessagebox.h>
+#include <qheaderview.h>
+#include <qsortfilterproxymodel.h>
 
 PhraseBookBox::PhraseBookBox(PhraseBook *phraseBook, QWidget *parent)
-   : QDialog(parent), m_phraseBook(phraseBook), m_translationSettingsDialog(0)
+   : QDialog(parent), m_phraseBook(phraseBook), m_settingsDialog(nullptr)
 {
-   // This definition needs to be within class context for lupdate to find it
+
+// definition needs to be within class context for lupdate to find it
 #define NewPhrase tr("(New Entry)")
 
    setupUi(this);
-   setWindowTitle(tr("%1[*] - Linguist").arg(m_phraseBook->friendlyPhraseBookName()));
+   setWindowTitle(tr("%1[*]").formatArg(m_phraseBook->friendlyPhraseBookName()));
    setWindowModified(m_phraseBook->isModified());
 
    phrMdl = new PhraseModel(this);
@@ -55,7 +51,7 @@ PhraseBookBox::PhraseBookBox(PhraseBook *phraseBook, QWidget *parent)
 
    phraseList->setModel(m_sortedPhraseModel);
    phraseList->header()->setDefaultSectionSize(150);
-   phraseList->header()->setResizeMode(QHeaderView::Interactive);
+   phraseList->header()->setSectionResizeMode(QHeaderView::Interactive);
 
    connect(sourceLed,     &QLineEdit::textChanged,      this, &PhraseBookBox::sourceChanged);
    connect(targetLed,     &QLineEdit::textChanged,      this, &PhraseBookBox::targetChanged);
@@ -68,7 +64,7 @@ PhraseBookBox::PhraseBookBox(PhraseBook *phraseBook, QWidget *parent)
    connect(removeBut,     &QAbstractButton::clicked,    this, &PhraseBookBox::removePhrase);
    connect(settingsBut,   &QAbstractButton::clicked,    this, &PhraseBookBox::settings);
    connect(saveBut,       &QAbstractButton::clicked,    this, &PhraseBookBox::save);
-   connect(m_phraseBook,  &PhraseBook:modifiedChanged,  this, &PhraseBookBox::setWindowModified);
+   connect(m_phraseBook,  &PhraseBook::modifiedChanged, this, &PhraseBookBox::setWindowModified);
 
    sourceLed->installEventFilter(this);
    targetLed->installEventFilter(this);
@@ -85,8 +81,7 @@ PhraseBookBox::PhraseBookBox(PhraseBook *phraseBook, QWidget *parent)
 
 bool PhraseBookBox::eventFilter(QObject *obj, QEvent *event)
 {
-   if (event->type() == QEvent::KeyPress &&
-         (obj == sourceLed || obj == targetLed || obj == definitionLed)) {
+   if (event->type() == QEvent::KeyPress && (obj == sourceLed || obj == targetLed || obj == definitionLed)) {
       const QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
       const int key = keyEvent->key();
 
@@ -98,6 +93,7 @@ bool PhraseBookBox::eventFilter(QObject *obj, QEvent *event)
             return QApplication::sendEvent(phraseList, event);
       }
    }
+
    return QDialog::eventFilter(obj, event);
 }
 
@@ -120,20 +116,19 @@ void PhraseBookBox::removePhrase()
 
 void PhraseBookBox::settings()
 {
-   if (!m_translationSettingsDialog) {
-      m_translationSettingsDialog = new TranslationSettingsDialog(this);
+   if (! m_settingsDialog) {
+      m_settingsDialog = new SettingsDialog(this);
    }
-   m_translationSettingsDialog->setPhraseBook(m_phraseBook);
-   m_translationSettingsDialog->exec();
+
+   m_settingsDialog->setPhraseBook(m_phraseBook);
+   m_settingsDialog->exec();
 }
 
 void PhraseBookBox::save()
 {
    const QString &fileName = m_phraseBook->fileName();
-   if (!m_phraseBook->save(fileName))
-      QMessageBox::warning(this,
-                           tr("Qt Linguist"),
-                           tr("Cannot save phrase book '%1'.").arg(fileName));
+   if (! m_phraseBook->save(fileName))
+      QMessageBox::warning(this, tr("Linguist"), tr("Unable to savephrase book '%1'.").formatArg(fileName));
 }
 
 void PhraseBookBox::sourceChanged(const QString &source)
@@ -147,6 +142,7 @@ void PhraseBookBox::sourceChanged(const QString &source)
 void PhraseBookBox::targetChanged(const QString &target)
 {
    QModelIndex index = currentPhraseIndex();
+
    if (index.isValid()) {
       phrMdl->setData(phrMdl->index(index.row(), 1), target);
    }
@@ -155,6 +151,7 @@ void PhraseBookBox::targetChanged(const QString &target)
 void PhraseBookBox::definitionChanged(const QString &definition)
 {
    QModelIndex index = currentPhraseIndex();
+
    if (index.isValid()) {
       phrMdl->setData(phrMdl->index(index.row(), 2), definition);
    }

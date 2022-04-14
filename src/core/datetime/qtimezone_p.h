@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -102,7 +102,7 @@ class Q_CORE_EXPORT QTimeZonePrivate : public QSharedData
    virtual QList<QByteArray> availableTimeZoneIds(QLocale::Country country) const;
    virtual QList<QByteArray> availableTimeZoneIds(int utcOffset) const;
 
-   virtual void serialize(QDataStream &ds) const;
+   virtual void serialize(QDataStream &stream) const;
 
    // Static Utility Methods
    static inline qint64 maxMSecs() {
@@ -143,7 +143,9 @@ class Q_CORE_EXPORT QTimeZonePrivate : public QSharedData
 };
 
 template<>
-QTimeZonePrivate *QSharedDataPointer<QTimeZonePrivate>::clone();
+inline QTimeZonePrivate *QSharedDataPointer<QTimeZonePrivate>::clone() {
+   return d->clone();
+}
 
 class  QUtcTimeZonePrivate final : public QTimeZonePrivate
 {
@@ -159,8 +161,7 @@ class  QUtcTimeZonePrivate final : public QTimeZonePrivate
 
    // Create custom offset from UTC
    QUtcTimeZonePrivate(const QByteArray &zoneId, int offsetSeconds, const QString &name,
-      const QString &abbreviation, QLocale::Country country,
-      const QString &comment);
+      const QString &abbreviation, QLocale::Country country, const QString &comment);
 
    QUtcTimeZonePrivate(const QUtcTimeZonePrivate &other);
    virtual ~QUtcTimeZonePrivate();
@@ -172,9 +173,9 @@ class  QUtcTimeZonePrivate final : public QTimeZonePrivate
    QLocale::Country country() const override;
    QString comment() const override;
 
-   QString displayName(QTimeZone::TimeType timeType,
-      QTimeZone::NameType nameType,
+   QString displayName(QTimeZone::TimeType timeType, QTimeZone::NameType nameType,
       const QLocale &locale) const override;
+
    QString abbreviation(qint64 atMSecsSinceEpoch) const override;
 
    int standardTimeOffset(qint64 atMSecsSinceEpoch) const override;
@@ -186,13 +187,12 @@ class  QUtcTimeZonePrivate final : public QTimeZonePrivate
    QList<QByteArray> availableTimeZoneIds(QLocale::Country country) const override;
    QList<QByteArray> availableTimeZoneIds(int utcOffset) const override;
 
-   void serialize(QDataStream &ds) const override;
+   void serialize(QDataStream &stream) const override;
 
  private:
    void init(const QByteArray &zoneId);
    void init(const QByteArray &zoneId, int offsetSeconds, const QString &name,
-      const QString &abbreviation, QLocale::Country country,
-      const QString &comment);
+      const QString &abbreviation, QLocale::Country country, const QString &comment);
 
    QString m_name;
    QString m_abbreviation;
@@ -230,9 +230,11 @@ class QTzTimeZonePrivate final : public QTimeZonePrivate
  public:
    // Create default time zone
    QTzTimeZonePrivate();
+
    // Create named time zone
    QTzTimeZonePrivate(const QByteArray &ianaId);
    QTzTimeZonePrivate(const QTzTimeZonePrivate &other);
+
    ~QTzTimeZonePrivate();
 
    QTimeZonePrivate *clone() override;
@@ -240,12 +242,12 @@ class QTzTimeZonePrivate final : public QTimeZonePrivate
    QLocale::Country country() const override;
    QString comment() const override;
 
-   QString displayName(qint64 atMSecsSinceEpoch,
-      QTimeZone::NameType nameType,
+   QString displayName(qint64 atMSecsSinceEpoch, QTimeZone::NameType nameType,
       const QLocale &locale) const override;
-   QString displayName(QTimeZone::TimeType timeType,
-      QTimeZone::NameType nameType,
+
+   QString displayName(QTimeZone::TimeType timeType, QTimeZone::NameType nameType,
       const QLocale &locale) const override;
+
    QString abbreviation(qint64 atMSecsSinceEpoch) const override;
 
    int offsetFromUtc(qint64 atMSecsSinceEpoch) const override;
@@ -284,6 +286,7 @@ class QMacTimeZonePrivate final : public QTimeZonePrivate
  public:
    // Create default time zone
    QMacTimeZonePrivate();
+
    // Create named time zone
    QMacTimeZonePrivate(const QByteArray &ianaId);
    QMacTimeZonePrivate(const QMacTimeZonePrivate &other);
@@ -347,6 +350,7 @@ class QWinTimeZonePrivate final : public QTimeZonePrivate
 
    QString displayName(QTimeZone::TimeType timeType, QTimeZone::NameType nameType,
       const QLocale &locale) const override;
+
    QString abbreviation(qint64 atMSecsSinceEpoch) const override;
 
    int offsetFromUtc(qint64 atMSecsSinceEpoch) const override;
@@ -378,50 +382,5 @@ class QWinTimeZonePrivate final : public QTimeZonePrivate
    QList<QWinTransitionRule> m_tranRules;
 };
 #endif // Q_OS_WIN
-
-#ifdef Q_OS_ANDROID
-class QAndroidTimeZonePrivate final : public QTimeZonePrivate
-
-{
- public:
-   // Create default time zone
-   QAndroidTimeZonePrivate();
-   // Create named time zone
-   QAndroidTimeZonePrivate(const QByteArray &ianaId);
-   QAndroidTimeZonePrivate(const QAndroidTimeZonePrivate &other);
-   ~QAndroidTimeZonePrivate();
-
-   QTimeZonePrivate *clone() override;
-
-   QString displayName(QTimeZone::TimeType timeType, QTimeZone::NameType nameType, const QLocale &locale) const override;
-   QString abbreviation(qint64 atMSecsSinceEpoch) const override
-
-   int offsetFromUtc(qint64 atMSecsSinceEpoch) const override;
-   int standardTimeOffset(qint64 atMSecsSinceEpoch) const override;
-   int daylightTimeOffset(qint64 atMSecsSinceEpoch) const override;
-
-   bool hasDaylightTime() const override;
-   bool isDaylightTime(qint64 atMSecsSinceEpoch) const override;
-
-   Data data(qint64 forMSecsSinceEpoch) const override;
-
-   bool hasTransitions() const override;
-   Data nextTransition(qint64 afterMSecsSinceEpoch) const override;
-   Data previousTransition(qint64 beforeMSecsSinceEpoch) const override;
-
-   Data dataForLocalTime(qint64 forLocalMSecs) const override;
-
-   QByteArray systemTimeZoneId() const override;
-
-   QList<QByteArray> availableTimeZoneIds() const override;
-
- private:
-   void init(const QByteArray &zoneId);
-
-   QJNIObjectPrivate androidTimeZone;
-
-};
-#endif // Q_OS_ANDROID
-
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -129,7 +129,7 @@ void QAbstractEventDispatcher::installNativeEventFilter(QAbstractNativeEventFilt
     Q_D(QAbstractEventDispatcher);
 
     // clean up unused items in the list
-    d->eventFilters.removeAll(0);
+    d->eventFilters.removeAll(nullptr);
     d->eventFilters.removeAll(filterObj);
     d->eventFilters.prepend(filterObj);
 }
@@ -140,7 +140,7 @@ void QAbstractEventDispatcher::removeNativeEventFilter(QAbstractNativeEventFilte
 
     for (int i = 0; i < d->eventFilters.count(); ++i) {
         if (d->eventFilters.at(i) == filter) {
-            d->eventFilters[i] = 0;
+            d->eventFilters[i] = nullptr;
             break;
         }
     }

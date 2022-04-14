@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,7 @@
 #ifndef QT_NO_SESSIONMANAGER
 
 QPlatformSessionManager::QPlatformSessionManager(const QString &id, const QString &key)
-   : m_sessionId(id),
-     m_sessionKey(key),
+   : m_sessionId(id), m_sessionKey(key),
      m_restartHint(QSessionManager::RestartIfRunning)
 {
 }
@@ -97,14 +96,14 @@ QStringList QPlatformSessionManager::discardCommand() const
 
 void QPlatformSessionManager::setManagerProperty(const QString &name, const QString &value)
 {
-   Q_UNUSED(name)
-   Q_UNUSED(value)
+   (void) name;
+   (void) value;
 }
 
 void QPlatformSessionManager::setManagerProperty(const QString &name, const QStringList &value)
 {
-   Q_UNUSED(name)
-   Q_UNUSED(value)
+   (void) name;
+   (void) value;
 }
 
 bool QPlatformSessionManager::isPhase2() const

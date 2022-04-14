@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -119,19 +119,23 @@ QString QMacPasteboardMimeAny::convertorName()
 QString QMacPasteboardMimeAny::flavorFor(const QString &mime)
 {
    // do not handle the mime type name in the drag pasteboard
-   if (mime == QLatin1String("application/x-qt-mime-type-name")) {
+   if (mime == "application/x-qt-mime-type-name") {
       return QString();
    }
-   QString ret = QLatin1String("com.trolltech.anymime.") + mime;
-   return ret.replace(QLatin1Char('/'), QLatin1String("--"));
+
+   QString retval = "com.copperspice.cs.anymime." + mime;
+
+   return retval.replace('/', "--");
 }
 
 QString QMacPasteboardMimeAny::mimeFor(QString flav)
 {
-   const QString any_prefix = QLatin1String("com.trolltech.anymime.");
+   const QString any_prefix = "com.copperspice.cs.anymime.";
+
    if (flav.size() > any_prefix.length() && flav.startsWith(any_prefix)) {
-      return flav.mid(any_prefix.length()).replace(QLatin1String("--"), QLatin1String("/"));
+      return flav.mid(any_prefix.length()).replace("--", "/");
    }
+
    return QString();
 }
 
@@ -189,9 +193,10 @@ QString QMacPasteboardMimeTypeName::convertorName()
 
 QString QMacPasteboardMimeTypeName::flavorFor(const QString &mime)
 {
-   if (mime == QLatin1String("application/x-qt-mime-type-name")) {
-      return QLatin1String("com.trolltech.qt.MimeTypeName");
+   if (mime == "application/x-qt-mime-type-name") {
+      return "com.copperspice.cs.MimeTypeName";
    }
+
    return QString();
 }
 
@@ -238,17 +243,19 @@ QString QMacPasteboardMimePlainTextFallback::convertorName()
 
 QString QMacPasteboardMimePlainTextFallback::flavorFor(const QString &mime)
 {
-   if (mime == QLatin1String("text/plain")) {
-      return QLatin1String("public.text");
+   if (mime == "text/plain") {
+      return QString("public.text");
    }
+
    return QString();
 }
 
 QString QMacPasteboardMimePlainTextFallback::mimeFor(QString flav)
 {
-   if (flav == QLatin1String("public.text")) {
-      return QLatin1String("text/plain");
+   if (flav == "public.text") {
+      return QString("text/plain");
    }
+
    return QString();
 }
 
@@ -260,19 +267,23 @@ bool QMacPasteboardMimePlainTextFallback::canConvert(const QString &mime, QStrin
 QVariant QMacPasteboardMimePlainTextFallback::convertToMime(const QString &mimetype, QList<QByteArray> data, QString flavor)
 {
    if (data.count() > 1) {
-      qWarning("QMacPasteboardMimePlainTextFallback: Cannot handle multiple member data");
+      qWarning("QMacPasteboardMimePlainTextFallback: Unable to handle multiple member data elements");
    }
 
-   if (flavor == QLatin1String("public.text")) {
+   if (flavor == "public.text") {
       // Note that public.text is documented by Apple to have an undefined encoding. From
       // testing it seems that utf8 is normally used, at least by Safari on iOS.
       const QByteArray &firstData = data.first();
-      return QString(QCFString(CFStringCreateWithBytes(kCFAllocatorDefault,
-                  reinterpret_cast<const UInt8 *>(firstData.constData()),
-                  firstData.size(), kCFStringEncodingUTF8, false)));
+
+      QCFString tmp = CFStringCreateWithBytes(kCFAllocatorDefault,
+               reinterpret_cast<const UInt8 *>(firstData.constData()), firstData.size(), kCFStringEncodingUTF8, false);
+
+      return tmp.toQString();
+
    } else {
-      qWarning("QMime::convertToMime: unhandled mimetype: %s", qPrintable(mimetype));
+      qWarning("QMime::convertToMime: unhandled mimetype: %s", csPrintable(mimetype));
    }
+
    return QVariant();
 }
 
@@ -280,9 +291,11 @@ QList<QByteArray> QMacPasteboardMimePlainTextFallback::convertFromMime(const QSt
 {
    QList<QByteArray> ret;
    QString string = data.toString();
-   if (flavor == QLatin1String("public.text")) {
+
+   if (flavor == "public.text") {
       ret.append(string.toUtf8());
    }
+
    return ret;
 }
 
@@ -306,9 +319,10 @@ QString QMacPasteboardMimeUnicodeText::convertorName()
 
 QString QMacPasteboardMimeUnicodeText::flavorFor(const QString &mime)
 {
-   if (mime == QLatin1String("text/plain")) {
-      return QLatin1String("public.utf16-plain-text");
+   if (mime == "text/plain") {
+      return QString("public.utf16-plain-text");
    }
+
    int i = mime.indexOf(QLatin1String("charset="));
    if (i >= 0) {
       QString cs(mime.mid(i + 8).toLower());
@@ -353,7 +367,7 @@ QVariant QMacPasteboardMimeUnicodeText::convertToMime(const QString &mimetype, Q
    } else if (flavor == QLatin1String("public.utf16-plain-text")) {
       ret = QTextCodec::codecForName("UTF-16")->toUnicode(firstData);
    } else {
-      qWarning("QMime::convertToMime: unhandled mimetype: %s", qPrintable(mimetype));
+      qWarning("QMime::convertToMime: unhandled mimetype: %s", csPrintable(mimetype));
    }
    return ret;
 }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -228,14 +228,12 @@ class QMap
       friend class QMap<Key, Val, C>;
 
       // free functions
-      friend bool operator==(iterator iter1, const_iterator iter2)
-      {
-         return (iter2 == iter1);
+      friend bool operator==(iterator iter1, const_iterator iter2) {
+         return iter2.operator==(iter1);
       }
 
-      friend bool operator!=(iterator iter1, const_iterator iter2)
-      {
-         return (iter2 != iter1);
+      friend bool operator!=(iterator iter1, const_iterator iter2) {
+         return iter2.operator!=(iter1);
       }
 
     private:
@@ -271,7 +269,7 @@ class QMap
    QMap(const QMap<Key, Val, C> &other) = default;
    QMap(QMap<Key, Val, C> &&other)      = default;
 
-   QMap(std::initializer_list<std::pair<Key, Val>> list, const C &compare = C())
+   QMap(std::initializer_list<std::pair<const Key, Val>> list, const C &compare = C())
       : m_data(list, compare) {}
 
    explicit QMap(C compare)
@@ -348,18 +346,12 @@ class QMap
       return m_data.find(key);
    }
 
+   iterator insert(const std::pair<const Key, Val> &data) {
+      return m_data.insert_or_assign(data.first, data.second).first;
+   }
+
    iterator insert(const Key &key, const Val &value) {
-      auto iter = m_data.find(key);
-
-      if (iter == m_data.end()) {
-         // add new element, emplace returns an std::pair, first is the iterator
-         return m_data.emplace(key, value).first;
-      }
-
-      // update value
-      iter->second = value;
-
-      return iter;
+      return m_data.insert_or_assign(key, value).first;
    }
 
    iterator insert(const_iterator hint, const Key &key, const Val &value) {
@@ -440,7 +432,8 @@ class QMap
       return *this;
    }
 
-   const Val value(const Key &key, const Val &defaultValue = Val()) const;
+   const Val value(const Key &key) const;
+   const Val value(const Key &key, const Val &defaultValue) const;
 
    QList<Val> values() const;
 
@@ -594,17 +587,27 @@ QList<Key> QMap<Key, Val, C>::uniqueKeys() const
 }
 
 template <class Key, class Val, class C>
+const Val QMap<Key, Val, C>::value(const Key &key) const
+{
+   auto iter = m_data.find(key);
+
+   if (iter == m_data.end()) {
+      // key was not found
+      return Val();
+   }
+
+   return iter->second;
+}
+
+template <class Key, class Val, class C>
 const Val QMap<Key, Val, C>::value(const Key &key, const Val &defaultValue) const
 {
-   auto range = m_data.equal_range(key);
+   auto iter = m_data.find(key);
 
-   if (range.first == range.second) {
+   if (iter == m_data.end()) {
       // key was not found
       return defaultValue;
    }
-
-   // get last key in the range
-   auto iter = --range.second;
 
    return iter->second;
 }
@@ -675,14 +678,14 @@ class QMapIterator
    using Item           = const_iterator;
 
  public:
-   QMapIterator(const QMap<Key, Val, C> &container)
-      : c(&container), i(c->constBegin()), n(c->constEnd()) {}
+   QMapIterator(const QMap<Key, Val, C> &map)
+      : c(&map), i(c->constBegin()), n(c->constEnd()) {}
 
    ~QMapIterator() {
    }
 
-   QMapIterator &operator=(const QMap<Key, Val, C> &container) {
-      c = container;
+   QMapIterator &operator=(const QMap<Key, Val, C> &map) {
+      c = map;
       i = c->constBegin();
       n = c->constEnd();
 
@@ -736,18 +739,18 @@ class QMapIterator
       return n.key();
    }
 
-   bool findNext(const Val &t) {
+   bool findNext(const Val &value) {
       while ((n = i) != c->constEnd()) {
-         if (*i++ == t) {
+         if (*i++ == value) {
             return true;
          }
       }
       return false;
    }
 
-   bool findPrevious(const Val &t) {
+   bool findPrevious(const Val &value) {
       while (i != c->constBegin()) {
-         if (*(n = --i) == t) {
+         if (*(n = --i) == value) {
             return true;
          }
       }
@@ -774,14 +777,14 @@ class QMutableMapIterator
    using Item           = iterator;
 
  public:
-   QMutableMapIterator(QMap<Key, Val, C> &container)
-      : c(&container), i(c->begin()), n(c->end()) {}
+   QMutableMapIterator(QMap<Key, Val, C> &map)
+      : c(&map), i(c->begin()), n(c->end()) {}
 
    ~QMutableMapIterator() {
    }
 
-   QMutableMapIterator &operator=(QMap<Key, Val, C> &container) {
-      c = &container;
+   QMutableMapIterator &operator=(QMap<Key, Val, C> &map) {
+      c = &map;
       i = c->begin();
       n = c->end();
 
@@ -853,9 +856,9 @@ class QMutableMapIterator
       return n.key();
    }
 
-   bool findNext(const Val &t) {
+   bool findNext(const Val &value) {
       while (c->constEnd() != const_iterator(n = i)) {
-         if (*i++ == t)  {
+         if (*i++ == value)  {
             return true;
          }
       }
@@ -863,9 +866,9 @@ class QMutableMapIterator
       return false;
    }
 
-   bool findPrevious(const Val &t) {
+   bool findPrevious(const Val &value) {
       while (c->constBegin() != const_iterator(i)) {
-         if (*(n = --i) == t) {
+         if (*(n = --i) == value) {
             return true;
          }
       }

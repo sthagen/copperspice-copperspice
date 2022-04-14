@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -53,13 +53,16 @@ class QTextOption;
 class QTextCursor;
 
 namespace CsText {
+
 Q_GUI_EXPORT bool mightBeRichText(const QString &);
 Q_GUI_EXPORT QString convertFromPlainText(const QString &plain, Qt::WhiteSpaceMode mode = Qt::WhiteSpacePre);
 
 #ifndef QT_NO_TEXTCODEC
 Q_GUI_EXPORT QTextCodec *codecForHtml(const QByteArray &ba);
 #endif
+
 }  // namespace
+
 class Q_GUI_EXPORT QAbstractUndoItem
 {
 
@@ -113,13 +116,16 @@ class Q_GUI_EXPORT QTextDocument : public QObject
    GUI_CS_PROPERTY_READ(documentMargin, documentMargin)
    GUI_CS_PROPERTY_WRITE(documentMargin, setDocumentMargin)
 
-   // following 2 were qdoc_property 1/5/2014
    GUI_CS_PROPERTY_READ(defaultTextOption, defaultTextOption)
    GUI_CS_PROPERTY_WRITE(defaultTextOption, setDefaultTextOption)
 
  public:
    explicit QTextDocument(QObject *parent = nullptr);
    explicit QTextDocument(const QString &text, QObject *parent = nullptr);
+
+   QTextDocument(const QTextDocument &) = delete;
+   QTextDocument &operator=(const QTextDocument &) = delete;
+
    ~QTextDocument();
 
    QTextDocument *clone(QObject *parent = nullptr) const;
@@ -145,7 +151,8 @@ class Q_GUI_EXPORT QTextDocument : public QObject
       DocumentTitle,
       DocumentUrl
    };
-   void setMetaInformation(MetaInformation info, const QString &);
+
+   void setMetaInformation(MetaInformation info, const QString &text);
    QString metaInformation(MetaInformation info) const;
 
 #ifndef QT_NO_TEXTHTMLPARSER
@@ -165,17 +172,17 @@ class Q_GUI_EXPORT QTextDocument : public QObject
    };
    using FindFlags = QFlags<FindFlag>;
 
-   QTextCursor find(const QString &subString, int from = 0, FindFlags options = FindFlags()) const;
-   QTextCursor find(const QString &subString, const QTextCursor &from, FindFlags options = FindFlags()) const;
+   QTextCursor find(const QString &subString, int position = 0, FindFlags options = FindFlags()) const;
+   QTextCursor find(const QString &subString, const QTextCursor &cursor, FindFlags options = FindFlags()) const;
 
-   QTextCursor find(const QRegularExpression &expr, int from = 0, FindFlags options = FindFlags()) const;
-   QTextCursor find(const QRegularExpression &expr, const QTextCursor &from, FindFlags options = FindFlags()) const;
+   QTextCursor find(const QRegularExpression &expr, int position = 0, FindFlags options = FindFlags()) const;
+   QTextCursor find(const QRegularExpression &expr, const QTextCursor &cursor, FindFlags options = FindFlags()) const;
 
    QTextFrame *frameAt(int pos) const;
    QTextFrame *rootFrame() const;
 
    QTextObject *object(int objectIndex) const;
-   QTextObject *objectForFormat(const QTextFormat &) const;
+   QTextObject *objectForFormat(const QTextFormat &format) const;
 
    QTextBlock findBlock(int pos) const;
    QTextBlock findBlockByNumber(int blockNumber) const;
@@ -211,7 +218,7 @@ class Q_GUI_EXPORT QTextDocument : public QObject
 
    QVector<QTextFormat> allFormats() const;
 
-   void markContentsDirty(int from, int length);
+   void markContentsDirty(int position, int length);
 
    void setUseDesignMetrics(bool b);
    bool useDesignMetrics() const;
@@ -249,7 +256,7 @@ class Q_GUI_EXPORT QTextDocument : public QObject
       RedoStack = 0x02,
       UndoAndRedoStacks = UndoStack | RedoStack
    };
-   void clearUndoRedoStacks(Stacks historyToClear = UndoAndRedoStacks);
+   void clearUndoRedoStacks(Stacks selection = UndoAndRedoStacks);
 
    int maximumBlockCount() const;
    void setMaximumBlockCount(int maximum);
@@ -262,23 +269,23 @@ class Q_GUI_EXPORT QTextDocument : public QObject
    Qt::CursorMoveStyle defaultCursorMoveStyle() const;
    void setDefaultCursorMoveStyle(Qt::CursorMoveStyle style);
 
-   GUI_CS_SIGNAL_1(Public, void contentsChange(int from, int charsRemoved, int charsAdded))
-   GUI_CS_SIGNAL_2(contentsChange, from, charsRemoved, charsAdded)
+   GUI_CS_SIGNAL_1(Public, void contentsChange(int position, int charsRemoved, int charsAdded))
+   GUI_CS_SIGNAL_2(contentsChange, position, charsRemoved, charsAdded)
 
    GUI_CS_SIGNAL_1(Public, void contentsChanged())
    GUI_CS_SIGNAL_2(contentsChanged)
 
-   GUI_CS_SIGNAL_1(Public, void undoAvailable(bool un_named_arg1))
-   GUI_CS_SIGNAL_2(undoAvailable, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void undoAvailable(bool status))
+   GUI_CS_SIGNAL_2(undoAvailable, status)
 
-   GUI_CS_SIGNAL_1(Public, void redoAvailable(bool un_named_arg1))
-   GUI_CS_SIGNAL_2(redoAvailable, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void redoAvailable(bool status))
+   GUI_CS_SIGNAL_2(redoAvailable, status)
 
    GUI_CS_SIGNAL_1(Public, void undoCommandAdded())
    GUI_CS_SIGNAL_2(undoCommandAdded)
 
-   GUI_CS_SIGNAL_1(Public, void modificationChanged(bool m))
-   GUI_CS_SIGNAL_2(modificationChanged, m)
+   GUI_CS_SIGNAL_1(Public, void modificationChanged(bool status))
+   GUI_CS_SIGNAL_2(modificationChanged, status)
 
    GUI_CS_SIGNAL_1(Public, void cursorPositionChanged(const QTextCursor &cursor))
    GUI_CS_SIGNAL_2(cursorPositionChanged, cursor)
@@ -298,29 +305,26 @@ class Q_GUI_EXPORT QTextDocument : public QObject
    GUI_CS_SLOT_1(Public, void redo())
    GUI_CS_SLOT_OVERLOAD(redo, ())
 
-   GUI_CS_SLOT_1(Public, void appendUndoItem(QAbstractUndoItem *un_named_arg1))
+   GUI_CS_SLOT_1(Public, void appendUndoItem(QAbstractUndoItem *item))
    GUI_CS_SLOT_2(appendUndoItem)
 
-   GUI_CS_SLOT_1(Public, void setModified(bool m = true))
+   GUI_CS_SLOT_1(Public, void setModified(bool status = true))
    GUI_CS_SLOT_2(setModified)
 
    QTextDocumentPrivate * docHandle() const;
 
  protected:
-   virtual QTextObject *createObject(const QTextFormat &f);
+   virtual QTextObject *createObject(const QTextFormat &format);
    virtual QVariant loadResource(int type, const QUrl &name);
 
    QTextDocument(QTextDocumentPrivate &dd, QObject *parent);
    QScopedPointer<QTextDocumentPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QTextDocument)
    Q_DECLARE_PRIVATE(QTextDocument)
    friend class QTextObjectPrivate;
-
 };
 
-Q_DECLARE_METATYPE(QTextDocument *)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QTextDocument::FindFlags)
 
 #endif

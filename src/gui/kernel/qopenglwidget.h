@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,15 +37,18 @@ class QOpenGLWidgetPrivate;
 class Q_GUI_EXPORT QOpenGLWidget : public QWidget
 {
     CS_OBJECT(QOpenGLWidget)
-    Q_DECLARE_PRIVATE(QOpenGLWidget)
 
-public:
+ public:
     enum UpdateBehavior {
         NoPartialUpdate,
         PartialUpdate
     };
 
-    explicit QOpenGLWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    explicit QOpenGLWidget(QWidget* parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
+    QOpenGLWidget(const QOpenGLWidget &) = delete;
+    QOpenGLWidget &operator=(const QOpenGLWidget &) = delete;
+
     ~QOpenGLWidget();
 
     void setUpdateBehavior(UpdateBehavior updateBehavior);
@@ -76,21 +79,21 @@ public:
     CS_SIGNAL_1(Public, void resized())
     CS_SIGNAL_2(resized)
 
-protected:
+ protected:
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);
     virtual void paintGL();
 
-    void paintEvent(QPaintEvent *e) override;
-    void resizeEvent(QResizeEvent *e) override;
-    bool event(QEvent *e) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    bool event(QEvent *event) override;
 
     int metric(QPaintDevice::PaintDeviceMetric metric) const override;
-    QPaintDevice *redirected(QPoint *p) const override;
+    QPaintDevice *redirected(QPoint *point) const override;
     QPaintEngine *paintEngine() const override;
 
-private:
-    Q_DISABLE_COPY(QOpenGLWidget)
+ private:
+      Q_DECLARE_PRIVATE(QOpenGLWidget)
 };
 
 #endif // QT_NO_OPENGL

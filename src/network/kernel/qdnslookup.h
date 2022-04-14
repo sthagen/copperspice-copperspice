@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -183,6 +183,9 @@ class Q_NETWORK_EXPORT QDnsLookup : public QObject
 {
     NET_CS_OBJECT(QDnsLookup)
 
+    NET_CS_ENUM(Error)
+    NET_CS_ENUM(Type)
+
     NET_CS_PROPERTY_READ(error, error)
     NET_CS_PROPERTY_NOTIFY(error, finished)
 
@@ -202,8 +205,8 @@ class Q_NETWORK_EXPORT QDnsLookup : public QObject
     NET_CS_PROPERTY_NOTIFY(nameserver, nameserverChanged)
 
  public:
-    NET_CS_REGISTER_ENUM(enum Error
-       {
+    NET_CS_REGISTER_ENUM(
+       enum Error {
            NoError = 0,
            ResolverError,
            OperationCancelledError,
@@ -215,8 +218,8 @@ class Q_NETWORK_EXPORT QDnsLookup : public QObject
        };
     )
 
-    NET_CS_REGISTER_ENUM( enum Type
-       {
+    NET_CS_REGISTER_ENUM(
+      enum Type {
            A = 1,
            AAAA = 28,
            ANY = 255,

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,16 +31,17 @@
 
 // emerald   #include <qmimetype.h>
 
-
 #ifndef QT_NO_PRINTER
 
 class Q_GUI_EXPORT QPlatformPrintDevice
 {
-    Q_DISABLE_COPY(QPlatformPrintDevice)
-
-public:
+ public:
     QPlatformPrintDevice();
     explicit QPlatformPrintDevice(const QString &id);
+
+    QPlatformPrintDevice(const QPlatformPrintDevice &) = delete;
+    QPlatformPrintDevice &operator=(const QPlatformPrintDevice &) = delete;
+
     virtual ~QPlatformPrintDevice();
 
     virtual QString id() const;
@@ -98,7 +99,7 @@ public:
     static QPageSize createPageSize(const QString &key, const QSize &size, const QString &localizedName);
     static QPageSize createPageSize(int windowsId, const QSize &size, const QString &localizedName);
 
-protected:
+ protected:
     virtual void loadPageSizes() const;
     virtual void loadResolutions() const;
     virtual void loadInputSlots() const;
@@ -153,4 +154,4 @@ protected:
 
 #endif // QT_NO_PRINTER
 
-#endif // QPLATFORMPRINTDEVICE_H
+#endif

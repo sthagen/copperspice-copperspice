@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,14 +22,12 @@
 ***********************************************************************/
 
 /*****************************************************
-** Copyright (C) 2013 Laszlo Papp <lpapp@kde.org>
-** Copyright (C) 2013 David Faure <faure@kde.org>
+** Copyright (c) 2013 Laszlo Papp <lpapp@kde.org>
+** Copyright (c) 2013 David Faure <faure@kde.org>
 *****************************************************/
 
 #include <qcommandlineoption.h>
 #include <qset.h>
-
-QT_BEGIN_NAMESPACE
 
 class QCommandLineOptionPrivate : public QSharedData
 {
@@ -53,10 +51,8 @@ class QCommandLineOptionPrivate : public QSharedData
    QStringList defaultValues;
 };
 
-
 QCommandLineOption::QCommandLineOption(const QString &name, const QString &description,
-                                       const QString &valueName,
-                                       const QString &defaultValue)
+                  const QString &valueName, const QString &defaultValue)
    : d(new QCommandLineOptionPrivate)
 {
    d->setNames(QStringList(name));
@@ -99,20 +95,27 @@ QStringList QCommandLineOption::names() const
 void QCommandLineOptionPrivate::setNames(const QStringList &nameList)
 {
    names.clear();
+
    if (nameList.isEmpty()) {
       qWarning("QCommandLineOption: Options must have at least one name");
    }
+
    for (const QString & name : nameList) {
       if (name.isEmpty()) {
          qWarning("QCommandLineOption: Option names can not be empty");
+
       } else {
          const QChar c = name.at(0);
-         if (c == QLatin1Char('-')) {
-            qWarning("QCommandLineOption: Option names cannot start with a '-'");
-         } else if (c == QLatin1Char('/')) {
-            qWarning("QCommandLineOption: Option names cannot start with a '/'");
-         } else if (name.contains(QLatin1Char('='))) {
-            qWarning("QCommandLineOption: Option names cannot contain a '='");
+
+         if (c == '-') {
+            qWarning("QCommandLineOption: Option names can not start with a '-'");
+
+         } else if (c == '/') {
+            qWarning("QCommandLineOption: Option names can not start with a '/'");
+
+         } else if (name.contains('=')) {
+            qWarning("QCommandLineOption: Option names can not contain a '='");
+
          } else {
             names.append(name);
          }
@@ -125,52 +128,21 @@ void QCommandLineOption::setValueName(const QString &valueName)
    d->valueName = valueName;
 }
 
-/*!
-    Returns the name of the expected value.
-
-    If empty, the option doesn't take a value.
-
-    \sa setValueName()
- */
 QString QCommandLineOption::valueName() const
 {
    return d->valueName;
 }
 
-/*!
-    Sets the description used for this option to \a description.
-
-    It is customary to add a "." at the end of the description.
-
-    The description is used by QCommandLineParser::showHelp().
-
-    \sa description()
- */
 void QCommandLineOption::setDescription(const QString &description)
 {
    d->description = description;
 }
 
-/*!
-    Returns the description set for this option.
-
-    \sa setDescription()
- */
 QString QCommandLineOption::description() const
 {
    return d->description;
 }
 
-/*!
-    Sets the default value used for this option to \a defaultValue.
-
-    The default value is used if the user of the application does not specify
-    the option on the command line.
-
-    If \a defaultValue is empty, the option has no default values.
-
-    \sa defaultValues() setDefaultValues()
- */
 void QCommandLineOption::setDefaultValue(const QString &defaultValue)
 {
    d->defaultValues.clear();
@@ -179,27 +151,12 @@ void QCommandLineOption::setDefaultValue(const QString &defaultValue)
    }
 }
 
-/*!
-    Sets the list of default values used for this option to \a defaultValues.
-
-    The default values are used if the user of the application does not specify
-    the option on the command line.
-
-    \sa defaultValues() setDefaultValue()
- */
 void QCommandLineOption::setDefaultValues(const QStringList &defaultValues)
 {
    d->defaultValues = defaultValues;
 }
 
-/*!
-    Returns the default values set for this option.
-
-    \sa setDefaultValues()
- */
 QStringList QCommandLineOption::defaultValues() const
 {
    return d->defaultValues;
 }
-
-QT_END_NAMESPACE

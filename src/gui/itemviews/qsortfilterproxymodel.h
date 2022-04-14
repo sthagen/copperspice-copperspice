@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -67,6 +67,10 @@ class Q_GUI_EXPORT QSortFilterProxyModel : public QAbstractProxyModel
 
  public:
    QSortFilterProxyModel(QObject *parent = nullptr);
+
+   QSortFilterProxyModel(const QSortFilterProxyModel &) = delete;
+   QSortFilterProxyModel &operator=(const QSortFilterProxyModel &) = delete;
+
    ~QSortFilterProxyModel();
 
    void setSourceModel(QAbstractItemModel *sourceModel) override;
@@ -116,9 +120,6 @@ class Q_GUI_EXPORT QSortFilterProxyModel : public QAbstractProxyModel
    GUI_CS_SLOT_1(Public, void setFilterFixedString(const QString &pattern))
    GUI_CS_SLOT_2(setFilterFixedString)
 
-   GUI_CS_SLOT_1(Public, void clear())
-   GUI_CS_SLOT_2(clear)
-
    GUI_CS_SLOT_1(Public, void invalidate())
    GUI_CS_SLOT_2(invalidate)
 
@@ -166,12 +167,10 @@ class Q_GUI_EXPORT QSortFilterProxyModel : public QAbstractProxyModel
    virtual bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
-   void filterChanged();
    void invalidateFilter();
 
  private:
    Q_DECLARE_PRIVATE(QSortFilterProxyModel)
-   Q_DISABLE_COPY(QSortFilterProxyModel)
 
    GUI_CS_SLOT_1(Private, void _q_sourceDataChanged(const QModelIndex &source_top_left,
          const QModelIndex &source_bottom_right, const QVector<int> &roles))
@@ -238,7 +237,6 @@ void QSortFilterProxyModel::cs_setFilterRegExp(const QRegularExpression &regExp)
 {
    setFilterRegExp(regExp);
 }
-
 
 #endif // QT_NO_SORTFILTERPROXYMODEL
 

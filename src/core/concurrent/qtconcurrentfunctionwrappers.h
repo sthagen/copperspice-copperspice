@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,14 +21,12 @@
 *
 ***********************************************************************/
 
-#ifndef QTCONCURRENTFUNCTIONWRAPPERS_H
-#define QTCONCURRENTFUNCTIONWRAPPERS_H
+#ifndef QTCONCURRENTFUNCTION_WRAPPERS_H
+#define QTCONCURRENTFUNCTION_WRAPPERS_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 #include <qtconcurrentcompilertest.h>
 #include <qstringlist.h>
-
-QT_BEGIN_NAMESPACE
 
 namespace QtConcurrent {
 
@@ -223,7 +221,6 @@ struct MapResultType<void, T(C::*)() const> {
    typedef T ResultType;
 };
 
-
 template <template <typename> class InputSequence, typename MapFunctor, typename T>
 struct MapResultType<InputSequence<T>, MapFunctor> {
    typedef InputSequence<typename LazyResultType<MapFunctor>::Type> ResultType;
@@ -254,9 +251,6 @@ struct MapResultType<QStringList, U(C::*)() const> {
    typedef QList<U> ResultType;
 };
 
-} // namespace QtPrivate.
-
-
-QT_END_NAMESPACE
+} // namespace QtPrivate
 
 #endif

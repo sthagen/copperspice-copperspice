@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -259,7 +259,7 @@ QString QSqlDriver::formatValue(const QSqlField &field, bool trimStrings) const
    const QString nullTxt("NULL");
 
    QString r;
-   if (field.isNull()) {
+   if (! field.isValid()) {
       r = nullTxt;
 
    } else {
@@ -273,7 +273,6 @@ QString QSqlDriver::formatValue(const QSqlField &field, bool trimStrings) const
             }
             break;
 
-#ifndef QT_NO_DATESTRING
          case QVariant::Date:
             if (field.value().toDate().isValid())
                r = QChar('\'') + field.value().toDate().toString(Qt::ISODate) + QChar('\'');
@@ -297,7 +296,6 @@ QString QSqlDriver::formatValue(const QSqlField &field, bool trimStrings) const
                r = nullTxt;
             }
             break;
-#endif
 
          case QVariant::String:
          case QVariant::Char: {

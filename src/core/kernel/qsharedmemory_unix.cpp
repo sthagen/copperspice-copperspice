@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,11 +23,15 @@
 
 #include <qplatformdefs.h>
 #include <qsharedmemory.h>
-#include <qsharedmemory_p.h>
 #include <qdebug.h>
 #include <qfile.h>
 
+#include <errno.h>
+#include <qcore_unix_p.h>
+#include <qsharedmemory_p.h>
+
 #ifndef QT_NO_SHAREDMEMORY
+
 #include <sys/types.h>
 #include <sys/ipc.h>
 
@@ -42,19 +46,15 @@
 #include <unistd.h>
 #endif
 
-#include <errno.h>
-#include <qcore_unix_p.h>
-
 #ifndef QT_NO_SHAREDMEMORY
 //#define QSHAREDMEMORY_DEBUG
 
-QT_BEGIN_NAMESPACE
-
 QSharedMemoryPrivate::QSharedMemoryPrivate()
-   : memory(0), size(0), error(QSharedMemory::NoError),
+   : memory(nullptr), size(0), error(QSharedMemory::NoError),
 #ifndef QT_NO_SYSTEMSEMAPHORE
      systemSemaphore(QString()), lockedByMe(false),
 #endif
+
 #ifndef QT_POSIX_IPC
      unix_key(0)
 #else
@@ -79,7 +79,7 @@ void QSharedMemoryPrivate::setErrorString(const QString &function)
          break;
 
       case ENOENT:
-         errorString = QSharedMemory::tr("%1: doesn't exist").formatArg(function);
+         errorString = QSharedMemory::tr("%1: does not exist").formatArg(function);
          error = QSharedMemory::NotFound;
          break;
 
@@ -130,7 +130,7 @@ key_t QSharedMemoryPrivate::handle()
 
    // ftok requires that an actual file exists somewhere
    if (!QFile::exists(nativeKey)) {
-      errorString = QSharedMemory::tr("%1: UNIX key file doesn't exist").formatArg("QSharedMemory::handle");
+      errorString = QSharedMemory::tr("%1: UNIX key file does not exist").formatArg("QSharedMemory::handle");
       error = QSharedMemory::NotFound;
       return 0;
    }
@@ -294,9 +294,9 @@ bool QSharedMemoryPrivate::attach(QSharedMemory::AccessMode mode)
    }
 
    // grab the memory
-   memory = shmat(id, 0, (mode == QSharedMemory::ReadOnly ? SHM_RDONLY : 0));
+   memory = shmat(id,nullptr, (mode == QSharedMemory::ReadOnly ? SHM_RDONLY : 0));
    if ((void *) - 1 == memory) {
-      memory = 0;
+      memory = nullptr;
       setErrorString(QLatin1String("QSharedMemory::attach (shmat)"));
       return false;
    }
@@ -373,7 +373,7 @@ bool QSharedMemoryPrivate::detach()
       }
       return false;
    }
-   memory = 0;
+   memory = nullptr;
    size = 0;
 
    // Get the number of current attachments
@@ -435,7 +435,5 @@ bool QSharedMemoryPrivate::detach()
 
    return true;
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_SHAREDMEMORY

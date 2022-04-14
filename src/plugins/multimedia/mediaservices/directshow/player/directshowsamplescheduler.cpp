@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,14 +23,14 @@
 
 #include "directshowsamplescheduler.h"
 
-#include <QtCore/qcoreapplication.h>
-#include <QtCore/qcoreevent.h>
+#include <qcoreapplication.h>
+#include <qcoreevent.h>
 
 class DirectShowTimedSample
 {
  public:
    DirectShowTimedSample(IMediaSample *sample)
-      : m_next(0)
+      : m_next(nullptr)
       , m_sample(sample)
       , m_cookie(0)
       , m_lastSample(false) {
@@ -113,15 +113,15 @@ bool DirectShowTimedSample::isReady(IReferenceClock *clock) const
 DirectShowSampleScheduler::DirectShowSampleScheduler(IUnknown *pin, QObject *parent)
    : QObject(parent)
    , m_pin(pin)
-   , m_clock(0)
-   , m_allocator(0)
-   , m_head(0)
-   , m_tail(0)
+   , m_clock(nullptr)
+   , m_allocator(nullptr)
+   , m_head(nullptr)
+   , m_tail(nullptr)
    , m_maximumSamples(1)
    , m_state(Stopped)
    , m_startTime(0)
-   , m_timeoutEvent(::CreateEvent(0, 0, 0, 0))
-   , m_flushEvent(::CreateEvent(0, 0, 0, 0))
+   , m_timeoutEvent(::CreateEvent(nullptr, 0, 0, nullptr))
+   , m_flushEvent(::CreateEvent(nullptr, 0, 0, nullptr))
 {
    m_semaphore.release(m_maximumSamples);
 }
@@ -180,7 +180,7 @@ HRESULT DirectShowSampleScheduler::NotifyAllocator(IMemAllocator *pAllocator, BO
          m_allocator->Release();
       }
 
-      m_allocator = 0;
+      m_allocator = nullptr;
 
       return S_OK;
    } else if ((hr = pAllocator->GetProperties(&properties)) != S_OK) {
@@ -350,8 +350,8 @@ void DirectShowSampleScheduler::stop()
       m_semaphore.release(1);
    }
 
-   m_head = 0;
-   m_tail = 0;
+   m_head = nullptr;
+   m_tail = nullptr;
 
    ::SetEvent(m_flushEvent);
 }
@@ -371,8 +371,9 @@ void DirectShowSampleScheduler::setFlushing(bool flushing)
 
             m_semaphore.release(1);
          }
-         m_head = 0;
-         m_tail = 0;
+
+         m_head = nullptr;
+         m_tail = nullptr;
 
          ::SetEvent(m_flushEvent);
       } else {
@@ -408,19 +409,19 @@ IMediaSample *DirectShowSampleScheduler::takeSample(bool *eos)
       IMediaSample *sample = m_head->sample();
       sample->AddRef();
 
-      *eos =  m_head->isLast();
-
+      *eos   =  m_head->isLast();
       m_head = m_head->remove();
 
       if (!m_head) {
-         m_tail = 0;
+         m_tail = nullptr;
       }
 
       m_semaphore.release(1);
 
       return sample;
+
    } else {
-      return 0;
+      return nullptr;
    }
 }
 
@@ -443,6 +444,7 @@ bool DirectShowSampleScheduler::event(QEvent *event)
       emit sampleReady();
 
       return true;
+
    } else {
       return QObject::event(event);
    }

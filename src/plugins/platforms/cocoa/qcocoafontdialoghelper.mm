@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,13 +27,12 @@
 
 #include <qtimer.h>
 #include <qfontdatabase.h>
+#include <qcocoaeventdispatcher.h>
 
 #include <qfont_p.h>
 #include <qfontengine_p.h>
 #include <qfontengine_coretext_p.h>
-
 #include <qcocoahelpers.h>
-#include <qcocoaeventdispatcher.h>
 
 #import <AppKit/AppKit.h>
 
@@ -62,8 +61,8 @@ static NSButton *macCreateButton(const char *text, NSView *superview)
    [button setButtonType: NSMomentaryLightButton];
    [button setBezelStyle: NSRoundedBezelStyle];
 
-   [button setTitle: (NSString *)(CFStringRef)QCFString(
-      qt_mac_removeMnemonics(QCoreApplication::translate("QDialogButtonBox", text)))];
+   QCFString tmp = qt_mac_removeMnemonics(QCoreApplication::translate("QDialogButtonBox", text));
+   [button setTitle: (NSString *) tmp.toCFStringRef()];
 
    [[button cell] setFont: [NSFont systemFontOfSize: [NSFont systemFontSizeForControlSize: NSControlSizeRegular]]];
    [superview addSubview: button];
@@ -78,13 +77,15 @@ static QFont qfontForCocoaFont(NSFont *cocoaFont, const QFont &resolveFont)
    if (cocoaFont) {
       int pSize = qRound([cocoaFont pointSize]);
       QCFType<CTFontDescriptorRef> font(CTFontCopyFontDescriptor((CTFontRef)cocoaFont));
-      QString family(QCFString((CFStringRef)CTFontDescriptorCopyAttribute(font, kCTFontFamilyNameAttribute)));
-      QString style(QCFString(((CFStringRef)CTFontDescriptorCopyAttribute(font, kCTFontStyleNameAttribute))));
+
+      QString family(QCFString((CFStringRef)CTFontDescriptorCopyAttribute(font, kCTFontFamilyNameAttribute)).toQString());
+      QString style(QCFString((CFStringRef)CTFontDescriptorCopyAttribute(font, kCTFontStyleNameAttribute)).toQString());
 
       newFont = QFontDatabase().font(family, style, pSize);
       newFont.setUnderline(resolveFont.underline());
       newFont.setStrikeOut(resolveFont.strikeOut());
    }
+
    return newFont;
 }
 
@@ -118,10 +119,10 @@ static QFont qfontForCocoaFont(NSFont *cocoaFont, const QFont &resolveFont)
 {
    self = [super init];
    mFontPanel = [NSFontPanel sharedFontPanel];
-   mHelper = 0;
-   mStolenContentView = 0;
-   mOkButton     = 0;
-   mCancelButton = 0;
+   mHelper = nullptr;
+   mStolenContentView = nullptr;
+   mOkButton     = nullptr;
+   mCancelButton = nullptr;
    mResultCode   = NSModalResponseCancel;
    mDialogIsExecuting = false;
    mResultSet = false;
@@ -156,7 +157,7 @@ static QFont qfontForCocoaFont(NSFont *cocoaFont, const QFont &resolveFont)
       // steal the font panel's contents view
       mStolenContentView = [mFontPanel contentView];
       [mStolenContentView retain];
-      [mFontPanel setContentView: 0];
+      [mFontPanel setContentView: nullptr];
 
       // create a new content view and add the stolen one as a subview
       NSRect frameRect = { { 0.0, 0.0 }, { 0.0, 0.0 } };
@@ -201,9 +202,9 @@ static QFont qfontForCocoaFont(NSFont *cocoaFont, const QFont &resolveFont)
       [mOkButton release];
       [mCancelButton release];
       [ourContentView release];
-      mOkButton = 0;
-      mCancelButton = 0;
-      mStolenContentView = 0;
+      mOkButton = nullptr;
+      mCancelButton = nullptr;
+      mStolenContentView = nullptr;
    }
 }
 
@@ -391,7 +392,7 @@ class QCocoaFontPanel
 
    void cleanup(QCocoaFontDialogHelper *helper) {
       if (mDelegate->mHelper == helper) {
-         mDelegate->mHelper = 0;
+         mDelegate->mHelper = nullptr;
       }
    }
 
@@ -422,7 +423,7 @@ class QCocoaFontPanel
 
    void setCurrentFont(const QFont &font) {
       NSFontManager *mgr = [NSFontManager sharedFontManager];
-      const NSFont *nsFont = 0;
+      const NSFont *nsFont = nullptr;
 
       int weight = 5;
       NSFontTraitMask mask = 0;

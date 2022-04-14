@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,14 +33,14 @@ class QSqlRelationalDelegate: public QItemDelegate
 {
  public:
 
-   explicit QSqlRelationalDelegate(QObject *aParent = nullptr)
-      : QItemDelegate(aParent) {
+   explicit QSqlRelationalDelegate(QObject *parent = nullptr)
+      : QItemDelegate(parent) {
    }
 
    ~QSqlRelationalDelegate() {
    }
 
-   QWidget *createEditor(QWidget *aParent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
 
       const QSqlRelationalTableModel *sqlModel = dynamic_cast<const QSqlRelationalTableModel *>(index.model());
 
@@ -51,7 +51,7 @@ class QSqlRelationalDelegate: public QItemDelegate
       }
 
       if (childModel) {
-         QComboBox *combo = new QComboBox(aParent);
+         QComboBox *combo = new QComboBox(parent);
          combo->setModel(childModel);
          combo->setModelColumn(childModel->fieldIndex(sqlModel->relation(index.column()).displayColumn()));
          combo->installEventFilter(const_cast<QSqlRelationalDelegate *>(this));
@@ -59,15 +59,15 @@ class QSqlRelationalDelegate: public QItemDelegate
          return combo;
 
       } else {
-         return QItemDelegate::createEditor(aParent, option, index);
+         return QItemDelegate::createEditor(parent, option, index);
 
       }
    }
 
    void setEditorData(QWidget *editor, const QModelIndex &index) const {
-      const QSqlRelationalTableModel *sqlModel = qobject_cast<const QSqlRelationalTableModel *>(index.model());
+      const QSqlRelationalTableModel *sqlModel = dynamic_cast<const QSqlRelationalTableModel *>(index.model());
 
-      QComboBox *combo = qobject_cast<QComboBox *>(editor);
+      QComboBox *combo = dynamic_cast<QComboBox *>(editor);
 
       if (! sqlModel || ! combo) {
          QItemDelegate::setEditorData(editor, index);
@@ -82,10 +82,10 @@ class QSqlRelationalDelegate: public QItemDelegate
          return;
       }
 
-      QSqlRelationalTableModel *sqlModel = qobject_cast<QSqlRelationalTableModel *>(model);
+      QSqlRelationalTableModel *sqlModel = dynamic_cast<QSqlRelationalTableModel *>(model);
 
       QSqlTableModel *childModel = sqlModel ? sqlModel->relationModel(index.column()) : nullptr;
-      QComboBox *combo = qobject_cast<QComboBox *>(editor);
+      QComboBox *combo = dynamic_cast<QComboBox *>(editor);
 
       if (! sqlModel || ! childModel || ! combo) {
          QItemDelegate::setModelData(editor, model, index);

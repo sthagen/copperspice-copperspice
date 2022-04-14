@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,13 +25,12 @@
 #define QSVGSTYLE_P_H
 
 #include <qpainter.h>
-
-#include "QtGui/qpainter.h"
-#include "QtGui/qpen.h"
-#include "QtGui/qbrush.h"
-#include "QtGui/qmatrix.h"
-#include "QtGui/qcolor.h"
-#include "QtGui/qfont.h"
+#include <qpainter.h>
+#include <qpen.h>
+#include <qbrush.h>
+#include <qmatrix.h>
+#include <qcolor.h>
+#include <qfont.h>
 #include <qdebug.h>
 
 class QSvgNode;
@@ -42,7 +41,7 @@ template <class T> class QSvgRefCounter
 {
  public:
    QSvgRefCounter() {
-      t = 0;
+      t = nullptr;
    }
 
    QSvgRefCounter(T *_t) {
@@ -390,7 +389,7 @@ class QSvgStrokeStyle : public QSvgStyleProperty
 
    void setStroke(QBrush brush) {
       m_stroke.setBrush(brush);
-      m_style = 0;
+      m_style = nullptr;
       m_strokeSet = 1;
    }
 
@@ -717,9 +716,12 @@ class QSvgStyle
 {
  public:
    QSvgStyle()
-      : quality(0), fill(0), viewportFill(0), font(0), stroke(0), solidColor(0), gradient(0), transform(0),
-        animateColor(0), opacity(0), compop(0) {
+      : quality(nullptr), fill(nullptr), viewportFill(nullptr), font(nullptr), stroke(nullptr),
+        solidColor(nullptr), gradient(nullptr), transform(nullptr), animateColor(nullptr),
+        opacity(nullptr), compop(nullptr)
+   {
    }
+
    ~QSvgStyle();
 
    void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states);

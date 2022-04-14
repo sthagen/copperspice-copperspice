@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QTEXTOBJECT_P_H
 #define QTEXTOBJECT_P_H
 
-#include <QtGui/qtextobject.h>
-#include <QtGui/qtextdocument.h>
+#include <qtextobject.h>
+#include <qtextdocument.h>
 
 
 
@@ -59,19 +59,19 @@ class QTextBlockGroupPrivate : public QTextObjectPrivate
    QTextBlockGroupPrivate(QTextDocument *doc)
       : QTextObjectPrivate(doc) {
    }
+
    typedef QList<QTextBlock> BlockList;
+
    BlockList blocks;
    void markBlocksDirty();
 };
 
 class QTextFramePrivate : public QTextObjectPrivate
 {
-   friend class QTextDocumentPrivate;
-   Q_DECLARE_PUBLIC(QTextFrame)
-
  public:
    QTextFramePrivate(QTextDocument *doc)
-      : QTextObjectPrivate(doc), fragment_start(0), fragment_end(0), parentFrame(0), layoutData(0) {
+      : QTextObjectPrivate(doc), fragment_start(0), fragment_end(0), parentFrame(nullptr), layoutData(nullptr)
+   {
    }
 
    virtual void fragmentAdded(QChar type, uint fragment);
@@ -84,6 +84,10 @@ class QTextFramePrivate : public QTextObjectPrivate
    QTextFrame *parentFrame;
    QList<QTextFrame *> childFrames;
    QTextFrameLayoutData *layoutData;
+
+ private:
+   Q_DECLARE_PUBLIC(QTextFrame)
+   friend class QTextDocumentPrivate;
 };
 
 #endif // QTEXTOBJECT_P_H

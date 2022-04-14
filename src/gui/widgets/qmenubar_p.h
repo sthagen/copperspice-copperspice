@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,21 +37,17 @@ class QMenuBarPrivate : public QWidgetPrivate
    Q_DECLARE_PUBLIC(QMenuBar)
 
  public:
-   QMenuBarPrivate() : itemsDirty(0), currentAction(0), mouseDown(0),
-      closePopupMode(0), defaultPopDown(1), popupState(0), keyboardState(0), altPressed(0),
-      doChildEffects(false), platformMenuBar(0)
-
-
-
-
-   { }
-
-   ~QMenuBarPrivate() {
-
-      delete platformMenuBar;
+   QMenuBarPrivate()
+      : itemsDirty(0), currentAction(nullptr), mouseDown(0),
+        closePopupMode(0), defaultPopDown(1), popupState(0), keyboardState(0), altPressed(0),
+        doChildEffects(false), platformMenuBar(nullptr)
+   {
    }
 
-
+   ~QMenuBarPrivate()
+   {
+      delete platformMenuBar;
+   }
 
    void init();
    QAction *getNextAction(const int start, const int increment) const;
@@ -115,8 +111,6 @@ class QMenuBarPrivate : public QWidgetPrivate
    inline int indexOf(QAction *act) const {
       return q_func()->actions().indexOf(act);
    }
-
-
 };
 
 #endif // QT_NO_MENUBAR

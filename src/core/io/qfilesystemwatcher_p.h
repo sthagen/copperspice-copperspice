@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,10 +28,8 @@
 
 #ifndef QT_NO_FILESYSTEMWATCHER
 
-#include <QtCore/qstringlist.h>
-#include <QtCore/qthread.h>
-
-QT_BEGIN_NAMESPACE
+#include <qstringlist.h>
+#include <qthread.h>
 
 class QFileSystemWatcherEngine : public QThread
 {
@@ -55,7 +53,6 @@ class QFileSystemWatcherEngine : public QThread
    virtual QStringList removePaths(const QStringList &paths, QStringList *files, QStringList *directories) = 0;
 
    virtual void stop() = 0;
-
 
    CORE_CS_SIGNAL_1(Public, void fileChanged(const QString &path, bool removed))
    CORE_CS_SIGNAL_2(fileChanged, path, removed)
@@ -88,7 +85,6 @@ class QFileSystemWatcherPrivate
 
 };
 
-
-QT_END_NAMESPACE
 #endif // QT_NO_FILESYSTEMWATCHER
-#endif // QFILESYSTEMWATCHER_P_H
+
+#endif

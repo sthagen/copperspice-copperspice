@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,7 @@
 #include <windows.h>
 
 typedef ULONGLONG (WINAPI *PtrGetTickCount64)(void);
-static PtrGetTickCount64 ptrGetTickCount64 = 0;
+static PtrGetTickCount64 ptrGetTickCount64 = nullptr;
 
 // Result of QueryPerformanceFrequency, 0 indicates that the high resolution timer is unavailable
 static quint64 counterFrequency = 0;

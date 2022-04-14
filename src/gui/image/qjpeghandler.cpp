@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -539,7 +539,7 @@ static bool write_jpeg_image(const QImage &image, QIODevice *device, volatile in
    }
    struct jpeg_compress_struct cinfo;
    JSAMPROW row_pointer[1];
-   row_pointer[0] = 0;
+   row_pointer[0] = nullptr;
 
    struct my_jpeg_destination_mgr *iod_dest = new my_jpeg_destination_mgr(device);
    struct my_error_mgr jerr;
@@ -730,15 +730,17 @@ class QJpegHandlerPrivate
    };
 
    QJpegHandlerPrivate(QJpegHandler *qq)
-      : quality(75), transformation(QImageIOHandler::TransformationNone), iod_src(0),
-        rgb888ToRgb32ConverterPtr(qt_convert_rgb888_to_rgb32), state(Ready), optimize(false), progressive(false), q(qq)
-   {}
+      : quality(75), transformation(QImageIOHandler::TransformationNone), iod_src(nullptr),
+        rgb888ToRgb32ConverterPtr(qt_convert_rgb888_to_rgb32), state(Ready), optimize(false),
+        progressive(false), q(qq)
+   {
+   }
 
    ~QJpegHandlerPrivate() {
       if (iod_src) {
          jpeg_destroy_decompress(&info);
          delete iod_src;
-         iod_src = 0;
+         iod_src = nullptr;
       }
    }
 
@@ -932,7 +934,7 @@ bool QJpegHandlerPrivate::readJpegHeader(QIODevice *device)
          format = QImage::Format_Invalid;
          read_jpeg_format(format, &info);
          QByteArray exifData;
-         for (jpeg_saved_marker_ptr marker = info.marker_list; marker != NULL; marker = marker->next) {
+         for (jpeg_saved_marker_ptr marker = info.marker_list; marker != nullptr; marker = marker->next) {
             if (marker->marker == JPEG_COM) {
                QString key, value;
                QString s = QString::fromLatin1((const char *)marker->data, marker->data_length);
@@ -1028,7 +1030,7 @@ QJpegHandler::~QJpegHandler()
    delete d;
 }
 
-bool QJpegHandler::canRead() const
+bool QJpegHandler::canRead()
 {
    if (d->state == QJpegHandlerPrivate::Ready && !canRead(device())) {
       return false;
@@ -1090,7 +1092,7 @@ bool QJpegHandler::supportsOption(ImageOption option) const
       || option == ImageTransformation;
 }
 
-QVariant QJpegHandler::option(ImageOption option) const
+QVariant QJpegHandler::option(ImageOption option)
 {
    switch (option) {
       case Quality:
@@ -1158,7 +1160,7 @@ void QJpegHandler::setOption(ImageOption option, const QVariant &value)
    }
 }
 
-QByteArray QJpegHandler::name() const
+QString QJpegHandler::name() const
 {
    return "jpeg";
 }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -113,7 +113,7 @@ class Q_OPENGL_EXPORT QGLTextureGlyphCache : public QImageTextureGlyphCache
    }
 
    inline const QOpenGLContextGroup *contextGroup() const {
-      return m_textureResource ? m_textureResource->group() : 0;
+      return m_textureResource ? m_textureResource->group() : nullptr;
    }
 
    int serialNumber() const {

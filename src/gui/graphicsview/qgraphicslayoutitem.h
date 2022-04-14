@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,20 +24,17 @@
 #ifndef QGRAPHICSLAYOUTITEM_H
 #define QGRAPHICSLAYOUTITEM_H
 
-#include <QtCore/qscopedpointer.h>
-#include <QtGui/qsizepolicy.h>
-#include <QtGui/qevent.h>
+#include <qscopedpointer.h>
+#include <qsizepolicy.h>
+#include <qevent.h>
 
-QT_BEGIN_NAMESPACE
-
-#if !defined(QT_NO_GRAPHICSVIEW)
+#if ! defined(QT_NO_GRAPHICSVIEW)
 
 class QGraphicsLayoutItemPrivate;
 class QGraphicsItem;
 
 class Q_GUI_EXPORT QGraphicsLayoutItem
 {
-
  public:
    QGraphicsLayoutItem(QGraphicsLayoutItem *parent = nullptr, bool isLayout = false);
    virtual ~QGraphicsLayoutItem();
@@ -91,7 +88,7 @@ class Q_GUI_EXPORT QGraphicsLayoutItem
 
  protected:
    void setGraphicsItem(QGraphicsItem *item);
-   void setOwnedByLayout(bool ownedByLayout);
+   void setOwnedByLayout(bool owner);
    QGraphicsLayoutItem(QGraphicsLayoutItemPrivate &dd);
 
    virtual QSizeF sizeHint(Qt::SizeHint which, const QSizeF &constraint = QSizeF()) const = 0;
@@ -106,19 +103,19 @@ class Q_GUI_EXPORT QGraphicsLayoutItem
 
 CS_DECLARE_INTERFACE(QGraphicsLayoutItem, "com.copperspice.QGraphicsLayoutItem")
 
-inline void QGraphicsLayoutItem::setMinimumSize(qreal aw, qreal ah)
+inline void QGraphicsLayoutItem::setMinimumSize(qreal w, qreal h)
 {
-   setMinimumSize(QSizeF(aw, ah));
+   setMinimumSize(QSizeF(w, h));
 }
 
-inline void QGraphicsLayoutItem::setPreferredSize(qreal aw, qreal ah)
+inline void QGraphicsLayoutItem::setPreferredSize(qreal w, qreal h)
 {
-   setPreferredSize(QSizeF(aw, ah));
+   setPreferredSize(QSizeF(w, h));
 }
 
-inline void QGraphicsLayoutItem::setMaximumSize(qreal aw, qreal ah)
+inline void QGraphicsLayoutItem::setMaximumSize(qreal w, qreal h)
 {
-   setMaximumSize(QSizeF(aw, ah));
+   setMaximumSize(QSizeF(w, h));
 }
 
 inline qreal QGraphicsLayoutItem::minimumWidth() const

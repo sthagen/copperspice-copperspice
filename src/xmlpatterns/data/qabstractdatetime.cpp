@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -68,7 +68,7 @@ QDateTime AbstractDateTime::create(AtomicValue::Ptr &errorMessage, const QString
 
    YearProperty year = yearStr.isEmpty() ? DefaultYear : yearStr.toInteger<int>();
 
-   if (getCapt(yearSign) == QChar::fromLatin1('-')) {
+   if (getCapt(yearSign) == "-") {
       year = -year;
    }
 
@@ -92,7 +92,7 @@ QDateTime AbstractDateTime::create(AtomicValue::Ptr &errorMessage, const QString
       } else if (QDate::isValid(DefaultYear, month, day)) {
          /* We can't use the badData() macro here because we need a different
           * error code: FODT0001 instead of FORG0001. */
-         errorMessage = ValidationError::createError(QtXmlPatterns::tr("Overflow: Can't represent date %1.")
+         errorMessage = ValidationError::createError(QtXmlPatterns::tr("Overflow: Can not represent date %1.")
                   .formatArg(formatData(QLatin1String("%1-%2-%3"))
                   .formatArg(year).formatArg(month).formatArg(day)), ReportContext::FODT0001);
          return QDateTime();
@@ -230,7 +230,7 @@ ZOTotal AbstractDateTime::parseZoneOffset(ZoneOffsetParseResult &result,
    } else {
       ZOTotal zoneOffset = (zoHour * 60 + zoMins) * 60;
 
-      if (zoneOffsetSignStr == QChar::fromLatin1('-')) {
+      if (zoneOffsetSignStr == "-") {
          zoneOffset = -zoneOffset;
       }
 
@@ -264,7 +264,7 @@ bool AbstractDateTime::isRangeValid(const QDate &date,
    if (date.isValid()) {
       return true;
    } else {
-      message = QtXmlPatterns::tr("Overflow: Date can't be represented.");
+      message = QtXmlPatterns::tr("Overflow: Date can not be represented.");
       return false;
    }
 }
@@ -338,11 +338,11 @@ void AbstractDateTime::copyTimeSpec(const QDateTime &from,
 {
    switch (from.timeSpec()) {
       case Qt::UTC:
-      /* Fallthrough. */
       case Qt::LocalTime: {
          to.setTimeSpec(from.timeSpec());
          return;
       }
+
       case Qt::OffsetFromUTC: {
          to.setOffsetFromUtc(from.offsetFromUtc());
          Q_ASSERT(to.timeSpec() == Qt::OffsetFromUTC);

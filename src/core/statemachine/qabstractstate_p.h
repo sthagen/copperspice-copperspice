@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,17 +24,18 @@
 #ifndef QABSTRACTSTATE_P_H
 #define QABSTRACTSTATE_P_H
 
-QT_BEGIN_NAMESPACE
+#include <qabstractstate.h>
 
 class QStateMachine;
-class QAbstractState;
+class QState;
 
 class QAbstractStatePrivate
 {
    Q_DECLARE_PUBLIC(QAbstractState)
 
  public:
-   virtual ~QAbstractStatePrivate() {}
+   virtual ~QAbstractStatePrivate()
+   { }
 
    enum StateType {
       AbstractState,
@@ -56,15 +57,14 @@ class QAbstractStatePrivate
    void emitEntered();
    void emitExited();
 
-   uint stateType: 31;
+   uint stateType: 30;
    uint isMachine: 1;
+   bool active: 1;
+
    mutable QState *parentState;
 
  protected:
    QAbstractState *q_ptr;
-
 };
-
-QT_END_NAMESPACE
 
 #endif

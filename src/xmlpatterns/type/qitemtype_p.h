@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -179,7 +179,8 @@ class ItemType : public virtual QSharedData
    }
 
  private:
-   Q_DISABLE_COPY(ItemType)
+   ItemType(const ItemType &) = delete;
+   ItemType &operator=(const ItemType &) = delete;
 };
 
 /**

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,27 +38,18 @@
 #include <qtooltip.h>
 #include <qwhatsthis.h>
 #include <qtreeview.h>
+#include <qabstractscrollarea.h>
+#include <qscrollarea.h>
+#include <qscrollbar.h>
+
 #include <qtabbar_p.h>
-#include <QAbstractScrollArea>
-#include <QScrollArea>
-#include <QScrollBar>
-#include <QDebug>
 
 #ifndef QT_NO_ACCESSIBILITY
-
-QT_BEGIN_NAMESPACE
 
 QString qt_accStripAmp(const QString &text);
 QString qt_accHotKey(const QString &text);
 
 #ifndef QT_NO_TABBAR
-/*!
-  \class QAccessibleTabBar
-  \brief The QAccessibleTabBar class implements the QAccessibleInterface for tab bars.
-  \internal
-
-  \ingroup accessibility
-*/
 
 class QAccessibleTabButton: public QAccessibleInterface, public QAccessibleActionInterface
 {
@@ -71,11 +62,11 @@ class QAccessibleTabButton: public QAccessibleInterface, public QAccessibleActio
       if (t == QAccessible::ActionInterface) {
          return static_cast<QAccessibleActionInterface *>(this);
       }
-      return 0;
+      return nullptr;
    }
 
    QObject *object() const override {
-      return 0;
+      return nullptr;
    }
    QAccessible::Role role() const override {
       return QAccessible::PageTab;
@@ -88,6 +79,7 @@ class QAccessibleTabButton: public QAccessibleInterface, public QAccessibleActio
       }
       return parent()->state();
    }
+
    QRect rect() const override {
       if (!isValid()) {
          return QRect();
@@ -104,11 +96,13 @@ class QAccessibleTabButton: public QAccessibleInterface, public QAccessibleActio
    }
 
    QAccessibleInterface *childAt(int, int) const override {
-      return 0;
+      return nullptr;
    }
+
    int childCount() const override {
       return 0;
    }
+
    int indexOfChild(const QAccessibleInterface *) const override  {
       return -1;
    }
@@ -138,7 +132,7 @@ class QAccessibleTabButton: public QAccessibleInterface, public QAccessibleActio
       return QAccessible::queryAccessibleInterface(m_parent.data());
    }
    QAccessibleInterface *child(int) const override {
-      return 0;
+      return nullptr;
    }
 
    // action interface
@@ -210,7 +204,7 @@ QAccessibleInterface *QAccessibleTabBar::child(int index) const
          return QAccessible::queryAccessibleInterface(tabBar()->d_func()->rightB);
       }
    }
-   return 0;
+   return nullptr;
 }
 
 int QAccessibleTabBar::indexOfChild(const QAccessibleInterface *child) const
@@ -284,7 +278,7 @@ QAccessibleInterface *QAccessibleComboBox::child(int index) const
    } else if (index == 1 && comboBox()->isEditable()) {
       return QAccessible::queryAccessibleInterface(comboBox()->lineEdit());
    }
-   return 0;
+   return nullptr;
 }
 
 int QAccessibleComboBox::childCount() const
@@ -298,7 +292,7 @@ QAccessibleInterface *QAccessibleComboBox::childAt(int x, int y) const
    if (comboBox()->isEditable() && comboBox()->lineEdit()->rect().contains(x, y)) {
       return child(1);
    }
-   return 0;
+   return nullptr;
 }
 
 int QAccessibleComboBox::indexOfChild(const QAccessibleInterface *child) const
@@ -312,17 +306,20 @@ int QAccessibleComboBox::indexOfChild(const QAccessibleInterface *child) const
    return -1;
 }
 
-/*! \reimp */
 QString QAccessibleComboBox::text(QAccessible::Text t) const
 {
    QString str;
 
    switch (t) {
       case QAccessible::Name:
-#ifndef Q_OS_UNIX // on Linux we use relations for this, name is text (fall through to Value)
+#ifdef Q_OS_UNIX
+         // on Linux we use relations, name is the text
+        [[fallthrough]];
+#else
          str = QAccessibleWidget::text(t);
          break;
 #endif
+
       case QAccessible::Value:
          if (comboBox()->isEditable()) {
             str = comboBox()->lineEdit()->text();
@@ -330,17 +327,21 @@ QString QAccessibleComboBox::text(QAccessible::Text t) const
             str = comboBox()->currentText();
          }
          break;
+
 #ifndef QT_NO_SHORTCUT
       case QAccessible::Accelerator:
          str = QKeySequence(Qt::Key_Down).toString(QKeySequence::NativeText);
          break;
 #endif
+
       default:
          break;
    }
+
    if (str.isEmpty()) {
       str = QAccessibleWidget::text(t);
    }
+
    return str;
 }
 
@@ -354,6 +355,7 @@ QString QAccessibleComboBox::localizedActionDescription(const QString &actionNam
    if (actionName == showMenuAction() || actionName == pressAction()) {
       return QComboBox::tr("Open the combo box selection popup");
    }
+
    return QString();
 }
 
@@ -376,7 +378,7 @@ QStringList QAccessibleComboBox::keyBindingsForAction(const QString &/*actionNam
 #endif // QT_NO_COMBOBOX
 
 #ifndef QT_NO_SCROLLAREA
-// ======================= QAccessibleAbstractScrollArea =======================
+
 QAccessibleAbstractScrollArea::QAccessibleAbstractScrollArea(QWidget *widget)
    : QAccessibleWidget(widget, QAccessible::Client)
 {
@@ -409,7 +411,7 @@ bool QAccessibleAbstractScrollArea::isValid() const
 QAccessibleInterface *QAccessibleAbstractScrollArea::childAt(int x, int y) const
 {
    if (!abstractScrollArea()->isVisible()) {
-      return 0;
+      return nullptr;
    }
 
    for (int i = 0; i < childCount(); ++i) {
@@ -419,7 +421,7 @@ QAccessibleInterface *QAccessibleAbstractScrollArea::childAt(int x, int y) const
          return child(i);
       }
    }
-   return 0;
+   return nullptr;
 }
 
 QAbstractScrollArea *QAccessibleAbstractScrollArea::abstractScrollArea() const
@@ -495,7 +497,5 @@ QAccessibleScrollArea::QAccessibleScrollArea(QWidget *widget)
    Q_ASSERT(qobject_cast<QScrollArea *>(widget));
 }
 #endif // QT_NO_SCROLLAREA
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_ACCESSIBILITY

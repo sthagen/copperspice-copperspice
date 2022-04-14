@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,17 +24,17 @@
 #ifndef QSCROLLER_H
 #define QSCROLLER_H
 
-#include <QObject>
-#include <QPointF>
-#include <QScrollerProperties>
+#include <qobject.h>
+#include <qpointf.h>
+#include <qscrollerproperties.h>
 
 class QWidget;
 class QScrollerPrivate;
 class QScrollerProperties;
 
 #ifndef QT_NO_GESTURES
-class QFlickGestureRecognizer;
-class QMouseFlickGestureRecognizer;
+   class QFlickGestureRecognizer;
+   class QMouseFlickGestureRecognizer;
 #endif
 
 class Q_GUI_EXPORT QScroller : public QObject
@@ -70,6 +70,9 @@ class Q_GUI_EXPORT QScroller : public QObject
       InputMove,
       InputRelease
    };
+
+   QScroller(const QScroller &) = delete;
+   QScroller &operator=(const QScroller &) = delete;
 
    static bool hasScroller(QObject *target);
 
@@ -127,13 +130,12 @@ class Q_GUI_EXPORT QScroller : public QObject
    GUI_CS_SIGNAL_2(scrollerPropertiesChanged, un_named_arg1)
 
  private:
-   QScrollerPrivate *d_ptr;
+   Q_DECLARE_PRIVATE(QScroller)
 
    QScroller(QObject *target);
    virtual ~QScroller();
 
-   Q_DISABLE_COPY(QScroller)
-   Q_DECLARE_PRIVATE(QScroller)
+   QScrollerPrivate *d_ptr;
 
 #ifndef QT_NO_GESTURES
    friend class QFlickGestureRecognizer;

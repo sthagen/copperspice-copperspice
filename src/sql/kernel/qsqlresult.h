@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,27 +24,25 @@
 #ifndef QSQLRESULT_H
 #define QSQLRESULT_H
 
-#include <qvariant.h>
-#include <qvector.h>
 #include <qsql.h>
 #include <qstring.h>
+#include <qvariant.h>
+#include <qvector.h>
+
 class QSqlRecord;
 class QVariant;
 class QSqlDriver;
 class QSqlError;
 class QSqlResultPrivate;
 
-
 class Q_SQL_EXPORT QSqlResult
 {
-   Q_DECLARE_PRIVATE(QSqlResult)
-
-   friend class QSqlQuery;
-   friend class QSqlTableModelPrivate;
-
-
  public:
+   QSqlResult(const QSqlResult &) = delete;
+   QSqlResult &operator=(const QSqlResult &) = delete;
+
    virtual ~QSqlResult();
+
    virtual QVariant handle() const;
 
  protected:
@@ -64,38 +62,40 @@ class Q_SQL_EXPORT QSqlResult
    bool isSelect() const;
    bool isForwardOnly() const;
    const QSqlDriver *driver() const;
-   virtual void setAt(int at);
-   virtual void setActive(bool a);
-   virtual void setLastError(const QSqlError &e);
+
+   virtual void setAt(int index);
+   virtual void setActive(bool active);
+   virtual void setLastError(const QSqlError &error);
    virtual void setQuery(const QString &query);
-   virtual void setSelect(bool s);
+   virtual void setSelect(bool select);
    virtual void setForwardOnly(bool forward);
 
    // prepared query support
    virtual bool exec();
    virtual bool prepare(const QString &query);
-   virtual bool savePrepare(const QString &sqlquery);
-   virtual void bindValue(int pos, const QVariant &val, QSql::ParamType type);
-   virtual void bindValue(const QString &placeholder, const QVariant &val,
-      QSql::ParamType type);
-   void addBindValue(const QVariant &val, QSql::ParamType type);
+   virtual bool savePrepare(const QString &query);
+   virtual void bindValue(int index, const QVariant &value, QSql::ParamType type);
+   virtual void bindValue(const QString &placeholder, const QVariant &value, QSql::ParamType type);
+
+   void addBindValue(const QVariant &value, QSql::ParamType type);
    QVariant boundValue(const QString &placeholder) const;
-   QVariant boundValue(int pos) const;
+   QVariant boundValue(int index) const;
+
    QSql::ParamType bindValueType(const QString &placeholder) const;
-   QSql::ParamType bindValueType(int pos) const;
+   QSql::ParamType bindValueType(int index) const;
    int boundValueCount() const;
    QVector<QVariant> &boundValues() const;
    QString executedQuery() const;
-   QString boundValueName(int pos) const;
+   QString boundValueName(int index) const;
    void clear();
    bool hasOutValues() const;
 
    BindingSyntax bindingSyntax() const;
 
-   virtual QVariant data(int i) = 0;
-   virtual bool isNull(int i) = 0;
-   virtual bool reset(const QString &sqlquery) = 0;
-   virtual bool fetch(int i) = 0;
+   virtual QVariant data(int index) = 0;
+   virtual bool isNull(int index) = 0;
+   virtual bool reset(const QString &query) = 0;
+   virtual bool fetch(int index) = 0;
    virtual bool fetchNext();
    virtual bool fetchPrevious();
    virtual bool fetchFirst() = 0;
@@ -115,11 +115,15 @@ class Q_SQL_EXPORT QSqlResult
    QSql::NumericalPrecisionPolicy numericalPrecisionPolicy() const;
 
    virtual bool nextResult();
-   void resetBindCount(); // HACK
+   void resetBindCount();       // emerald, redesign
 
    QSqlResultPrivate *d_ptr;
+
  private:
-   Q_DISABLE_COPY(QSqlResult)
+   Q_DECLARE_PRIVATE(QSqlResult)
+
+   friend class QSqlQuery;
+   friend class QSqlTableModelPrivate;
 };
 
-#endif // QSQLRESULT_H
+#endif

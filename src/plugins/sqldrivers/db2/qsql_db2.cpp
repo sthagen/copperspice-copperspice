@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -495,7 +495,7 @@ static bool qMakeStatement(QDB2ResultPrivate *d, bool forwardOnly, bool setForwa
 
 QVariant QDB2Result::handle() const
 {
-   return QVariant(qRegisterMetaType<SQLHANDLE>("SQLHANDLE"), &d->hStmt);
+   return QVariant::fromValue<SQLHANDLE>(d->hStmt);
 }
 
 /************************************/
@@ -1677,7 +1677,7 @@ QString QDB2Driver::formatValue(const QSqlField &field, bool trimStrings) const
 
 QVariant QDB2Driver::handle() const
 {
-   return QVariant(qRegisterMetaType<SQLHANDLE>("SQLHANDLE"), &d->hDbc);
+   return QVariant::fromValue<SQLHANDLE>(d->hDbc);
 }
 
 QString QDB2Driver::escapeIdentifier(const QString &identifier, IdentifierType) const

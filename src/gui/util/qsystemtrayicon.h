@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -55,10 +55,19 @@ class Q_GUI_EXPORT QSystemTrayIcon : public QObject
    GUI_CS_PROPERTY_DESIGNABLE(visible, false)
 
  public:
-   enum MessageIcon { NoIcon, Information, Warning, Critical };
+   enum MessageIcon {
+      NoIcon,
+      Information,
+      Warning,
+      Critical
+   };
 
    QSystemTrayIcon(QObject *parent = nullptr);
    QSystemTrayIcon(const QIcon &icon, QObject *parent = nullptr);
+
+   QSystemTrayIcon(const QSystemTrayIcon &) = delete;
+   QSystemTrayIcon &operator=(const QSystemTrayIcon &) = delete;
+
    ~QSystemTrayIcon();
 
    enum ActivationReason {
@@ -112,16 +121,14 @@ class Q_GUI_EXPORT QSystemTrayIcon : public QObject
    QScopedPointer<QSystemTrayIconPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QSystemTrayIcon)
    Q_DECLARE_PRIVATE(QSystemTrayIcon)
+
    GUI_CS_SLOT_1(Private, void _q_emitActivated(QPlatformSystemTrayIcon::ActivationReason))
    GUI_CS_SLOT_2(_q_emitActivated)
 
    friend class QSystemTrayIconSys;
    friend class QBalloonTip;
 };
-
-
 
 inline void QSystemTrayIcon::show()
 {

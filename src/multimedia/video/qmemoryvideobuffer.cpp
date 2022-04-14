@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,35 +22,24 @@
 ***********************************************************************/
 
 #include <qmemoryvideobuffer_p.h>
-#include <qabstractvideobuffer_p.h>
+
 #include <qbytearray.h>
 
+#include <qabstractvideobuffer_p.h>
 
 class QMemoryVideoBufferPrivate : public QAbstractVideoBufferPrivate
 {
  public:
    QMemoryVideoBufferPrivate()
-      : bytesPerLine(0)
-      , mapMode(QAbstractVideoBuffer::NotMapped)
-   { }
+      : bytesPerLine(0), mapMode(QAbstractVideoBuffer::NotMapped)
+   {
+   }
 
    int bytesPerLine;
    QAbstractVideoBuffer::MapMode mapMode;
    QByteArray data;
 };
 
-/*!
-    \class QMemoryVideoBuffer
-    \brief The QMemoryVideoBuffer class provides a system memory allocated video data buffer.
-    \internal
-
-    QMemoryVideoBuffer is the default video buffer for allocating system memory.  It may be used to
-    allocate memory for a QVideoFrame without implementing your own QAbstractVideoBuffer.
-*/
-
-/*!
-    Constructs a video buffer with an image stride of \a bytesPerLine from a byte \a array.
-*/
 QMemoryVideoBuffer::QMemoryVideoBuffer(const QByteArray &array, int bytesPerLine)
    : QAbstractVideoBuffer(*new QMemoryVideoBufferPrivate, NoHandle)
 {
@@ -60,24 +49,15 @@ QMemoryVideoBuffer::QMemoryVideoBuffer(const QByteArray &array, int bytesPerLine
    d->bytesPerLine = bytesPerLine;
 }
 
-/*!
-    Destroys a system memory allocated video buffer.
-*/
 QMemoryVideoBuffer::~QMemoryVideoBuffer()
 {
 }
 
-/*!
-    \reimp
-*/
 QAbstractVideoBuffer::MapMode QMemoryVideoBuffer::mapMode() const
 {
    return d_func()->mapMode;
 }
 
-/*!
-    \reimp
-*/
 uchar *QMemoryVideoBuffer::map(MapMode mode, int *numBytes, int *bytesPerLine)
 {
    Q_D(QMemoryVideoBuffer);
@@ -94,14 +74,12 @@ uchar *QMemoryVideoBuffer::map(MapMode mode, int *numBytes, int *bytesPerLine)
       }
 
       return reinterpret_cast<uchar *>(d->data.data());
+
    } else {
-      return 0;
+      return nullptr;
    }
 }
 
-/*!
-    \reimp
-*/
 void QMemoryVideoBuffer::unmap()
 {
    d_func()->mapMode = NotMapped;

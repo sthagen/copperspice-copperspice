@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,20 +30,20 @@
 static const int NESTING_LIMIT = 1024;
 
 // error strings for the JSON parser
-#define JSONERR_OK          QT_TRANSLATE_NOOP("QJsonParseError", "no error occurred")
-#define JSONERR_UNTERM_OBJ  QT_TRANSLATE_NOOP("QJsonParseError", "unterminated object")
-#define JSONERR_MISS_NSEP   QT_TRANSLATE_NOOP("QJsonParseError", "missing name separator")
-#define JSONERR_UNTERM_AR   QT_TRANSLATE_NOOP("QJsonParseError", "unterminated array")
-#define JSONERR_MISS_VSEP   QT_TRANSLATE_NOOP("QJsonParseError", "missing value separator")
-#define JSONERR_ILLEGAL_VAL QT_TRANSLATE_NOOP("QJsonParseError", "illegal value")
-#define JSONERR_END_OF_NUM  QT_TRANSLATE_NOOP("QJsonParseError", "invalid termination by number")
-#define JSONERR_ILLEGAL_NUM QT_TRANSLATE_NOOP("QJsonParseError", "illegal number")
-#define JSONERR_STR_ESC_SEQ QT_TRANSLATE_NOOP("QJsonParseError", "invalid escape sequence")
-#define JSONERR_STR_UTF8    QT_TRANSLATE_NOOP("QJsonParseError", "invalid UTF8 string")
-#define JSONERR_UTERM_STR   QT_TRANSLATE_NOOP("QJsonParseError", "unterminated string")
-#define JSONERR_MISS_OBJ    QT_TRANSLATE_NOOP("QJsonParseError", "object is missing after a comma")
-#define JSONERR_DEEP_NEST   QT_TRANSLATE_NOOP("QJsonParseError", "too deeply nested document")
-#define JSONERR_DOC_LARGE   QT_TRANSLATE_NOOP("QJsonParseError", "too large document")
+#define JSONERR_OK          cs_mark_tr("QJsonParseError", "no error occurred")
+#define JSONERR_UNTERM_OBJ  cs_mark_tr("QJsonParseError", "unterminated object")
+#define JSONERR_MISS_NSEP   cs_mark_tr("QJsonParseError", "missing name separator")
+#define JSONERR_UNTERM_AR   cs_mark_tr("QJsonParseError", "unterminated array")
+#define JSONERR_MISS_VSEP   cs_mark_tr("QJsonParseError", "missing value separator")
+#define JSONERR_ILLEGAL_VAL cs_mark_tr("QJsonParseError", "illegal value")
+#define JSONERR_END_OF_NUM  cs_mark_tr("QJsonParseError", "invalid termination by number")
+#define JSONERR_ILLEGAL_NUM cs_mark_tr("QJsonParseError", "illegal number")
+#define JSONERR_STR_ESC_SEQ cs_mark_tr("QJsonParseError", "invalid escape sequence")
+#define JSONERR_STR_UTF8    cs_mark_tr("QJsonParseError", "invalid UTF8 string")
+#define JSONERR_UTERM_STR   cs_mark_tr("QJsonParseError", "unterminated string")
+#define JSONERR_MISS_OBJ    cs_mark_tr("QJsonParseError", "object is missing after a comma")
+#define JSONERR_DEEP_NEST   cs_mark_tr("QJsonParseError", "too deeply nested document")
+#define JSONERR_DOC_LARGE   cs_mark_tr("QJsonParseError", "too large document")
 
 QString QJsonParseError::errorString() const
 {
@@ -53,42 +53,55 @@ QString QJsonParseError::errorString() const
       case NoError:
          sz = JSONERR_OK;
          break;
+
       case UnterminatedObject:
          sz = JSONERR_UNTERM_OBJ;
          break;
+
       case MissingNameSeparator:
          sz = JSONERR_MISS_NSEP;
          break;
+
       case UnterminatedArray:
          sz = JSONERR_UNTERM_AR;
          break;
+
       case MissingValueSeparator:
          sz = JSONERR_MISS_VSEP;
          break;
+
       case IllegalValue:
          sz = JSONERR_ILLEGAL_VAL;
          break;
+
       case TerminationByNumber:
          sz = JSONERR_END_OF_NUM;
          break;
+
       case IllegalNumber:
          sz = JSONERR_ILLEGAL_NUM;
          break;
+
       case IllegalEscapeSequence:
          sz = JSONERR_STR_ESC_SEQ;
          break;
+
       case IllegalUTF8String:
          sz = JSONERR_STR_UTF8;
          break;
+
       case UnterminatedString:
          sz = JSONERR_UTERM_STR;
          break;
+
       case MissingObject:
          sz = JSONERR_MISS_OBJ;
          break;
+
       case DeepNesting:
          sz = JSONERR_DEEP_NEST;
          break;
+
       case DocumentTooLarge:
          sz = JSONERR_DOC_LARGE;
          break;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,11 +22,12 @@
 ***********************************************************************/
 
 #include <qjsondocument.h>
-#include <qjsonparser_p.h>
-#include <qjsonwriter_p.h>
 
 #include <qstringlist.h>
 #include <qvariant.h>
+
+#include <qjsonparser_p.h>
+#include <qjsonwriter_p.h>
 
 QJsonDocument::QJsonDocument()
    : m_data(std::make_shared<QJsonValue>())
@@ -106,7 +107,8 @@ QString QJsonDocument::toJsonString(JsonFormat format) const
 
 QJsonDocument QJsonDocument::fromJson(const QByteArray &json, QJsonParseError *error)
 {
-   return fromJson(QString::fromUtf8(json), error);
+   QString str = QString::fromUtf8(json);
+   return fromJson(str, error);
 }
 
 QJsonDocument QJsonDocument::fromJson(QStringView json, QJsonParseError *error)
@@ -151,7 +153,7 @@ void QJsonDocument::setArray(const QJsonArray &array)
 
 bool QJsonDocument::operator==(const QJsonDocument &other) const
 {
-   if (m_data == other.m_data) {
+   if (*m_data == *other.m_data) {
       return true;
    }
 

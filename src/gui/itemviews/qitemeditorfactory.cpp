@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -71,9 +71,9 @@ class QUIntSpinBox : public QSpinBox
 
  public:
    explicit QUIntSpinBox(QWidget *parent = nullptr)
-      : QSpinBox(parent) {
-      connect(this, static_cast<void (QUIntSpinBox::*)(int)>(&QUIntSpinBox::valueChanged),
-          this, &QUIntSpinBox::uintValueChanged);
+      : QSpinBox(parent)
+   {
+      connect(this, cs_mp_cast<int>(&QUIntSpinBox::valueChanged), this, &QUIntSpinBox::uintValueChanged);
    }
 
    uint uintValue() const {
@@ -91,7 +91,7 @@ class QUIntSpinBox : public QSpinBox
 
 QWidget *QItemEditorFactory::createEditor(QVariant::Type type, QWidget *parent) const
 {
-   QItemEditorCreatorBase *creator = creatorMap.value(type, 0);
+   QItemEditorCreatorBase *creator = creatorMap.value(type, nullptr);
 
    if (! creator) {
       const QItemEditorFactory *dfactory = defaultFactory();
@@ -103,7 +103,7 @@ QWidget *QItemEditorFactory::createEditor(QVariant::Type type, QWidget *parent) 
 
 QString QItemEditorFactory::valuePropertyName(QVariant::Type type) const
 {
-   QItemEditorCreatorBase *creator = creatorMap.value(type, 0);
+   QItemEditorCreatorBase *creator = creatorMap.value(type, nullptr);
 
    if (! creator) {
       const QItemEditorFactory *dfactory = defaultFactory();
@@ -183,19 +183,23 @@ QWidget *QDefaultItemEditorFactory::createEditor(QVariant::Type type, QWidget *p
          ed->setFrame(false);
          return ed;
       }
+
       case QVariant::Time: {
          QDateTimeEdit *ed = new QTimeEdit(parent);
          ed->setFrame(false);
          return ed;
       }
+
       case QVariant::DateTime: {
          QDateTimeEdit *ed = new QDateTimeEdit(parent);
          ed->setFrame(false);
          return ed;
       }
 #endif
+
       case QVariant::Pixmap:
          return new QLabel(parent);
+
 #ifndef QT_NO_SPINBOX
       case QVariant::Double: {
          QDoubleSpinBox *sb = new QDoubleSpinBox(parent);
@@ -205,13 +209,14 @@ QWidget *QDefaultItemEditorFactory::createEditor(QVariant::Type type, QWidget *p
          return sb;
       }
 #endif
+
 #ifndef QT_NO_LINEEDIT
       case QVariant::String:
       default: {
          // the default editor is a lineedit
          QExpandingLineEdit *le = new QExpandingLineEdit(parent);
-         le->setFrame(le->style()->styleHint(QStyle::SH_ItemView_DrawDelegateFrame, 0, le));
-         if (!le->style()->styleHint(QStyle::SH_ItemView_ShowDecorationSelected, 0, le)) {
+         le->setFrame(le->style()->styleHint(QStyle::SH_ItemView_DrawDelegateFrame, nullptr, le));
+         if (!le->style()->styleHint(QStyle::SH_ItemView_ShowDecorationSelected, nullptr, le)) {
             le->setWidgetOwnsGeometry(true);
          }
          return le;
@@ -221,7 +226,8 @@ QWidget *QDefaultItemEditorFactory::createEditor(QVariant::Type type, QWidget *p
          break;
 #endif
    }
-   return 0;
+
+   return nullptr;
 }
 
 QString QDefaultItemEditorFactory::valuePropertyName(QVariant::Type type) const
@@ -308,6 +314,7 @@ void QExpandingLineEdit::changeEvent(QEvent *e)
       case QEvent::ContentsRectChange:
          updateMinimumWidth();
          break;
+
       default:
          break;
    }
@@ -318,9 +325,9 @@ void QExpandingLineEdit::changeEvent(QEvent *e)
 void QExpandingLineEdit::updateMinimumWidth()
 {
    int left, right;
-   getTextMargins(&left, 0, &right, 0);
+   getTextMargins(&left, nullptr, &right, nullptr);
    int width = left + right + 4 /*horizontalMargin in qlineedit.cpp*/;
-   getContentsMargins(&left, 0, &right, 0);
+   getContentsMargins(&left, nullptr, &right, nullptr);
    width += left + right;
 
    QStyleOptionFrame opt;

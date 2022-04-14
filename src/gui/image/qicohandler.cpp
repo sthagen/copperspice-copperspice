@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,16 +22,13 @@
 ***********************************************************************/
 
 #include <qicohandler_p.h>
-#include <QtCore/qendian.h>
-#include <QtGui/QImage>
-#include <QtCore/QFile>
-#include <QtCore/QBuffer>
+#include <qendian.h>
+#include <qimage.h>
+#include <qfile.h>
+#include <qbuffer.h>
 #include <qvariant.h>
 
-QT_BEGIN_NAMESPACE
-
-// These next two structs represent how the icon information is stored
-// in an ICO file.
+// These next two structs represent how the icon information is stored in an ICO file.
 typedef struct {
    quint8  bWidth;               // Width of the image
    quint8  bHeight;              // Height of the image (times 2)
@@ -767,7 +764,7 @@ void QIcoHandler::setupReader() const
    m_ICOReader = new ICOReader(device());
 }
 
-QVariant QIcoHandler::option(ImageOption option) const
+QVariant QIcoHandler::option(ImageOption option)
 {
    if (option == Size) {
       QIODevice *device = QImageIOHandler::device();
@@ -796,18 +793,21 @@ bool QIcoHandler::supportsOption(ImageOption option) const
  * If the magic bytes were found, it is assumed that the QIcoHandler can read the file.
  *
  */
-bool QIcoHandler::canRead() const
+bool QIcoHandler::canRead()
 {
    bool bCanRead = false;
    QIODevice *device = QImageIOHandler::device();
+
    if (device) {
       bCanRead = ICOReader::canRead(device);
       if (bCanRead) {
          setFormat("ico");
       }
+
    } else {
       qWarning("QIcoHandler::canRead() called with no device");
    }
+
    return bCanRead;
 }
 
@@ -854,7 +854,7 @@ bool QIcoHandler::write(const QImage &image)
  * Return the common identifier of the format.
  * For ICO format this will return "ico".
  */
-QByteArray QIcoHandler::name() const
+QString QIcoHandler::name() const
 {
    return "ico";
 }
@@ -863,7 +863,7 @@ QByteArray QIcoHandler::name() const
 /*! \reimp
 
 */
-int QIcoHandler::imageCount() const
+int QIcoHandler::imageCount()
 {
    setupReader();
    return m_ICOReader->count();
@@ -889,4 +889,3 @@ bool QIcoHandler::jumpToNextImage()
    return jumpToImage(m_currentIconIndex + 1);
 }
 
-QT_END_NAMESPACE

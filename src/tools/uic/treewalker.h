@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef TREEWALKER_H
 #define TREEWALKER_H
 
-#include <QList>
+#include <qlist.h>
 
 class DomUI;
 class DomLayoutDefault;
@@ -69,7 +69,9 @@ class DomButtonGroups;
 class DomButtonGroup;
 
 struct TreeWalker {
-   inline virtual ~TreeWalker() {}
+   virtual ~TreeWalker()
+   {
+   }
 
    virtual void acceptUI(DomUI *ui);
    virtual void acceptLayoutDefault(DomLayoutDefault *layoutDefault);

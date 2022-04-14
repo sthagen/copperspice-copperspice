@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -203,7 +203,7 @@ int QMachOParser::parse(const char *m_s, ulong fdlen, const QString &library, QS
    //    // No Qt section was found, but at least we know that where the proper architecture's boundaries are
    //    return NoQtSection;
    if (errorString) {
-      *errorString = QLibrary::tr("'%1' is not a Qt plugin").formatArg(library);
+      *errorString = QLibrary::tr("'%1' is not a CS plugin").formatArg(library);
    }
 
    return NotSuitable;

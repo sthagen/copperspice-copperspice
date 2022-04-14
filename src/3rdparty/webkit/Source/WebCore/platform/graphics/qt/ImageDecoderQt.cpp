@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Friedemann Kleint 
+ * Copyright (C) 2006 Friedemann Kleint
  * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
  *
  * All rights reserved.
@@ -29,10 +29,10 @@
 #include "config.h"
 #include "ImageDecoderQt.h"
 
-#include <QtCore/QByteArray>
-#include <QtCore/QBuffer>
+#include <QByteArray>
+#include <QBuffer>
 
-#include <QtGui/QImageReader>
+#include <QImageReader>
 #include <qdebug.h>
 
 namespace WebCore {
@@ -128,7 +128,7 @@ int ImageDecoderQt::repetitionCount() const
 
 String ImageDecoderQt::filenameExtension() const
 {
-    return String(m_format.constData(), m_format.length());
+    return m_format;
 };
 
 ImageFrame* ImageDecoderQt::frameBufferAtIndex(size_t index)

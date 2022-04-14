@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,6 @@
 
 #include <qmediacontrol.h>
 #include <qmultimedia.h>
-#include <qmediaenumdebug.h>
 
 class Q_MULTIMEDIA_EXPORT QMediaStreamsControl : public QMediaControl
 {
@@ -41,12 +40,12 @@ class Q_MULTIMEDIA_EXPORT QMediaStreamsControl : public QMediaControl
    virtual ~QMediaStreamsControl();
 
    virtual int streamCount() = 0;
-   virtual StreamType streamType(int streamNumber) = 0;
+   virtual StreamType streamType(int streamID) = 0;
 
-   virtual QVariant metaData(int streamNumber, const QString &key) = 0;
+   virtual QVariant metaData(int streamID, const QString &key) = 0;
 
-   virtual bool isActive(int streamNumber) = 0;
-   virtual void setActive(int streamNumber, bool state) = 0;
+   virtual bool isActive(int streamID) = 0;
+   virtual void setActive(int streamID, bool state) = 0;
 
    MULTI_CS_SIGNAL_1(Public, void streamsChanged())
    MULTI_CS_SIGNAL_2(streamsChanged)
@@ -60,8 +59,5 @@ class Q_MULTIMEDIA_EXPORT QMediaStreamsControl : public QMediaControl
 
 #define QMediaStreamsControl_iid "com.copperspice.CS.mediaStreamsControl/1.0"
 CS_DECLARE_INTERFACE(QMediaStreamsControl, QMediaStreamsControl_iid)
-
-Q_DECLARE_METATYPE(QMediaStreamsControl::StreamType)
-Q_MEDIA_ENUM_DEBUG(QMediaStreamsControl, StreamType)
 
 #endif

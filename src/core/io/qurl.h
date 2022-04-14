@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -102,7 +102,7 @@ class Q_CORE_EXPORT QUrl
       other.d = nullptr;
    }
 
-   QUrl &operator =(const QUrl &other);
+   QUrl &operator=(const QUrl &other);
 
    QUrl &operator=(QUrl &&other) {
       qSwap(d, other.d);
@@ -121,7 +121,7 @@ class Q_CORE_EXPORT QUrl
    QString fileName(FormattingOptions options = FullyDecoded) const;
 
    static QUrl fromEncoded(const QByteArray &url, ParsingMode mode = TolerantMode);
-   static QString fromPercentEncoding(const QByteArray &);
+   static QString fromPercentEncoding(const QByteArray &input);
    static QUrl fromUserInput(const QString &userInput);
 
    static QUrl fromUserInput(const QString &userInput, const QString &workingDirectory,
@@ -149,7 +149,7 @@ class Q_CORE_EXPORT QUrl
 
    QString topLevelDomain(FormattingOptions options = FullyDecoded) const;
 
-   static QByteArray toPercentEncoding(const QString &, const QByteArray &exclude = QByteArray(),
+   static QByteArray toPercentEncoding(const QString &input, const QByteArray &exclude = QByteArray(),
                   const QByteArray &include = QByteArray());
 
    QString toLocalFile() const;
@@ -193,9 +193,9 @@ class Q_CORE_EXPORT QUrl
    QString fragment(FormattingOptions options = PrettyDecoded) const;
 
    // operators
-   bool operator <(const QUrl &url) const;
-   bool operator ==(const QUrl &url) const;
-   bool operator !=(const QUrl &url) const;
+   bool operator<(const QUrl &url) const;
+   bool operator==(const QUrl &url) const;
+   bool operator!=(const QUrl &url) const;
 
 # ifdef Q_OS_DARWIN
    static QUrl fromCFURL(CFURLRef url);
@@ -237,37 +237,38 @@ class Q_CORE_EXPORT QUrl
    void removeEncodedQueryItem(const QByteArray &key);
    void removeAllEncodedQueryItems(const QByteArray &key);
 
-   void setEncodedUrl(const QByteArray &u, ParsingMode mode = TolerantMode) {
-      setUrl(fromEncodedComponent_helper(u), mode);
+   void setEncodedUrl(const QByteArray &url, ParsingMode parsingMode = TolerantMode) {
+      setUrl(fromEncodedComponent_helper(url), parsingMode);
    }
 
    QByteArray encodedUserName() const {
       return userName(FullyEncoded).toLatin1();
    }
-   void setEncodedUserName(const QByteArray &value) {
-      setUserName(fromEncodedComponent_helper(value));
+   void setEncodedUserName(const QByteArray &userName) {
+      setUserName(fromEncodedComponent_helper(userName));
    }
 
    QByteArray encodedPassword() const {
       return password(FullyEncoded).toLatin1();
    }
-   void setEncodedPassword(const QByteArray &value) {
-      setPassword(fromEncodedComponent_helper(value));
+   void setEncodedPassword(const QByteArray &password) {
+      setPassword(fromEncodedComponent_helper(password));
    }
 
    QByteArray encodedHost() const {
       return host(FullyEncoded).toLatin1();
    }
 
-   void setEncodedHost(const QByteArray &value) {
-      setHost(fromEncodedComponent_helper(value));
+   void setEncodedHost(const QByteArray &host) {
+      setHost(fromEncodedComponent_helper(host));
    }
 
    QByteArray encodedPath() const {
       return path(FullyEncoded).toLatin1();
    }
-   void setEncodedPath(const QByteArray &value) {
-      setPath(fromEncodedComponent_helper(value));
+
+   void setEncodedPath(const QByteArray &path) {
+      setPath(fromEncodedComponent_helper(path));
    }
 
    QByteArray encodedQuery() const {
@@ -285,14 +286,14 @@ class Q_CORE_EXPORT QUrl
       setFragment(fromEncodedComponent_helper(fragment));
    }
 
-   static QString fromAce(const QString &);
-   static QString fromAce(const QByteArray &);
-   static QByteArray toAce(const QString &);
+   static QString fromAce(const QString &domain);
+   static QString fromAce(const QByteArray &domain);
+   static QByteArray toAce(const QString &domain);
 
    static QStringList idnWhitelist();
    static QStringList toStringList(const QList<QUrl> &urls, FormattingOptions options = FormattingOptions(PrettyDecoded));
    static QList<QUrl> fromStringList(const QStringList &urls, ParsingMode mode = TolerantMode);
-   static void setIdnWhitelist(const QStringList &);
+   static void setIdnWhitelist(const QStringList &list);
 
    using DataPtr = QUrlPrivate *;
 
@@ -312,7 +313,7 @@ class Q_CORE_EXPORT QUrl
 Q_DECLARE_SHARED(QUrl)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QUrl::FormattingOptions)
 
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QUrl &);
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QUrl &);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QUrl &url);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QUrl &url);
 
 #endif

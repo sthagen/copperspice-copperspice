@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,68 +24,48 @@
 #ifndef PHRASEVIEW_H
 #define PHRASEVIEW_H
 
-#include <QList>
-#include <QShortcut>
-#include <QTreeView>
-#include "phrase.h"
+#include <phrase.h>
 
-QT_BEGIN_NAMESPACE
+#include <qlist.h>
+#include <qshortcut.h>
+#include <qtreeview.h>
 
 class MultiDataModel;
 class PhraseModel;
 
-class GuessShortcut : public QShortcut
-{
-   Q_OBJECT
- public:
-   GuessShortcut(int nkey, QWidget *parent, const char *member)
-      : QShortcut(parent), nrkey(nkey) {
-      setKey(Qt::CTRL + (Qt::Key_1 + nrkey));
-      connect(this, SIGNAL(activated()), this, SLOT(keyActivated()));
-      connect(this, SIGNAL(activated(int)), parent, member);
-   }
-
- private slots:
-   void keyActivated() {
-      emit activated(nrkey);
-   }
-
- signals:
-   void activated(int nkey);
-
- private:
-   int nrkey;
-};
-
 class PhraseView : public QTreeView
 {
-   Q_OBJECT
+   CS_OBJECT(PhraseView)
 
  public:
-   PhraseView(MultiDataModel *model, QList<QHash<QString, QList<Phrase *> > > *phraseDict, QWidget *parent = nullptr);
+   PhraseView(MultiDataModel *model, QList<QHash<QString, QList<Phrase *>>> *phraseDict, QWidget *parent = nullptr);
    ~PhraseView();
+
    void setSourceText(int model, const QString &sourceText);
 
- public slots:
-   void toggleGuessing();
-   void update();
+   CS_SLOT_1(Public, void toggleGuessing())
+   CS_SLOT_2(toggleGuessing)
 
- signals:
-   void phraseSelected(int latestModel, const QString &phrase);
+   CS_SLOT_1(Public, void update())
+   CS_SLOT_2(update)
+
+   CS_SIGNAL_1(Public, void phraseSelected(int latestModel,const QString & phrase))
+   CS_SIGNAL_2(phraseSelected,latestModel,phrase)
 
  protected:
    // QObject
    virtual void contextMenuEvent(QContextMenuEvent *event);
+
    // QAbstractItemView
    virtual void mouseDoubleClickEvent(QMouseEvent *event);
 
- private slots:
-   void guessShortcut(int nkey);
-   void selectPhrase(const QModelIndex &index);
-   void selectPhrase();
+ private:
+   // slots
+   void guessShortcut(int id);
+   void selectPhrase(const QModelIndex & index);
+   void selectCurrentPhrase();
    void editPhrase();
 
- private:
    QList<Phrase *> getPhrases(int model, const QString &sourceText);
    void deleteGuesses();
 
@@ -98,6 +78,4 @@ class PhraseView : public QTreeView
    bool m_doGuesses;
 };
 
-QT_END_NAMESPACE
-
-#endif // PHRASEVIEW_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -64,8 +64,8 @@ public:
     MULTI_CS_SIGNAL_1(Public, void alternativeFrequenciesEnabledChanged(bool enabled))
     MULTI_CS_SIGNAL_2(alternativeFrequenciesEnabledChanged,enabled)
 
-    MULTI_CS_SIGNAL_1(Public, void error(QRadioData::Error err))
-    MULTI_CS_SIGNAL_OVERLOAD(error, (QRadioData::Error), err)
+    MULTI_CS_SIGNAL_1(Public, void error(QRadioData::Error error))
+    MULTI_CS_SIGNAL_OVERLOAD(error, (QRadioData::Error), error)
 
 protected:
     explicit QRadioDataControl(QObject *parent = nullptr);

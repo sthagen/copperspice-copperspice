@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,7 +34,6 @@ class QAccessibleObjectPrivate
 {
  public:
    QPointer<QObject> object;
-
 };
 
 QAccessibleObject::QAccessibleObject(QObject *object)
@@ -43,20 +42,11 @@ QAccessibleObject::QAccessibleObject(QObject *object)
    d->object = object;
 }
 
-/*!
-    Destroys the QAccessibleObject.
-
-    This only happens when a call to release() decrements the internal
-    reference counter to zero.
-*/
 QAccessibleObject::~QAccessibleObject()
 {
    delete d;
 }
 
-/*!
-    \reimp
-*/
 QObject *QAccessibleObject::object() const
 {
    return d->object;
@@ -64,7 +54,7 @@ QObject *QAccessibleObject::object() const
 
 bool QAccessibleObject::isValid() const
 {
-   return !d->object.isNull();
+   return ! d->object.isNull();
 }
 
 QRect QAccessibleObject::rect() const
@@ -82,13 +72,14 @@ QAccessibleInterface *QAccessibleObject::childAt(int x, int y) const
 {
    for (int i = 0; i < childCount(); ++i) {
       QAccessibleInterface *childIface = child(i);
+
       Q_ASSERT(childIface);
       if (childIface->rect().contains(x, y)) {
          return childIface;
       }
    }
 
-   return 0;
+   return nullptr;
 }
 
 QAccessibleApplication::QAccessibleApplication()
@@ -98,15 +89,18 @@ QAccessibleApplication::QAccessibleApplication()
 
 QWindow *QAccessibleApplication::window() const
 {
-   return 0;
+   return nullptr;
 }
+
 // all toplevel widgets except popups and the desktop
 static QObjectList topLevelObjects()
 {
    QObjectList list;
    const QWindowList tlw(QGuiApplication::topLevelWindows());
+
    for (int i = 0; i < tlw.count(); ++i) {
       QWindow *w = tlw.at(i);
+
       if (w->type() != Qt::Popup && w->type() != Qt::Desktop) {
          if (QAccessibleInterface *root = w->accessibleRoot()) {
             if (root->object()) {
@@ -137,7 +131,7 @@ int QAccessibleApplication::indexOfChild(const QAccessibleInterface *child) cons
 QAccessibleInterface *QAccessibleApplication::parent() const
 {
 
-   return 0;
+   return nullptr;
 }
 
 QAccessibleInterface *QAccessibleApplication::child(int index) const
@@ -146,7 +140,7 @@ QAccessibleInterface *QAccessibleApplication::child(int index) const
    if (index >= 0 && index < tlo.count()) {
       return QAccessible::queryAccessibleInterface(tlo.at(index));
    }
-   return 0;
+   return nullptr;
 }
 
 
@@ -155,7 +149,7 @@ QAccessibleInterface *QAccessibleApplication::focusChild() const
    if (QWindow *window = QGuiApplication::focusWindow()) {
       return window->accessibleRoot();
    }
-   return 0;
+   return nullptr;
 }
 
 QString QAccessibleApplication::text(QAccessible::Text t) const

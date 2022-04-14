@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,18 +31,15 @@
 #include "qxmlschema_p.h"
 #include "qxsdschemacontext_p.h"
 #include "qxsdschema_p.h"
-#include <QtNetwork/QNetworkAccessManager>
-
-QT_BEGIN_NAMESPACE
+#include <qnetaccess_manager.h>
 
 class QXmlSchemaValidatorPrivate
 {
  public:
    QXmlSchemaValidatorPrivate(const QXmlSchema &schema)
-      : m_namePool(schema.namePool())
-      , m_userMessageHandler(0)
-      , m_uriResolver(0)
-      , m_userNetworkAccessManager(0) {
+      : m_namePool(schema.namePool()), m_userMessageHandler(nullptr), m_uriResolver(nullptr),
+        m_userNetworkAccessManager(nullptr)
+   {
       setSchema(schema);
 
       const QXmlSchemaPrivate *p = schema.d;
@@ -90,7 +87,5 @@ class QXmlSchemaValidatorPrivate
    QPatternist::XsdSchema::Ptr                                      m_schema;
    QUrl                                                             m_schemaDocumentUri;
 };
-
-QT_END_NAMESPACE
 
 #endif

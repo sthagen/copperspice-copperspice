@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QACCESSIBLEBRIDGE_H
 #define QACCESSIBLEBRIDGE_H
 
-#include <QtCore/qplugin.h>
-#include <QtCore/qfactoryinterface.h>
+#include <qplugin.h>
+#include <qfactoryinterface.h>
 
 #ifndef QT_NO_ACCESSIBILITY
 
@@ -35,8 +35,11 @@ class QAccessibleEvent;
 class QAccessibleBridge
 {
  public:
-   virtual ~QAccessibleBridge() {}
-   virtual void setRootObject(QAccessibleInterface *) = 0;
+   virtual ~QAccessibleBridge()
+   {
+   }
+
+   virtual void setRootObject(QAccessibleInterface *object) = 0;
    virtual void notifyAccessibilityUpdate(QAccessibleEvent *event) = 0;
 };
 

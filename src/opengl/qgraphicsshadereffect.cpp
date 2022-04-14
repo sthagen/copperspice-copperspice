@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -70,7 +70,7 @@ class QGraphicsShaderEffectPrivate : public QGraphicsEffectPrivate
    QGraphicsShaderEffectPrivate()
       : pixelShaderFragment(qglslDefaultImageFragmentShader)
 #ifdef QGL_HAVE_CUSTOM_SHADERS
-      , customShaderStage(0)
+      , customShaderStage(nullptr)
 #endif
    {
    }
@@ -80,7 +80,6 @@ class QGraphicsShaderEffectPrivate : public QGraphicsEffectPrivate
    QGLCustomShaderEffectStage *customShaderStage;
 #endif
 };
-
 
 QGraphicsShaderEffect::QGraphicsShaderEffect(QObject *parent)
    : QGraphicsEffect(*new QGraphicsShaderEffectPrivate(), parent)
@@ -95,29 +94,22 @@ QGraphicsShaderEffect::~QGraphicsShaderEffect()
 #endif
 }
 
-/*#
-    Returns the source code for the pixel shader fragment for
-    this shader effect.  The default is a shader that copies
-    its incoming pixmap directly to the output with no effect
-    applied.
-
-    \sa setPixelShaderFragment()
-*/
 QByteArray QGraphicsShaderEffect::pixelShaderFragment() const
 {
    Q_D(const QGraphicsShaderEffect);
    return d->pixelShaderFragment;
 }
 
-
 void QGraphicsShaderEffect::setPixelShaderFragment(const QByteArray &code)
 {
    Q_D(QGraphicsShaderEffect);
+
    if (d->pixelShaderFragment != code) {
       d->pixelShaderFragment = code;
+
 #ifdef QGL_HAVE_CUSTOM_SHADERS
       delete d->customShaderStage;
-      d->customShaderStage = 0;
+      d->customShaderStage = nullptr;
 #endif
    }
 }
@@ -130,12 +122,11 @@ void QGraphicsShaderEffect::draw(QPainter *painter)
    Q_D(QGraphicsShaderEffect);
 
 #ifdef QGL_HAVE_CUSTOM_SHADERS
-   // Set the custom shader on the paint engine.  The setOnPainter()
-   // call may fail if the paint engine is not GL2.  In that case,
-   // we fall through to drawing the pixmap normally.
-   if (!d->customShaderStage) {
-      d->customShaderStage = new QGLCustomShaderEffectStage
-      (this, d->pixelShaderFragment);
+   // Set the custom shader on the paint engine. The setOnPainter() call may fail
+   // if the paint engine is not GL2. Then draw the pixmap normally.
+
+   if (! d->customShaderStage) {
+      d->customShaderStage = new QGLCustomShaderEffectStage(this, d->pixelShaderFragment);
    }
    bool usingShader = d->customShaderStage->setOnPainter(painter);
 
@@ -162,7 +153,6 @@ void QGraphicsShaderEffect::draw(QPainter *painter)
 #endif
 }
 
-
 void QGraphicsShaderEffect::setUniformsDirty()
 {
 #ifdef QGL_HAVE_CUSTOM_SHADERS
@@ -173,16 +163,6 @@ void QGraphicsShaderEffect::setUniformsDirty()
 #endif
 }
 
-/*#
-    Sets custom uniform variables on the current GL context when
-    \a program is about to be used by the paint engine.
-
-    This function should be overridden if the shader set with
-    setPixelShaderFragment() has additional parameters beyond
-    those that the paint engine normally sets itself.
-
-    \sa setUniformsDirty()
-*/
 void QGraphicsShaderEffect::setUniforms(QGLShaderProgram *program)
 {
    (void) program;

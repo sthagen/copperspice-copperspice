@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,12 @@
 #ifndef QCOCOANATIVECONTEXT_H
 #define QCOCOANATIVECONTEXT_H
 
-#include <QtCore/QMetaType>
 #include <AppKit/NSOpenGL.h>
 
 struct QCocoaNativeContext
 {
     QCocoaNativeContext()
-        : m_context(0)
+        : m_context(nullptr)
     { }
 
     QCocoaNativeContext(NSOpenGLContext *ctx)
@@ -43,6 +42,6 @@ private:
     NSOpenGLContext *m_context;
 };
 
-Q_DECLARE_METATYPE(QCocoaNativeContext)
+CS_DECLARE_METATYPE(QCocoaNativeContext)
 
 #endif

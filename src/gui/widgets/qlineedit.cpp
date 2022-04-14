@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -104,7 +104,7 @@ void QLineEdit::initStyleOption(QStyleOptionFrame *option) const
 
 
 QLineEdit::QLineEdit(QWidget *parent)
-   : QWidget(*new QLineEditPrivate, parent, 0)
+   : QWidget(*new QLineEditPrivate, parent, Qt::EmptyFlag)
 {
    Q_D(QLineEdit);
    d->init(QString());
@@ -112,7 +112,7 @@ QLineEdit::QLineEdit(QWidget *parent)
 
 
 QLineEdit::QLineEdit(const QString &contents, QWidget *parent)
-   : QWidget(*new QLineEditPrivate, parent, 0)
+   : QWidget(*new QLineEditPrivate, parent, Qt::EmptyFlag)
 {
    Q_D(QLineEdit);
    d->init(contents);
@@ -159,8 +159,6 @@ QString QLineEdit::displayText() const
    return d->control->displayText();
 }
 
-
-
 int QLineEdit::maxLength() const
 {
    Q_D(const QLineEdit);
@@ -173,7 +171,6 @@ void QLineEdit::setMaxLength(int maxLength)
    d->control->setMaxLength(maxLength);
 }
 
-
 bool QLineEdit::hasFrame() const
 {
    Q_D(const QLineEdit);
@@ -184,49 +181,58 @@ void QLineEdit::addAction(QAction *action, ActionPosition position)
 {
    Q_D(QLineEdit);
    QWidget::addAction(action);
-   d->addAction(action, 0, position);
+   d->addAction(action, nullptr, position);
 }
+
 QAction *QLineEdit::addAction(const QIcon &icon, ActionPosition position)
 {
    QAction *result = new QAction(icon, QString(), this);
    addAction(result, position);
+
    return result;
 }
-static const char clearButtonActionNameC[] = "_q_qlineeditclearaction";
+
+static const QString clearButtonAction = QString("_cs_clearActionEnabled");
+
 void QLineEdit::setClearButtonEnabled(bool enable)
 {
    Q_D(QLineEdit);
+
    if (enable == isClearButtonEnabled()) {
       return;
    }
 
    if (enable) {
       QAction *clearAction = new QAction(d->clearButtonIcon(), QString(), this);
-      clearAction->setEnabled(!isReadOnly());
-      clearAction->setObjectName(QLatin1String(clearButtonActionNameC));
-      d->addAction(clearAction, 0, QLineEdit::TrailingPosition,
-         QLineEditPrivate::SideWidgetClearButton | QLineEditPrivate::SideWidgetFadeInWithText);
+      clearAction->setEnabled(! isReadOnly());
+      clearAction->setObjectName(clearButtonAction);
+
+      d->addAction(clearAction, nullptr, QLineEdit::TrailingPosition,
+                  QLineEditPrivate::SideWidgetClearButton | QLineEditPrivate::SideWidgetFadeInWithText);
+
    } else {
-      QAction *clearAction = findChild<QAction *>(QLatin1String(clearButtonActionNameC));
+      QAction *clearAction = findChild<QAction *>(clearButtonAction);
+
       Q_ASSERT(clearAction);
       d->removeAction(clearAction);
+
       delete clearAction;
    }
 }
+
 bool QLineEdit::isClearButtonEnabled() const
 {
-   return findChild<QAction *>(QLatin1String(clearButtonActionNameC));
+   return findChild<QAction *>(clearButtonAction);
 }
 
 void QLineEdit::setFrame(bool enable)
 {
    Q_D(QLineEdit);
+
    d->frame = enable;
    update();
    updateGeometry();
 }
-
-
 
 QLineEdit::EchoMode QLineEdit::echoMode() const
 {
@@ -237,9 +243,11 @@ QLineEdit::EchoMode QLineEdit::echoMode() const
 void QLineEdit::setEchoMode(EchoMode mode)
 {
    Q_D(QLineEdit);
+
    if (mode == (EchoMode)d->control->echoMode()) {
       return;
    }
+
    Qt::InputMethodHints imHints = inputMethodHints();
    if (mode == Password || mode == NoEcho) {
       imHints |= Qt::ImhHiddenText;
@@ -270,7 +278,7 @@ void QLineEdit::setValidator(const QValidator *v)
    Q_D(QLineEdit);
    d->control->setValidator(v);
 }
-#endif // QT_NO_VALIDATOR
+#endif
 
 #ifndef QT_NO_COMPLETER
 
@@ -283,8 +291,8 @@ void QLineEdit::setCompleter(QCompleter *c)
    }
 
    if (d->control->completer()) {
-      disconnect(d->control->completer(), 0, this, 0);
-      d->control->completer()->setWidget(0);
+      disconnect(d->control->completer(), QString(), this, QString());
+      d->control->completer()->setWidget(nullptr);
 
       if (d->control->completer()->parent() == this) {
          delete d->control->completer();
@@ -293,17 +301,17 @@ void QLineEdit::setCompleter(QCompleter *c)
 
    d->control->setCompleter(c);
 
-   if (!c) {
+   if (! c) {
       return;
    }
 
-   if (c->widget() == 0) {
+   if (c->widget() == nullptr) {
       c->setWidget(this);
    }
 
    if (hasFocus()) {
-      QObject::connect(d->control->completer(), static_cast<void (QCompleter::*)(const QString &)>(&QCompleter::activated),   this, &QLineEdit::setText);
-      QObject::connect(d->control->completer(), static_cast<void (QCompleter::*)(const QString &)>(&QCompleter::highlighted), this, &QLineEdit::_q_completionHighlighted);
+      QObject::connect(d->control->completer(), cs_mp_cast<const QString &>(&QCompleter::activated),   this, &QLineEdit::setText);
+      QObject::connect(d->control->completer(), cs_mp_cast<const QString &>(&QCompleter::highlighted), this, &QLineEdit::_q_completionHighlighted);
    }
 }
 
@@ -973,11 +981,13 @@ bool QLineEdit::event(QEvent *e)
 
    } else if (e->type() == QEvent::WindowActivate) {
       QTimer::singleShot(0, this, SLOT(_q_handleWindowActivate()));
+
 #ifndef QT_NO_SHORTCUT
    } else if (e->type() == QEvent::ShortcutOverride) {
       QKeyEvent *ke = static_cast<QKeyEvent *>(e);
       d->control->processShortcutOverrideEvent(ke);
 #endif
+
    } else if (e->type() == QEvent::KeyRelease) {
       d->control->setCursorBlinkPeriod(QApplication::cursorFlashTime());
 
@@ -996,6 +1006,7 @@ bool QLineEdit::event(QEvent *e)
 
    } else if (e->type() == QEvent::ActionRemoved) {
       d->removeAction(static_cast<QActionEvent *>(e)->action());
+
    } else if (e->type() == QEvent::Resize) {
       d->positionSideWidgets();
    }
@@ -1356,7 +1367,7 @@ void QLineEdit::focusInEvent(QFocusEvent *e)
       initStyleOption(&opt);
 
       if ((! hasSelectedText() && d->control->preeditAreaText().isEmpty())
-         || style()->styleHint(QStyle::SH_BlinkCursorWhenTextSelected, &opt, this)) {
+               || style()->styleHint(QStyle::SH_BlinkCursorWhenTextSelected, &opt, this)) {
          d->setCursorVisible(true);
       }
 
@@ -1369,23 +1380,20 @@ void QLineEdit::focusInEvent(QFocusEvent *e)
    if (d->control->completer()) {
       d->control->completer()->setWidget(this);
 
-      QObject::connect(d->control->completer(), static_cast<void (QCompleter::*)(const QString &)>(&QCompleter::activated),   this, &QLineEdit::setText);
-      QObject::connect(d->control->completer(), static_cast<void (QCompleter::*)(const QString &)>(&QCompleter::highlighted), this, &QLineEdit::_q_completionHighlighted);
+      QObject::connect(d->control->completer(), cs_mp_cast<const QString &>(&QCompleter::activated),   this, &QLineEdit::setText);
+      QObject::connect(d->control->completer(), cs_mp_cast<const QString &>(&QCompleter::highlighted), this, &QLineEdit::_q_completionHighlighted);
    }
 
 #endif
    update();
 }
 
-/*!\reimp
-*/
-
 void QLineEdit::focusOutEvent(QFocusEvent *e)
 {
    Q_D(QLineEdit);
+
    if (d->control->passwordEchoEditing()) {
-      // Reset the echomode back to PasswordEchoOnEdit when the widget loses
-      // focus.
+      // Reset the echomode back to PasswordEchoOnEdit when the widget loses focus
       d->updatePasswordEchoEditing(false);
    }
 
@@ -1397,17 +1405,18 @@ void QLineEdit::focusOutEvent(QFocusEvent *e)
 
    d->setCursorVisible(false);
    d->control->setCursorBlinkPeriod(0);
+
 #ifdef QT_KEYPAD_NAVIGATION
    // editingFinished() is already emitted on LeaveEditFocus
-   if (!QApplication::keypadNavigationEnabled())
+   if (! QApplication::keypadNavigationEnabled())
 #endif
+
       if (reason != Qt::PopupFocusReason
-         || !(QApplication::activePopupWidget() && QApplication::activePopupWidget()->parentWidget() == this)) {
+            || ! (QApplication::activePopupWidget() && QApplication::activePopupWidget()->parentWidget() == this)) {
          if (hasAcceptableInput() || d->control->fixup()) {
             emit editingFinished();
          }
       }
-
 
 #ifdef QT_KEYPAD_NAVIGATION
    d->control->setCancelText(QString());
@@ -1415,15 +1424,13 @@ void QLineEdit::focusOutEvent(QFocusEvent *e)
 
 #ifndef QT_NO_COMPLETER
    if (d->control->completer()) {
-      QObject::disconnect(d->control->completer(), 0, this, 0);
+      QObject::disconnect(d->control->completer(), QString(), this, QString());
    }
 #endif
 
    QWidget::focusOutEvent(e);
 }
 
-/*!\reimp
-*/
 void QLineEdit::paintEvent(QPaintEvent *)
 {
    Q_D(QLineEdit);
@@ -1444,18 +1451,22 @@ void QLineEdit::paintEvent(QPaintEvent *)
 
    QFontMetrics fm = fontMetrics();
    Qt::Alignment va = QStyle::visualAlignment(d->control->layoutDirection(), QFlag(d->alignment));
+
    switch (va & Qt::AlignVertical_Mask) {
       case Qt::AlignBottom:
          d->vscroll = r.y() + r.height() - fm.height() - d->verticalMargin;
          break;
+
       case Qt::AlignTop:
          d->vscroll = r.y() + d->verticalMargin;
          break;
+
       default:
          //center
          d->vscroll = r.y() + (r.height() - fm.height() + 1) / 2;
          break;
    }
+
    QRect lineRect(r.x() + d->horizontalMargin, d->vscroll, r.width() - 2 * d->horizontalMargin, fm.height());
 
    if (d->shouldShowPlaceholderText()) {

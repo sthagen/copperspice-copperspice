@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,27 +24,11 @@
 #include <qaudio.h>
 #include <qdebug.h>
 
-namespace QAudio {
-
-class RegisterMetaTypes
-{
- public:
-   RegisterMetaTypes() {
-      qRegisterMetaType<QAudio::Error>();
-      qRegisterMetaType<QAudio::State>();
-      qRegisterMetaType<QAudio::Mode>();
-      qRegisterMetaType<QAudio::Role>();
-   }
-
-} _register;
-
-}
-
-
 QDebug operator<<(QDebug dbg, QAudio::Error error)
 {
    QDebugStateSaver saver(dbg);
    dbg.nospace();
+
    switch (error) {
       case QAudio::NoError:
          dbg << "NoError";

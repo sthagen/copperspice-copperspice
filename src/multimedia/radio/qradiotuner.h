@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,6 @@
 #include <qobject.h>
 #include <qpair.h>
 #include <qmediaobject.h>
-#include <qmediaenumdebug.h>
 #include <qradiodata.h>
 
 class QRadioTunerPrivate;
@@ -79,7 +78,7 @@ class Q_MULTIMEDIA_EXPORT QRadioTuner : public QMediaObject
    MULTI_CS_ENUM(StereoMode)
    MULTI_CS_ENUM(SearchMode)
 
-public:
+ public:
     enum State { ActiveState, StoppedState };
     enum Band { AM, FM, SW, LW, FM2 };
     enum Error { NoError, ResourceError, OpenError, OutOfRangeError };
@@ -87,6 +86,10 @@ public:
     enum SearchMode { SearchFast, SearchGetStationId };
 
     explicit QRadioTuner(QObject *parent = nullptr);
+
+    QRadioTuner(const QRadioTuner &) = delete;
+    QRadioTuner &operator=(const QRadioTuner &) = delete;
+
     ~QRadioTuner();
 
     QMultimedia::AvailabilityStatus availability() const override;
@@ -95,7 +98,7 @@ public:
 
     Band band() const;
 
-    bool isBandSupported(Band b) const;
+    bool isBandSupported(Band band) const;
 
     int frequency() const;
     int frequencyStep(Band band) const;
@@ -168,21 +171,8 @@ public:
     MULTI_CS_SIGNAL_1(Public, void error(QRadioTuner::Error error))
     MULTI_CS_SIGNAL_OVERLOAD(error, (QRadioTuner::Error), error)
 
-private:
-    Q_DISABLE_COPY(QRadioTuner)
+ private:
     Q_DECLARE_PRIVATE(QRadioTuner)
 };
-
-Q_DECLARE_METATYPE(QRadioTuner::State)
-Q_DECLARE_METATYPE(QRadioTuner::Band)
-Q_DECLARE_METATYPE(QRadioTuner::Error)
-Q_DECLARE_METATYPE(QRadioTuner::StereoMode)
-Q_DECLARE_METATYPE(QRadioTuner::SearchMode)
-
-Q_MEDIA_ENUM_DEBUG(QRadioTuner, State)
-Q_MEDIA_ENUM_DEBUG(QRadioTuner, Band)
-Q_MEDIA_ENUM_DEBUG(QRadioTuner, Error)
-Q_MEDIA_ENUM_DEBUG(QRadioTuner, StereoMode)
-Q_MEDIA_ENUM_DEBUG(QRadioTuner, SearchMode)
 
 #endif

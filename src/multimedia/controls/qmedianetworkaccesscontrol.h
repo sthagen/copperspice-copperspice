@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,7 @@ class Q_MULTIMEDIA_EXPORT QMediaNetworkAccessControl : public QMediaControl
  public:
    virtual ~QMediaNetworkAccessControl();
 
-   virtual void setConfigurations(const QList<QNetworkConfiguration> &configuration) = 0;
+   virtual void setConfigurations(const QList<QNetworkConfiguration> &configurations) = 0;
    virtual QNetworkConfiguration currentConfiguration() const = 0;
 
    MULTI_CS_SIGNAL_1(Public, void configurationChanged(const QNetworkConfiguration &configuration))

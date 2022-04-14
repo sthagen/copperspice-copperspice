@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,7 +32,6 @@
 #include <qpropertyanimation.h>
 #include <qmimedata.h>
 #include <qvariant.h>
-
 #include <qwidgetaction.h>
 
 #ifndef QT_NO_ACCESSIBILITY
@@ -52,6 +51,7 @@ QRect QLineEditPrivate::adjustedControlRect(const QRect &rect) const
    QRect widgetRect = !rect.isEmpty() ? rect : q_func()->rect();
    QRect cr = adjustedContentsRect();
    int cix = cr.x() - hscroll + horizontalMargin;
+
    return widgetRect.translated(QPoint(cix, vscroll));
 }
 
@@ -59,6 +59,7 @@ int QLineEditPrivate::xToPos(int x, QTextLine::CursorPosition betweenOrOn) const
 {
    QRect cr = adjustedContentsRect();
    x -= cr.x() - hscroll + horizontalMargin;
+
    return control->xToPos(x, betweenOrOn);
 }
 
@@ -67,6 +68,7 @@ bool QLineEditPrivate::inSelection(int x) const
    x -= adjustedContentsRect().x() - hscroll + horizontalMargin;
    return control->inSelection(x);
 }
+
 QRect QLineEditPrivate::cursorRect() const
 {
    return adjustedControlRect(control->cursorRect());
@@ -115,7 +117,7 @@ void QLineEditPrivate::_q_textEdited(const QString &text)
 
 #ifndef QT_NO_COMPLETER
    if (control->completer()
-      && control->completer()->completionMode() != QCompleter::InlineCompletion) {
+         && control->completer()->completionMode() != QCompleter::InlineCompletion) {
       control->complete(-1);   // update the popup on cut/paste/del
    }
 #endif
@@ -139,12 +141,15 @@ void QLineEditPrivate::_q_editFocusChange(bool e)
 void QLineEditPrivate::_q_selectionChanged()
 {
    Q_Q(QLineEdit);
+
    if (control->preeditAreaText().isEmpty()) {
       QStyleOptionFrame opt;
       q->initStyleOption(&opt);
+
       bool showCursor = control->hasSelectedText() ?
          q->style()->styleHint(QStyle::SH_BlinkCursorWhenTextSelected, &opt, q) :
          q->hasFocus();
+
       setCursorVisible(showCursor);
    }
 
@@ -185,10 +190,9 @@ void QLineEditPrivate::init(const QString &txt)
    QObject::connect(control, &QLineControl::cursorPositionChanged, q, &QLineEdit::updateMicroFocus);
    QObject::connect(control, &QLineControl::textChanged,           q, &QLineEdit::updateMicroFocus);
 
-   QObject::connect(control, &QLineControl::selectionChanged,      q, static_cast<void (QLineEdit::*)()>(&QLineEdit::update));
-
+   QObject::connect(control, &QLineControl::selectionChanged,      q, cs_mp_cast<>(&QLineEdit::update));
    QObject::connect(control, &QLineControl::selectionChanged,      q, &QLineEdit::updateMicroFocus);
-   QObject::connect(control, &QLineControl::displayTextChanged,    q, static_cast<void (QLineEdit::*)()>(&QLineEdit::update));
+   QObject::connect(control, &QLineControl::displayTextChanged,    q, cs_mp_cast<>(&QLineEdit::update));
    QObject::connect(control, &QLineControl::updateNeeded,          q, &QLineEdit::_q_updateNeeded);
 
    QStyleOptionFrame opt;
@@ -312,10 +316,10 @@ void QLineEditPrivate::drag()
    }
 }
 
-#endif // QT_NO_DRAGANDDROP
+#endif
+
 QLineEditIconButton::QLineEditIconButton(QWidget *parent)
-   : QToolButton(parent)
-   , m_opacity(0)
+   : QToolButton(parent), m_opacity(0)
 {
    setFocusPolicy(Qt::NoFocus);
 }
@@ -325,6 +329,7 @@ QLineEditPrivate *QLineEditIconButton::lineEditPrivate() const
    QLineEdit *le = qobject_cast<QLineEdit *>(parentWidget());
    return le ? static_cast<QLineEditPrivate *>(qt_widget_private(le)) : nullptr;
 }
+
 void QLineEditIconButton::paintEvent(QPaintEvent *)
 {
    QPainter painter(this);
@@ -349,6 +354,7 @@ void QLineEditIconButton::paintEvent(QPaintEvent *)
    painter.setOpacity(m_opacity);
    painter.drawPixmap(pixmapRect, iconPixmap);
 }
+
 void QLineEditIconButton::actionEvent(QActionEvent *e)
 {
    switch (e->type()) {
@@ -365,8 +371,10 @@ void QLineEditIconButton::actionEvent(QActionEvent *e)
       default:
          break;
    }
+
    QToolButton::actionEvent(e);
 }
+
 void QLineEditIconButton::setOpacity(qreal value)
 {
    if (!qFuzzyCompare(m_opacity, value)) {
@@ -379,12 +387,13 @@ void QLineEditIconButton::setOpacity(qreal value)
 #ifndef QT_NO_ANIMATION
 void QLineEditIconButton::startOpacityAnimation(qreal endValue)
 {
-   QPropertyAnimation *animation = new QPropertyAnimation(this, QByteArrayLiteral("opacity"));
+   QPropertyAnimation *animation = new QPropertyAnimation(this, "opacity");
    animation->setDuration(160);
    animation->setEndValue(endValue);
    animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 #endif
+
 void QLineEditIconButton::updateCursor()
 {
 #ifndef QT_NO_CURSOR
@@ -396,7 +405,8 @@ void QLineEditPrivate::_q_textChanged(const QString &text)
 {
    if (hasSideWidgets()) {
       const int newTextSize = text.size();
-      if (!newTextSize || !lastTextSize) {
+
+      if (! newTextSize || !lastTextSize) {
          lastTextSize = newTextSize;
 
 #ifndef QT_NO_ANIMATION
@@ -433,6 +443,7 @@ QLineEditPrivate::SideWidgetParameters QLineEditPrivate::sideWidgetParameters() 
    result.margin = result.iconSize / 4;
    result.widgetWidth = result.iconSize + 6;
    result.widgetHeight = result.iconSize + 2;
+
    return result;
 }
 
@@ -442,6 +453,7 @@ QIcon QLineEditPrivate::clearButtonIcon() const
    QStyleOptionFrame styleOption;
    q->initStyleOption(&styleOption);
    return q->style()->standardIcon(QStyle::SP_LineEditClearButton, &styleOption, q);
+
 }
 
 void QLineEditPrivate::setClearButtonEnabled(bool enabled)
@@ -490,6 +502,7 @@ QLineEditPrivate::PositionIndexPair QLineEditPrivate::findSideWidget(const QActi
          return PositionIndexPair(QLineEdit::LeadingPosition, i);
       }
    }
+
    for (int i = 0; i < trailingSideWidgets.size(); ++i) {
       if (a == trailingSideWidgets.at(i).action) {
          return PositionIndexPair(QLineEdit::TrailingPosition, i);
@@ -503,14 +516,16 @@ QWidget *QLineEditPrivate::addAction(QAction *newAction, QAction *before, QLineE
    Q_Q(QLineEdit);
 
    if (! newAction) {
-      return 0;
+      return nullptr;
    }
+
    if (! hasSideWidgets()) {
-      QObject::connect(q, &QLineEdit::textChanged, q, &QLineEdit::textChanged);
+      QObject::connect(q, &QLineEdit::textChanged, q, &QLineEdit::_q_textChanged);
       lastTextSize = q->text().size();
    }
 
-   QWidget *w = 0;
+   QWidget *w = nullptr;
+
    // Store flags about QWidgetAction here since removeAction() may be called from ~QAction,
    // in which a qobject_cast<> no longer works.
 

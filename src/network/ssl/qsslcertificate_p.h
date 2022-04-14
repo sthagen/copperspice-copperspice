@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,7 @@
 #define QSSLCERTIFICATE_P_H
 
 #include <qsslsocket_p.h>
-#include <qsslcertificateextension.h>
+#include <qsslcertificate_extension.h>
 #include <qdatetime.h>
 #include <qmultimap.h>
 
@@ -43,7 +43,8 @@ class QSslCertificatePrivate
 {
  public:
    QSslCertificatePrivate()
-      : null(true), x509(0) {
+      : null(true), x509(nullptr)
+   {
       QSslSocketPrivate::ensureInitialized();
    }
 

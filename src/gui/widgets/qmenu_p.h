@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -44,13 +44,14 @@ class QSetValueOnDestroy
 {
  public:
    QSetValueOnDestroy(T &toSet, T value)
-      : toSet(toSet)
-      , value(value)
-   { }
+      : toSet(toSet), value(value)
+   {
+   }
 
    ~QSetValueOnDestroy() {
       toSet = value;
    }
+
  private:
    T &toSet;
    T value;
@@ -58,23 +59,16 @@ class QSetValueOnDestroy
 
 class QMenuSloppyState
 {
-   Q_DISABLE_COPY(QMenuSloppyState)
-
  public:
    QMenuSloppyState()
-      : m_menu(nullptr)
-      , m_enabled(false)
-      , m_uni_directional(false)
-      , m_select_other_actions(false)
-      , m_first_mouse(true)
-      , m_init_guard(false)
-      , m_uni_dir_discarded_count(0)
-      , m_uni_dir_fail_at_count(0)
-      , m_timeout(0)
-      , m_reset_action(nullptr)
-      , m_origin_action(nullptr)
-      , m_parent(nullptr)
-   { }
+      : m_menu(nullptr), m_enabled(false), m_uni_directional(false), m_select_other_actions(false)
+      , m_first_mouse(true), m_init_guard(false), m_uni_dir_discarded_count(0), m_uni_dir_fail_at_count(0)
+      , m_timeout(0), m_reset_action(nullptr), m_origin_action(nullptr), m_parent(nullptr)
+   {
+   }
+
+   QMenuSloppyState(const QMenuSloppyState &) = delete;
+   QMenuSloppyState &operator=(const QMenuSloppyState &) = delete;
 
    ~QMenuSloppyState() {
       reset();
@@ -82,9 +76,9 @@ class QMenuSloppyState
 
    void initialize(QMenu *menu) {
       m_menu = menu;
-      m_uni_directional = menu->style()->styleHint(QStyle::SH_Menu_SubMenuUniDirection, 0, menu);
-      m_uni_dir_fail_at_count = menu->style()->styleHint(QStyle::SH_Menu_SubMenuUniDirectionFailCount, 0, menu);
-      m_select_other_actions = menu->style()->styleHint(QStyle::SH_Menu_SubMenuSloppySelectOtherActions, 0, menu);
+      m_uni_directional = menu->style()->styleHint(QStyle::SH_Menu_SubMenuUniDirection, nullptr, menu);
+      m_uni_dir_fail_at_count = menu->style()->styleHint(QStyle::SH_Menu_SubMenuUniDirectionFailCount, nullptr, menu);
+      m_select_other_actions = menu->style()->styleHint(QStyle::SH_Menu_SubMenuSloppySelectOtherActions, nullptr, menu);
       m_timeout = menu->style()->styleHint(QStyle::SH_Menu_SubMenuSloppyCloseTimeout);
       m_discard_state_when_entering_parent = menu->style()->styleHint(QStyle::SH_Menu_SubMenuResetWhenReenteringParent);
       m_dont_start_time_on_leave = menu->style()->styleHint(QStyle::SH_Menu_SubMenuDontStartSloppyOnLeave);
@@ -249,23 +243,31 @@ class QMenuPrivate : public QWidgetPrivate
    Q_DECLARE_PUBLIC(QMenu)
 
  public:
-   QMenuPrivate() : itemsDirty(0), maxIconWidth(0), tabWidth(0), ncols(0),
-      collapsibleSeparators(true), toolTipsVisible(false),
-      activationRecursionGuard(false), delayedPopupGuard(false),
-      hasReceievedEnter(false),
-      hasHadMouse(0), aboutToHide(0), motions(0),
-      currentAction(0),
+   enum SelectionReason {
+      SelectedFromKeyboard,
+      SelectedFromElsewhere
+   };
+
+   QMenuPrivate()
+      : itemsDirty(0), maxIconWidth(0), tabWidth(0), ncols(0),
+        collapsibleSeparators(true), toolTipsVisible(false), activationRecursionGuard(false),
+        delayedPopupGuard(false), hasReceievedEnter(false), hasHadMouse(0), aboutToHide(0),
+        motions(0), currentAction(nullptr),
+
 #ifdef QT_KEYPAD_NAVIGATION
-      selectAction(0),
-      cancelAction(0),
+      selectAction(nullptr),
+      cancelAction(nullptr),
 #endif
-      scroll(0), eventLoop(0), tearoff(0), tornoff(0), tearoffHighlighted(0),
-      hasCheckableItems(0), doChildEffects(false), platformMenu(0)
-   {}
+
+      scroll(nullptr), eventLoop(nullptr), tearoff(0), tornoff(0), tearoffHighlighted(0),
+      hasCheckableItems(0), doChildEffects(false), platformMenu(nullptr)
+   {
+   }
 
    ~QMenuPrivate() {
       delete scroll;
-      if (!platformMenu.isNull() && !platformMenu->parent()) {
+
+      if (! platformMenu.isNull() && ! platformMenu->parent()) {
          delete platformMenu.data();
       }
    }
@@ -282,9 +284,10 @@ class QMenuPrivate : public QWidgetPrivate
    static QMenuPrivate *get(QMenu *m) {
       return m->d_func();
    }
+
    int scrollerHeight() const;
 
-   //item calculations
+   // item calculations
    mutable uint itemsDirty : 1;
    mutable uint maxIconWidth, tabWidth;
    QRect actionRect(QAction *) const;
@@ -295,9 +298,11 @@ class QMenuPrivate : public QWidgetPrivate
    void updateActionRects(const QRect &screen) const;
    QRect popupGeometry(const QWidget *widget) const;
    QRect popupGeometry(int screen = -1) const;
-   mutable uint ncols : 4; //4 bits is probably plenty
+
+   mutable uint ncols : 4;             // 4 bits is probably plenty
    uint collapsibleSeparators : 1;
    uint toolTipsVisible : 1;
+
    QSize adjustMenuSizeForScreen(const QRect &screen);
    int getLastVisibleAction() const;
 
@@ -321,9 +326,10 @@ class QMenuPrivate : public QWidgetPrivate
 
    struct DelayState {
       DelayState()
-         : parent(0)
-         , action(0)
-      { }
+         : parent(nullptr), action(nullptr)
+      {
+      }
+
       void initialize(QMenu *parent) {
          this->parent = parent;
       }
@@ -332,23 +338,21 @@ class QMenuPrivate : public QWidgetPrivate
          if (timer.isActive() && toStartAction == action) {
             return;
          }
+
          action = toStartAction;
          timer.start(timeout, parent);
       }
+
       void stop() {
-         action = 0;
+         action = nullptr;
          timer.stop();
       }
 
       QMenu *parent;
       QBasicTimer timer;
       QAction *action;
-   } delayState;
 
-   enum SelectionReason {
-      SelectedFromKeyboard,
-      SelectedFromElsewhere
-   };
+   } delayState;
 
    QWidget *topCausedWidget() const;
    QAction *actionAt(QPoint p) const;
@@ -360,10 +364,11 @@ class QMenuPrivate : public QWidgetPrivate
    void popupAction(QAction *, int, bool);
    void setSyncAction();
 
-   //scrolling support
+   // scrolling support
    struct QMenuScroller {
-      enum ScrollLocation { ScrollStay, ScrollBottom, ScrollTop, ScrollCenter };
+      enum ScrollLocation {  ScrollStay, ScrollBottom, ScrollTop, ScrollCenter };
       enum ScrollDirection { ScrollNone = 0, ScrollUp = 0x01, ScrollDown = 0x02 };
+
       uint scrollFlags : 2, scrollDirection : 2;
       int scrollOffset;
       QBasicTimer scrollTimer;
@@ -376,19 +381,19 @@ class QMenuPrivate : public QWidgetPrivate
    void scrollMenu(QMenuScroller::ScrollDirection direction, bool page = false, bool active = false);
    void scrollMenu(QAction *action, QMenuScroller::ScrollLocation location, bool active = false);
 
-   //synchronous operation (ie exec())
+   // synchronous operation (ie exec())
    QEventLoop *eventLoop;
    QPointer<QAction> syncAction;
 
-   //search buffer
+   // search buffer
    QString searchBuffer;
    QBasicTimer searchBufferTimer;
 
-   //passing of mouse events up the parent hierarchy
+   // passing of mouse events up the parent hierarchy
    QPointer<QMenu> activeMenu;
    bool mouseEventTaken(QMouseEvent *);
 
-   //used to walk up the popup list
+   // used to walk up the popup list
    struct QMenuCaused {
       QPointer<QWidget> widget;
       QPointer<QAction> action;
@@ -399,7 +404,7 @@ class QMenuPrivate : public QWidgetPrivate
    void hideUpToMenuBar();
    void hideMenu(QMenu *menu);
 
-   //index mappings
+   // index mappings
    QAction *actionAt(int i) const {
       return q_func()->actions().at(i);
    }
@@ -408,16 +413,15 @@ class QMenuPrivate : public QWidgetPrivate
       return q_func()->actions().indexOf(act);
    }
 
-   //tear off support
+   // tear off support
    uint tearoff : 1, tornoff : 1, tearoffHighlighted : 1;
    QPointer<QTornOffMenu> tornPopup;
 
    mutable bool hasCheckableItems;
 
-
    QMenuSloppyState sloppyState;
 
-   //default action
+   // default action
    QPointer<QAction> defaultAction;
 
    QAction *menuAction;
@@ -438,17 +442,14 @@ class QMenuPrivate : public QWidgetPrivate
 
    void updateLayoutDirection();
 
-   //menu fading/scrolling effects
+   // menu fading/scrolling effects
    bool doChildEffects;
 
    QPointer<QPlatformMenu> platformMenu;
-
    QPointer<QAction> actionAboutToTrigger;
-
    QPointer<QWidget> noReplayFor;
 };
 
 #endif // QT_NO_MENU
 
-
-#endif // QMENU_P_H
+#endif

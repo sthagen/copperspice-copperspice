@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,11 +36,11 @@
 #include "qcocoainputcontext.h"
 #include "qcocoamimetypes.h"
 #include "qcocoaaccessibility.h"
+#include <qcoreapplication.h>
+#include <qplatform_accessibility.h>
 
 #include <qplatform_inputcontextfactory_p.h>
-#include <qplatform_accessibility.h>
 #include <qplatform_inputcontextfactory_p.h>
-#include <qcoreapplication.h>
 
 #include <IOKit/graphics/IOGraphicsLib.h>
 
@@ -161,7 +161,7 @@ QWindow *QCocoaScreen::topLevelWindowAt(const QPoint &point) const
 
       // Continue the search if the window does not belong to this process.
       NSWindow *nsWindow = [NSApp windowWithWindowNumber: topWindowNumber];
-      if (nsWindow == 0) {
+      if (nsWindow == nullptr) {
          continue;
       }
 
@@ -275,29 +275,27 @@ static QCocoaIntegration::Options parseOptions(const QStringList &paramList)
    return options;
 }
 
-QCocoaIntegration *QCocoaIntegration::mInstance = 0;
+QCocoaIntegration *QCocoaIntegration::mInstance = nullptr;
 
 QCocoaIntegration::QCocoaIntegration(const QStringList &paramList)
-   : mOptions(parseOptions(paramList))
-   , mFontDb(new QCoreTextFontDatabase(mOptions.testFlag(UseFreeTypeFontEngine)))
+   : mOptions(parseOptions(paramList)), mFontDb(new QCoreTextFontDatabase(mOptions.testFlag(UseFreeTypeFontEngine))),
 #ifndef QT_NO_ACCESSIBILITY
-   , mAccessibility(new QCocoaAccessibility)
+     mAccessibility(new QCocoaAccessibility),
 #endif
-   , mCocoaClipboard(new QCocoaClipboard)
-   , mCocoaDrag(new QCocoaDrag)
-   , mNativeInterface(new QCocoaNativeInterface)
-   , mServices(new QCocoaServices)
-   , mKeyboardMapper(new QCocoaKeyMapper)
+     mCocoaClipboard(new QCocoaClipboard), mCocoaDrag(new QCocoaDrag),
+     mNativeInterface(new QCocoaNativeInterface), mServices(new QCocoaServices),
+     mKeyboardMapper(new QCocoaKeyMapper)
 {
-   if (mInstance != 0) {
+   if (mInstance != nullptr) {
       qWarning("Creating multiple Cocoa platform integrations is not supported");
    }
 
    mInstance = this;
 
    QString icStr = QPlatformInputContextFactory::requested();
+
    icStr.isEmpty() ? mInputContext.reset(new QCocoaInputContext)
-   : mInputContext.reset(QPlatformInputContextFactory::create(icStr));
+      : mInputContext.reset(QPlatformInputContextFactory::create(icStr));
 
    initResources();
    QMacAutoReleasePool pool;
@@ -327,10 +325,7 @@ QCocoaIntegration::QCocoaIntegration(const QStringList &paramList)
       }
    }
 
-   // ### For AA_MacPluginApplication we do not want to load the menu nib.
-   // prior versions did not set the application delegate so that behavior is matched here.
-
-   if (!QCoreApplication::testAttribute(Qt::AA_MacPluginApplication)) {
+   if (! QCoreApplication::testAttribute(Qt::AA_MacPluginApplication)) {
 
       // Set app delegate, link to the current delegate (if any)
       QCocoaApplicationDelegate *newDelegate = [QCocoaApplicationDelegate sharedDelegate];
@@ -339,7 +334,6 @@ QCocoaIntegration::QCocoaIntegration(const QStringList &paramList)
 
       // Load the application menu. This menu contains Preferences, Hide, Quit.
       QCocoaMenuLoader *qtMenuLoader = [[QCocoaMenuLoader alloc] init];
-      qt_mac_loadMenuNib(qtMenuLoader);
       [cocoaApplication setMenu: [qtMenuLoader menu]];
       [newDelegate setMenuLoader: qtMenuLoader];
    }
@@ -361,7 +355,7 @@ QCocoaIntegration::QCocoaIntegration(const QStringList &paramList)
 
 QCocoaIntegration::~QCocoaIntegration()
 {
-   mInstance = 0;
+   mInstance = nullptr;
 
    qt_resetNSApplicationSendEvent();
 
@@ -371,7 +365,7 @@ QCocoaIntegration::~QCocoaIntegration()
       QCocoaApplicationDelegate *delegate = [QCocoaApplicationDelegate sharedDelegate];
       [delegate removeAppleEventHandlers];
       // reset the application delegate
-      [[NSApplication sharedApplication] setDelegate: 0];
+      [[NSApplication sharedApplication] setDelegate: nullptr];
    }
 
    // Delete the clipboard integration and destroy mime type converters.
@@ -398,20 +392,20 @@ QCocoaIntegration::Options QCocoaIntegration::options() const
    return mOptions;
 }
 
-/*!
-    \brief Synchronizes the screen list, adds new screens, removes deleted ones
-*/
 void QCocoaIntegration::updateScreens()
 {
    NSArray *scrs = [NSScreen screens];
    NSMutableArray *screens = [NSMutableArray arrayWithArray: scrs];
+
    if ([screens count] == 0)
       if ([NSScreen mainScreen]) {
          [screens addObject: [NSScreen mainScreen]];
       }
+
    if ([screens count] == 0) {
       return;
    }
+
    QSet<QCocoaScreen *> remainingScreens = QSet<QCocoaScreen *>::fromList(mScreens);
    QList<QPlatformScreen *> siblings;
    uint screenCount = [screens count];
@@ -432,7 +426,8 @@ void QCocoaIntegration::updateScreens()
          }
       }
 
-      QCocoaScreen *screen = NULL;
+      QCocoaScreen *screen = nullptr;
+
       for (QCocoaScreen *existingScr : mScreens)
          // NSScreen documentation says do not cache the array returned from [NSScreen screens].
          // However in practice, we can identify a screen by its pointer: if resolution changes,
@@ -475,8 +470,9 @@ QCocoaScreen *QCocoaIntegration::screenAtIndex(int index)
    // It is possible that the screen got removed while updateScreens was called
    // so we do a sanity check to be certain
    if (index >= mScreens.count()) {
-      return 0;
+      return nullptr;
    }
+
    return mScreens.at(index);
 }
 
@@ -496,6 +492,7 @@ bool QCocoaIntegration::hasCapability(QPlatformIntegration::Capability cap) cons
       case ApplicationState:
       case ApplicationIcon:
          return true;
+
       default:
          return QPlatformIntegration::hasCapability(cap);
    }
@@ -510,9 +507,10 @@ QPlatformWindow *QCocoaIntegration::createPlatformWindow(QWindow *window) const
 QPlatformOpenGLContext *QCocoaIntegration::createPlatformOpenGLContext(QOpenGLContext *context) const
 {
    QCocoaGLContext *glContext = new QCocoaGLContext(context->format(),
-      context->shareHandle(),
-      context->nativeHandle());
+      context->shareHandle(), context->nativeHandle());
+
    context->setNativeHandle(glContext->nativeHandle());
+
    return glContext;
 }
 #endif
@@ -619,6 +617,7 @@ void QCocoaIntegration::clearToolbars()
       [it.value() release];
       ++it;
    }
+
    mToolbars.clear();
 }
 
@@ -630,15 +629,16 @@ void QCocoaIntegration::pushPopupWindow(QCocoaWindow *window)
 QCocoaWindow *QCocoaIntegration::popPopupWindow()
 {
    if (m_popupWindowStack.isEmpty()) {
-      return 0;
+      return nullptr;
    }
+
    return m_popupWindowStack.takeLast();
 }
 
 QCocoaWindow *QCocoaIntegration::activePopupWindow() const
 {
    if (m_popupWindowStack.isEmpty()) {
-      return 0;
+      return nullptr;
    }
    return m_popupWindowStack.front();
 }

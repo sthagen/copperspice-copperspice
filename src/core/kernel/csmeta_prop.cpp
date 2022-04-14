@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,7 +26,8 @@
 #include <qmetaobject.h>
 
 QMetaProperty::QMetaProperty(const QString &name, QMetaObject *obj)
-   :  m_metaObject(obj), m_name(name)
+   :  m_metaObject(obj), m_name(name),
+      m_returnTypeId(typeid(void)), m_returnTypeFuncPtr(nullptr)
 {
    m_typeName     = QString();
 
@@ -43,19 +44,14 @@ QMetaProperty::QMetaProperty(const QString &name, QMetaObject *obj)
    m_scriptJar    = nullptr;
    m_storedJar    = nullptr;
    m_userJar      = nullptr;
+
+   // register enums
+   Qt::staticMetaObject();
 }
 
 QMetaEnum QMetaProperty::enumerator() const
 {
-   QMetaEnum enumObj;
-
-   int index = m_metaObject->indexOfEnumerator(m_typeName);
-
-   if (index > 0) {
-      enumObj = m_metaObject->enumerator(index);
-   }
-
-   return enumObj;
+   return QMetaObject::findEnum(m_returnTypeId);
 }
 
 bool QMetaProperty::hasNotifySignal() const
@@ -65,7 +61,7 @@ bool QMetaProperty::hasNotifySignal() const
 
 bool QMetaProperty::hasStdCppSet() const
 {
-   //  internal & undocumented, used to bypass issues in Qt
+   // internal & undocumented, used to bypass issues
    return false;
 }
 
@@ -78,11 +74,21 @@ bool QMetaProperty::isDesignable(const QObject *object) const
 {
    bool retval;
 
-   if (! m_designJar) {
-      return false;
-   }
+   if (m_designJar == nullptr) {
+      retval = true;
 
-   retval = m_designJar->run<bool>(object);
+   } else if (object == nullptr) {
+
+      if (m_designJar->isStatic()) {
+         retval = m_designJar->run<bool>(object);
+      } else {
+         // might be designable so default to yes
+         retval = true;
+      }
+
+   } else {
+      retval = m_designJar->run<bool>(object);
+   }
 
    return retval;
 }
@@ -130,11 +136,21 @@ bool QMetaProperty::isScriptable(const QObject *object) const
 {
    bool retval = m_scriptJar;
 
-   if (! m_scriptJar) {
-      return false;
-   }
+   if (m_scriptJar == nullptr) {
+retval = true;
 
-   retval = m_scriptJar->run<bool>(object);
+   } else if (object == nullptr) {
+
+      if (m_scriptJar->isStatic()) {
+         retval = m_scriptJar->run<bool>(object);
+      } else {
+         // might be scriptable so default to yes
+         retval = true;
+      }
+
+   } else {
+      retval = m_scriptJar->run<bool>(object);
+   }
 
    return retval;
 }
@@ -143,11 +159,21 @@ bool QMetaProperty::isStored(const QObject *object) const
 {
    bool retval = m_storedJar;
 
-   if (! m_storedJar) {
-      return false;
-   }
+   if (m_storedJar == nullptr) {
+     retval = true;
 
-   retval = m_storedJar->run<bool>(object);
+   } else if (object == nullptr) {
+
+      if (m_storedJar->isStatic()) {
+         retval = m_storedJar->run<bool>(object);
+      } else {
+         // might be storable so default to yes
+         retval = true;
+      }
+
+   } else{
+      retval = m_storedJar->run<bool>(object);
+   }
 
    return retval;
 }
@@ -156,11 +182,21 @@ bool QMetaProperty::isUser(const QObject *object) const
 {
    bool retval = false;
 
-   if (! m_userJar) {
-      return false;
-   }
+   if (m_userJar == nullptr) {
+      retval = false;
 
-   retval = m_userJar->run<bool>(object);
+   } else if (object == nullptr) {
+
+      if (m_userJar->isStatic()) {
+         retval = m_userJar->run<bool>(object);
+      } else {
+         // default value
+         retval = false;
+      }
+
+   } else {
+      retval = m_userJar->run<bool>(object);
+   }
 
    return retval;
 }
@@ -180,6 +216,17 @@ const QString &QMetaProperty::name() const
    return m_name;
 }
 
+void QMetaProperty::loadTypeName() const
+{
+   if (m_typeName.isEmpty()) {
+      // populate m_typeName with a String denoting the return type of the property
+
+      if (m_returnTypeFuncPtr != nullptr) {
+         const_cast<QMetaProperty *>(this)->m_typeName = m_returnTypeFuncPtr();
+      }
+   }
+}
+
 QMetaMethod QMetaProperty::notifySignal() const
 {
    static const QString str;
@@ -187,7 +234,8 @@ QMetaMethod QMetaProperty::notifySignal() const
    int id = notifySignalIndex();
 
    if (id == -1) {
-      return QMetaMethod(str, str, std::vector<QString>(), QMetaMethod::Private, QMetaMethod::Slot, QMetaMethod::Attributes(), m_metaObject);
+      return QMetaMethod(str, str, std::vector<QString>(), QMetaMethod::Private, QMetaMethod::Slot,
+                  QMetaMethod::Attributes(), m_metaObject);
 
    } else  {
       return m_metaObject->method(id);
@@ -220,7 +268,7 @@ int QMetaProperty::notifySignalIndex() const
 
 int QMetaProperty::propertyIndex() const
 {
-   if (! m_metaObject) {
+   if (m_metaObject == nullptr) {
       return -1;
    }
 
@@ -281,22 +329,26 @@ void QMetaProperty::setTypeName(const QString &typeName)
 
 QVariant::Type QMetaProperty::type() const
 {
-   QVariant::Type retval = QVariant::UserType;
-   QMetaEnum enumObj = this->enumerator();
+   QVariant::Type retval = QVariant::Invalid;
+   QMetaEnum enumObj     = this->enumerator();
+
+   loadTypeName();
 
    if (enumObj.isValid()) {
       // process enum
-      QString enumName = enumObj.scope() + "::" + enumObj.name();
+      QString enumName    = enumObj.scope() + "::" + enumObj.name();
+      uint enumMetaTypeId = QVariant::nameToType(enumName);
 
-      int enumMetaTypeId = QMetaType::type(enumName);
-
-      if (enumMetaTypeId == 0) {
+      if (enumMetaTypeId == QVariant::Invalid) {
          retval = QVariant::Int;
       }
 
    } else if (! m_typeName.isEmpty()) {
-      retval = QVariant::nameToType(m_typeName);
+      uint enumMetaTypeId = QVariant::nameToType(m_typeName);
 
+      if (enumMetaTypeId < QVariant::UserType) {
+         retval = static_cast<QVariant::Type>(enumMetaTypeId);
+      }
    }
 
    return retval;
@@ -304,25 +356,25 @@ QVariant::Type QMetaProperty::type() const
 
 const QString &QMetaProperty::typeName() const
 {
+   loadTypeName();
+
    return m_typeName;
 }
 
-int QMetaProperty::userType() const
+uint QMetaProperty::userType() const
 {
-   int retval = QVariant::UserType;
+   uint retval = QVariant::Invalid;
    QMetaEnum enumObj = this->enumerator();
+
+   loadTypeName();
 
    if (enumObj.isValid()) {
       // process enum
       QString enumName = enumObj.scope() + "::" + enumObj.name();
-      retval = QMetaType::type(enumName);
+      retval = QVariant::nameToType(enumName);
 
    } else if (! m_typeName.isEmpty()) {
       retval = QVariant::nameToType(m_typeName);
-
-      if (retval == QVariant::UserType) {
-         retval = QMetaType::type(m_typeName);
-      }
    }
 
    return retval;
@@ -338,16 +390,17 @@ bool QMetaProperty::write(QObject *object, const QVariant &value) const
 }
 
 // ** internal
-void QMetaProperty::setReadMethod(const QString &typeName, JarReadAbstract *jarRead)
+void QMetaProperty::setReadMethod(std::type_index returnTypeId,
+         QString (*returnTypeFuncPtr)(), JarReadAbstract *jarRead)
 {
    if (! jarRead) {
       return;
    }
 
-   // typeName is the return type
-   this->setTypeName(typeName);
+   m_returnTypeId      = returnTypeId;
+   m_returnTypeFuncPtr = returnTypeFuncPtr;
 
-   // method is a ptr to the property READ method,store in a SpiceJarRead
+   // method is a ptr to the property READ method, store in a SpiceJarRead
    m_readJar    = jarRead;
    m_read_able  = true;
 }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,7 +33,6 @@ struct sockaddr;
 
 class QHostAddressPrivate;
 class QHostAddress;
-
 
 Q_NETWORK_EXPORT uint qHash(const QHostAddress &key, uint seed = 0);
 
@@ -75,14 +74,16 @@ class Q_NETWORK_EXPORT QHostAddress
    explicit QHostAddress(const sockaddr *address);
    explicit QHostAddress(const QString &address);
 
-   QHostAddress(const QHostAddress &other);
    QHostAddress(SpecialAddress address);
+
+   QHostAddress(const QHostAddress &other);
+
    ~QHostAddress();
 
    void setAddress(quint32 ip4Addr);
    void setAddress(const quint8 *ip6Addr);
    void setAddress(const Q_IPV6ADDR &ip6Addr);
-   void setAddress(const sockaddr *address);
+   void setAddress(const sockaddr *sockAddr);
    bool setAddress(const QString &address);
 
    QAbstractSocket::NetworkLayerProtocol protocol() const;
@@ -95,18 +96,21 @@ class Q_NETWORK_EXPORT QHostAddress
    void setScopeId(const QString &id);
 
    QHostAddress &operator=(const QHostAddress &other);
-   QHostAddress &operator=(const QString &address);
 
    QHostAddress &operator=(QHostAddress &&other) {
       swap(other);
       return *this;
    }
 
-   bool operator ==(const QHostAddress &address) const;
-   bool operator ==(SpecialAddress address) const;
-   inline bool operator !=(const QHostAddress &address) const {
-      return !operator==(address);
+   QHostAddress &operator=(const QString &address);
+
+   bool operator ==(const QHostAddress &other) const;
+
+   inline bool operator !=(const QHostAddress &other) const {
+      return !operator==(other);
    }
+
+   bool operator ==(SpecialAddress address) const;
 
    inline bool operator !=(SpecialAddress address) const {
       return !operator==(address);
@@ -142,5 +146,7 @@ Q_NETWORK_EXPORT QDebug operator<<(QDebug, const QHostAddress &);
 
 Q_NETWORK_EXPORT QDataStream &operator<<(QDataStream &, const QHostAddress &);
 Q_NETWORK_EXPORT QDataStream &operator>>(QDataStream &, QHostAddress &);
+
+CS_DECLARE_METATYPE(QHostAddress)
 
 #endif

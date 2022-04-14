@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -67,7 +67,8 @@ QSizePolicy::operator QVariant() const
 
 QDataStream &operator<<(QDataStream &stream, const QSizePolicy &policy)
 {
-    // The order here is for historical reasons. (compatibility with Qt4)
+    // order here is for historical reasons
+
     quint32 data = (policy.bits.horPolicy |         // [0, 3]
                     policy.bits.verPolicy << 4 |    // [4, 7]
                     policy.bits.hfw << 8 |          // [8]

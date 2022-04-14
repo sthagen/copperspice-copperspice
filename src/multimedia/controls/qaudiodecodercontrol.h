@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -59,8 +59,8 @@ class Q_MULTIMEDIA_EXPORT QAudioDecoderControl : public QMediaControl
    virtual qint64 duration() const = 0;
 
  public:
-   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudioDecoder::State newState))
-   MULTI_CS_SIGNAL_2(stateChanged, newState)
+   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudioDecoder::State state))
+   MULTI_CS_SIGNAL_2(stateChanged, state)
 
    MULTI_CS_SIGNAL_1(Public, void formatChanged(const QAudioFormat &format))
    MULTI_CS_SIGNAL_2(formatChanged, format)

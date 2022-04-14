@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -80,17 +80,21 @@ QPlatformDialogHelper *QDialogPrivate::platformHelper() const
 {
    // Delayed creation of the platform, ensuring that
    // that qobject_cast<> on the dialog works in the plugin.
-   if (!m_platformHelperCreated) {
+
+   if (! m_platformHelperCreated) {
       m_platformHelperCreated = true;
       QDialogPrivate *ncThis = const_cast<QDialogPrivate *>(this);
       QDialog *dialog = ncThis->q_func();
       const int type = themeDialogType(dialog);
+
       if (type >= 0) {
          m_platformHelper = QGuiApplicationPrivate::platformTheme()
             ->createPlatformDialogHelper(static_cast<QPlatformTheme::DialogType>(type));
+
          if (m_platformHelper) {
-            QObject::connect(m_platformHelper, SIGNAL(accept()), dialog, SLOT(accept()));
-            QObject::connect(m_platformHelper, SIGNAL(reject()), dialog, SLOT(reject()));
+            QObject::connect(m_platformHelper, &QPlatformDialogHelper::accept, dialog, &QDialog::accept);
+            QObject::connect(m_platformHelper, &QPlatformDialogHelper::reject, dialog, &QDialog::reject);
+
             ncThis->initHelper(m_platformHelper);
          }
       }
@@ -103,9 +107,11 @@ bool QDialogPrivate::canBeNativeDialog() const
    QDialogPrivate *ncThis = const_cast<QDialogPrivate *>(this);
    QDialog *dialog = ncThis->q_func();
    const int type = themeDialogType(dialog);
-   if (type >= 0)
-      return QGuiApplicationPrivate::platformTheme()
-         ->usePlatformNativeDialog(static_cast<QPlatformTheme::DialogType>(type));
+
+   if (type >= 0) {
+      return QGuiApplicationPrivate::platformTheme()->usePlatformNativeDialog(static_cast<QPlatformTheme::DialogType>(type));
+   }
+
    return false;
 }
 
@@ -114,7 +120,7 @@ QWindow *QDialogPrivate::parentWindow() const
    if (const QWidget *parent = q_func()->nativeParentWidget()) {
       return parent->windowHandle();
    }
-   return 0;
+   return nullptr;
 }
 
 bool QDialogPrivate::setNativeDialogVisible(bool visible)
@@ -142,32 +148,30 @@ QVariant QDialogPrivate::styleHint(QPlatformDialogHelper::StyleHint hint) const
 void QDialogPrivate::deletePlatformHelper()
 {
    delete m_platformHelper;
-   m_platformHelper = 0;
+   m_platformHelper = nullptr;
    m_platformHelperCreated = false;
    nativeDialogInUse = false;
 }
-QDialog::QDialog(QWidget *parent, Qt::WindowFlags f)
-   : QWidget(*new QDialogPrivate, parent, f | ((f & Qt::WindowType_Mask) == 0 ? Qt::Dialog : Qt::WindowType(0)))
+
+QDialog::QDialog(QWidget *parent, Qt::WindowFlags flags)
+   : QWidget(*new QDialogPrivate, parent, flags | ((flags & Qt::WindowType_Mask) == 0 ? Qt::Dialog : Qt::WindowType(0)))
 {
 }
 
-
-/*!
-  \overload
-  \internal
-*/
-QDialog::QDialog(QDialogPrivate &dd, QWidget *parent, Qt::WindowFlags f)
-   : QWidget(dd, parent, f | ((f & Qt::WindowType_Mask) == 0 ? Qt::Dialog : Qt::WindowType(0)))
+// internal
+QDialog::QDialog(QDialogPrivate &dd, QWidget *parent, Qt::WindowFlags flags)
+   : QWidget(dd, parent, flags | ((flags & Qt::WindowType_Mask) == 0 ? Qt::Dialog : Qt::WindowType(0)))
 {
 }
+
 QDialog::~QDialog()
 {
-   QT_TRY {
-      // Need to hide() here, as our (to-be) overridden hide()
-      // will not be called in ~QWidget.
+   try {
+      // must call hide() as the overridden hide() will not be called in ~QWidget
       hide();
-   } QT_CATCH(...) {
-      // we're in the destructor - just swallow the exception
+
+   } catch (...) {
+      // do nothing
    }
 }
 
@@ -181,10 +185,13 @@ QDialog::~QDialog()
 void QDialogPrivate::setDefault(QPushButton *pushButton)
 {
    Q_Q(QDialog);
+
    bool hasMain = false;
    QList<QPushButton *> list = q->findChildren<QPushButton *>();
+
    for (int i = 0; i < list.size(); ++i) {
       QPushButton *pb = list.at(i);
+
       if (pb->window() == q) {
          if (pb == mainDef) {
             hasMain = true;
@@ -209,7 +216,7 @@ void QDialogPrivate::setDefault(QPushButton *pushButton)
 */
 void QDialogPrivate::setMainDefault(QPushButton *pushButton)
 {
-   mainDef = 0;
+   mainDef = nullptr;
    setDefault(pushButton);
 }
 
@@ -311,7 +318,7 @@ int QDialog::exec()
    if (guard.isNull()) {
       return QDialog::Rejected;
    }
-   d->eventLoop = 0;
+   d->eventLoop = nullptr;
 
    setAttribute(Qt::WA_ShowModal, wasShowModal);
 
@@ -370,17 +377,18 @@ bool QDialog::eventFilter(QObject *o, QEvent *e)
 void QDialog::contextMenuEvent(QContextMenuEvent *e)
 {
 #if defined(QT_NO_WHATSTHIS) || defined(QT_NO_MENU)
-   Q_UNUSED(e);
+   (void) e;
+
 #else
    QWidget *w = childAt(e->pos());
    if (!w) {
-      w = rect().contains(e->pos()) ? this : 0;
+      w = rect().contains(e->pos()) ? this : nullptr;
       if (!w) {
          return;
       }
    }
    while (w && w->whatsThis().size() == 0 && !w->testAttribute(Qt::WA_CustomWhatsThis)) {
-      w = w->isWindow() ? 0 : w->parentWidget();
+      w = w->isWindow() ? nullptr : w->parentWidget();
    }
 
    if (w) {
@@ -456,27 +464,22 @@ void QDialog::closeEvent(QCloseEvent *e)
    }
 }
 
-/*****************************************************************************
-  Geometry management.
- *****************************************************************************/
-
-/*! \reimp
-*/
-
 void QDialog::setVisible(bool visible)
 {
    Q_D(QDialog);
-   if (!testAttribute(Qt::WA_DontShowOnScreen) && d->canBeNativeDialog() && d->setNativeDialogVisible(visible)) {
+
+   if (! testAttribute(Qt::WA_DontShowOnScreen) && d->canBeNativeDialog() && d->setNativeDialogVisible(visible)) {
       return;
    }
+
    if (visible) {
-      if (testAttribute(Qt::WA_WState_ExplicitShowHide) && !testAttribute(Qt::WA_WState_Hidden)) {
+      if (testAttribute(Qt::WA_WState_ExplicitShowHide) && ! testAttribute(Qt::WA_WState_Hidden)) {
          return;
       }
 
-
       QWidget::setVisible(visible);
       showExtension(d->doShowExtension);
+
       QWidget *fw = window()->focusWidget();
       if (!fw) {
          fw = this;
@@ -827,7 +830,7 @@ void QDialog::setSizeGripEnabled(bool enabled)
          d->resizer->show();
       } else {
          delete d->resizer;
-         d->resizer = 0;
+         d->resizer = nullptr;
       }
    }
 

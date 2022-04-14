@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2016-2022 Barbara Geller
+* Copyright (c) 2016-2022 Ansel Sermersheim
 *
 * This file is part of CsSignal.
 *
@@ -31,8 +31,8 @@
 #include "cs_internal.h"
 #include "cs_macro.h"
 #include "cs_slot.h"
-#include "rcu_guarded.hpp"
-#include "rcu_list.hpp"
+#include "cs_rcu_guarded.h"
+#include "cs_rcu_list.h"
 
 namespace CsSignal {
 
@@ -109,11 +109,11 @@ class LIB_SIG_EXPORT SignalBase
       };
 
       // list of connections from my Signal to some Receiver
-      mutable LibG::SharedList<ConnectStruct> m_connectList;
+      mutable libguarded::SharedList<ConnectStruct> m_connectList;
 
       void addConnection(std::unique_ptr<const Internal::BentoAbstract> signalMethod, const SlotBase *,
                   std::unique_ptr<const Internal::BentoAbstract> slotMethod, ConnectionKind type,
-                  LibG::SharedList<ConnectStruct>::write_handle senderListHandle) const;
+                  libguarded::SharedList<ConnectStruct>::write_handle senderListHandle) const;
 
       virtual void handleException(std::exception_ptr data);
 
@@ -152,7 +152,7 @@ void activate(Sender &sender, void (SignalClass::*signal)(SignalArgTypes...), Ts
 
    Internal::Bento<void (SignalClass::*)(SignalArgTypes...)> signal_Bento(signal);
 
-   // save the addresss of sender
+   // save the address of sender
    const SignalBase *senderPtr = &sender;
 
    // store the signal data, false indicates the data will not be copied
@@ -287,7 +287,7 @@ bool connect(const Sender &sender, void (SignalClass::*signalMethod)(SignalArgs.
    static_assert( std::is_base_of<SlotClass, Receiver>::value,
                   "connect():  Slot was not a child class of Receiver");
 
-   // compare signal and slot paramerter list
+   // compare signal and slot parameter list
    static_assert( Internal::cs_check_connect_args<void (*)(SignalArgs...), void (*)(SlotArgs...) >::value,
                   "connect():  Incompatible signal/slot arguments");
 
@@ -342,7 +342,7 @@ bool connect(const Sender &sender, void (SignalClass::*signalMethod)(SignalArgs.
    // Sender must be the same class as SignalClass and Sender is a child of SignalClass
    Internal::cs_testConnect_SenderSignal<Sender, SignalClass>();
 
-   // compare signal and slot paramerter list
+   // compare signal and slot parameter list
    Internal::cs_testConnect_SignalSlotArgs_1<T, SignalArgs...>();
 
    if (signalMethod == nullptr) {
@@ -505,7 +505,7 @@ bool internal_disconnect(const Sender &sender, const Internal::BentoAbstract *si
          auto receiverListHandle = temp.receiver->m_possibleSenders.lock_write();
          receiverListHandle->erase(find(receiverListHandle->begin(), receiverListHandle->end(), &sender));
 
-         // delete conneciton in sender
+         // delete connection in sender
          senderListHandle->erase(iter);
       }
    }
@@ -513,8 +513,37 @@ bool internal_disconnect(const Sender &sender, const Internal::BentoAbstract *si
    return retval;
 }
 
+}  // namespace
 
-}
+// method pointer cast used to resolve ambiguous method overloading for signals and slots
+
+// 1
+template<class... Args>
+class cs_mp_cast_internal
+{
+ public:
+   template<class className>
+   constexpr auto operator()(void (className::*methodPtr)(Args ...)) const {
+      return methodPtr;
+   }
+};
+
+template<class... Args>
+constexpr cs_mp_cast_internal<Args...> cs_mp_cast;
+
+
+// 2
+template<class... Args>
+class cs_cmp_cast_internal
+{
+ public:
+   template<class className>
+   constexpr auto operator()(void (className::*methodPtr)(Args ...) const) const {
+      return methodPtr;
+   }
+};
+
+template<class... Args>
+constexpr cs_cmp_cast_internal<Args...> cs_cmp_cast;
 
 #endif
-

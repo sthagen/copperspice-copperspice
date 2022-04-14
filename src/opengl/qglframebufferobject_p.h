@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,18 +28,15 @@
 
 #include <qglpaintdevice_p.h>
 #include <qgl_p.h>
-#include <qopenglextensions_p.h>
-
+#include <qopengl_extensions_p.h>
 
 class QGLFramebufferObjectFormatPrivate
 {
  public:
    QGLFramebufferObjectFormatPrivate()
-      : ref(1),
-        samples(0),
-        attachment(QGLFramebufferObject::NoAttachment),
-        target(GL_TEXTURE_2D),
-        mipmap(false) {
+      : ref(1), samples(0), attachment(QGLFramebufferObject::NoAttachment),
+        target(GL_TEXTURE_2D), mipmap(false) {
+
 #ifndef QT_OPENGL_ES_2
       QOpenGLContext *ctx = QOpenGLContext::currentContext();
       const bool isES = ctx ? ctx->isOpenGLES() : QOpenGLContext::openGLModuleType() != QOpenGLContext::LibGL;
@@ -49,15 +46,11 @@ class QGLFramebufferObjectFormatPrivate
 #endif
    }
 
-   QGLFramebufferObjectFormatPrivate
-   (const QGLFramebufferObjectFormatPrivate *other)
-      : ref(1),
-        samples(other->samples),
-        attachment(other->attachment),
-        target(other->target),
-        internal_format(other->internal_format),
-        mipmap(other->mipmap) {
+   QGLFramebufferObjectFormatPrivate(const QGLFramebufferObjectFormatPrivate *other)
+      : ref(1), samples(other->samples), attachment(other->attachment), target(other->target),
+        internal_format(other->internal_format), mipmap(other->mipmap) {
    }
+
    bool equals(const QGLFramebufferObjectFormatPrivate *other) {
       return samples == other->samples &&
          attachment == other->attachment &&
@@ -107,11 +100,13 @@ class QGLFBOGLPaintDevice : public QGLPaintDevice
 class QGLFramebufferObjectPrivate
 {
  public:
-   QGLFramebufferObjectPrivate() : fbo_guard(0), texture_guard(0), depth_buffer_guard(0)
-              , stencil_buffer_guard(0), color_buffer_guard(0), valid(false), engine(0)
-   {}
+   QGLFramebufferObjectPrivate()
+      : fbo_guard(nullptr), texture_guard(nullptr), depth_buffer_guard(nullptr),
+        stencil_buffer_guard(nullptr), color_buffer_guard(nullptr), valid(false), engine(nullptr)
+   {
+   }
 
-   ~QGLFramebufferObjectPrivate() {}
+   ~QGLFramebufferObjectPrivate() { }
 
    void init(QGLFramebufferObject *q, const QSize &sz,
       QGLFramebufferObject::Attachment attachment,

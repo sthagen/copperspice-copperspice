@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -234,9 +234,6 @@ void QPollingFileSystemWatcherEngine::timeout()
    }
 }
 
-
-
-
 QFileSystemWatcherEngine *QFileSystemWatcherPrivate::createNativeEngine()
 {
 #if defined(Q_OS_WIN)
@@ -260,7 +257,7 @@ QFileSystemWatcherEngine *QFileSystemWatcherPrivate::createNativeEngine()
 }
 
 QFileSystemWatcherPrivate::QFileSystemWatcherPrivate()
-   : native(0), poller(0), forced(0)
+   : native(nullptr), poller(nullptr), forced(nullptr)
 {
 }
 
@@ -376,19 +373,21 @@ QFileSystemWatcher::~QFileSystemWatcher()
       d->native->stop();
       d->native->wait();
       delete d->native;
-      d->native = 0;
+      d->native = nullptr;
    }
+
    if (d->poller) {
       d->poller->stop();
       d->poller->wait();
       delete d->poller;
-      d->poller = 0;
+      d->poller = nullptr;
    }
+
    if (d->forced) {
       d->forced->stop();
       d->forced->wait();
       delete d->forced;
-      d->forced = 0;
+      d->forced = nullptr;
    }
 }
 
@@ -410,7 +409,7 @@ void QFileSystemWatcher::addPaths(const QStringList &paths)
    }
 
    QStringList p = paths;
-   QFileSystemWatcherEngine *engine = 0;
+   QFileSystemWatcherEngine *engine = nullptr;
 
    if (!objectName().startsWith(QLatin1String("_qt_autotest_force_engine_"))) {
       // Normal runtime case - search intelligently for best engine

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,14 +26,6 @@
 
 #include <qobject.h>
 #include <qdebug.h>
-
-static int qRegisterAudioBufferMetaTypes()
-{
-   qRegisterMetaType<QAudioBuffer>();
-   return 0;
-}
-
-Q_CONSTRUCTOR_FUNCTION(qRegisterAudioBufferMetaTypes)
 
 class QAudioBufferPrivate : public QSharedData
 {
@@ -61,13 +53,14 @@ class QAudioBufferPrivate : public QSharedData
    QAudioBufferPrivate *clone();
 
    static QAudioBufferPrivate *acquire(QAudioBufferPrivate *other) {
-      if (!other) {
-         return 0;
+      if (! other) {
+         return nullptr;
       }
 
       // Ref the other (if there are extant data() pointers, they will
       // also point here - it's a feature, not a bug, like QByteArray)
       other->ref();
+
       return other;
    }
 
@@ -109,7 +102,7 @@ class QMemoryAudioBufferProvider : public QAbstractAudioBuffer
             }
          }
       } else {
-         mBuffer = 0;
+         mBuffer = nullptr;
       }
    }
 
@@ -168,11 +161,11 @@ QAudioBufferPrivate *QAudioBufferPrivate::clone()
       }
    }
 
-   return 0;
+   return nullptr;
 }
 
 QAudioBuffer::QAudioBuffer()
-   : d(0)
+   : d(nullptr)
 {
 }
 
@@ -194,16 +187,16 @@ QAudioBuffer::QAudioBuffer(const QByteArray &data, const QAudioFormat &format, q
       int frameCount = format.framesForBytes(data.size());
       d = new QAudioBufferPrivate(new QMemoryAudioBufferProvider(data.constData(), frameCount, format, startTime));
    } else {
-      d = 0;
+      d = nullptr;
    }
 }
 
 QAudioBuffer::QAudioBuffer(int numFrames, const QAudioFormat &format, qint64 startTime)
 {
    if (format.isValid()) {
-      d = new QAudioBufferPrivate(new QMemoryAudioBufferProvider(0, numFrames, format, startTime));
+      d = new QAudioBufferPrivate(new QMemoryAudioBufferProvider(nullptr, numFrames, format, startTime));
    } else {
-      d = 0;
+      d = nullptr;
    }
 }
 
@@ -280,23 +273,25 @@ qint64 QAudioBuffer::startTime() const
 const void *QAudioBuffer::constData() const
 {
    if (!isValid()) {
-      return 0;
+      return nullptr;
    }
+
    return d->mProvider->constData();
 }
 
 const void *QAudioBuffer::data() const
 {
    if (!isValid()) {
-      return 0;
+      return nullptr;
    }
+
    return d->mProvider->constData();
 }
 
 void *QAudioBuffer::data()
 {
    if (!isValid()) {
-      return 0;
+      return nullptr;
    }
 
    if (d->mCount.load() != 1) {
@@ -305,8 +300,8 @@ void *QAudioBuffer::data()
       QAudioBufferPrivate *newd = d->clone();
 
       // This shouldn't happen
-      if (!newd) {
-         return 0;
+      if (! newd) {
+         return nullptr;
       }
 
       d->deref();
@@ -331,6 +326,5 @@ void *QAudioBuffer::data()
       return memBuffer->writableData();
    }
 
-   return 0;
+   return nullptr;
 }
-

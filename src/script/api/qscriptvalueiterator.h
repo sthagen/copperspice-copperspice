@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QSCRIPTVALUEITERATOR_H
 #define QSCRIPTVALUEITERATOR_H
 
-#include <QtScript/qscriptvalue.h>
-#include <QtCore/qscopedpointer.h>
+#include <qscriptvalue.h>
+#include <qscopedpointer.h>
 #include <qstringfwd.h>
 
 class QScriptString;
@@ -35,6 +35,10 @@ class Q_SCRIPT_EXPORT QScriptValueIterator
 {
  public:
    QScriptValueIterator(const QScriptValue &value);
+
+   QScriptValueIterator(const QScriptValueIterator &) = delete;
+   QScriptValueIterator &operator=(const QScriptValueIterator &) = delete;
+
    ~QScriptValueIterator();
 
    bool hasNext() const;
@@ -59,10 +63,8 @@ class Q_SCRIPT_EXPORT QScriptValueIterator
    QScriptValueIterator &operator=(QScriptValue &value);
 
  private:
-   QScopedPointer<QScriptValueIteratorPrivate> d_ptr;
-
    Q_DECLARE_PRIVATE(QScriptValueIterator)
-   Q_DISABLE_COPY(QScriptValueIterator)
+   QScopedPointer<QScriptValueIteratorPrivate> d_ptr;
 };
 
 #endif

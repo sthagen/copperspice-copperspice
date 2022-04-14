@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -113,10 +113,14 @@ class QWindowsVistaStyle : public QWindowsXPStyle
 
  public:
    QWindowsVistaStyle();
+
+   QWindowsVistaStyle(const QWindowsVistaStyle &) = delete;
+   QWindowsVistaStyle &operator=(const QWindowsVistaStyle &) = delete;
+
    ~QWindowsVistaStyle();
 
    void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
-      const QWidget *widget = 0) const override;
+      const QWidget *widget = nullptr) const override;
 
    void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter,
       const QWidget *widget) const override;
@@ -129,21 +133,22 @@ class QWindowsVistaStyle : public QWindowsXPStyle
 
    QRect subElementRect(SubElement element, const QStyleOption *option, const QWidget *widget) const override;
 
-   QRect subControlRect(ComplexControl cc, const QStyleOptionComplex *opt, SubControl sc,
+   QRect subControlRect(ComplexControl control, const QStyleOptionComplex *option, SubControl sc,
       const QWidget *widget) const override;
 
    SubControl hitTestComplexControl(ComplexControl control, const QStyleOptionComplex *option, const QPoint &pos,
-      const QWidget *widget = 0) const override;
+      const QWidget *widget = nullptr) const override;
 
    QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption *option = nullptr,
       const QWidget *widget = nullptr) const;
 
-   QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption *opt, const QWidget *widget = 0) const override;
+   QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option,
+      const QWidget *widget = nullptr) const override;
 
-   int pixelMetric(PixelMetric metric, const QStyleOption *option = 0, const QWidget *widget = 0) const override;
+   int pixelMetric(PixelMetric metric, const QStyleOption *option = nullptr, const QWidget *widget = nullptr) const override;
 
-   int styleHint(StyleHint hint, const QStyleOption *opt = 0, const QWidget *widget = 0,
-      QStyleHintReturn *returnData = 0) const override;
+   int styleHint(StyleHint hint, const QStyleOption *opt = nullptr, const QWidget *widget = nullptr,
+      QStyleHintReturn *styleHintReturn = nullptr) const override;
 
    void polish(QWidget *widget) override;
    void unpolish(QWidget *widget) override;
@@ -153,9 +158,7 @@ class QWindowsVistaStyle : public QWindowsXPStyle
 
    QPalette standardPalette() const override;
 
-
  private:
-   Q_DISABLE_COPY(QWindowsVistaStyle)
    Q_DECLARE_PRIVATE(QWindowsVistaStyle)
 
    friend class QStyleFactory;

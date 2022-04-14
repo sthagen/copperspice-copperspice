@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,10 +29,13 @@
 // ** enum
 template<class T>
 void cs_namespace_register_enum(const char *name, std::type_index id, const char *scope);
-  
+
+template<class T>
+void cs_namespace_register_enum_data(const char *data);
+
 // ** flags
 template<class T>
 void cs_namespace_register_flag(const char *enumName, const char *scope, const char *flagName, std::type_index id);
- 
+
 
 #endif

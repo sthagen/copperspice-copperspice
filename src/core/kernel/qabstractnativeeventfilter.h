@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,23 +24,24 @@
 #ifndef QABSTRACTNATIVEEVENTFILTER_H
 #define QABSTRACTNATIVEEVENTFILTER_H
 
-#include <QtCore/qnamespace.h>
-
+#include <qnamespace.h>
 
 class QAbstractNativeEventFilterPrivate;
 
 class Q_CORE_EXPORT QAbstractNativeEventFilter
 {
-public:
-    QAbstractNativeEventFilter();
-    virtual ~QAbstractNativeEventFilter();
+   public:
+      QAbstractNativeEventFilter();
 
-    virtual bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) = 0;
+      QAbstractNativeEventFilter(const QAbstractNativeEventFilter &) = delete;
+      QAbstractNativeEventFilter &operator=(const QAbstractNativeEventFilter &) = delete;
 
-private:
-    Q_DISABLE_COPY(QAbstractNativeEventFilter)
-    QAbstractNativeEventFilterPrivate *d;
+      virtual ~QAbstractNativeEventFilter();
+
+      virtual bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) = 0;
+
+   private:
+      QAbstractNativeEventFilterPrivate *d;
 };
 
-
-#endif /* QABSTRACTNATIVEEVENTFILTER_H */
+#endif

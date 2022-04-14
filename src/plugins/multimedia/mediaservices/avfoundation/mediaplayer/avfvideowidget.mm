@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,7 @@
 #endif
 
 AVFVideoWidget::AVFVideoWidget(QWidget *parent)
-   : QWidget(parent), m_aspectRatioMode(Qt::KeepAspectRatio), m_playerLayer(0), m_nativeView(0)
+   : QWidget(parent), m_aspectRatioMode(Qt::KeepAspectRatio), m_playerLayer(nullptr), m_nativeView(nullptr)
 {
    setAutoFillBackground(false);
 }
@@ -81,7 +81,7 @@ void AVFVideoWidget::setPlayerLayer(AVPlayerLayer *layer)
 
    if (!m_nativeView) {
       //make video widget a native window
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_DARWIN)
       m_nativeView = (NSView *)this->winId();
       [m_nativeView setWantsLayer: YES];
 #else

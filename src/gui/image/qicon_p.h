@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,12 @@
 #ifndef QICON_P_H
 #define QICON_P_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qsize.h>
-#include <QtCore/qlist.h>
-#include <QtGui/qpixmap.h>
-#include <QtGui/qicon.h>
-#include <QtGui/qiconengine.h>
+#include <qglobal.h>
+#include <qsize.h>
+#include <qlist.h>
+#include <qpixmap.h>
+#include <qicon.h>
+#include <qiconengine.h>
 
 #ifndef QT_NO_ICON
 
@@ -108,7 +108,7 @@ class Q_GUI_EXPORT QPixmapIconEngine : public QIconEngine
    QPixmapIconEngineEntry *tryMatch(const QSize &size, QIcon::Mode mode, QIcon::State state);
    QVector<QPixmapIconEngineEntry> pixmaps;
 
-   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &s, const QIcon &icon);
+   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QIcon &icon);
    friend class QIconThemeEngine;
 };
 

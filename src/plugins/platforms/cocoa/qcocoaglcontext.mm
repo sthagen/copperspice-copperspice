@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -110,7 +110,7 @@ QCocoaGLContext::QCocoaGLContext(const QSurfaceFormat &format, QPlatformOpenGLCo
      m_shareContext(nil),
      m_format(format)
 {
-   if (!nativeHandle.isNull()) {
+   if (nativeHandle.isValid()) {
       if (!nativeHandle.canConvert<QCocoaNativeContext>()) {
          qWarning("QCocoaGLContext: Requires a QCocoaNativeContext");
          return;
@@ -181,7 +181,7 @@ QCocoaGLContext::QCocoaGLContext(const QSurfaceFormat &format, QPlatformOpenGLCo
 QCocoaGLContext::~QCocoaGLContext()
 {
    if (m_currentWindow && m_currentWindow.data()->handle()) {
-      static_cast<QCocoaWindow *>(m_currentWindow.data()->handle())->setCurrentContext(0);
+      static_cast<QCocoaWindow *>(m_currentWindow.data()->handle())->setCurrentContext(nullptr);
    }
 
    [m_context release];
@@ -237,7 +237,7 @@ void QCocoaGLContext::setActiveWindow(QWindow *window)
    }
 
    if (m_currentWindow && m_currentWindow.data()->handle()) {
-      static_cast<QCocoaWindow *>(m_currentWindow.data()->handle())->setCurrentContext(0);
+      static_cast<QCocoaWindow *>(m_currentWindow.data()->handle())->setCurrentContext(nullptr);
    }
 
    Q_ASSERT(window->handle());
@@ -340,7 +340,7 @@ void QCocoaGLContext::updateSurfaceFormat()
 void QCocoaGLContext::doneCurrent()
 {
    if (m_currentWindow && m_currentWindow.data()->handle()) {
-      static_cast<QCocoaWindow *>(m_currentWindow.data()->handle())->setCurrentContext(0);
+      static_cast<QCocoaWindow *>(m_currentWindow.data()->handle())->setCurrentContext(nullptr);
    }
 
    m_currentWindow.clear();

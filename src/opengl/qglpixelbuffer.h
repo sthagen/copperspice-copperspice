@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,12 +31,16 @@ class QGLPixelBufferPrivate;
 
 class Q_OPENGL_EXPORT QGLPixelBuffer : public QPaintDevice
 {
-   Q_DECLARE_PRIVATE(QGLPixelBuffer)
  public:
    QGLPixelBuffer(const QSize &size, const QGLFormat &format = QGLFormat::defaultFormat(),
       QGLWidget *shareWidget = nullptr);
+
    QGLPixelBuffer(int width, int height, const QGLFormat &format = QGLFormat::defaultFormat(),
       QGLWidget *shareWidget = nullptr);
+
+   QGLPixelBuffer(const QGLPixelBuffer &) = delete;
+   QGLPixelBuffer &operator=(const QGLPixelBuffer &) = delete;
+
    virtual ~QGLPixelBuffer();
 
    bool isValid() const;
@@ -45,7 +49,7 @@ class Q_OPENGL_EXPORT QGLPixelBuffer : public QPaintDevice
    QGLContext *context() const;
 
    GLuint generateDynamicTexture() const;
-   bool bindToDynamicTexture(GLuint texture);
+   bool bindToDynamicTexture(GLuint texture_id);
    void releaseFromDynamicTexture();
    void updateDynamicTexture(GLuint texture_id) const;
 
@@ -54,8 +58,8 @@ class Q_OPENGL_EXPORT QGLPixelBuffer : public QPaintDevice
    GLuint bindTexture(const QString &fileName);
    void deleteTexture(GLuint texture_id);
 
-   void drawTexture(const QRectF &target, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
-   void drawTexture(const QPointF &point, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QRectF &target, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QPointF &point, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
 
    QSize size() const;
    Qt::HANDLE handle() const;
@@ -74,7 +78,7 @@ class Q_OPENGL_EXPORT QGLPixelBuffer : public QPaintDevice
    }
 
  private:
-   Q_DISABLE_COPY(QGLPixelBuffer)
+   Q_DECLARE_PRIVATE(QGLPixelBuffer)
    QScopedPointer<QGLPixelBufferPrivate> d_ptr;
 
    friend class QGLDrawable;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -61,7 +61,7 @@ class QPlainTextDocumentLayoutPrivate : public QAbstractTextDocumentLayoutPrivat
 
  public:
    QPlainTextDocumentLayoutPrivate() {
-      mainViewPrivate = 0;
+      mainViewPrivate = nullptr;
       width = 0;
       maximumWidth = 0;
       maximumWidthBlockNumber = 0;
@@ -315,7 +315,8 @@ void QPlainTextDocumentLayout::layoutBlock(const QTextBlock &block)
       availableWidth = qreal(INT_MAX); // similar to text edit with pageSize.width == 0
    }
    availableWidth -= 2 * margin + extraMargin;
-   while (1) {
+
+   while (true) {
       QTextLine line = tl->createLine();
       if (!line.isValid()) {
          break;
@@ -444,18 +445,24 @@ qreal QPlainTextEditPrivate::verticalOffset(int topBlock, int topLine) const
       QTextBlock currentBlock = doc->findBlockByNumber(topBlock);
       QPlainTextDocumentLayout *documentLayout = qobject_cast<QPlainTextDocumentLayout *>(doc->documentLayout());
       Q_ASSERT(documentLayout);
+
+      // emerald - investigate if there is a side effect
       QRectF r = documentLayout->blockBoundingRect(currentBlock);
-      Q_UNUSED(r);
+      (void) r;
+
       QTextLayout *layout = currentBlock.layout();
+
       if (layout && topLine <= layout->lineCount()) {
          QTextLine line = layout->lineAt(topLine - 1);
          const QRectF lr = line.naturalTextRect();
          offset = lr.bottom();
       }
    }
+
    if (topBlock == 0 && topLine == 0) {
       offset -= doc->documentMargin();   // top margin
    }
+
    return offset;
 }
 
@@ -714,15 +721,14 @@ void QPlainTextEditPrivate::updateViewport()
 }
 
 QPlainTextEditPrivate::QPlainTextEditPrivate()
-   : control(0), tabChangesFocus(false),
-     lineWrap(QPlainTextEdit::WidgetWidth),
-     wordWrap(QTextOption::WrapAtWordBoundaryOrAnywhere),
-     clickCausedFocus(0), topLine(0), topLineFracture(0),
+   : control(nullptr), tabChangesFocus(false), lineWrap(QPlainTextEdit::WidgetWidth),
+     wordWrap(QTextOption::WrapAtWordBoundaryOrAnywhere), clickCausedFocus(0), topLine(0), topLineFracture(0),
      pageUpDownLastCursorYIsValid(false)
 {
    showCursorOnInitialShow = true;
    backgroundVisible       = false;
    centerOnScroll          = false;
+
    inDrag = false;
 }
 
@@ -738,26 +744,25 @@ void QPlainTextEditPrivate::init(const QString &txt)
 
    control->setPalette(q->palette());
 
-   QObject::connect(vbar, SIGNAL(actionTriggered(int)), q, SLOT(_q_verticalScrollbarActionTriggered(int)));
+   QObject::connect(vbar,    &QScrollBar::actionTriggered,  q, &QPlainTextEdit::_q_verticalScrollbarActionTriggered);
 
-   QObject::connect(control, &QPlainTextEditControl::microFocusChanged,    q, &QPlainTextEdit::updateMicroFocus);
-   QObject::connect(control, &QPlainTextEditControl::documentSizeChanged,  q, &QPlainTextEdit::_q_adjustScrollbars);
-   QObject::connect(control, &QPlainTextEditControl::blockCountChanged,    q, &QPlainTextEdit::blockCountChanged);
-   QObject::connect(control, &QPlainTextEditControl::updateRequest,        q, &QPlainTextEdit::_q_repaintContents);
-   QObject::connect(control, &QPlainTextEditControl::modificationChanged,  q, &QPlainTextEdit::modificationChanged);
+   QObject::connect(control, &QPlainTextEditControl::microFocusChanged,     q, &QPlainTextEdit::updateMicroFocus);
+   QObject::connect(control, &QPlainTextEditControl::documentSizeChanged,   q, &QPlainTextEdit::_q_adjustScrollbars);
+   QObject::connect(control, &QPlainTextEditControl::blockCountChanged,     q, &QPlainTextEdit::blockCountChanged);
+   QObject::connect(control, &QPlainTextEditControl::updateRequest,         q, &QPlainTextEdit::_q_repaintContents);
+   QObject::connect(control, &QPlainTextEditControl::modificationChanged,   q, &QPlainTextEdit::modificationChanged);
 
-   QObject::connect(control, SIGNAL(textChanged()),           q, SLOT(textChanged()));
-   QObject::connect(control, SIGNAL(undoAvailable(bool)),     q, SLOT(undoAvailable(bool)));
-   QObject::connect(control, SIGNAL(redoAvailable(bool)),     q, SLOT(redoAvailable(bool)));
-   QObject::connect(control, SIGNAL(copyAvailable(bool)),     q, SLOT(copyAvailable(bool)));
-   QObject::connect(control, SIGNAL(selectionChanged()),      q, SLOT(selectionChanged()));
-   QObject::connect(control, SIGNAL(cursorPositionChanged()), q, SLOT(_q_cursorPositionChanged()));
+   QObject::connect(control, &QPlainTextEditControl::textChanged,           q, &QPlainTextEdit::textChanged);
+   QObject::connect(control, &QPlainTextEditControl::textChanged,           q, &QPlainTextEdit::updateMicroFocus);
 
-   QObject::connect(control, SIGNAL(textChanged()),           q, SLOT(updateMicroFocus()));
+   QObject::connect(control, &QPlainTextEditControl::undoAvailable,         q, &QPlainTextEdit::undoAvailable);
+   QObject::connect(control, &QPlainTextEditControl::redoAvailable,         q, &QPlainTextEdit::redoAvailable);
+   QObject::connect(control, &QPlainTextEditControl::copyAvailable,         q, &QPlainTextEdit::copyAvailable);
+   QObject::connect(control, &QPlainTextEditControl::selectionChanged,      q, &QPlainTextEdit::selectionChanged);
+   QObject::connect(control, &QPlainTextEditControl::cursorPositionChanged, q, &QPlainTextEdit::_q_cursorPositionChanged);
 
-   // set a null page size initially to avoid any relayouting until the textedit
-   // is shown. relayoutDocument() will take care of setting the page size to the
-   // viewport dimensions later.
+   // set a null page size initially to avoid any relayouting until the textedit is shown
+   // relayoutDocument() will take care of setting the page size to the viewport dimensions later.
 
    doc->setTextWidth(-1);
    doc->documentLayout()->setPaintDevice(viewport);
@@ -1025,9 +1030,10 @@ QPlainTextEdit::QPlainTextEdit(const QString &text, QWidget *parent)
 QPlainTextEdit::~QPlainTextEdit()
 {
    Q_D(QPlainTextEdit);
+
    if (d->documentLayoutPtr) {
       if (d->documentLayoutPtr->priv()->mainViewPrivate == d) {
-         d->documentLayoutPtr->priv()->mainViewPrivate = 0;
+         d->documentLayoutPtr->priv()->mainViewPrivate = nullptr;
       }
    }
 }
@@ -1035,7 +1041,7 @@ QPlainTextEdit::~QPlainTextEdit()
 void QPlainTextEdit::setDocument(QTextDocument *document)
 {
    Q_D(QPlainTextEdit);
-   QPlainTextDocumentLayout *documentLayout = 0;
+   QPlainTextDocumentLayout *documentLayout = nullptr;
 
    if (!document) {
       document = new QTextDocument(d->control);
@@ -1444,6 +1450,7 @@ void QPlainTextEdit::keyReleaseEvent(QKeyEvent *e)
 {
 #ifdef QT_KEYPAD_NAVIGATION
    Q_D(QPlainTextEdit);
+
    if (QApplication::keypadNavigationEnabled()) {
       if (!e->isAutoRepeat() && e->key() == Qt::Key_Back
          && d->deleteAllTimer.isActive()) {
@@ -1471,11 +1478,12 @@ void QPlainTextEdit::keyReleaseEvent(QKeyEvent *e)
 
 QVariant QPlainTextEdit::loadResource(int type, const QUrl &name)
 {
+   (void) type;
+   (void) name;
+
    return QVariant();
 }
 
-/*! \reimp
-*/
 void QPlainTextEdit::resizeEvent(QResizeEvent *e)
 {
    Q_D(QPlainTextEdit);
@@ -1494,9 +1502,8 @@ void QPlainTextEditPrivate::relayoutDocument()
 
    int width = viewport->width();
 
-   if (documentLayout->priv()->mainViewPrivate == 0
-      || documentLayout->priv()->mainViewPrivate == this
-      || width > documentLayout->textWidth()) {
+   if (documentLayout->priv()->mainViewPrivate == nullptr || documentLayout->priv()->mainViewPrivate == this
+               || width > documentLayout->textWidth()) {
       documentLayout->priv()->mainViewPrivate = this;
       documentLayout->setTextWidth(width);
    }

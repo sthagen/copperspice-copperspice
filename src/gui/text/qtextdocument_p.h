@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -73,8 +73,8 @@ class QTextBlockData : public QFragment<3>
 {
  public:
    inline void initialize() {
-      layout    = 0;
-      userData  = 0;
+      layout    = nullptr;
+      userData  = nullptr;
       userState = -1;
       revision  = 0;
       hidden    = 0;
@@ -84,10 +84,10 @@ class QTextBlockData : public QFragment<3>
 
    inline void free() {
       delete layout;
-      layout = 0;
+      layout = nullptr;
 
       delete userData;
-      userData = 0;
+      userData = nullptr;
    }
 
    mutable int format;
@@ -184,8 +184,8 @@ class QTextDocumentPrivate
    void setBlockFormat(const QTextBlock &from, const QTextBlock &to,
       const QTextBlockFormat &newFormat, FormatChangeMode mode = SetFormat);
 
-   void emitUndoAvailable(bool available);
-   void emitRedoAvailable(bool available);
+   void emitUndoAvailable(bool status);
+   void emitRedoAvailable(bool status);
 
    int undoRedo(bool undo);
 

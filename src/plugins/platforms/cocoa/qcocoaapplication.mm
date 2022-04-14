@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -95,7 +95,7 @@ static const QByteArray q_macLocalEventType = "mac_generic_NSEvent";
 
 - (BOOL) qt_filterEvent: (NSEvent *)event
 {
-   if (qApp && qApp->eventDispatcher()->filterNativeEvent(q_macLocalEventType, static_cast<void *>(event), 0)) {
+   if (qApp && qApp->eventDispatcher()->filterNativeEvent(q_macLocalEventType, static_cast<void *>(event), nullptr)) {
       return true;
    }
 

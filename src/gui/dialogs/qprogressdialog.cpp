@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,21 +48,21 @@
 static const int defaultShowTime = 1500;
 
 // wait at least the minWaitTime long before attempting to make a prediction
-static const int minWaitTime = 50;
+static const int minWaitTime         = 50;
 static const int LABEL_INDEX         = 0;
 static const int PROGRESS_BAR_INDEX  = 1;
 static const int CANCEL_BUTTON_INDEX = 2;
 
-QProgressDialog::QProgressDialog(QWidget *parent, Qt::WindowFlags f)
-   : QDialog(parent, f)
+QProgressDialog::QProgressDialog(QWidget *parent, Qt::WindowFlags flags)
+   : QDialog(parent, flags)
 {
    useDefaultCancelText = true;
    init(QString(), QString(), 0, 100);
 }
 
 QProgressDialog::QProgressDialog(const QString &labelText, const QString &cancelButtonText,
-   int minimum, int maximum, QWidget *parent, Qt::WindowFlags f)
-   : QDialog(parent, f)
+   int minimum, int maximum, QWidget *parent, Qt::WindowFlags flags)
+   : QDialog(parent, flags)
 {
    useDefaultCancelText = false;
    init(labelText, cancelButtonText, minimum, maximum);
@@ -85,7 +85,7 @@ void QProgressDialog::init(const QString &labelText, const QString &cancelButton
    //
    m_label = new QLabel(labelText, this);
 
-   int alignL = style()->styleHint(QStyle::SH_ProgressDialog_TextLabelAlignment, 0, this);
+   int alignL = style()->styleHint(QStyle::SH_ProgressDialog_TextLabelAlignment, nullptr, this);
    m_label->setAlignment(Qt::Alignment(alignL));
 
    m_progressBar = new QProgressBar(this);
@@ -93,7 +93,8 @@ void QProgressDialog::init(const QString &labelText, const QString &cancelButton
    m_progressBar->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
    m_cancelButton =  new QPushButton();
-   m_centerCancelPB = style()->styleHint(QStyle::SH_ProgressDialog_CenterCancelButton, 0, this);
+   m_centerCancelPB = style()->styleHint(QStyle::SH_ProgressDialog_CenterCancelButton, nullptr, this);
+
    if (useDefaultCancelText) {
       retranslateStrings();
 
@@ -136,7 +137,7 @@ void QProgressDialog::disconnectOnClose()
 {
    if (receiverToDisconnectOnClose) {
       QObject::disconnect(this, SIGNAL(canceled()), receiverToDisconnectOnClose, memberToDisconnectOnClose);
-      receiverToDisconnectOnClose = 0;
+      receiverToDisconnectOnClose = nullptr;
    }
 
    memberToDisconnectOnClose.clear();
@@ -150,6 +151,7 @@ QString QProgressDialog::labelText() const
 
    return QString();
 }
+
 void QProgressDialog::reset()
 {
 
@@ -215,7 +217,7 @@ void QProgressDialog::setCancelButton(QPushButton *newButton)
 
 #ifndef QT_NO_SHORTCUT
       delete escapeShortcut;
-      escapeShortcut = 0;
+      escapeShortcut = nullptr;
 #endif
 
    }
@@ -280,7 +282,7 @@ void QProgressDialog::setCancelButtonText(const QString &cancelButtonText)
       }
 
    } else {
-      setCancelButton(0);
+      setCancelButton(nullptr);
 
    }
 

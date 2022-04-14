@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QPODLIST_P_H
 #define QPODLIST_P_H
 
-#include <QtCore/qvarlengtharray.h>
-
-QT_BEGIN_NAMESPACE
+#include <qvarlengtharray.h>
 
 template <typename T, int Prealloc>
 class QPodList : public QVarLengthArray<T, Prealloc>
@@ -73,7 +71,5 @@ class QPodList : public QVarLengthArray<T, Prealloc>
       return tmp;
    }
 };
-
-QT_END_NAMESPACE
 
 #endif // QPODLIST_P_H

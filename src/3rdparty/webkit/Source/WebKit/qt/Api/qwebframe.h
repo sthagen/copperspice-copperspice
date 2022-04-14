@@ -1,10 +1,11 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2018 Barbara Geller
-* Copyright (c) 2012-2018 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
+*
+* Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
 * Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
 *
 * This file is part of CopperSpice.
 *
@@ -16,7 +17,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *
-* <http://www.gnu.org/licenses/>.
+* https://www.gnu.org/licenses/
 *
 ***********************************************************************/
 
@@ -27,8 +28,8 @@
 #include <qurl.h>
 #include <qvariant.h>
 #include <qicon.h>
-#include <QtScript/qscriptengine.h>
-#include <qnetworkaccessmanager.h>
+#include <qscriptengine.h>
+#include <qnetaccess_manager.h>
 #include <qwebkitglobal.h>
 
 class QRect;

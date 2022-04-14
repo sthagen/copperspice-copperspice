@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,6 +28,7 @@
 #include <qstringlist.h>
 #include <qhash.h>
 #include <qshareddata.h>
+
 #include <qringbuffer_p.h>
 #include <qiodevice_p.h>
 
@@ -72,17 +73,19 @@ inline uint qHash(const QProcEnvKey &key)
    return qHash(key.toCaseFolded());
 }
 
-typedef QString QProcEnvValue;
+using QProcEnvValue = QString;
+
 #else
 class QProcEnvKey
 {
  public:
-   QProcEnvKey() : hash(0) {}
-   explicit QProcEnvKey(const QByteArray &other) : key(other), hash(qHash(key)) {}
+   QProcEnvKey()
+      : hash(0)
+   {}
 
-   QProcEnvKey(const QProcEnvKey &other) {
-      *this = other;
-   }
+   explicit QProcEnvKey(const QByteArray &other)
+      : key(other), hash(qHash(key))
+   {}
 
    bool operator==(const QProcEnvKey &other) const {
       return key == other.key;
@@ -91,6 +94,7 @@ class QProcEnvKey
    QByteArray key;
    uint hash;
 };
+
 inline uint qHash(const QProcEnvKey &key)
 {
    return key.hash;
@@ -99,18 +103,20 @@ inline uint qHash(const QProcEnvKey &key)
 class QProcEnvValue
 {
  public:
-   QProcEnvValue() {}
-   QProcEnvValue(const QProcEnvValue &other) {
-      *this = other;
-   }
+   QProcEnvValue()
+   {}
 
-   explicit QProcEnvValue(const QString &value) : stringValue(value) {}
-   explicit QProcEnvValue(const QByteArray &value) : byteValue(value) {}
+   explicit QProcEnvValue(const QString &value)
+      : stringValue(value)
+   {}
+
+   explicit QProcEnvValue(const QByteArray &value)
+      : byteValue(value)
+   {}
 
    bool operator==(const QProcEnvValue &other) const {
       return byteValue.isEmpty() && other.byteValue.isEmpty()
-             ? stringValue == other.stringValue
-             : bytes() == other.bytes();
+             ? stringValue == other.stringValue : bytes() == other.bytes();
    }
 
    QByteArray bytes() const {
@@ -223,7 +229,7 @@ class QProcessEnvironmentPrivate: public QSharedData
    void insert(const QProcessEnvironmentPrivate &other);
 };
 
-/**   \cond INTERNAL (notation so DoxyPress will not parse this class  */
+#if ! defined (CS_DOXYPRESS)
 
 template<>
 inline void QSharedDataPointer<QProcessEnvironmentPrivate>::detach()
@@ -241,7 +247,7 @@ inline void QSharedDataPointer<QProcessEnvironmentPrivate>::detach()
    d = x;
 }
 
-/**   \endcond   */
+#endif // doxypress
 
 class QProcessPrivate : public QIODevicePrivate
 {
@@ -257,12 +263,12 @@ class QProcessPrivate : public QIODevicePrivate
          // if you add "= 4" here, increase the number of bits below
       };
 
-      Channel() : process(0), notifier(0), type(Normal), closed(false), append(false) {
+      Channel() : process(nullptr), notifier(nullptr), type(Normal), closed(false), append(false) {
          pipe[0] = INVALID_Q_PIPE;
          pipe[1] = INVALID_Q_PIPE;
 
 #ifdef Q_OS_WIN
-            reader = 0;
+            reader = nullptr;
 #endif
       }
 

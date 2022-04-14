@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,17 +21,19 @@
 *
 ***********************************************************************/
 
-#include "qpagesetupdialog.h"
+#include <qpagesetupdialog.h>
 #include <qpagesetupdialog_p.h>
+
 #include <qprinter.h>
+
 #ifndef QT_NO_PRINTDIALOG
 
-
-
-QPageSetupDialogPrivate::QPageSetupDialogPrivate(QPrinter *prntr) : printer(0), ownsPrinter(false)
+QPageSetupDialogPrivate::QPageSetupDialogPrivate(QPrinter *prntr)
+   : printer(nullptr), ownsPrinter(false)
 {
    setPrinter(prntr);
 }
+
 void QPageSetupDialogPrivate::setPrinter(QPrinter *newPrinter)
 {
    if (printer && ownsPrinter) {
@@ -51,17 +53,14 @@ void QPageSetupDialogPrivate::setPrinter(QPrinter *newPrinter)
 
 }
 
-
 void QPageSetupDialog::open(QObject *receiver, const QString &member)
 {
    Q_D(QPageSetupDialog);
    connect(this, SIGNAL(accepted()), receiver, member);
    d->receiverToDisconnectOnClose = receiver;
-   d->memberToDisconnectOnClose = member;
+   d->memberToDisconnectOnClose   = member;
    QDialog::open();
 }
-
-
 
 QPageSetupDialog::~QPageSetupDialog()
 {
@@ -70,22 +69,23 @@ QPageSetupDialog::~QPageSetupDialog()
       delete d->printer;
    }
 }
+
 QPrinter *QPageSetupDialog::printer()
 {
    Q_D(QPageSetupDialog);
    return d->printer;
 }
+
 void QPageSetupDialog::done(int result)
 {
    Q_D(QPageSetupDialog);
    QDialog::done(result);
+
    if (d->receiverToDisconnectOnClose) {
-      disconnect(this, SIGNAL(accepted()),
-         d->receiverToDisconnectOnClose, d->memberToDisconnectOnClose);
-      d->receiverToDisconnectOnClose = 0;
+      disconnect(this, SIGNAL(accepted()), d->receiverToDisconnectOnClose, d->memberToDisconnectOnClose);
+      d->receiverToDisconnectOnClose = nullptr;
    }
    d->memberToDisconnectOnClose.clear();
 }
-
 
 #endif

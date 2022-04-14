@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qtextcodec.h>
 #include <string.h>
-
-QT_BEGIN_NAMESPACE
 
 #ifndef QT_NO_TEXTCODEC
 
@@ -61,23 +59,24 @@ class QTextCodec
 
    struct ConverterState {
       ConverterState(ConversionFlags f = DefaultConversion)
-         : flags(f), remainingChars(0), invalidChars(0), d(0) {
+         : flags(f), remainingChars(0), invalidChars(0), d(nullptr)
+      {
          state_data[0] = state_data[1] = state_data[2] = 0;
       }
-      ~ConverterState() { }
+
+      ConverterState(const ConverterState &) = delete;
+      ConverterState &operator=(const ConverterState &) = delete;
+
+      ~ConverterState() = default;
+
       ConversionFlags flags;
       int remainingChars;
       int invalidChars;
       uint state_data[3];
       void *d;
-
-    private:
-      Q_DISABLE_COPY(ConverterState)
    };
 };
 
-#endif //QT_NO_TEXTCODEC
-
-QT_END_NAMESPACE
+#endif // QT_NO_TEXTCODEC
 
 #endif

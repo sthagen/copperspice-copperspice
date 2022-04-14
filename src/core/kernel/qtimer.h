@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QTIMER_H
 #define QTIMER_H
 
-#include <QtCore/qbasictimer.h>    // conceptual inheritance
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
+#include <qbasictimer.h>
+#include <qobject.h>
 
 class Q_CORE_EXPORT QTimer : public QObject
 {
@@ -47,6 +45,10 @@ class Q_CORE_EXPORT QTimer : public QObject
 
  public:
    explicit QTimer(QObject *parent = nullptr);
+
+   QTimer(const QTimer &) = delete;
+   QTimer &operator=(const QTimer &) = delete;
+
    ~QTimer();
 
    bool isActive() const {
@@ -63,8 +65,8 @@ class Q_CORE_EXPORT QTimer : public QObject
    }
 
    int remainingTime() const;
-   void setTimerType(Qt::TimerType atype) {
-      this->type = atype;
+   void setTimerType(Qt::TimerType timerType) {
+      this->type = timerType;
    }
 
    Qt::TimerType timerType() const {
@@ -82,32 +84,33 @@ class Q_CORE_EXPORT QTimer : public QObject
 
    // **A  slot in a QObject
    template <typename Receiver, typename SlotClass, typename SlotReturn>
-   static inline typename std::enable_if<std::is_base_of<SlotClass, Receiver>::value>::type singleShot(int msec, Receiver *receiver,
-      SlotReturn(SlotClass::*slotMethod)()) {
+   static typename std::enable_if<std::is_base_of<SlotClass, Receiver>::value>::type
+            singleShot(int msec, Receiver *receiver, SlotReturn (SlotClass::*slotMethod)()) {
       singleShot(msec, msec >= 2000 ? Qt::CoarseTimer : Qt::PreciseTimer, receiver, slotMethod);
    }
 
    template <typename Receiver, typename SlotClass, typename SlotReturn>
-   static inline typename std::enable_if<std::is_base_of<SlotClass, Receiver>::value>::type singleShot(int msec, Qt::TimerType timerType,
-      Receiver *receiver, SlotReturn(SlotClass::*slotMethod)()) {
-      std::unique_ptr<CSBento< SlotReturn(SlotClass::*)() >> slotBento =
+   static typename std::enable_if<std::is_base_of<SlotClass, Receiver>::value>::type
+            singleShot(int msec, Qt::TimerType timerType, Receiver *receiver, SlotReturn (SlotClass::*slotMethod)()) {
+
+      std::unique_ptr<CSBento< SlotReturn (SlotClass::*)() >> slotBento =
             std::make_unique<CSBento< SlotReturn(SlotClass::*)() >>(std::move(slotMethod));
 
-      singleShot_internal(msec, timerType, receiver, slotBento);
+      singleShot_internal(msec, timerType, receiver, std::move(slotBento));
    }
 
    // ** B  slot is a function pointer (without receiver)
    template <typename T>
-   static inline typename std::enable_if < ! std::is_member_function_pointer<T>::value &&
-   ! std::is_convertible<T, QString>::value &&
-   ! std::is_convertible<T, const char *>::value, void >::type singleShot(int msec, T slotMethod) {
+   static typename std::enable_if < ! std::is_member_function_pointer<T>::value &&
+            ! std::is_convertible<T, QString>::value && ! std::is_convertible<T, const char *>::value, void >::type
+            singleShot(int msec, T slotMethod) {
       singleShot(msec, msec >= 2000 ? Qt::CoarseTimer : Qt::PreciseTimer, nullptr, slotMethod);
    }
 
    template <typename T>
-   static inline typename std::enable_if < ! std::is_member_function_pointer<T>::value &&
-   ! std::is_convertible<T, QString>::value &&
-   ! std::is_convertible<T, const char *>::value, void >::type singleShot(int msec, Qt::TimerType timerType, T slotMethod) {
+   static typename std::enable_if < ! std::is_member_function_pointer<T>::value &&
+            ! std::is_convertible<T, QString>::value && ! std::is_convertible<T, const char *>::value, void >::type
+            singleShot(int msec, Qt::TimerType timerType, T slotMethod) {
       singleShot(msec, timerType, nullptr, slotMethod);
    }
 
@@ -115,19 +118,19 @@ class Q_CORE_EXPORT QTimer : public QObject
    // ** C  slot is a function pointer (with receiver)
    template <typename T>
    static inline typename std::enable_if < ! std::is_member_function_pointer<T>::value &&
-   ! std::is_convertible<T, QString>::value &&
-   ! std::is_convertible<T, const char *>::value, void >::type singleShot(int msec, QObject *receiver, T slotMethod) {
+            ! std::is_convertible<T, QString>::value && ! std::is_convertible<T, const char *>::value, void >::type
+            singleShot(int msec, QObject *receiver, T slotMethod) {
       singleShot(msec, msec >= 2000 ? Qt::CoarseTimer : Qt::PreciseTimer, receiver, slotMethod);
    }
 
    template <typename T>
-   static inline typename std::enable_if < ! std::is_member_function_pointer<T>::value &&
-   ! std::is_convertible<T, QString>::value &&
-   ! std::is_convertible<T, const char *>::value, void >::type singleShot(int msec, Qt::TimerType timerType, QObject *receiver,
-      T slotMethod) {
+   static typename std::enable_if < ! std::is_member_function_pointer<T>::value &&
+            ! std::is_convertible<T, QString>::value && ! std::is_convertible<T, const char *>::value, void >::type
+            singleShot(int msec, Qt::TimerType timerType, QObject *receiver, T slotMethod) {
+
       std::unique_ptr<CSBento<T>> slotBento = std::make_unique<CSBento<T>>(std::move(slotMethod));
 
-      singleShot_internal(msec, timerType, receiver, slotBento);
+      singleShot_internal(msec, timerType, receiver, std::move(slotBento));
    }
 
    CORE_CS_SLOT_1(Public, void start(int msec))
@@ -146,9 +149,7 @@ class Q_CORE_EXPORT QTimer : public QObject
    void timerEvent(QTimerEvent *) override;
 
  private:
-   Q_DISABLE_COPY(QTimer)
-
-   inline int startTimer(int) {
+   int startTimer(int) {
       return -1;
    }
 
@@ -156,6 +157,7 @@ class Q_CORE_EXPORT QTimer : public QObject
 
    static void singleShot_internal(int msec, Qt::TimerType timerType,
       const QObject *receiver, std::unique_ptr<CSBentoAbstract> slotBento);
+
    int id;
    int inter;
    int del;
@@ -169,4 +171,4 @@ inline void QTimer::setSingleShot(bool value)
    single = value;
 }
 
-#endif // QTIMER_H
+#endif

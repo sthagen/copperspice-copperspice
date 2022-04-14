@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -43,7 +43,11 @@ class Q_MULTIMEDIA_EXPORT QMediaPlaylistNavigator : public QObject
    MULTI_CS_PROPERTY_READ(currentItem, currentItem)
 
  public:
-   QMediaPlaylistNavigator(QMediaPlaylistProvider *playlist, QObject *parent = 0);
+   QMediaPlaylistNavigator(QMediaPlaylistProvider *playlist, QObject *parent = nullptr);
+
+   QMediaPlaylistNavigator(const QMediaPlaylistNavigator &) = delete;
+   QMediaPlaylistNavigator &operator=(const QMediaPlaylistNavigator &) = delete;
+
    virtual ~QMediaPlaylistNavigator();
 
    QMediaPlaylistProvider *playlist() const;
@@ -86,7 +90,6 @@ class Q_MULTIMEDIA_EXPORT QMediaPlaylistNavigator : public QObject
    QMediaPlaylistNavigatorPrivate *d_ptr;
 
  private:
-   Q_DISABLE_COPY(QMediaPlaylistNavigator)
    Q_DECLARE_PRIVATE(QMediaPlaylistNavigator)
 
    MULTI_CS_SLOT_1(Private, void _q_mediaInserted(int start, int end))

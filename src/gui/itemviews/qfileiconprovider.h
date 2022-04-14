@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,37 +24,42 @@
 #ifndef QFILEICONPROVIDER_H
 #define QFILEICONPROVIDER_H
 
-#include <QtCore/qfileinfo.h>
-#include <QtCore/qscopedpointer.h>
-#include <QtGui/qicon.h>
+#include <qfileinfo.h>
+#include <qscopedpointer.h>
+#include <qicon.h>
 
 class QFileIconProviderPrivate;
 
 class Q_GUI_EXPORT QFileIconProvider
 {
-
  public:
    enum Option {
       DontUseCustomDirectoryIcons = 0x00000001
    };
    using Options = QFlags<Option>;
 
-   QFileIconProvider();
-   virtual ~QFileIconProvider();
    enum IconType { Computer, Desktop, Trashcan, Network, Drive, Folder, File };
+
+   QFileIconProvider();
+
+   QFileIconProvider(const QFileIconProvider &) = delete;
+   QFileIconProvider &operator=(const QFileIconProvider &) = delete;
+
+   virtual ~QFileIconProvider();
+
    virtual QIcon icon(IconType type) const;
    virtual QIcon icon(const QFileInfo &info) const;
    virtual QString type(const QFileInfo &info) const;
 
    void setOptions(Options options);
    Options options() const;
+
  private:
    Q_DECLARE_PRIVATE(QFileIconProvider)
    QScopedPointer<QFileIconProviderPrivate> d_ptr;
-   Q_DISABLE_COPY(QFileIconProvider)
-
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFileIconProvider::Options)
+
 #endif
 

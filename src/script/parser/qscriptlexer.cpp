@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -55,7 +55,7 @@ QScript::Lexer::Lexer(QScriptEnginePrivate *eng)
    buffer8  = new char[size8];
    buffer16 = new QChar[size16];
 
-   pattern  = 0;
+   pattern  = nullptr;
    flags    = 0;
 }
 
@@ -732,11 +732,15 @@ int QScript::Lexer::lex()
 
    double dval = 0;
    if (state == Number) {
-      dval = qstrtod(buffer8, 0, 0);
-   } else if (state == Hex) { // scan hex numbers
+      dval = qstrtod(buffer8, nullptr, nullptr);
+
+   } else if (state == Hex) {
+      // scan hex numbers
       dval = QScript::integerFromString(buffer8, pos8, 16);
       state = Number;
-   } else if (state == Octal) {   // scan octal number
+
+   } else if (state == Octal) {
+      // scan octal number
       dval = QScript::integerFromString(buffer8, pos8, 8);
       state = Number;
    }
@@ -747,16 +751,21 @@ int QScript::Lexer::lex()
    switch (parenthesesState) {
       case IgnoreParentheses:
          break;
+
       case CountParentheses:
          if (token == QScriptGrammar::T_RPAREN) {
             --parenthesesCount;
+
             if (parenthesesCount == 0) {
                parenthesesState = BalancedParentheses;
             }
+
          } else if (token == QScriptGrammar::T_LPAREN) {
             ++parenthesesCount;
          }
+
          break;
+
       case BalancedParentheses:
          parenthesesState = IgnoreParentheses;
          break;
@@ -765,46 +774,58 @@ int QScript::Lexer::lex()
    switch (state) {
       case Eof:
          return 0;
+
       case Other:
          if (token == QScriptGrammar::T_RBRACE || token == QScriptGrammar::T_SEMICOLON) {
             delimited = true;
          }
          return token;
+
       case Identifier:
          if ((token = findReservedWord(buffer16, pos16)) < 0) {
             /* TODO: close leak on parse error. same holds true for String */
             if (driver) {
                Q_ASSERT_X(false, Q_FUNC_INFO, "not implemented");
-               qsyylval.ustr = 0; // driver->intern(buffer16, pos16);
+               qsyylval.ustr = nullptr;                            // driver->intern(buffer16, pos16);
             } else {
-               qsyylval.ustr = 0;
+               qsyylval.ustr = nullptr;
             }
             return QScriptGrammar::T_IDENTIFIER;
          }
+
          if (token == QScriptGrammar::T_CONTINUE || token == QScriptGrammar::T_BREAK
                || token == QScriptGrammar::T_RETURN || token == QScriptGrammar::T_THROW) {
             restrKeyword = true;
+
          } else if (token == QScriptGrammar::T_IF || token == QScriptGrammar::T_FOR
                     || token == QScriptGrammar::T_WHILE || token == QScriptGrammar::T_WITH) {
             parenthesesState = CountParentheses;
+
             parenthesesCount = 0;
          } else if (token == QScriptGrammar::T_DO) {
             parenthesesState = BalancedParentheses;
+
          }
+
          return token;
+
       case String:
          if (driver) {
             Q_ASSERT_X(false, Q_FUNC_INFO, "not implemented");
-            qsyylval.ustr = 0; // driver->intern(buffer16, pos16);
+            qsyylval.ustr = nullptr;             // driver->intern(buffer16, pos16);
+
          } else {
-            qsyylval.ustr = 0;
+            qsyylval.ustr = nullptr;
          }
          return QScriptGrammar::T_STRING_LITERAL;
+
       case Number:
          qsyylval.dval = dval;
          return QScriptGrammar::T_NUMERIC_LITERAL;
+
       case Bad:
          return -1;
+
       default:
          Q_ASSERT(!"unhandled numeration value in switch");
          return -1;
@@ -1111,9 +1132,9 @@ bool QScript::Lexer::scanRegExp(RegExpBodyPrefix prefix)
       } else {
          if (driver) {
             Q_ASSERT_X(false, Q_FUNC_INFO, "not implemented");
-            pattern = 0; // driver->intern(buffer16, pos16);
+            pattern = nullptr;       // driver->intern(buffer16, pos16);
          } else {
-            pattern = 0;
+            pattern = nullptr;
          }
          pos16 = 0;
          shift(1);

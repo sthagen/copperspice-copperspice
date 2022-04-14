@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,34 +22,34 @@
 ***********************************************************************/
 
 #include <qabstractfileengine.h>
-#include <qabstractfileengine_p.h>
-
-#ifdef QT_BUILD_CORE_LIB
-#include <qresource_p.h>
-#endif
 
 #include <qdatetime.h>
 #include <qreadwritelock.h>
 #include <qvariant.h>
-
-// built-in handlers
 #include <qfsfileengine.h>
 #include <qdiriterator.h>
 
+#include <qabstractfileengine_p.h>
+#include <qresource_p.h>
 #include <qfilesystementry_p.h>
 #include <qfilesystemmetadata_p.h>
 #include <qfilesystemengine_p.h>
 
-QT_BEGIN_NAMESPACE
-
 static bool qt_file_engine_handlers_in_use = false;
 
 /*
-    All application-wide handlers are stored in this list. The mutex must be
+    All application wide handlers are stored in this list. The mutex must be
     acquired to ensure thread safety.
- */
-Q_GLOBAL_STATIC_WITH_ARGS(QReadWriteLock, fileEngineHandlerMutex, (QReadWriteLock::Recursive))
+*/
+
+static QReadWriteLock *fileEngineHandlerMutex()
+{
+   static QReadWriteLock retval(QReadWriteLock::Recursive);
+   return &retval;
+}
+
 static bool qt_abstractfileenginehandlerlist_shutDown = false;
+
 class QAbstractFileEngineHandlerList : public QList<QAbstractFileEngineHandler *>
 {
  public:
@@ -60,15 +60,6 @@ class QAbstractFileEngineHandlerList : public QList<QAbstractFileEngineHandler *
 };
 Q_GLOBAL_STATIC(QAbstractFileEngineHandlerList, fileEngineHandlers)
 
-/*!
-    Constructs a file handler and registers it. Once created this
-    handler's create() function will be called (along with all the other
-    handlers) for any paths used. The most recently created handler that
-    recognizes the given path (i.e. that returns a QAbstractFileEngine) is
-    used for the new path.
-
-    \sa create()
- */
 QAbstractFileEngineHandler::QAbstractFileEngineHandler()
 {
    QWriteLocker locker(fileEngineHandlerMutex());
@@ -76,16 +67,12 @@ QAbstractFileEngineHandler::QAbstractFileEngineHandler()
    fileEngineHandlers()->prepend(this);
 }
 
-/*!
-    Destroys the file handler. This will automatically unregister the handler
-    from Qt.
- */
 QAbstractFileEngineHandler::~QAbstractFileEngineHandler()
 {
    QWriteLocker locker(fileEngineHandlerMutex());
 
    // Remove this handler from the handler list only if the list is valid.
-   if (!qt_abstractfileenginehandlerlist_shutDown) {
+   if (! qt_abstractfileenginehandlerlist_shutDown) {
       QAbstractFileEngineHandlerList *handlers = fileEngineHandlers();
       handlers->removeOne(this);
       if (handlers->isEmpty()) {
@@ -94,14 +81,9 @@ QAbstractFileEngineHandler::~QAbstractFileEngineHandler()
    }
 }
 
-/*
-   \ìnternal
-
-   Handles calls to custom file engine handlers.
-*/
 QAbstractFileEngine *qt_custom_file_engine_handler_create(const QString &path)
 {
-   QAbstractFileEngine *engine = 0;
+   QAbstractFileEngine *engine = nullptr;
 
    if (qt_file_engine_handlers_in_use) {
       QReadLocker locker(fileEngineHandlerMutex());
@@ -149,33 +131,16 @@ QAbstractFileEngine::QAbstractFileEngine(QAbstractFileEnginePrivate &dd) : d_ptr
    d_ptr->q_ptr = this;
 }
 
-/*!
-    Destroys the QAbstractFileEngine.
- */
 QAbstractFileEngine::~QAbstractFileEngine()
 {
 }
 
-/*!
-    \fn bool QAbstractFileEngine::open(QIODevice::OpenMode mode)
-
-    Opens the file in the specified \a mode. Returns true if the file
-    was successfully opened; otherwise returns false.
-
-    The \a mode is an OR combination of QIODevice::OpenMode and
-    QIODevice::HandlingMode values.
-*/
 bool QAbstractFileEngine::open(QIODevice::OpenMode openMode)
 {
    Q_UNUSED(openMode);
    return false;
 }
 
-/*!
-    Closes the file, returning true if successful; otherwise returns false.
-
-    The default implementation always returns false.
-*/
 bool QAbstractFileEngine::close()
 {
    return false;
@@ -400,10 +365,9 @@ QStringList QAbstractFileEngine::entryList(QDir::Filters filters, const QStringL
 
     \sa setFileName()
 */
-QAbstractFileEngine::FileFlags QAbstractFileEngine::fileFlags(FileFlags type) const
+QAbstractFileEngine::FileFlags QAbstractFileEngine::fileFlags(FileFlags) const
 {
-   Q_UNUSED(type);
-   return 0;
+   return Qt::EmptyFlag;
 }
 
 /*!
@@ -554,7 +518,7 @@ uchar *QAbstractFileEngine::map(qint64 offset, qint64 size, QFile::MemoryMapFlag
    option.flags = flags;
    MapExtensionReturn r;
    if (!extension(MapExtension, &option, &r)) {
-      return 0;
+      return nullptr;
    }
    return r.address;
 }
@@ -702,27 +666,12 @@ QFileInfo QAbstractFileEngineIterator::currentFileInfo() const
    return d->fileInfo;
 }
 
-/*!
-    \internal
-
-    Returns the entry info \a type for this iterator's current directory entry
-    as a QVariant. If \a type is undefined for this entry, a null QVariant is
-    returned.
-
-    \sa QAbstractFileEngine::beginEntryList(), QDir::beginEntryList()
-*/
-QVariant QAbstractFileEngineIterator::entryInfo(EntryInfoType type) const
-{
-   Q_UNUSED(type)
-   return QVariant();
-}
-
 QAbstractFileEngine::Iterator *QAbstractFileEngine::beginEntryList(QDir::Filters filters,
       const QStringList &filterNames)
 {
    Q_UNUSED(filters);
    Q_UNUSED(filterNames);
-   return 0;
+   return nullptr;
 }
 
 /*!
@@ -730,7 +679,7 @@ QAbstractFileEngine::Iterator *QAbstractFileEngine::beginEntryList(QDir::Filters
 */
 QAbstractFileEngine::Iterator *QAbstractFileEngine::endEntryList()
 {
-   return 0;
+   return nullptr;
 }
 
 qint64 QAbstractFileEngine::read(char *data, qint64 maxlen)
@@ -775,6 +724,7 @@ bool QAbstractFileEngine::extension(Extension extension, const ExtensionOption *
    Q_UNUSED(extension);
    Q_UNUSED(option);
    Q_UNUSED(output);
+
    return false;
 }
 
@@ -790,26 +740,11 @@ QFile::FileError QAbstractFileEngine::error() const
    return d->fileError;
 }
 
-/*!
-  Returns the human-readable message appropriate to the current error
-  reported by error(). If no suitable string is available, an
-  empty string is returned.
-
-  \sa error()
- */
 QString QAbstractFileEngine::errorString() const
 {
    Q_D(const QAbstractFileEngine);
    return d->errorString;
 }
-
-/*!
-    Sets the error type to \a error, and the error string to \a errorString.
-    Call this function to set the error values returned by the higher-level
-    classes.
-
-    \sa QFile::error(), QIODevice::errorString(), QIODevice::setErrorString()
-*/
 void QAbstractFileEngine::setError(QFile::FileError error, const QString &errorString)
 {
    Q_D(QAbstractFileEngine);
@@ -817,4 +752,3 @@ void QAbstractFileEngine::setError(QFile::FileError error, const QString &errorS
    d->errorString = errorString;
 }
 
-QT_END_NAMESPACE

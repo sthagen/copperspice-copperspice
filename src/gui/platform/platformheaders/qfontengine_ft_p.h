@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -54,13 +54,13 @@ class QFreetypeFace
    static QFreetypeFace *getFace(const QFontEngine::FaceId &face_id, const QByteArray &fontData = QByteArray());
    void release(const QFontEngine::FaceId &face_id);
 
-   // locks the struct for usage. Any read/write operations require locking.
+   // locks the struct for usage, any read/write operations require locking.
    void lock() {
-      _lock.lock();
+      m_lock.lock();
    }
 
    void unlock() {
-      _lock.unlock();
+      m_lock.unlock();
    }
 
    FT_Face face;
@@ -84,17 +84,22 @@ class QFreetypeFace
    static void addBitmapToPath(FT_GlyphSlot slot, const QFixedPoint &point, QPainterPath *path);
 
  private:
-   QFreetypeFace() : _lock(QMutex::Recursive) {}
-   ~QFreetypeFace() {}
+   QFreetypeFace()
+   {
+   }
+
+   ~QFreetypeFace()
+   {
+   }
 
    void cleanup();
 
    QAtomicInt ref;
-   QMutex _lock;
+   QRecursiveMutex m_lock;
    QByteArray fontData;
 
-   void *hbFace;
-   qt_destroy_func_ptr hbFace_destroy_func;
+   // harfbuzz
+   std::shared_ptr<hb_face_t> m_hb_FTFace;
 
    friend class QFontEngineFT;
    friend class QtFreetypeData;
@@ -275,7 +280,7 @@ class QFontEngineFT : public QFontEngine
 
    Glyph *loadGlyph(uint glyph, QFixed subPixelPosition, GlyphFormat format = Format_None,
                   bool fetchMetricsOnly = false) const {
-      return loadGlyph(cacheEnabled ? &defaultGlyphSet : 0, glyph, subPixelPosition, format, fetchMetricsOnly);
+      return loadGlyph(cacheEnabled ? &defaultGlyphSet : nullptr, glyph, subPixelPosition, format, fetchMetricsOnly);
    }
 
    Glyph *loadGlyph(QGlyphSet *set, uint glyph, QFixed subPixelPosition, GlyphFormat = Format_None,

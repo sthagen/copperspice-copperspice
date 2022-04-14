@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,6 @@ class QOpenGLWindowPrivate;
 class Q_GUI_EXPORT QOpenGLWindow : public QPaintDeviceWindow
 {
    GUI_CS_OBJECT(QOpenGLWindow)
-   Q_DECLARE_PRIVATE(QOpenGLWindow)
 
  public:
    enum UpdateBehavior {
@@ -49,6 +48,9 @@ class Q_GUI_EXPORT QOpenGLWindow : public QPaintDeviceWindow
    explicit QOpenGLWindow(UpdateBehavior updateBehavior = NoPartialUpdate, QWindow *parent = nullptr);
    explicit QOpenGLWindow(QOpenGLContext *shareContext, UpdateBehavior updateBehavior = NoPartialUpdate,
       QWindow *parent = nullptr);
+
+   QOpenGLWindow(const QOpenGLWindow &) = delete;
+   QOpenGLWindow &operator=(const QOpenGLWindow &) = delete;
 
    ~QOpenGLWindow();
 
@@ -81,7 +83,7 @@ class Q_GUI_EXPORT QOpenGLWindow : public QPaintDeviceWindow
    QPaintDevice *redirected(QPoint *) const override;
 
  private:
-   Q_DISABLE_COPY(QOpenGLWindow)
+   Q_DECLARE_PRIVATE(QOpenGLWindow)
 };
 
 #endif // QT_NO_OPENGL

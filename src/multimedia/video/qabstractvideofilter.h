@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -52,21 +52,24 @@ class Q_MULTIMEDIA_EXPORT QAbstractVideoFilter : public QObject
     MULTI_CS_PROPERTY_WRITE(active, setActive)
     MULTI_CS_PROPERTY_NOTIFY(active, activeChanged)
 
-public:
+ public:
     explicit QAbstractVideoFilter(QObject *parent = nullptr);
+
+   QAbstractVideoFilter(const QAbstractVideoFilter &) = delete;
+   QAbstractVideoFilter &operator=(const QAbstractVideoFilter &) = delete;
+
     ~QAbstractVideoFilter();
 
     bool isActive() const;
-    void setActive(bool v);
+    void setActive(bool value);
 
     virtual QVideoFilterRunnable *createFilterRunnable() = 0;
 
     MULTI_CS_SIGNAL_1(Public, void activeChanged())
     MULTI_CS_SIGNAL_2(activeChanged)
 
-private:
+ private:
     Q_DECLARE_PRIVATE(QAbstractVideoFilter)
-    Q_DISABLE_COPY(QAbstractVideoFilter)
 
     QAbstractVideoFilterPrivate *d_ptr;
 };

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -80,7 +80,7 @@ void QFSFileEnginePrivate::init()
 
    openMode = QIODevice::NotOpen;
    fd = -1;
-   fh = 0;
+   fh = nullptr;
 
    lastIOCommand = IOFlushCommand;
    lastFlushFailed = false;
@@ -126,12 +126,14 @@ QFSFileEngine::QFSFileEngine(QFSFileEnginePrivate &dd)
 QFSFileEngine::~QFSFileEngine()
 {
    Q_D(QFSFileEngine);
+
    if (d->closeFileHandle) {
       if (d->fh) {
          int ret;
          do {
             ret = fclose(d->fh);
          } while (ret == EOF && errno == EINTR);
+
       } else if (d->fd != -1) {
          int ret;
          do {
@@ -139,6 +141,7 @@ QFSFileEngine::~QFSFileEngine()
          } while (ret == -1 && errno == EINTR);
       }
    }
+
    QList<uchar *> keys = d->maps.keys();
    for (int i = 0; i < keys.count(); ++i) {
       unmap(keys.at(i));
@@ -163,8 +166,12 @@ bool QFSFileEngine::open(QIODevice::OpenMode openMode)
    Q_D(QFSFileEngine);
 
    if (d->fileEntry.isEmpty()) {
+
+#if defined(CS_SHOW_DEBUG)
       qWarning("QFSFileEngine::open() No file name specified");
-      setError(QFile::OpenError, QLatin1String("No file name specified"));
+#endif
+
+      setError(QFile::OpenError, QString("No file name specified"));
       return false;
    }
 
@@ -181,7 +188,7 @@ bool QFSFileEngine::open(QIODevice::OpenMode openMode)
    d->openMode = openMode;
    d->lastFlushFailed = false;
    d->tried_stat = 0;
-   d->fh = 0;
+   d->fh = nullptr;
    d->fd = -1;
 
    return d->nativeOpen(openMode);
@@ -196,14 +203,6 @@ bool QFSFileEngine::open(QIODevice::OpenMode openMode, FILE *fh)
    return open(openMode, fh, QFile::DontCloseHandle);
 }
 
-/*!
-    Opens the file handle \a fh in \a openMode mode. Returns true
-    on success; otherwise returns false.
-
-    The \a handleFlags argument specifies whether the file handle will be
-    closed by Qt. See the QFile::FileHandleFlags documentation for more
-    information.
-*/
 bool QFSFileEngine::open(QIODevice::OpenMode openMode, FILE *fh, QFile::FileHandleFlags handleFlags)
 {
    Q_D(QFSFileEngine);
@@ -249,7 +248,7 @@ bool QFSFileEnginePrivate::openFh(QIODevice::OpenMode openMode, FILE *fh)
                      qt_error_string(int(errno)));
 
          this->openMode = QIODevice::NotOpen;
-         this->fh = 0;
+         this->fh = nullptr;
 
          return false;
       }
@@ -267,14 +266,6 @@ bool QFSFileEngine::open(QIODevice::OpenMode openMode, int fd)
    return open(openMode, fd, QFile::DontCloseHandle);
 }
 
-/*!
-    Opens the file descriptor \a fd in \a openMode mode. Returns true
-    on success; otherwise returns false.
-
-    The \a handleFlags argument specifies whether the file handle will be
-    closed by Qt. See the QFile::FileHandleFlags documentation for more
-    information.
-*/
 bool QFSFileEngine::open(QIODevice::OpenMode openMode, int fd, QFile::FileHandleFlags handleFlags)
 {
    Q_D(QFSFileEngine);
@@ -293,7 +284,7 @@ bool QFSFileEngine::open(QIODevice::OpenMode openMode, int fd, QFile::FileHandle
    d->lastFlushFailed = false;
    d->closeFileHandle = (handleFlags & QFile::AutoCloseHandle);
    d->fileEntry.clear();
-   d->fh = 0;
+   d->fh = nullptr;
    d->fd = -1;
    d->tried_stat = 0;
 
@@ -309,7 +300,7 @@ bool QFSFileEnginePrivate::openFd(QIODevice::OpenMode openMode, int fd)
 {
    Q_Q(QFSFileEngine);
    this->fd = fd;
-   fh = 0;
+   fh = nullptr;
 
    // Seek to the end when in Append mode.
    if (openMode & QFile::Append) {
@@ -373,17 +364,18 @@ bool QFSFileEnginePrivate::closeFdFh()
 
       // We must reset these guys regardless; calling close again after a
       // failed close causes crashes on some systems.
-      fh = 0;
+      fh = nullptr;
       fd = -1;
       closed = (ret == 0);
    }
 
-   // Report errors.
-   if (!flushed || !closed) {
+   // Report errors
+   if (! flushed || !closed) {
       if (flushed) {
-         // If not flushed, we want the flush error to fall through.
+         // if not flushed, flush all errors
          q->setError(QFile::UnspecifiedError, qt_error_string(errno));
       }
+
       return false;
    }
 
@@ -519,6 +511,7 @@ bool QFSFileEnginePrivate::seekFdFh(qint64 pos)
    if (fh) {
       // Buffered stdlib mode.
       int ret;
+
       do {
          ret = QT_FSEEK(fh, QT_OFF_T(pos), SEEK_SET);
       } while (ret != 0 && errno == EINTR);
@@ -527,14 +520,20 @@ bool QFSFileEnginePrivate::seekFdFh(qint64 pos)
          q->setError(QFile::ReadError, qt_error_string(int(errno)));
          return false;
       }
+
    } else {
       // Unbuffered stdio mode.
       if (QT_LSEEK(fd, QT_OFF_T(pos), SEEK_SET) == -1) {
-         qWarning() << "QFile::at: Cannot set file position" << pos;
+
+#if defined(CS_SHOW_DEBUG)
+         qWarning() << "QFile::at: Can not set file position" << pos;
+#endif
+
          q->setError(QFile::PositionError, qt_error_string(errno));
          return false;
       }
    }
+
    return true;
 }
 
@@ -758,7 +757,7 @@ QAbstractFileEngine::Iterator *QFSFileEngine::beginEntryList(QDir::Filters filte
 */
 QAbstractFileEngine::Iterator *QFSFileEngine::endEntryList()
 {
-   return 0;
+   return nullptr;
 }
 #endif
 
@@ -809,7 +808,7 @@ bool QFSFileEngine::extension(Extension extension, const ExtensionOption *option
       const MapExtensionOption *options = (MapExtensionOption *)(option);
       MapExtensionReturn *returnValue = static_cast<MapExtensionReturn *>(output);
       returnValue->address = d->map(options->offset, options->size, options->flags);
-      return (returnValue->address != 0);
+      return (returnValue->address != nullptr);
    }
    if (extension == UnMapExtension) {
       UnMapExtensionOption *options = (UnMapExtensionOption *)option;

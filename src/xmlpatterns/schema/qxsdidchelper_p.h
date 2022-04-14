@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,9 +26,7 @@
 
 #include <qreportcontext_p.h>
 #include <qschematype_p.h>
-#include <QtXmlPatterns/QXmlItem>
-
-QT_BEGIN_NAMESPACE
+#include <QXmlItem>
 
 namespace QPatternist {
 class FieldNode
@@ -140,8 +138,7 @@ inline uint qHash(const QPatternist::TargetNode &node)
 {
    return qHash(node.item().toNodeModelIndex());
 }
-}
 
-QT_END_NAMESPACE
+}
 
 #endif

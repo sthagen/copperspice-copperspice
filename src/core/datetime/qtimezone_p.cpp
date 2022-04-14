@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,11 +22,12 @@
 ***********************************************************************/
 
 #include <qtimezone.h>
-#include <qtimezone_p.h>
 
-#include <qtimezone_data.h>
 #include <qdatastream.h>
 #include <qdebug.h>
+
+#include <qtimezone_p.h>
+#include <qtimezone_data_p.h>
 
 #include <algorithm>
 
@@ -393,9 +394,10 @@ QList<QByteArray> QTimeZonePrivate::availableTimeZoneIds(int offsetFromUtc) cons
    return result;
 }
 
-void QTimeZonePrivate::serialize(QDataStream &ds) const
+void QTimeZonePrivate::serialize(QDataStream &stream) const
 {
-   ds << QString::fromUtf8(m_id);
+   // leave this as a QByteArray
+   stream << m_id;
 }
 
 // Static Utility Methods
@@ -562,8 +564,7 @@ QList<QByteArray> QTimeZonePrivate::windowsIdToIanaIds(const QByteArray &windows
    return list;
 }
 
-QList<QByteArray> QTimeZonePrivate::windowsIdToIanaIds(const QByteArray &windowsId,
-   QLocale::Country country)
+QList<QByteArray> QTimeZonePrivate::windowsIdToIanaIds(const QByteArray &windowsId, QLocale::Country country)
 {
    const quint16 windowsIdKey = toWindowsIdKey(windowsId);
    for (int i = 0; i < zoneDataTableSize; ++i) {
@@ -575,12 +576,6 @@ QList<QByteArray> QTimeZonePrivate::windowsIdToIanaIds(const QByteArray &windows
    }
 
    return QList<QByteArray>();
-}
-
-// Define template for derived classes to reimplement so QSharedDataPointer clone() works correctly
-template<> QTimeZonePrivate *QSharedDataPointer<QTimeZonePrivate>::clone()
-{
-   return d->clone();
 }
 
 /*
@@ -602,6 +597,7 @@ QUtcTimeZonePrivate::QUtcTimeZonePrivate(const QByteArray &id)
    for (int i = 0; i < utcDataTableSize; ++i) {
       const QUtcData *data = utcData(i);
       const QByteArray uid = utcId(data);
+
       if (uid == id) {
          QString name = QString::fromUtf8(id);
          init(id, data->offsetFromUtc, name, name, QLocale::AnyCountry, name);
@@ -763,9 +759,10 @@ QList<QByteArray> QUtcTimeZonePrivate::availableTimeZoneIds(qint32 offsetSeconds
    return result;
 }
 
-void QUtcTimeZonePrivate::serialize(QDataStream &ds) const
+void QUtcTimeZonePrivate::serialize(QDataStream &stream) const
 {
-   ds << "OffsetFromUtc" << QString::fromUtf8(m_id) << m_offsetFromUtc << m_name
-      << m_abbreviation << (qint32) m_country << m_comment;
-}
+   // first entry must be a QByteArray
 
+   stream << QByteArray("OffsetFromUtc") << QString::fromUtf8(m_id) << m_offsetFromUtc << m_name
+          << m_abbreviation << (qint32) m_country << m_comment;
+}

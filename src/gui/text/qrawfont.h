@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,6 @@ class QRawFontPrivate;
 
 class Q_GUI_EXPORT QRawFont
 {
-
  public:
    enum AntialiasingType {
       PixelAntialiasing,
@@ -46,17 +45,20 @@ class Q_GUI_EXPORT QRawFont
 
    enum LayoutFlag {
       SeparateAdvances = 0,
-      KernedAdvances = 1,
+      KernedAdvances   = 1,
       UseDesignMetrics = 2
    };
 
    using LayoutFlags = QFlags<LayoutFlag>;
 
    QRawFont();
+
    QRawFont(const QString &fileName, qreal pixelSize,
       QFont::HintingPreference hintingPreference = QFont::PreferDefaultHinting);
+
    QRawFont(const QByteArray &fontData, qreal pixelSize,
       QFont::HintingPreference hintingPreference = QFont::PreferDefaultHinting);
+
    QRawFont(const QRawFont &other);
 
    ~QRawFont();
@@ -72,7 +74,7 @@ class Q_GUI_EXPORT QRawFont
 
    bool operator==(const QRawFont &other) const;
    inline bool operator!=(const QRawFont &other) const {
-      return !operator==(other);
+      return ! operator==(other);
    }
 
    QString familyName() const;
@@ -113,11 +115,10 @@ class Q_GUI_EXPORT QRawFont
    qreal unitsPerEm() const;
 
    void loadFromFile(const QString &fileName, qreal pixelSize, QFont::HintingPreference hintingPreference);
-
    void loadFromData(const QByteArray &fontData, qreal pixelSize, QFont::HintingPreference hintingPreference);
 
    void swap(QRawFont &other) {
-      qSwap(d, other.d);
+      qSwap(m_fontPrivate, other.m_fontPrivate);
    }
 
    bool supportsCharacter(quint32 ucs4) const;
@@ -133,7 +134,7 @@ class Q_GUI_EXPORT QRawFont
    friend class QTextLayout;
    friend class QTextEngine;
 
-   QExplicitlySharedDataPointer<QRawFontPrivate> d;
+   std::shared_ptr<QRawFontPrivate> m_fontPrivate;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QRawFont::LayoutFlags)
@@ -146,6 +147,7 @@ inline QVector<QPointF> QRawFont::advancesForGlyphIndexes(const QVector<quint32>
    if (advancesForGlyphIndexes(glyphIndexes.constData(), advances.data(), glyphIndexes.size(), layoutFlags)) {
       return advances;
    }
+
    return QVector<QPointF>();
 }
 

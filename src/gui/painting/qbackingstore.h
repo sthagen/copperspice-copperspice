@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -54,7 +54,7 @@ class Q_GUI_EXPORT QBackingStore
 
    bool scroll(const QRegion &area, int dx, int dy);
 
-   void beginPaint(const QRegion &);
+   void beginPaint(const QRegion &region);
    void endPaint();
 
    void setStaticContents(const QRegion &region);

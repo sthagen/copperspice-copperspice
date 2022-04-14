@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QSCRIPTDECLARATIVECLASS_P_H
 #define QSCRIPTDECLARATIVECLASS_P_H
 
-#include <QtScript/qscriptvalue.h>
-#include <QtScript/qscriptclass.h>
-
-QT_BEGIN_NAMESPACE
+#include <qscriptvalue.h>
+#include <qscriptclass.h>
 
 class QScriptDeclarativeClassPrivate;
 class PersistentIdentifierPrivate;
@@ -83,9 +81,9 @@ class Q_SCRIPT_EXPORT QScriptDeclarativeClass
    static QScriptValue scopeChainValue(QScriptContext *, int index);
    static QScriptContext *pushCleanContext(QScriptEngine *);
 
-   static QScriptValue newStaticScopeObject(
-      QScriptEngine *, int propertyCount, const QString *names,
+   static QScriptValue newStaticScopeObject(QScriptEngine *, int propertyCount, const QString *names,
       const QScriptValue *values, const QScriptValue::PropertyFlags *flags);
+
    static QScriptValue newStaticScopeObject(QScriptEngine *);
 
    class Q_SCRIPT_EXPORT PersistentIdentifier
@@ -95,13 +93,20 @@ class Q_SCRIPT_EXPORT QScriptDeclarativeClass
 
       PersistentIdentifier();
       ~PersistentIdentifier();
+
       PersistentIdentifier(const PersistentIdentifier &other);
       PersistentIdentifier &operator=(const PersistentIdentifier &other);
 
       QString toString() const;
+
     private:
       friend class QScriptDeclarativeClass;
-      PersistentIdentifier(QScriptEnginePrivate *e) : identifier(0), engine(e), d(0) {}
+
+      PersistentIdentifier(QScriptEnginePrivate *e)
+         : identifier(nullptr), engine(e), d(nullptr)
+      {
+      }
+
       QScriptEnginePrivate *engine;
       void *d;
    };
@@ -133,15 +138,14 @@ class Q_SCRIPT_EXPORT QScriptDeclarativeClass
    virtual QStringList propertyNames(Object *);
 
    virtual bool isQObject() const;
-   virtual QObject *toQObject(Object *, bool *ok = 0);
-   virtual QVariant toVariant(Object *, bool *ok = 0);
+   virtual QObject *toQObject(Object *, bool *ok = nullptr);
+   virtual QVariant toVariant(Object *, bool *ok = nullptr);
 
    QScriptContext *context() const;
+
  protected:
    friend class QScriptDeclarativeClassPrivate;
    QScopedPointer<QScriptDeclarativeClassPrivate> d_ptr;
 };
-
-QT_END_NAMESPACE
 
 #endif

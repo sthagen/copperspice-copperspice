@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,15 +36,17 @@ class Q_GUI_EXPORT QPixmapCache
     public:
       Key();
       Key(const Key &other);
+
       Key(Key &&other) : d(other.d) {
          other.d = nullptr;
       }
 
       ~Key();
 
-      bool operator ==(const Key &key) const;
-      inline bool operator !=(const Key &key) const {
-         return !operator==(key);
+      bool operator ==(const Key &other) const;
+
+      inline bool operator !=(const Key &other) const {
+         return !operator==(other);
       }
 
       Key &operator =(Key &&other) {
@@ -64,7 +66,7 @@ class Q_GUI_EXPORT QPixmapCache
    };
 
    static int cacheLimit();
-   static void setCacheLimit(int);
+   static void setCacheLimit(int max);
    static QPixmap *find(const QString &key);
    static bool find(const QString &key, QPixmap &pixmap);
    static bool find(const QString &key, QPixmap *pixmap);

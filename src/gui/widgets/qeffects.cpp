@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,6 +24,7 @@
 #include <qapplication.h>
 
 #ifndef QT_NO_EFFECTS
+
 #include <qdesktopwidget.h>
 #include <qeffects_p.h>
 #include <qevent.h>
@@ -41,7 +42,7 @@ class QAlphaWidget: public QWidget, private QEffects
    GUI_CS_OBJECT(QAlphaWidget)
 
  public:
-   QAlphaWidget(QWidget *w, Qt::WindowFlags f = 0);
+   QAlphaWidget(QWidget *w, Qt::WindowFlags flags = Qt::EmptyFlag);
    ~QAlphaWidget();
 
    void run(int time);
@@ -69,17 +70,15 @@ class QAlphaWidget: public QWidget, private QEffects
    QElapsedTimer checkTime;
 };
 
-static QAlphaWidget *q_blend = 0;
+static QAlphaWidget *q_blend = nullptr;
 
-/*
-  Constructs a QAlphaWidget.
-*/
-QAlphaWidget::QAlphaWidget(QWidget *w, Qt::WindowFlags f)
-   : QWidget(QApplication::desktop()->screen(QApplication::desktop()->screenNumber(w)), f)
+QAlphaWidget::QAlphaWidget(QWidget *w, Qt::WindowFlags flags)
+   : QWidget(QApplication::desktop()->screen(QApplication::desktop()->screenNumber(w)), flags)
 {
 #ifndef Q_OS_WIN
    setEnabled(false);
 #endif
+
    setAttribute(Qt::WA_NoSystemBackground, true);
    widget = w;
    alpha = 0;
@@ -221,12 +220,6 @@ void QAlphaWidget::closeEvent(QCloseEvent *e)
    QWidget::closeEvent(e);
 }
 
-/*
-  Render alphablending for the time elapsed.
-
-  Show the blended widget and free all allocated source
-  if the blending is finished.
-*/
 void QAlphaWidget::render()
 {
    int tempel = checkTime.elapsed();
@@ -243,48 +236,48 @@ void QAlphaWidget::render()
    }
 
 #if defined(Q_OS_WIN)
-   if (alpha >= 1 || !showWidget) {
+   if (alpha >= 1 || ! showWidget) {
       anim.stop();
       qApp->removeEventFilter(this);
       widget->setWindowOpacity(1);
-      q_blend = 0;
+
+      q_blend = nullptr;
       deleteLater();
+
    } else {
       widget->setWindowOpacity(alpha);
    }
+
 #else
-   if (alpha >= 1 || !showWidget) {
+   if (alpha >= 1 || ! showWidget) {
       anim.stop();
       qApp->removeEventFilter(this);
 
-      if (widget) {
-         if (!showWidget) {
-#ifdef Q_OS_WIN
-            setEnabled(true);
-            setFocus();
-#endif
+      if (widget != nullptr) {
+
+         if (! showWidget) {
             widget->hide();
+
          } else {
-            //Since we are faking the visibility of the widget
-            //we need to unset the hidden state on it before calling show
+            // since we are faking the visibility of the widget
+            // we need to unset the hidden state on it before calling show
             widget->setAttribute(Qt::WA_WState_Hidden, true);
             widget->show();
             lower();
          }
       }
-      q_blend = 0;
+
+      q_blend = nullptr;
       deleteLater();
+
    } else {
       alphaBlend();
       pm = QPixmap::fromImage(mixedImage);
       repaint();
    }
-#endif // defined(Q_OS_WIN)
+#endif
 }
 
-/*
-  Calculate an alphablended image.
-*/
 void QAlphaWidget::alphaBlend()
 {
    const int a = qRound(alpha * 256);
@@ -293,6 +286,7 @@ void QAlphaWidget::alphaBlend()
    const int sw = frontImage.width();
    const int sh = frontImage.height();
    const int bpl = frontImage.bytesPerLine();
+
    switch (frontImage.depth()) {
       case 32: {
          uchar *mixed_data = mixedImage.bits();
@@ -321,19 +315,12 @@ void QAlphaWidget::alphaBlend()
    }
 }
 
-/*
-  Internal class QRollEffect
-
-  The QRollEffect widget is shown while the animation lasts
-  and displays a scrolling pixmap.
-*/
-
 class QRollEffect : public QWidget, private QEffects
 {
    GUI_CS_OBJECT(QRollEffect)
 
  public:
-   QRollEffect(QWidget *w, Qt::WindowFlags f, DirFlags orient);
+   QRollEffect(QWidget *w, Qt::WindowFlags flags, DirFlags orient);
 
    void run(int time);
 
@@ -364,13 +351,10 @@ class QRollEffect : public QWidget, private QEffects
    QPixmap pm;
 };
 
-static QRollEffect *q_roll = 0;
+static QRollEffect *q_roll = nullptr;
 
-/*
-  Construct a QRollEffect widget.
-*/
-QRollEffect::QRollEffect(QWidget *w, Qt::WindowFlags f, DirFlags orient)
-   : QWidget(0, f), orientation(orient)
+QRollEffect::QRollEffect(QWidget *w, Qt::WindowFlags flags, DirFlags orient)
+   : QWidget(nullptr, flags), orientation(orient)
 {
 #ifndef Q_OS_WIN
    setEnabled(false);
@@ -395,6 +379,7 @@ QRollEffect::QRollEffect(QWidget *w, Qt::WindowFlags f, DirFlags orient)
    if (orientation & (RightScroll | LeftScroll)) {
       currentWidth = 0;
    }
+
    if (orientation & (DownScroll | UpScroll)) {
       currentHeight = 0;
    }
@@ -550,7 +535,7 @@ void QRollEffect::scroll()
             lower();
          }
       }
-      q_roll = 0;
+      q_roll = nullptr;
       deleteLater();
    }
 }
@@ -563,7 +548,7 @@ void qScrollEffect(QWidget *w, QEffects::DirFlags orient, int time)
 {
    if (q_roll) {
       q_roll->deleteLater();
-      q_roll = 0;
+      q_roll = nullptr;
    }
 
    if (!w) {
@@ -586,7 +571,7 @@ void qFadeEffect(QWidget *w, int time)
 {
    if (q_blend) {
       q_blend->deleteLater();
-      q_blend = 0;
+      q_blend = nullptr;
    }
 
    if (!w) {

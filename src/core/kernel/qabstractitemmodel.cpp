@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,12 +36,18 @@
 
 #include <limits.h>
 
+enum SortType {
+   Type_Int,
+   Type_Float,
+   Type_Other
+};
+
 QPersistentModelIndexData *QPersistentModelIndexData::create(const QModelIndex &index)
 {
    Q_ASSERT(index.isValid());          // we will _never_ insert an invalid index in the list
 
-   QPersistentModelIndexData *d = 0;
-   QAbstractItemModel *model = const_cast<QAbstractItemModel *>(index.model());
+   QPersistentModelIndexData *d = nullptr;
+   QAbstractItemModel *model    = const_cast<QAbstractItemModel *>(index.model());
 
    QMultiMap<QModelIndex, QPersistentModelIndexData *> &tmpIndex = model->d_func()->persistent.m_indexes;
    const QMultiMap<QModelIndex, QPersistentModelIndexData *>::iterator it = tmpIndex.find(index);
@@ -77,7 +83,7 @@ void QPersistentModelIndexData::destroy(QPersistentModelIndexData *data)
 }
 
 QPersistentModelIndex::QPersistentModelIndex()
-   : d(0)
+   : d(nullptr)
 {
 }
 
@@ -90,7 +96,7 @@ QPersistentModelIndex::QPersistentModelIndex(const QPersistentModelIndex &other)
 }
 
 QPersistentModelIndex::QPersistentModelIndex(const QModelIndex &index)
-   : d(0)
+   : d(nullptr)
 {
    if (index.isValid()) {
       d = QPersistentModelIndexData::create(index);
@@ -102,7 +108,7 @@ QPersistentModelIndex::~QPersistentModelIndex()
 {
    if (d && !d->ref.deref()) {
       QPersistentModelIndexData::destroy(d);
-      d = 0;
+      d = nullptr;
    }
 }
 
@@ -153,7 +159,7 @@ QPersistentModelIndex &QPersistentModelIndex::operator=(const QModelIndex &other
          d->ref.ref();
       }
    } else {
-      d = 0;
+      d = nullptr;
    }
 
    return *this;
@@ -205,7 +211,8 @@ void *QPersistentModelIndex::internalPointer() const
    if (d) {
       return d->index.internalPointer();
    }
-   return 0;
+
+   return nullptr;
 }
 
 quintptr QPersistentModelIndex::internalId() const
@@ -222,15 +229,16 @@ QModelIndex QPersistentModelIndex::parent() const
    if (d) {
       return d->index.parent();
    }
+
    return QModelIndex();
 }
-
 
 QModelIndex QPersistentModelIndex::sibling(int row, int column) const
 {
    if (d) {
       return d->index.sibling(row, column);
    }
+
    return QModelIndex();
 }
 
@@ -258,7 +266,8 @@ Qt::ItemFlags QPersistentModelIndex::flags() const
    if (d) {
       return d->index.flags();
    }
-   return 0;
+
+   return Qt::EmptyFlag;
 }
 
 const QAbstractItemModel *QPersistentModelIndex::model() const
@@ -266,20 +275,9 @@ const QAbstractItemModel *QPersistentModelIndex::model() const
    if (d) {
       return d->index.model();
    }
-   return 0;
+
+   return nullptr;
 }
-
-/*!
-    \fn bool QPersistentModelIndex::isValid() const
-
-    Returns true if this persistent model index is valid; otherwise returns
-    false.
-
-    A valid index belongs to a model, and has non-negative row and column
-    numbers.
-
-    \sa model(), row(), column()
-*/
 
 bool QPersistentModelIndex::isValid() const
 {
@@ -364,9 +362,8 @@ const QMultiHash<int, QString> &QAbstractItemModelPrivate::defaultRoleNames()
    return *qDefaultRoleNames();
 }
 
-static uint typeOfVariant(const QVariant &value)
+static SortType typeOfVariant(const QVariant &value)
 {
-   //return 0 for integer, 1 for floating point and 2 for other
    switch (value.userType()) {
       case QVariant::Bool:
       case QVariant::Int:
@@ -374,37 +371,41 @@ static uint typeOfVariant(const QVariant &value)
       case QVariant::LongLong:
       case QVariant::ULongLong:
       case QVariant::Char:
-      case QMetaType::Short:
-      case QMetaType::UShort:
-      case QMetaType::UChar:
-      case QMetaType::ULong:
-      case QMetaType::Long:
-         return 0;
+      case QVariant::Short:
+      case QVariant::UShort:
+      case QVariant::UChar:
+      case QVariant::ULong:
+      case QVariant::Long:
+         return SortType::Type_Int;
+
       case QVariant::Double:
-      case QMetaType::Float:
-         return 1;
+      case QVariant::Float:
+         return SortType::Type_Float;
+
       default:
-         return 2;
+         return SortType::Type_Other;
    }
 }
 
-/*!
-    \internal
-    return true if \a value contains a numerical type
 
-    This function is used by our Q{Tree,Widget,Table}WidgetModel classes to sort.
-*/
+// internal
+// called from QTreeWidgetItem, QListWidgetItem, QTableWidgetItem for sorting
+
 bool QAbstractItemModelPrivate::variantLessThan(const QVariant &v1, const QVariant &v2)
 {
-   switch (qMax(typeOfVariant(v1), typeOfVariant(v2))) {
-      case 0: //integer type
-         return v1.toLongLong() < v2.toLongLong();
+   SortType type1 = typeOfVariant(v1);
+   SortType type2 = typeOfVariant(v2);
 
-      case 1: //floating point
-         return v1.toReal() < v2.toReal();
+   if (type1 == SortType::Type_Int && type2 == SortType::Type_Int) {
+      // integer
+      return v1.toLongLong() < v2.toLongLong();
 
-      default:
-         return v1.toString().localeAwareCompare(v2.toString()) < 0;
+   } else if (type1 <= SortType::Type_Float && type2 <= SortType::Type_Float)  {
+      // floating point
+      return v1.toReal() < v2.toReal();
+
+   } else {
+      return v1.toString().localeAwareCompare(v2.toString()) < 0;
    }
 }
 
@@ -693,7 +694,7 @@ void QAbstractItemModelPrivate::rowsRemoved(const QModelIndex &parent,
       }
 
       data->index = QModelIndex();
-      data->model = 0;
+      data->model = nullptr;
    }
 }
 
@@ -823,14 +824,13 @@ void QAbstractItemModelPrivate::columnsRemoved(const QModelIndex &parent,
       }
 
       data->index = QModelIndex();
-      data->model = 0;
+      data->model = nullptr;
    }
 }
 
 void QAbstractItemModel::resetInternalData()
 {
 }
-
 
 QAbstractItemModel::QAbstractItemModel(QObject *parent)
    : QObject(parent), d_ptr(new QAbstractItemModelPrivate)
@@ -916,12 +916,12 @@ QStringList QAbstractItemModel::mimeTypes() const
 QMimeData *QAbstractItemModel::mimeData(const QModelIndexList &indexes) const
 {
    if (indexes.count() <= 0) {
-      return 0;
+      return nullptr;
    }
 
    QStringList types = mimeTypes();
    if (types.isEmpty()) {
-      return 0;
+      return nullptr;
    }
 
    QMimeData *data = new QMimeData();
@@ -1056,8 +1056,9 @@ bool QAbstractItemModel::canFetchMore(const QModelIndex &) const
 Qt::ItemFlags QAbstractItemModel::flags(const QModelIndex &index) const
 {
    Q_D(const QAbstractItemModel);
-   if (!d->indexValid(index)) {
-      return 0;
+
+   if (! d->indexValid(index)) {
+      return Qt::EmptyFlag;
    }
 
    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
@@ -1067,8 +1068,6 @@ void QAbstractItemModel::sort(int column, Qt::SortOrder order)
 {
    (void) column;
    (void) order;
-
-   // do nothing
 }
 
 QModelIndex QAbstractItemModel::buddy(const QModelIndex &index) const
@@ -1258,10 +1257,10 @@ void QAbstractItemModel::encodeData(const QModelIndexList &indexes, QDataStream 
  */
 bool QAbstractItemModel::decodeData(int row, int column, const QModelIndex &parent, QDataStream &stream)
 {
-   int top = INT_MAX;
-   int left = INT_MAX;
+   int top    = INT_MAX;
+   int left   = INT_MAX;
    int bottom = 0;
-   int right = 0;
+   int right  = 0;
 
    QVector<int> rows, columns;
    QVector<QMap<int, QVariant> > data;
@@ -1614,7 +1613,7 @@ void QAbstractItemModel::changePersistentIndex(const QModelIndex &from, const QM
       if (to.isValid()) {
          d->persistent.insertMultiAtEnd(to, data);
       } else {
-         data->model = 0;
+         data->model = nullptr;
       }
    }
 }
@@ -1646,7 +1645,7 @@ void QAbstractItemModel::changePersistentIndexList(const QModelIndexList &from,
          if (data->index.isValid()) {
             toBeReinserted << data;
          } else {
-            data->model = 0;
+            data->model = nullptr;
          }
       }
    }

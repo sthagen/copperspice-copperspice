@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,6 @@
 #ifndef QVIDEOFRAME_H
 #define QVIDEOFRAME_H
 
-#include <qmetatype.h>
 #include <qshareddata.h>
 #include <qimage.h>
 #include <qabstractvideobuffer.h>
@@ -105,7 +104,7 @@ class Q_MULTIMEDIA_EXPORT QVideoFrame
    int height() const;
 
    FieldType fieldType() const;
-   void setFieldType(FieldType);
+   void setFieldType(FieldType field);
 
    bool isMapped() const;
    bool isReadable() const;
@@ -147,11 +146,6 @@ class Q_MULTIMEDIA_EXPORT QVideoFrame
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, const QVideoFrame &);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QVideoFrame::FieldType);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QVideoFrame::PixelFormat);
-
-
-Q_DECLARE_METATYPE(QVideoFrame)
-Q_DECLARE_METATYPE(QVideoFrame::FieldType)
-Q_DECLARE_METATYPE(QVideoFrame::PixelFormat)
 
 #endif
 

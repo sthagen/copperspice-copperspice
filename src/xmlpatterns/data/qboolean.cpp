@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -104,10 +104,12 @@ AtomicValue::Ptr Boolean::fromLexical(const QString &lexical)
 {
    const QString val(lexical.trimmed()); /* Apply the whitespace facet. */
 
-   if (val == QLatin1String("true") || val == QChar(QLatin1Char('1'))) {
+   if (val == "true" || val == "1") {
       return CommonValues::BooleanTrue;
-   } else if (val == QLatin1String("false") || val == QChar(QLatin1Char('0'))) {
+
+   } else if (val == "false" || val == "0") {
       return CommonValues::BooleanFalse;
+
    } else {
       return ValidationError::createError();
    }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -229,8 +229,8 @@ class QInputDialogPrivate : public QDialogPrivate
 };
 
 QInputDialogPrivate::QInputDialogPrivate()
-   : label(0), buttonBox(0), lineEdit(0), plainTextEdit(0), intSpinBox(0), doubleSpinBox(0),
-     comboBox(0), listView(0), inputWidget(0), mainLayout(0)
+   : label(nullptr), buttonBox(nullptr), lineEdit(nullptr), plainTextEdit(nullptr), intSpinBox(nullptr),
+     doubleSpinBox(nullptr), comboBox(nullptr), listView(nullptr), inputWidget(nullptr), mainLayout(nullptr)
 {
 }
 
@@ -258,8 +258,8 @@ void QInputDialogPrivate::ensureLayout()
    label->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 
    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, q);
-   QObject::connect(buttonBox, SIGNAL(accepted()), q, SLOT(accept()));
-   QObject::connect(buttonBox, SIGNAL(rejected()), q, SLOT(reject()));
+   QObject::connect(buttonBox, &QDialogButtonBox::accepted, q, &QInputDialog::accept);
+   QObject::connect(buttonBox, &QDialogButtonBox::rejected, q, &QInputDialog::reject);
 
    mainLayout = new QVBoxLayout(q);
    mainLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
@@ -316,8 +316,7 @@ void QInputDialogPrivate::ensureComboBox()
 
       comboBox->hide();
       QObject::connect(comboBox, &QComboBox::editTextChanged, q, &QInputDialog::_q_textChanged);
-      QObject::connect(comboBox, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
-                  q, &QInputDialog::_q_textChanged);
+      QObject::connect(comboBox, cs_mp_cast<const QString &>(&QComboBox::currentIndexChanged), q, &QInputDialog::_q_textChanged);
    }
 }
 
@@ -343,34 +342,50 @@ void QInputDialogPrivate::ensureIntSpinBox()
 {
    Q_Q(QInputDialog);
 
-   if (!intSpinBox) {
+   if (! intSpinBox) {
       intSpinBox = new QInputDialogSpinBox(q);
       intSpinBox->hide();
-      QObject::connect(intSpinBox, SIGNAL(valueChanged(int)), q, SLOT(intValueChanged(int)));
+
+      QObject::connect(intSpinBox, cs_mp_cast<int>(&QSpinBox::valueChanged), q, &QInputDialog::intValueChanged);
    }
 }
 
 void QInputDialogPrivate::ensureDoubleSpinBox()
 {
    Q_Q(QInputDialog);
-   if (!doubleSpinBox) {
+
+   if (! doubleSpinBox) {
       doubleSpinBox = new QInputDialogDoubleSpinBox(q);
       doubleSpinBox->hide();
-      QObject::connect(doubleSpinBox, SIGNAL(valueChanged(double)), q, SLOT(doubleValueChanged(double)));
+
+      QObject::connect(doubleSpinBox, cs_mp_cast<double>(&QDoubleSpinBox::valueChanged), q, &QInputDialog::doubleValueChanged);
    }
 }
 
 void QInputDialogPrivate::ensureEnabledConnection(QAbstractSpinBox *spinBox)
 {
-   if (spinBox) {
+   if (spinBox != nullptr) {
       QAbstractButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
-      QObject::connect(spinBox, SIGNAL(textChanged(bool)), okButton, SLOT(setEnabled(bool)), Qt::UniqueConnection);
+
+      QInputDialogSpinBox *tmp1 = dynamic_cast<QInputDialogSpinBox *>(spinBox);
+
+      if (tmp1 != nullptr) {
+         QObject::connect(tmp1, &QInputDialogSpinBox::textChanged, okButton, &QAbstractButton::setEnabled, Qt::UniqueConnection);
+
+      } else {
+         QInputDialogDoubleSpinBox *tmp2 = dynamic_cast<QInputDialogDoubleSpinBox *>(spinBox);
+
+         if (tmp2 != nullptr) {
+            QObject::connect(tmp2, &QInputDialogDoubleSpinBox::textChanged, okButton, &QAbstractButton::setEnabled, Qt::UniqueConnection);
+         }
+      }
    }
 }
 
 void QInputDialogPrivate::setInputWidget(QWidget *widget)
 {
    Q_ASSERT(widget);
+
    if (inputWidget == widget) {
       return;
    }
@@ -384,14 +399,28 @@ void QInputDialogPrivate::setInputWidget(QWidget *widget)
 
       // disconnect old input widget
       QAbstractButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+
       if (QAbstractSpinBox *spinBox = qobject_cast<QAbstractSpinBox *>(inputWidget)) {
-         QObject::disconnect(spinBox, SIGNAL(textChanged(bool)), okButton, SLOT(setEnabled(bool)));
+
+         QInputDialogSpinBox *tmp1 = dynamic_cast<QInputDialogSpinBox *>(spinBox);
+
+         if (tmp1 != nullptr) {
+            QObject::disconnect(tmp1, &QInputDialogSpinBox::textChanged, okButton, &QAbstractButton::setEnabled);
+
+         } else {
+            QInputDialogDoubleSpinBox *tmp2 = dynamic_cast<QInputDialogDoubleSpinBox *>(spinBox);
+
+            if (tmp2 != nullptr) {
+               QObject::disconnect(tmp2, &QInputDialogDoubleSpinBox::textChanged, okButton, &QAbstractButton::setEnabled);
+            }
+         }
       }
 
-      // connect new input widget and update enabled state of OK button
       QAbstractSpinBox *spinBox = qobject_cast<QAbstractSpinBox *>(widget);
+
+      // connect new input widget and update enabled state of OK button
       ensureEnabledConnection(spinBox);
-      okButton->setEnabled(!spinBox || spinBox->hasAcceptableInput());
+      okButton->setEnabled(! spinBox || spinBox->hasAcceptableInput());
    }
 
    inputWidget = widget;
@@ -663,7 +692,6 @@ QString QInputDialog::textValue() const
    Q_D(const QInputDialog);
    return d->textValue;
 }
-
 
 void QInputDialog::setTextEchoMode(QLineEdit::EchoMode mode)
 {
@@ -984,7 +1012,6 @@ void QInputDialog::setVisible(bool visible)
    QDialog::setVisible(visible);
 }
 
-
 void QInputDialog::done(int result)
 {
    Q_D(QInputDialog);
@@ -1010,7 +1037,7 @@ void QInputDialog::done(int result)
       disconnect(this, signalForMember(d->memberToDisconnectOnClose), d->receiverToDisconnectOnClose,
          d->memberToDisconnectOnClose);
 
-      d->receiverToDisconnectOnClose = 0;
+      d->receiverToDisconnectOnClose = nullptr;
    }
 
    d->memberToDisconnectOnClose.clear();
@@ -1028,13 +1055,13 @@ QString QInputDialog::getText(QWidget *parent, const QString &title, const QStri
    dialog.setTextEchoMode(mode);
    dialog.setInputMethodHints(inputMethodHints);
 
-   const int ret = dialog.exec();
+   const int result = dialog.exec();
 
    if (ok) {
-      *ok = !!ret;
+      *ok = (result != 0);
    }
 
-   if (ret) {
+   if (result) {
       return dialog.textValue();
    } else {
       return QString();
@@ -1042,10 +1069,10 @@ QString QInputDialog::getText(QWidget *parent, const QString &title, const QStri
 }
 
 QString QInputDialog::getMultiLineText(QWidget *parent, const QString &title, const QString &label,
-   const QString &text, bool *ok, Qt::WindowFlags flags,
-   Qt::InputMethodHints inputMethodHints)
+   const QString &text, bool *ok, Qt::WindowFlags flags, Qt::InputMethodHints inputMethodHints)
 {
    QInputDialog dialog(parent, flags);
+
    dialog.setOptions(QInputDialog::UsePlainTextEditForTextInput);
    dialog.setWindowTitle(title);
    dialog.setLabelText(label);
@@ -1065,13 +1092,11 @@ QString QInputDialog::getMultiLineText(QWidget *parent, const QString &title, co
    }
 }
 
-
-
-
 int QInputDialog::getInt(QWidget *parent, const QString &title, const QString &label, int value,
    int min, int max, int step, bool *ok, Qt::WindowFlags flags)
 {
    QInputDialog dialog(parent, flags);
+
    dialog.setWindowTitle(title);
    dialog.setLabelText(label);
    dialog.setIntRange(min, max);
@@ -1079,9 +1104,11 @@ int QInputDialog::getInt(QWidget *parent, const QString &title, const QString &l
    dialog.setIntStep(step);
 
    int ret = dialog.exec();
+
    if (ok) {
       *ok = !!ret;
    }
+
    if (ret) {
       return dialog.intValue();
    } else {
@@ -1093,6 +1120,7 @@ double QInputDialog::getDouble(QWidget *parent, const QString &title, const QStr
    double value, double min, double max, int decimals, bool *ok, Qt::WindowFlags flags)
 {
    QInputDialog dialog(parent, flags);
+
    dialog.setWindowTitle(title);
    dialog.setLabelText(label);
    dialog.setDoubleDecimals(decimals);
@@ -1119,6 +1147,7 @@ QString QInputDialog::getItem(QWidget *parent, const QString &title, const QStri
    QString text(items.value(current));
 
    QInputDialog dialog(parent, flags);
+
    dialog.setWindowTitle(title);
    dialog.setLabelText(label);
    dialog.setComboBoxItems(items);
@@ -1131,15 +1160,13 @@ QString QInputDialog::getItem(QWidget *parent, const QString &title, const QStri
    if (ok) {
       *ok = !!ret;
    }
+
    if (ret) {
       return dialog.textValue();
    } else {
       return text;
    }
 }
-
-
-
 
 void QInputDialog::_q_textChanged(const QString &un_named_arg1)
 {

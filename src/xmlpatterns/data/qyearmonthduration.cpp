@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -57,8 +57,7 @@ YearMonthDuration::Ptr YearMonthDuration::fromLexical(const QString &lexical)
    MonthProperty months = 0;
    bool isPos;
 
-   const AtomicValue::Ptr err(create(captureTable, lexical, &isPos, &years,
-                                     &months, 0, 0, 0, 0, 0));
+   const AtomicValue::Ptr err(create(captureTable, lexical, &isPos, &years, &months, nullptr, nullptr, nullptr, nullptr, nullptr));
 
    return err ? err : YearMonthDuration::Ptr(new YearMonthDuration(isPos, years, months));
 }

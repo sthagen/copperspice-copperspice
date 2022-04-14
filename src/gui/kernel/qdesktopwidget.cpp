@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -110,6 +110,7 @@ void QDesktopWidgetPrivate::_q_updateScreens()
    // Create new screen widgets as necessary. While iterating, keep the old list in place so
    // that widgetForScreen works.
    // Furthermore, we note which screens have changed, and compute the overall virtual geometry.
+
    QList<QDesktopScreenWidget *> newScreens;
    QList<int> changedScreens;
    QRegion virtualGeometry;
@@ -173,13 +174,13 @@ void QDesktopWidgetPrivate::_q_availableGeometryChanged()
 {
    Q_Q(QDesktopWidget);
 
-   if (QScreen *screen = qobject_cast<QScreen *>(q->sender())) {
+   if (QScreen *screen = dynamic_cast<QScreen *>(q->sender())) {
       emit q->workAreaResized(QGuiApplication::screens().indexOf(screen));
    }
 }
 
 QDesktopWidget::QDesktopWidget()
-   : QWidget(*new QDesktopWidgetPrivate, 0, Qt::Desktop)
+   : QWidget(*new QDesktopWidgetPrivate, nullptr, Qt::Desktop)
 {
    Q_D(QDesktopWidget);
 

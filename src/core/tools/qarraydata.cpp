@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,10 +21,8 @@
 *
 ***********************************************************************/
 
-#include <QtCore/qarraydata.h>
+#include <qarraydata.h>
 #include <qtools_p.h>
-
-QT_BEGIN_NAMESPACE
 
 #if defined (__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__  >= 406) && !defined(Q_CC_INTEL)
 #pragma GCC diagnostic push
@@ -121,7 +119,9 @@ void QArrayData::deallocate(QArrayData *data, size_t objectSize, size_t alignmen
 {
    // Alignment is a power of two
    Q_ASSERT(alignment >= Q_ALIGNOF(QArrayData) && ! (alignment & (alignment - 1)));
-   Q_UNUSED(objectSize) Q_UNUSED(alignment)
+
+   (void) objectSize;
+   (void) alignment;
 
    if (data == &qt_array_unsharable_empty())  {
       return;
@@ -129,5 +129,3 @@ void QArrayData::deallocate(QArrayData *data, size_t objectSize, size_t alignmen
 
    qFree(data);
 }
-
-QT_END_NAMESPACE

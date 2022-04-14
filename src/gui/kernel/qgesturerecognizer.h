@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QGESTURERECOGNIZER_H
 #define QGESTURERECOGNIZER_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qnamespace.h>
+#include <qglobal.h>
+#include <qnamespace.h>
 
 #ifndef QT_NO_GESTURES
 
@@ -38,15 +38,13 @@ class Q_GUI_EXPORT QGestureRecognizer
  public:
    enum ResultFlag {
       Ignore           = 0x0001,
-
       MayBeGesture     = 0x0002,
       TriggerGesture   = 0x0004,
       FinishGesture    = 0x0008,
       CancelGesture    = 0x0010,
-
       ResultState_Mask = 0x00ff,
 
-      ConsumeEventHint        = 0x0100,
+      ConsumeEventHint           = 0x0100,
       // StoreEventHint          = 0x0200,
       // ReplayStoredEventsHint  = 0x0400,
       // DiscardStoredEventsHint = 0x0800,
@@ -59,9 +57,8 @@ class Q_GUI_EXPORT QGestureRecognizer
    virtual ~QGestureRecognizer();
 
    virtual QGesture *create(QObject *target);
-   virtual Result recognize(QGesture *state, QObject *watched,
-      QEvent *event) = 0;
-   virtual void reset(QGesture *state);
+   virtual Result recognize(QGesture *gesture, QObject *watched, QEvent *event) = 0;
+   virtual void reset(QGesture *gesture);
 
    static Qt::GestureType registerRecognizer(QGestureRecognizer *recognizer);
    static void unregisterRecognizer(Qt::GestureType type);

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -51,10 +51,10 @@ static inline QString fromstrerror_helper(const char *str, const QByteArray &)
 static QString windowsErrorString(int errorCode)
 {
    QString ret;
-   wchar_t *buffer = 0;
+   wchar_t *buffer = nullptr;
 
    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                 NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&buffer, 0, NULL);
+                 nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&buffer, 0, nullptr);
 
    if (buffer != nullptr) {
       ret = QString::fromStdWString(std::wstring(buffer));
@@ -71,7 +71,7 @@ static QString windowsErrorString(int errorCode)
 
 static QString standardLibraryErrorString(int errorCode)
 {
-   const char *s = 0;
+   const char *s = nullptr;
    QString ret;
 
    switch (errorCode) {
@@ -79,19 +79,19 @@ static QString standardLibraryErrorString(int errorCode)
          break;
 
       case EACCES:
-         s = QT_TRANSLATE_NOOP("QIODevice", "Permission denied");
+         s = cs_mark_tr("QIODevice", "Permission denied");
          break;
 
       case EMFILE:
-         s = QT_TRANSLATE_NOOP("QIODevice", "Too many open files");
+         s = cs_mark_tr("QIODevice", "Too many open files");
          break;
 
       case ENOENT:
-         s = QT_TRANSLATE_NOOP("QIODevice", "No such file or directory");
+         s = cs_mark_tr("QIODevice", "No such file or directory");
          break;
 
       case ENOSPC:
-         s = QT_TRANSLATE_NOOP("QIODevice", "No space left on device");
+         s = cs_mark_tr("QIODevice", "No space left on device");
          break;
 
       default: {
@@ -110,9 +110,9 @@ static QString standardLibraryErrorString(int errorCode)
    if (s) {
       ret = QString::fromLatin1(s);
    }
+
    return ret.trimmed();
 }
-
 
 QString QSystemError::toString()
 {
@@ -122,7 +122,8 @@ QString QSystemError::toString()
 #if defined (Q_OS_WIN)
          return windowsErrorString(errorCode);
 #else
-         // unix: fall through as native and standard library are the same
+         // unix: native and standard library are the same
+         [[fallthrough]];
 #endif
 
       case StandardLibraryError:

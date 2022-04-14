@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,19 +21,22 @@
 *
 ***********************************************************************/
 
-#include "qcocoaaccessibilityelement.h"
-#include "qcocoaaccessibility.h"
-#include "qcocoahelpers.h"
-#include "qcocoawindow.h"
-#include "qaccessiblecache_p.h"
-#include <qaccessiblebridgeutils_p.h>
+#include <qcocoaaccessibilityelement.h>
+
 #include <qaccessible.h>
+#include <qcocoaaccessibility.h>
+#include <qcocoahelpers.h>
+#include <qcocoawindow.h>
+
+#include <qaccessiblecache_p.h>
+#include <qaccessiblebridgeutils_p.h>
 
 #import <AppKit/NSAccessibility.h>
 
 #ifndef QT_NO_ACCESSIBILITY
 
-static void convertLineOffset(QAccessibleTextInterface *text, int *line, int *offset, NSUInteger *start = 0, NSUInteger *end = 0)
+static void convertLineOffset(QAccessibleTextInterface *text, int *line, int *offset,
+            NSUInteger *start = nullptr, NSUInteger *end = nullptr)
 {
    Q_ASSERT(*line == -1 || *offset == -1);
    Q_ASSERT(*line != -1 || *offset != -1);
@@ -596,13 +599,14 @@ static void convertLineOffset(QAccessibleTextInterface *text, int *line, int *of
 
    int y = qt_mac_flipYCoordinate(point.y);
    QAccessibleInterface *childInterface = iface->childAt(point.x, y);
+
    // No child found, meaning we hit this element.
    if (!childInterface) {
       return NSAccessibilityUnignoredAncestor(self);
    }
 
    // find the deepest child at the point
-   QAccessibleInterface *childOfChildInterface = 0;
+   QAccessibleInterface *childOfChildInterface = nullptr;
    do {
       childOfChildInterface = childInterface->childAt(point.x, y);
       if (childOfChildInterface) {

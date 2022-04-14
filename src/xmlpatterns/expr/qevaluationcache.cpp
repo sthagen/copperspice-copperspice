@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,10 +23,8 @@
 
 template<bool IsForGlobal>
 EvaluationCache<IsForGlobal>::EvaluationCache(const Expression::Ptr &op,
-      const VariableDeclaration *varDecl,
-      const VariableSlotID aSlot) : SingleContainer(op)
-   , m_declarationUsedByMany(varDecl->usedByMany())
-   , m_varSlot(aSlot)
+            const VariableDeclaration *varDecl, const VariableSlotID aSlot)
+   : SingleContainer(op), m_declarationUsedByMany(varDecl->usedByMany()), m_varSlot(aSlot)
 {
    Q_ASSERT(m_varSlot > -1);
 }
@@ -83,20 +81,22 @@ Item::Iterator::Ptr EvaluationCache<IsForGlobal>::evaluateSequence(const Dynamic
           */
          return Item::Iterator::Ptr(new ListIterator<Item, Item::List>(cell.cachedItems));
       }
+
       case ItemSequenceCacheCell::Empty: {
          cell.inUse = true;
          cell.sourceIterator = m_operand->evaluateSequence(IsForGlobal ? topFocusContext(context) : context);
          cell.cacheState = ItemSequenceCacheCell::PartiallyPopulated;
-         /* Fallthrough. */
       }
+      [[fallthrough]];
+
       case ItemSequenceCacheCell::PartiallyPopulated: {
          cell.inUse = false;
-         Q_ASSERT_X(cells.at(m_varSlot).sourceIterator, Q_FUNC_INFO,
-                    "This trigger for a cache bug which hasn't yet been analyzed.");
+         Q_ASSERT_X(cells.at(m_varSlot).sourceIterator, Q_FUNC_INFO, "Cache inconsistency.");
          return Item::Iterator::Ptr(new CachingIterator(cells, m_varSlot, IsForGlobal ? topFocusContext(context) : context));
       }
+
       default: {
-         Q_ASSERT_X(false, Q_FUNC_INFO, "This path is not supposed to be run.");
+         Q_ASSERT_X(false, Q_FUNC_INFO, "This path is invalid.");
          return Item::Iterator::Ptr();
       }
    }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,7 +32,7 @@ QMetaMethod::QMetaMethod(const QString &typeName, const QString &signature, std:
      m_access(access), m_methodType(methodType), m_attributes(attributes), m_metaObject(obj)
 {
    m_bento     = nullptr;
-   m_tag       = "";
+   m_tag       = QString();
    m_revision  = 0;
 }
 
@@ -47,7 +47,7 @@ QMetaMethod::QMetaMethod()
    m_metaObject = nullptr;
 
    m_bento      = nullptr;
-   m_tag        = "";
+   m_tag        = QString();
    m_revision   = 0;
 }
 
@@ -85,9 +85,18 @@ const QMetaObject *QMetaMethod::getMetaObject() const
    return m_metaObject;
 }
 
+bool QMetaMethod::isValid() const
+{
+   if (m_metaObject == nullptr) {
+      return false;
+   }
+
+   return true;
+}
+
 int QMetaMethod::methodIndex() const
 {
-   if (! m_metaObject) {
+   if (m_metaObject == nullptr) {
       return -1;
    }
 
@@ -114,12 +123,12 @@ int QMetaMethod::parameterCount() const
    return m_paramNames.size();
 }
 
-int QMetaMethod::parameterType(int index) const
+uint QMetaMethod::parameterType(int index) const
 {
    QList<QString> types = parameterTypes();
-   QString typeName = types[index];
+   QString typeName     = types[index];
 
-   int retval = QMetaType::type(typeName);
+   uint retval = QVariant::nameToType(typeName);
 
    return retval;
 }

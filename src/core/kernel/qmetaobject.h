@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,6 +35,7 @@
 #include <qstring8.h>
 #include <qvector.h>
 
+#include <optional>
 #include <utility>
 #include <stdexcept>
 #include <typeindex>
@@ -50,7 +51,7 @@ class Q_CORE_EXPORT QMetaObject
    int classInfoOffset() const;
 
    virtual const QString &className() const = 0;
-   static void connectSlotsByName(QObject *o);
+   static void connectSlotsByName(QObject *object);
 
    virtual const QString &getInterface_iid() const = 0;
 
@@ -65,17 +66,23 @@ class Q_CORE_EXPORT QMetaObject
    int indexOfConstructor(const QString &constructor) const;
    int indexOfEnumerator(const QString &name) const;
    int indexOfMethod(const QString &method) const;
-   int indexOfMethod(const CsSignal::Internal::BentoAbstract &temp) const;
+   int indexOfMethod(const CsSignal::Internal::BentoAbstract &tmp) const;
    int indexOfProperty(const QString &name) const;
    int indexOfSignal(const QString &signal) const;
    int indexOfSlot(const QString &slot) const;
 
+   template<class SignalClass, class ...SignalArgs>
+   int indexOfSignal(void (SignalClass::*methodPtr)(SignalArgs...)) const;
+
+   template<class MethodClass, class ...MethodArgs, class MethodReturn>
+   int indexOfMethod(MethodReturn (MethodClass::*methodPtr)(MethodArgs...)) const;
+
    virtual QMetaMethod method(int index) const = 0;
-   QMetaMethod method(const CSBentoAbstract &temp) const;
+   QMetaMethod method(const CSBentoAbstract &tmp) const;
 
    // alternate name for method()
-   QMetaMethod lookUpMethod(const CSBentoAbstract &temp) const {
-      return method(temp);
+   QMetaMethod lookUpMethod(const CSBentoAbstract &tmp) const {
+      return method(tmp);
    }
 
    virtual int methodCount() const = 0;
@@ -87,8 +94,8 @@ class Q_CORE_EXPORT QMetaObject
 
    virtual const QMetaObject *superClass() const = 0;
 
-   QString tr(const char *s, const char *c = 0, int n = -1) const;
-   QString trUtf8(const char *s, const char *c = 0, int n = -1) const;
+   QString tr(const char *text, const char *comment = nullptr, std::optional<int> numArg = std::optional<int>()) const;
+   QString tr(const QString &text, const QString &comment = QString(), std::optional<int> numArg = std::optional<int>()) const;
 
    QMetaProperty userProperty() const;
 
@@ -100,6 +107,8 @@ class Q_CORE_EXPORT QMetaObject
 
    template<class T>
    static QMetaEnum findEnum();
+
+   static QMetaEnum findEnum(std::type_index id);
 
    template<class R, class ...Ts>
    static bool invokeMethod(QObject *object, const QString &member, Qt::ConnectionType type, CSReturnArgument<R> retval,
@@ -114,8 +123,8 @@ class Q_CORE_EXPORT QMetaObject
    template<class ...Ts>
    static bool invokeMethod(QObject *object, const QString &member, CSArgument<Ts>... Vs);
 
-   template<class MethodClass, class... MethodArgs>
-   QMetaMethod method( void (MethodClass::*methodPtr)(MethodArgs...) ) const;
+   template<class MethodClass, class... MethodArgs, class MethodReturn>
+   QMetaMethod method(MethodReturn (MethodClass::*methodPtr)(MethodArgs...) ) const;
 
    template<class ...Ts>
    QObject *newInstance(Ts... Vs) const;
@@ -134,43 +143,71 @@ class Q_CORE_EXPORT QMetaObject
    static QString getType(const QString &fullName);
 };
 
-template<class T>
-QMetaEnum QMetaObject::findEnum()
+template<class SignalClass, class ...SignalArgs>
+int QMetaObject::indexOfSignal(void (SignalClass::*methodPtr)(SignalArgs...)) const
 {
-   QMetaEnum data;
-   std::pair<QMetaObject *, QString> enumData;
-
-   // look up the enum type
-   auto iter_enum = m_enumsAll().find(typeid(T));
-
-   if (iter_enum == m_enumsAll().end()) {
-      // no QMetaEnum for T
-
-   } else  {
-      enumData = iter_enum.value();
-
-      QMetaObject *metaObj = enumData.first;
-      QString name        = enumData.second;
-
-      int index = metaObj->indexOfEnumerator(name);
-      data = metaObj->enumerator(index);
-   }
-
-   return data;
-}
-
-template<class MethodClass, class... MethodArgs>
-QMetaMethod QMetaObject::method( void (MethodClass::*methodPtr)(MethodArgs...) ) const
-{
-   QMetaMethod retval;
+   int retval = -1;
    const int count = methodCount();
 
-   CSBento<void (MethodClass::*)(MethodArgs...)> temp = methodPtr;
+   CSBento<void (SignalClass::*)(SignalArgs...)> tmp = methodPtr;
 
    for (int index = 0; index < count; ++index)  {
       QMetaMethod metaMethod = method(index);
 
-      bool ok = metaMethod.compare(temp);
+      bool ok = metaMethod.compare(tmp);
+
+      if (ok && metaMethod.methodType() == QMetaMethod::Signal) {
+         // found QMetaMethod match
+         retval = index;
+         break;
+      }
+   }
+
+   return retval;
+}
+
+template<class MethodClass, class ...MethodArgs, class MethodReturn>
+int QMetaObject::indexOfMethod(MethodReturn (MethodClass::*methodPtr)(MethodArgs...)) const
+{
+   int retval = -1;
+   const int count = methodCount();
+
+   CSBento<MethodReturn (MethodClass::*)(MethodArgs...)> tmp = methodPtr;
+
+   for (int index = 0; index < count; ++index)  {
+      QMetaMethod metaMethod = method(index);
+
+      bool ok = metaMethod.compare(tmp);
+
+      if (ok) {
+         // found QMetaMethod match
+         retval = index;
+         break;
+      }
+   }
+
+   return retval;
+}
+
+template<class T>
+QMetaEnum QMetaObject::findEnum()
+{
+   // call non template version
+   return findEnum(typeid(T));
+}
+
+template<class MethodClass, class... MethodArgs, class MethodReturn>
+QMetaMethod QMetaObject::method(MethodReturn (MethodClass::*methodPtr)(MethodArgs...) ) const
+{
+   QMetaMethod retval;
+   const int count = methodCount();
+
+   CSBento<MethodReturn (MethodClass::*)(MethodArgs...)> tmp = methodPtr;
+
+   for (int index = 0; index < count; ++index)  {
+      QMetaMethod metaMethod = method(index);
+
+      bool ok = metaMethod.compare(tmp);
 
       if (ok) {
          // found QMetaMethod match
@@ -189,17 +226,17 @@ QObject *QMetaObject::newInstance(Ts... Vs) const
 
    // signature of the method being invoked
    constructorSig += "(";
-   constructorSig += cs_typeName<Ts...>();
+   constructorSig += cs_typeToName<Ts...>();
    constructorSig += ")";
 
    int index = this->indexOfConstructor(constructorSig);
 
    if (index == -1)  {
-      return 0;
+      return nullptr;
    }
 
    QMetaMethod metaMethod = this->constructor(index);
-   QObject *retval = 0;
+   QObject *retval = nullptr;
 
    // about to call QMetaMethod::invoke()
    metaMethod.invoke(0, Qt::DirectConnection, CSReturnArgument<QObject *>(retval), Vs...);
@@ -207,7 +244,7 @@ QObject *QMetaObject::newInstance(Ts... Vs) const
    return retval;
 }
 
-/**   \cond INTERNAL (notation so DoxyPress will not parse this class  */
+#if ! defined (CS_DOXYPRESS)
 
 // **
 class Q_CORE_EXPORT QMetaObject_X : public QMetaObject
@@ -241,16 +278,18 @@ class Q_CORE_EXPORT QMetaObject_X : public QMetaObject
    void register_method_s2_part2(QString className, const QString &name, CSBentoAbstract *methodBento, QMetaMethod::MethodType kind);
 
    // properties
-   int register_property_read(const QString &name, const QString &dataType, JarReadAbstract *readJar);
-   int register_property_write(const QString &name, JarWriteAbstract *method);
-   int register_property_bool(const QString &name, JarReadAbstract *method, QMetaProperty::Kind kind);
+   void register_property_read(const QString &name, std::type_index returnTypeId,
+         QString (*returnTypeFuncPtr)(), JarReadAbstract *readJar);
+
+   void register_property_write(const QString &name, JarWriteAbstract *method);
+   void register_property_bool(const QString &name, JarReadAbstract *method, QMetaProperty::Kind kind);
 
    void register_property_int(const QString &name, int value, QMetaProperty::Kind kind);
 
  protected:
    QMap<QString, QMetaClassInfo> m_classInfo;
    QMap<QString, QMetaMethod>    m_constructor;         // constructor
-   QMap<QString, QMetaMethod>    m_methods;             // methds, signals, slots
+   QMap<QString, QMetaMethod>    m_methods;             // methods, signals, slots
    QMap<QString, QMetaEnum>      m_enums;
    QMap<QString, QMetaProperty>  m_properties;
    QMultiMap<QString, QString>   m_flag;
@@ -261,7 +300,7 @@ template<class T>
 class QMetaObject_T : public QMetaObject_X
 {
    public:
-      QMetaObject_T();
+      QMetaObject_T() = default;
 
       void postConstruct();
 
@@ -280,7 +319,7 @@ class QMetaObject_T : public QMetaObject_X
       // slots, invokables
       template<class U>
       void register_method(const QString &name, U method, QMetaMethod::MethodType kind,
-                  const QString &va_args, QMetaMethod::Access access);
+            const QString &va_args, QMetaMethod::Access access);
 
       // properties
       template<class U>
@@ -291,14 +330,9 @@ class QMetaObject_T : public QMetaObject_X
 };
 
 template<class T>
-QMetaObject_T<T>::QMetaObject_T()
-{
-}
-
-template<class T>
 void QMetaObject_T<T>::postConstruct()
 {
-   // calls the overloaded version to ensure the other overloads are processed
+   // calls the first "overload" to ensure the other overloads are processed
    T::cs_regTrigger(cs_number<0>());
 }
 
@@ -327,7 +361,7 @@ const QMetaObject *QMetaObject_T<T>::superClass() const
 template<>
 inline const QMetaObject *QMetaObject_T<QObject>::superClass() const
 {
-   return 0;
+   return nullptr;
 }
 
 // **
@@ -494,6 +528,6 @@ void QMetaObject_T<T>::register_property_reset(const QString &name, U methodPtr)
 // best way to handle declarations
 #include <csmeta_internal_2.h>
 
-/**   \endcond   */
+#endif // doxypress
 
 #endif

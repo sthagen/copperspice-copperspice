@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,30 +23,21 @@
 
 #include <qcupsjobwidget_p.h>
 
-#include <QCheckBox>
-#include <QDateTime>
-#include <QFontDatabase>
-#include <QLabel>
-#include <QLayout>
-#include <QTime>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QHeaderView>
-#include <QPrinter>
-#include <QPrintEngine>
+#include <qcheckbox.h>
+#include <qdatetime.h>
+#include <qfontdatabase.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qtime.h>
+#include <qtablewidget.h>
+#include <qtablewidgetitem.h>
+#include <qheaderview.h>
+#include <qprinter.h>
+#include <qprintengine.h>
 
-#if !defined(QT_NO_PRINTER) && !defined(QT_NO_CUPS)
+#if ! defined(QT_NO_PRINTER) && ! defined(QT_NO_CUPS)
 
-/*!
-    \internal
-    \class QCupsJobWidget
-
-    A widget to add to QPrintDialog to enable extra CUPS options
-    such as Job Scheduling, Job Priority or Job Billing
-    \ingroup printing
-    \inmodule QtPrintSupport
- */
-
+// internal
 QCupsJobWidget::QCupsJobWidget(QWidget *parent)
     : QWidget(parent)
 {

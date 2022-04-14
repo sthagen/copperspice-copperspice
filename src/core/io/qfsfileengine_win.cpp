@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -97,14 +97,14 @@ bool QFSFileEnginePrivate::nativeOpen(QIODevice::OpenMode openMode)
       accessRights |= GENERIC_WRITE;
    }
 
-   SECURITY_ATTRIBUTES securityAtts = { sizeof(SECURITY_ATTRIBUTES), NULL, FALSE };
+   SECURITY_ATTRIBUTES securityAtts = { sizeof(SECURITY_ATTRIBUTES), nullptr, FALSE };
 
    // WriteOnly can create files, ReadOnly cannot.
    DWORD creationDisp = (openMode & QIODevice::WriteOnly) ? OPEN_ALWAYS : OPEN_EXISTING;
 
    // Create the file handle.
    fileHandle = CreateFile(&fileEntry.nativeFilePath().toStdWString()[0],
-                  accessRights, shareMode, &securityAtts, creationDisp, FILE_ATTRIBUTE_NORMAL, NULL);
+                  accessRights, shareMode, &securityAtts, creationDisp, FILE_ATTRIBUTE_NORMAL, nullptr);
 
    // Bail out on error.
    if (fileHandle == INVALID_HANDLE_VALUE) {
@@ -115,11 +115,6 @@ bool QFSFileEnginePrivate::nativeOpen(QIODevice::OpenMode openMode)
    // Truncate the file after successfully opening it if Truncate is passed.
    if (openMode & QIODevice::Truncate) {
       q->setSize(0);
-   }
-
-   // Seek to the end when in Append mode.
-   if (openMode & QFile::Append) {
-      ::SetFilePointer(fileHandle, 0, 0, FILE_END);
    }
 
    return true;
@@ -191,25 +186,31 @@ bool QFSFileEnginePrivate::nativeSyncToDisk()
 qint64 QFSFileEnginePrivate::nativeSize() const
 {
    Q_Q(const QFSFileEngine);
-   QFSFileEngine *thatQ = const_cast<QFSFileEngine *>(q);
 
-   // ### Don't flush; for buffered files, we should get away with ftell.
-   thatQ->flush();
+   QFSFileEngine *self_FileEngine = const_cast<QFSFileEngine *>(q);
+
+   // do not flush, for buffered files, we should get away with ftell
+   self_FileEngine->flush();
 
    // Always retrive the current information
    metaData.clearFlags(QFileSystemMetaData::SizeAttribute);
 
    bool filled = false;
-   if (fileHandle != INVALID_HANDLE_VALUE && openMode != QIODevice::NotOpen )
-      filled = QFileSystemEngine::fillMetaData(fileHandle, metaData,
-               QFileSystemMetaData::SizeAttribute);
-   else {
+
+   if (fileHandle != INVALID_HANDLE_VALUE && openMode != QIODevice::NotOpen) {
+      filled = QFileSystemEngine::fillMetaData(fileHandle, metaData, QFileSystemMetaData::SizeAttribute);
+
+   } else {
       filled = doStat(QFileSystemMetaData::SizeAttribute);
    }
 
-   if (!filled) {
-      thatQ->setError(QFile::UnspecifiedError, qt_error_string(errno));
+   if (! filled) {
+      // file is most likely not open
+
+      self_FileEngine->setError(QFile::UnspecifiedError, qt_error_string(errno));
+      return 0;
    }
+
    return metaData.size();
 }
 
@@ -219,7 +220,7 @@ qint64 QFSFileEnginePrivate::nativeSize() const
 qint64 QFSFileEnginePrivate::nativePos() const
 {
    Q_Q(const QFSFileEngine);
-   QFSFileEngine *thatQ = const_cast<QFSFileEngine *>(q);
+   QFSFileEngine *self_FileEngine = const_cast<QFSFileEngine *>(q);
 
    if (fh || fd != -1) {
       // stdlib / stido mode.
@@ -234,8 +235,9 @@ qint64 QFSFileEnginePrivate::nativePos() const
    LARGE_INTEGER currentFilePos;
    LARGE_INTEGER offset;
    offset.QuadPart = 0;
-   if (!::SetFilePointerEx(fileHandle, offset, &currentFilePos, FILE_CURRENT)) {
-      thatQ->setError(QFile::UnspecifiedError, qt_error_string());
+
+   if (! ::SetFilePointerEx(fileHandle, offset, &currentFilePos, FILE_CURRENT)) {
+      self_FileEngine->setError(QFile::UnspecifiedError, qt_error_string());
       return 0;
    }
 
@@ -289,11 +291,11 @@ qint64 QFSFileEnginePrivate::nativeRead(char *data, qint64 maxlen)
       return -1;
    }
 
-   DWORD bytesToRead = DWORD(maxlen); // <- lossy
+   qint64 bytesToRead = maxlen;
 
    // Reading on Windows fails with ERROR_NO_SYSTEM_RESOURCES when
    // the chunks are too large, so we limit the block size to 32MB.
-   static const DWORD maxBlockSize = 32 * 1024 * 1024;
+   static const qint64 maxBlockSize = 32 * 1024 * 1024;
 
    qint64 totalRead = 0;
 
@@ -301,7 +303,7 @@ qint64 QFSFileEnginePrivate::nativeRead(char *data, qint64 maxlen)
       DWORD blockSize = qMin(bytesToRead, maxBlockSize);
       DWORD bytesRead;
 
-      if (! ReadFile(fileHandle, data + totalRead, blockSize, &bytesRead, NULL)) {
+      if (! ReadFile(fileHandle, data + totalRead, blockSize, &bytesRead, nullptr)) {
          if (totalRead == 0) {
             // Note: only return failure if the first ReadFile fails.
             q->setError(QFile::ReadError, qt_error_string());
@@ -319,7 +321,7 @@ qint64 QFSFileEnginePrivate::nativeRead(char *data, qint64 maxlen)
 
    } while (totalRead < maxlen);
 
-   return qint64(totalRead);
+   return totalRead;
 }
 
 /*
@@ -360,17 +362,18 @@ qint64 QFSFileEnginePrivate::nativeWrite(const char *data, qint64 len)
       return -1;
    }
 
-   qint64 bytesToWrite = DWORD(len); // <- lossy
+   qint64 bytesToWrite = len;
 
    // Writing on Windows fails with ERROR_NO_SYSTEM_RESOURCES when
    // the chunks are too large, so we limit the block size to 32MB.
-   static const DWORD maxBlockSize = 32 * 1024 * 1024;
+   static const qint64 maxBlockSize = 32 * 1024 * 1024;
 
    qint64 totalWritten = 0;
    do {
       DWORD blockSize = qMin(bytesToWrite, maxBlockSize);
       DWORD bytesWritten;
-      if (!WriteFile(fileHandle, data + totalWritten, blockSize, &bytesWritten, NULL)) {
+
+      if (!WriteFile(fileHandle, data + totalWritten, blockSize, &bytesWritten, nullptr)) {
          if (totalWritten == 0) {
             // Note: Only return error if the first WriteFile failed.
             q->setError(QFile::WriteError, qt_error_string());
@@ -378,12 +381,15 @@ qint64 QFSFileEnginePrivate::nativeWrite(const char *data, qint64 len)
          }
          break;
       }
+
       if (bytesWritten == 0) {
          break;
       }
+
       totalWritten += bytesWritten;
       bytesToWrite -= bytesWritten;
    } while (totalWritten < len);
+
    return qint64(totalWritten);
 }
 
@@ -404,10 +410,13 @@ int QFSFileEnginePrivate::nativeHandle() const
    if (openMode & QIODevice::Append) {
       flags |= _O_APPEND;
    }
+
    if (!(openMode & QIODevice::WriteOnly)) {
       flags |= _O_RDONLY;
    }
+
    cachedFd = _open_osfhandle((intptr_t) fileHandle, flags);
+
    return cachedFd;
 
 }
@@ -422,6 +431,7 @@ bool QFSFileEnginePrivate::nativeIsSequential() const
    if (fh || fd != -1) {
       handle = (HANDLE)_get_osfhandle(fh ? QT_FILENO(fh) : fd);
    }
+
    if (handle == INVALID_HANDLE_VALUE) {
       return false;
    }
@@ -480,7 +490,7 @@ bool QFSFileEngine::renameOverwrite(const QString &newName)
 
    bool retval = ::MoveFileEx(&d->fileEntry.nativeFilePath().toStdWString()[0],
                   &QFileSystemEntry(newName).nativeFilePath().toStdWString()[0],
-                  MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) != 0;
+                  MOVEFILE_REPLACE_EXISTING) != 0;
 
    if (! retval) {
       setError(QFile::RenameError, QSystemError(::GetLastError(), QSystemError::NativeError).toString());
@@ -557,8 +567,10 @@ QFileInfoList QFSFileEngine::drives()
 {
    QFileInfoList retval;
 
-#if defined(Q_OS_WIN32)
-   quint32 driveBits = (quint32) GetLogicalDrives() & 0x3ffffff;
+#if defined(Q_OS_WIN)
+    const UINT oldErrorMode = ::SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
+    quint32 driveBits = (quint32) GetLogicalDrives() & 0x3ffffff;
+    ::SetErrorMode(oldErrorMode);
 #endif
 
    char driveName[] = "A:/";
@@ -577,7 +589,7 @@ QFileInfoList QFSFileEngine::drives()
 
 bool QFSFileEnginePrivate::doStat(QFileSystemMetaData::MetaDataFlags flags) const
 {
-   if (!tried_stat || !metaData.hasFlags(flags)) {
+   if (! tried_stat || !metaData.hasFlags(flags)) {
       tried_stat = true;
 
       int localFd = fd;
@@ -606,13 +618,13 @@ bool QFSFileEngine::link(const QString &newName)
    IShellLink *psl;
    bool neededCoInit = false;
 
-   HRESULT hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void **)&psl);
+   HRESULT hres = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLink, (void **)&psl);
 
    if (hres == CO_E_NOTINITIALIZED) {
       // COM was not initialized
       neededCoInit = true;
-      CoInitialize(NULL);
-      hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void **)&psl);
+      CoInitialize(nullptr);
+      hres = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLink, (void **)&psl);
    }
 
    if (SUCCEEDED(hres)) {
@@ -664,7 +676,7 @@ QAbstractFileEngine::FileFlags QFSFileEngine::fileFlags(QAbstractFileEngine::Fil
       d->metaData.clear();
    }
 
-   QAbstractFileEngine::FileFlags retval = 0;
+   QAbstractFileEngine::FileFlags retval = Qt::EmptyFlag;
 
    if (type & FlagsMask) {
       retval |= LocalDiskFlag;
@@ -672,7 +684,7 @@ QAbstractFileEngine::FileFlags QFSFileEngine::fileFlags(QAbstractFileEngine::Fil
 
    bool exists;
    {
-      QFileSystemMetaData::MetaDataFlags queryFlags = 0;
+      QFileSystemMetaData::MetaDataFlags queryFlags = Qt::EmptyFlag;
       queryFlags |= QFileSystemMetaData::MetaDataFlags(uint(type)) & QFileSystemMetaData::Permissions;
 
       // AliasType and BundleType are 0x0
@@ -793,11 +805,13 @@ QString QFSFileEngine::fileName(FileName file) const
       if (! (fileFlags(ExistsFlag) & ExistsFlag)) {
          return QString();
       }
+
       QFileSystemEntry entry(QFileSystemEngine::canonicalName(QFileSystemEntry(fileName(AbsoluteName)), d->metaData));
 
       if (file == CanonicalPathName) {
          return entry.path();
       }
+
       return entry.filePath();
 
    } else if (file == LinkName) {
@@ -877,6 +891,7 @@ bool QFSFileEngine::setSize(qint64 size)
    if (!d->fileEntry.isEmpty()) {
       // resize file on disk
       QFile file(d->fileEntry.filePath());
+
       if (file.open(QFile::ReadWrite)) {
          bool retval = file.resize(size);
          if (!retval) {
@@ -900,21 +915,23 @@ QDateTime QFSFileEngine::fileTime(FileTime time) const
    return QDateTime();
 }
 
-uchar *QFSFileEnginePrivate::map(qint64 offset, qint64 size,
-                                 QFile::MemoryMapFlags flags)
+uchar *QFSFileEnginePrivate::map(qint64 offset, qint64 size, QFile::MemoryMapFlags flags)
 {
+   (void) flags;
+
    Q_Q(QFSFileEngine);
-   Q_UNUSED(flags);
+
    if (openMode == QFile::NotOpen) {
       q->setError(QFile::PermissionsError, qt_error_string(ERROR_ACCESS_DENIED));
-      return 0;
-   }
-   if (offset == 0 && size == 0) {
-      q->setError(QFile::UnspecifiedError, qt_error_string(ERROR_INVALID_PARAMETER));
-      return 0;
+      return nullptr;
    }
 
-   if (mapHandle == NULL) {
+   if (offset == 0 && size == 0) {
+      q->setError(QFile::UnspecifiedError, qt_error_string(ERROR_INVALID_PARAMETER));
+      return nullptr;
+   }
+
+   if (mapHandle == nullptr) {
       // get handle to the file
       HANDLE handle = fileHandle;
 
@@ -924,15 +941,16 @@ uchar *QFSFileEnginePrivate::map(qint64 offset, qint64 size,
 
       if (handle == INVALID_HANDLE_VALUE) {
          q->setError(QFile::PermissionsError, qt_error_string(ERROR_ACCESS_DENIED));
-         return 0;
+         return nullptr;
       }
 
       // first create the file mapping handle
       DWORD protection = (openMode & QIODevice::WriteOnly) ? PAGE_READWRITE : PAGE_READONLY;
-      mapHandle = ::CreateFileMapping(handle, 0, protection, 0, 0, 0);
-      if (mapHandle == NULL) {
+      mapHandle = ::CreateFileMapping(handle, nullptr, protection, 0, 0, nullptr);
+
+      if (mapHandle == nullptr) {
          q->setError(QFile::PermissionsError, qt_error_string());
-         return 0;
+         return nullptr;
       }
    }
 
@@ -941,6 +959,7 @@ uchar *QFSFileEnginePrivate::map(qint64 offset, qint64 size,
    if (openMode & QIODevice::ReadOnly) {
       access = FILE_MAP_READ;
    }
+
    if (openMode & QIODevice::WriteOnly) {
       access = FILE_MAP_WRITE;
    }
@@ -956,8 +975,7 @@ uchar *QFSFileEnginePrivate::map(qint64 offset, qint64 size,
    }
 
    // attempt to create the map
-   LPVOID mapAddress = ::MapViewOfFile(mapHandle, access,
-                                       offsetHi, offsetLo, size + extra);
+   LPVOID mapAddress = ::MapViewOfFile(mapHandle, access, offsetHi, offsetLo, size + extra);
    if (mapAddress) {
       uchar *address = extra + static_cast<uchar *>(mapAddress);
       maps[address] = extra;
@@ -975,8 +993,9 @@ uchar *QFSFileEnginePrivate::map(qint64 offset, qint64 size,
    }
 
    ::CloseHandle(mapHandle);
-   mapHandle = NULL;
-   return 0;
+   mapHandle = nullptr;
+
+   return nullptr;
 }
 
 bool QFSFileEnginePrivate::unmap(uchar *ptr)
@@ -995,7 +1014,7 @@ bool QFSFileEnginePrivate::unmap(uchar *ptr)
    maps.remove(ptr);
    if (maps.isEmpty()) {
       ::CloseHandle(mapHandle);
-      mapHandle = NULL;
+      mapHandle = nullptr;
    }
 
    return true;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,18 +23,15 @@
 
 #include <qplatform_graphicsbuffer.h>
 
-#include <QOpenGLContext>
-#include <QOpenGLFunctions>
+#include <qopenglcontext.h>
+#include <qopenglfunctions.h>
 #include <qopengl.h>
-#include <QDebug>
+#include <qdebug.h>
 
 QPlatformGraphicsBuffer::QPlatformGraphicsBuffer(const QSize &size, const QPixelFormat &format)
-   : m_size(size)
-   , m_format(format)
+   : m_size(size), m_format(format)
 {
 }
-
-
 
 QPlatformGraphicsBuffer::~QPlatformGraphicsBuffer()
 {
@@ -42,12 +39,14 @@ QPlatformGraphicsBuffer::~QPlatformGraphicsBuffer()
 
 bool QPlatformGraphicsBuffer::bindToTexture(const QRect &rect) const
 {
+   (void) rect;
    return false;
 }
 
 bool QPlatformGraphicsBuffer::lock(AccessTypes access, const QRect &rect)
 {
    bool locked = doLock(access, rect);
+
    if (locked) {
       m_lock_access |= access;
    }
@@ -60,9 +59,11 @@ void QPlatformGraphicsBuffer::unlock()
    if (m_lock_access == None) {
       return;
    }
+
    AccessTypes previous = m_lock_access;
    doUnlock();
    m_lock_access = None;
+
    emit unlocked(previous);
 }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,15 +26,13 @@
 
 #include <QListView>
 
-QT_BEGIN_NAMESPACE
-
 class QStandardItemModel;
-
 class MultiDataModel;
 
 class ErrorsView : public QListView
 {
-   Q_OBJECT
+   CS_OBJECT(ErrorsView)
+
  public:
    enum ErrorType {
       SuperfluousAccelerator,
@@ -49,12 +47,11 @@ class ErrorsView : public QListView
    void clear();
    void addError(int model, const ErrorType type, const QString &arg = QString());
    QString firstError();
+
  private:
    void addError(int model, const QString &error);
    QStandardItemModel *m_list;
    MultiDataModel *m_dataModel;
 };
 
-QT_END_NAMESPACE
-
-#endif // ERRORSVIEW_H
+#endif

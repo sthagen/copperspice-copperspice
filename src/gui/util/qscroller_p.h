@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -57,7 +57,7 @@ class QScrollerPrivate : public QObject
    QScrollerPrivate(QScroller *q, QObject *target);
    void init();
 
-   void sendEvent(QObject *o, QEvent *e);
+   void sendEvent(QObject *object, QEvent *event);
 
    void setState(QScroller::State s);
 
@@ -92,7 +92,6 @@ class QScrollerPrivate : public QObject
    bool prepareScrolling(const QPointF &position);
    void handleDrag(const QPointF &position, qint64 timestamp);
 
-   QPointF realDpi(int screen);
    QPointF dpi() const;
    void setDpi(const QPointF &dpi);
    void setDpiFromWidget(QWidget *widget);

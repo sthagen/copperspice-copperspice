@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,13 +30,13 @@
 #include <qguiapplication.h>
 #include <qdebug.h>
 
-QFactoryLoader *loader()
+static QFactoryLoader *loader()
 {
    static QFactoryLoader retval(QPlatformIntegrationInterface_ID, "/platforms", Qt::CaseInsensitive);
    return &retval;
 }
 
-QFactoryLoader *directLoader()
+static QFactoryLoader *directLoader()
 {
    static QFactoryLoader retval(QPlatformIntegrationInterface_ID, "", Qt::CaseInsensitive);
    return &retval;
@@ -46,16 +46,16 @@ static inline QPlatformIntegration *loadIntegration(QFactoryLoader *loader, cons
                   const QStringList &parameters, int &argc, char ** argv)
 {
    if (loader->keySet().contains(key)) {
-      if (QPlatformIntegrationPlugin *factory = qobject_cast<QPlatformIntegrationPlugin *>(loader->instance(key))) {
+
+      if (QPlatformIntegrationPlugin *factory = dynamic_cast<QPlatformIntegrationPlugin *>(loader->instance(key))) {
 
          if (QPlatformIntegration *result = factory->create(key, parameters, argc, argv)) {
             return result;
          }
-
       }
    }
 
-   return 0;
+   return nullptr;
 }
 
 QPlatformIntegration *QPlatformIntegrationFactory::create(const QString &platform, const QStringList &paramList,
@@ -63,6 +63,7 @@ QPlatformIntegration *QPlatformIntegrationFactory::create(const QString &platfor
 {
     // try loading the plugin from the passed value of platformPluginPath
     if (! platformPluginPath.isEmpty()) {
+
         QCoreApplication::addLibraryPath(platformPluginPath);
 
         if (QPlatformIntegration *retval = loadIntegration(directLoader(), platform, paramList, argc, argv)) {
@@ -70,7 +71,7 @@ QPlatformIntegration *QPlatformIntegrationFactory::create(const QString &platfor
         }
     }
 
-    // try loading using the defualt path
+    // try loading using the default path or the path in cs.conf
     if (QPlatformIntegration *retval = loadIntegration(loader(), platform, paramList, argc, argv)) {
         return retval;
     }

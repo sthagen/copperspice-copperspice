@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,11 +37,13 @@ class QCommonStylePrivate : public QStylePrivate
    Q_DECLARE_PUBLIC(QCommonStyle)
 
  public:
-   inline QCommonStylePrivate() :
+   QCommonStylePrivate()
+
 #ifndef QT_NO_ITEMVIEWS
-      cachedOption(0),
+      : cachedOption(nullptr), animationFps(30)
+#else
+      : animationFps(30)
 #endif
-      animationFps(30)
    { }
 
    ~QCommonStylePrivate() {
@@ -55,8 +57,8 @@ class QCommonStylePrivate : public QStylePrivate
    }
 
 #ifndef QT_NO_ITEMVIEWS
-   void viewItemDrawText(QPainter *p, const QStyleOptionViewItem *option, const QRect &rect) const;
-   void viewItemLayout(const QStyleOptionViewItem *opt,  QRect *checkRect,
+   void viewItemDrawText(QPainter *painter, const QStyleOptionViewItem *option, const QRect &rect) const;
+   void viewItemLayout(const QStyleOptionViewItem *option,  QRect *checkRect,
       QRect *pixmapRect, QRect *textRect, bool sizehint) const;
 
    QSize viewItemSize(const QStyleOptionViewItem *option, int role) const;
@@ -84,15 +86,17 @@ class QCommonStylePrivate : public QStylePrivate
    mutable QIcon tabBarcloseButtonIcon;
 
 #ifndef QT_NO_TABBAR
-   void tabLayout(const QStyleOptionTab *opt, const QWidget *widget, QRect *textRect, QRect *pixmapRect) const;
+   void tabLayout(const QStyleOptionTab *option, const QWidget *widget, QRect *textRect, QRect *pixmapRect) const;
 #endif
+
    int animationFps;
 
 #ifndef QT_NO_ANIMATION
-   void _q_removeAnimation();
+   void _q_removeAnimation(QObject *obj);
 
-   QList<const QObject *> animationTargets() const;
-   QStyleAnimation *animation(const QObject *target) const;
+   QList<const QObject *> animationKeys() const;
+   QStyleAnimation *animationValue(const QObject *target) const;
+
    void startAnimation(QStyleAnimation *animation) const;
    void stopAnimation(const QObject *target) const;
 

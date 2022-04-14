@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,20 +22,20 @@
 ***********************************************************************/
 
 #include <qtextdocumentfragment.h>
-#include <qtextdocumentfragment_p.h>
-#include <qtextcursor_p.h>
-#include <qtextlist.h>
 
+#include <qtextlist.h>
 #include <qdebug.h>
 #include <qtextcodec.h>
 #include <qbytearray.h>
 #include <qdatastream.h>
 #include <qdatetime.h>
 
-QT_BEGIN_NAMESPACE QTextCopyHelper::QTextCopyHelper(const QTextCursor &_source, const QTextCursor &_destination, bool forceCharFormat,
-   const QTextCharFormat &fmt)
-   : formatCollection(*_destination.d->priv->formatCollection()), originalText(_source.d->priv->buffer())
+#include <qtextdocumentfragment_p.h>
+#include <qtextcursor_p.h>
 
+QTextCopyHelper::QTextCopyHelper(const QTextCursor &_source, const QTextCursor &_destination,
+      bool forceCharFormat, const QTextCharFormat &fmt)
+   : formatCollection(*_destination.d->priv->formatCollection()), originalText(_source.d->priv->buffer())
 {
    src = _source.d->priv;
    dst = _destination.d->priv;
@@ -247,9 +247,8 @@ void QTextDocumentFragmentPrivate::insert(QTextCursor &_cursor) const
    destPieceTable->endEditBlock();
 }
 
-
 QTextDocumentFragment::QTextDocumentFragment()
-   : d(0)
+   : d(nullptr)
 {
 }
 
@@ -259,7 +258,7 @@ QTextDocumentFragment::QTextDocumentFragment()
     like the document's title.
 */
 QTextDocumentFragment::QTextDocumentFragment(const QTextDocument *document)
-   : d(0)
+   : d(nullptr)
 {
    if (!document) {
       return;
@@ -277,7 +276,7 @@ QTextDocumentFragment::QTextDocumentFragment(const QTextDocument *document)
     \sa isEmpty() QTextCursor::selection()
 */
 QTextDocumentFragment::QTextDocumentFragment(const QTextCursor &cursor)
-   : d(0)
+   : d(nullptr)
 {
    if (!cursor.hasSelection()) {
       return;
@@ -647,7 +646,7 @@ QTextHtmlImporter::ProcessNodeResult QTextHtmlImporter::processSpecialNodes()
                if (n->parent) {
                   n = &at(n->parent);
                } else {
-                  n = 0;
+                  n = nullptr;
                }
             }
          }
@@ -748,7 +747,7 @@ bool QTextHtmlImporter::closeTag()
    bool blockTagClosed = false;
 
    while (depth > endDepth) {
-      Table *t = 0;
+      Table *t = nullptr;
       if (!tables.isEmpty()) {
          t = &tables.last();
       }
@@ -774,7 +773,7 @@ bool QTextHtmlImporter::closeTag()
             indent = t->lastIndent;
 
             tables.resize(tables.size() - 1);
-            t = 0;
+            t = nullptr;
 
             if (tables.isEmpty()) {
                cursor = doc->rootFrame()->lastCursorPosition();
@@ -821,7 +820,8 @@ bool QTextHtmlImporter::closeTag()
             if (closedNode->children.isEmpty()) {
                break;
             }
-         // fall through
+            [[fallthrough]];
+
          default:
             if (closedNode->isBlock()) {
                blockTagClosed = true;
@@ -1063,9 +1063,9 @@ QTextHtmlImporter::ProcessNodeResult QTextHtmlImporter::processBlockNode()
 
    int bottomMargin = this->bottomMargin(currentNodeIdx);
 
-   // for list items we may want to collapse with the bottom margin of the
-   // list.
-   const QTextHtmlParserNode *parentNode = currentNode->parent ? &at(currentNode->parent) : 0;
+   // for list items we may want to collapse with the bottom margin of the list.
+   const QTextHtmlParserNode *parentNode = currentNode->parent ? &at(currentNode->parent) : nullptr;
+
    if ((currentNode->id == Html_li || currentNode->id == Html_dt || currentNode->id == Html_dd)
       && parentNode
       && (parentNode->isListStart() || parentNode->id == Html_dl)
@@ -1202,7 +1202,7 @@ void QTextHtmlImporter::appendBlock(const QTextBlockFormat &format, QTextCharFor
 
 QTextDocumentFragment QTextDocumentFragment::fromHtml(const QString &html)
 {
-   return fromHtml(html, 0);
+   return fromHtml(html, nullptr);
 }
 
 QTextDocumentFragment QTextDocumentFragment::fromHtml(const QString &html, const QTextDocument *resourceProvider)
@@ -1214,6 +1214,5 @@ QTextDocumentFragment QTextDocumentFragment::fromHtml(const QString &html, const
    importer.import();
    return res;
 }
-
 
 #endif // QT_NO_TEXTHTMLPARSER

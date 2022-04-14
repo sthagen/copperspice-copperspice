@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -54,6 +54,10 @@ class Q_CORE_EXPORT QLibrary : public QObject
    explicit QLibrary(const QString &fileName, QObject *parent = nullptr);
    explicit QLibrary(const QString &fileName, int verNum, QObject *parent = nullptr);
    explicit QLibrary(const QString &fileName, const QString &version, QObject *parent = nullptr);
+
+   QLibrary(const QLibrary &) = delete;
+   QLibrary &operator=(const QLibrary &) = delete;
+
    ~QLibrary();
 
    void *resolve(const QString &symbol);
@@ -70,7 +74,7 @@ class Q_CORE_EXPORT QLibrary : public QObject
    void setFileName(const QString &fileName);
    QString fileName() const;
 
-   void setFileNameAndVersion(const QString &fileName, int verNum);
+   void setFileNameAndVersion(const QString &fileName, int versionNumber);
    void setFileNameAndVersion(const QString &fileName, const QString &version);
    QString errorString() const;
 
@@ -78,8 +82,6 @@ class Q_CORE_EXPORT QLibrary : public QObject
    LoadHints loadHints() const;
 
  private:
-   Q_DISABLE_COPY(QLibrary)
-
    QLibraryHandle *m_handle;
    bool m_loaded;
 };

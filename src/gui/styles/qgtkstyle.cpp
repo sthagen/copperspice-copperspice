@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,31 +26,31 @@
 #if !defined(QT_NO_STYLE_GTK)
 
 #include <qapplication_p.h>
-#include <QtCore/QLibrary>
-#include <QtCore/QSettings>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QStatusBar>
-#include <QtGui/QLineEdit>
-#include <QtGui/QWidget>
-#include <QtGui/QListView>
-#include <QtGui/QApplication>
-#include <QtGui/QStyleOption>
-#include <QtGui/QPushButton>
-#include <QtGui/QPainter>
-#include <QtGui/QMainWindow>
-#include <QtGui/QToolBar>
-#include <QtGui/QHeaderView>
-#include <QtGui/QMenuBar>
-#include <QtGui/QComboBox>
-#include <QtGui/QSpinBox>
-#include <QtGui/QScrollBar>
-#include <QtGui/QAbstractButton>
-#include <QtGui/QToolButton>
-#include <QtGui/QGroupBox>
-#include <QtGui/QRadioButton>
-#include <QtGui/QCheckBox>
-#include <QtGui/QTreeView>
-#include <QtGui/QStyledItemDelegate>
+#include <QLibrary>
+#include <QSettings>
+#include <QDialogButtonBox>
+#include <QStatusBar>
+#include <QLineEdit>
+#include <QWidget>
+#include <QListView>
+#include <QApplication>
+#include <QStyleOption>
+#include <QPushButton>
+#include <QPainter>
+#include <QMainWindow>
+#include <QToolBar>
+#include <QHeaderView>
+#include <QMenuBar>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QScrollBar>
+#include <QAbstractButton>
+#include <QToolButton>
+#include <QGroupBox>
+#include <QRadioButton>
+#include <QCheckBox>
+#include <QTreeView>
+#include <QStyledItemDelegate>
 #include <qwizard.h>
 #include <qpixmapcache.h>
 #include <qstyleanimation_p.h>
@@ -1012,7 +1012,9 @@ void QGtkStyle::drawPrimitive(PrimitiveElement element,
          }
          break;
 
-      case PE_FrameDefaultButton: // fall through
+      case PE_FrameDefaultButton:
+         [[fallthrough]];
+
       case PE_FrameFocusRect: {
          QRect frameRect = option->rect.adjusted(1, 1, -2, -2); // ### this mess should move to subcontrolrect
          if (qobject_cast<const QAbstractItemView *>(widget)) {
@@ -1056,15 +1058,19 @@ void QGtkStyle::drawPrimitive(PrimitiveElement element,
          // The reason for this is that a lot of code that relies on custom item delegates will look odd having
          // a gradient on the branch but a flat shaded color on the item itself.
          QCommonStyle::drawPrimitive(element, option, painter, widget);
+
          if (!option->state & State_Selected) {
             break;
+
          } else {
             if (const QAbstractItemView *view = qobject_cast<const QAbstractItemView *>(widget)) {
                if (!qobject_cast<QStyledItemDelegate *>(view->itemDelegate())) {
                   break;
                }
             }
-         } // fall through
+
+         }
+         [[fallthrough]];
 
       case PE_PanelItemViewItem:
          if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option)) {
@@ -2929,7 +2935,9 @@ void QGtkStyle::drawControl(ControlElement element,
          }
          break;
 
-      case CE_RadioButton: // Fall through
+      case CE_RadioButton:
+         [[fallthrough]];
+
       case CE_CheckBox:
          if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(option)) {
             bool isRadio = (element == CE_RadioButton);
@@ -3710,7 +3718,7 @@ void QGtkStyle::drawControl(ControlElement element,
                int step = 0;
 
 #ifndef QT_NO_ANIMATION
-               if (QProgressStyleAnimation *animation = qobject_cast<QProgressStyleAnimation *>(d->animation(option->styleObject))) {
+               if (QProgressStyleAnimation *animation = dynamic_cast<QProgressStyleAnimation *>(d->animationValue(option->styleObject))) {
                   step = animation->progressStep(slideWidth);
                } else {
                   d->startAnimation(new QProgressStyleAnimation(d->animationFps, option->styleObject));
@@ -4321,7 +4329,9 @@ QPixmap QGtkStyle::standardPixmap(StandardPixmap sp, const QStyleOption *option,
       }
       break;
 
-      case SP_TitleBarCloseButton: // Fall through
+      case SP_TitleBarCloseButton:
+         [[fallthrough]];
+
       case SP_DockWidgetCloseButton: {
 
          QImage closeButton(dock_widget_close_xpm);

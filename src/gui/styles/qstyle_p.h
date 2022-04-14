@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,10 +25,7 @@
 #define QSTYLE_P_H
 
 #include <qstyle.h>
-
 #include <qguiapplication.h>
-
-
 
 class QStyle;
 
@@ -38,7 +35,9 @@ class QStylePrivate
 
  public:
    inline QStylePrivate()
-      : layoutSpacingIndex(-1), proxyStyle(0) {}
+      : layoutSpacingIndex(-1), proxyStyle(nullptr)
+   {
+   }
 
    virtual ~QStylePrivate() {}
 

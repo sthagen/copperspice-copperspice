@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -100,7 +100,7 @@ class Q_CORE_EXPORT QJsonArray
    // operators
    QJsonArray &operator =(const QJsonArray &other);
 
-   QJsonValue &operator[](size_type i);
+   QJsonValue &operator[](size_type index);
    const QJsonValue &operator[](size_type index) const;
 
    bool operator==(const QJsonArray &other) const;

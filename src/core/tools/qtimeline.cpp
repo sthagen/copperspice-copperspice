@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,11 +23,9 @@
 
 #include <qtimeline.h>
 
-#include <QtCore/qcoreevent.h>
-#include <QtCore/qmath.h>
-#include <QtCore/qelapsedtimer.h>
-
-QT_BEGIN_NAMESPACE
+#include <qcoreevent.h>
+#include <qmath.h>
+#include <qelapsedtimer.h>
 
 class QTimeLinePrivate
 {
@@ -760,12 +758,6 @@ void QTimeLine::setPaused(bool paused)
    }
 }
 
-/*!
-    Toggles the direction of the timeline. If the direction was Forward, it
-    becomes Backward, and vice verca.
-
-    \sa setDirection()
-*/
 void QTimeLine::toggleDirection()
 {
    Q_D(QTimeLine);
@@ -791,4 +783,3 @@ void QTimeLine::timerEvent(QTimerEvent *event)
    }
 }
 
-QT_END_NAMESPACE

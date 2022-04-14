@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,7 +31,7 @@
 void QButtonGroupPrivate::detectCheckedButton()
 {
    QAbstractButton *previous = checkedButton;
-   checkedButton = 0;
+   checkedButton = nullptr;
    if (exclusive) {
       return;
    }
@@ -42,7 +42,6 @@ void QButtonGroupPrivate::detectCheckedButton()
       }
    }
 }
-
 
 QButtonGroup::QButtonGroup(QObject *parent)
    : QObject(parent), d_ptr(new QButtonGroupPrivate)
@@ -55,7 +54,7 @@ QButtonGroup::~QButtonGroup()
    Q_D(QButtonGroup);
 
    for (int i = 0; i < d->buttonList.count(); ++i) {
-      d->buttonList.at(i)->d_func()->group = 0;
+      d->buttonList.at(i)->d_func()->group = nullptr;
    }
 }
 
@@ -102,11 +101,12 @@ void QButtonGroup::removeButton(QAbstractButton *button)
       d->detectCheckedButton();
    }
    if (button->d_func()->group == this) {
-      button->d_func()->group = 0;
+      button->d_func()->group = nullptr;
       d->buttonList.removeAll(button);
       d->mapping.remove(button);
    }
 }
+
 QList<QAbstractButton *> QButtonGroup::buttons() const
 {
    Q_D(const QButtonGroup);

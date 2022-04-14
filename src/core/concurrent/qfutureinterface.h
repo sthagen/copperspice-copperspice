@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,15 +24,15 @@
 #ifndef QFUTUREINTERFACE_H
 #define QFUTUREINTERFACE_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qrunnable.h>
-#include <QtCore/qmutex.h>
-#include <QtCore/qtconcurrentexception.h>
-#include <QtCore/qtconcurrentresultstore.h>
+#include <qglobal.h>
+#include <qrunnable.h>
+#include <qmutex.h>
+#include <qtconcurrentexception.h>
+#include <qtconcurrentresultstore.h>
 
-QT_BEGIN_NAMESPACE
+template <typename T>
+class QFuture;
 
-template <typename T> class QFuture;
 class QFutureInterfaceBasePrivate;
 
 class QFutureWatcherBase;
@@ -244,6 +244,7 @@ inline QList<T> QFutureInterface<T>::results()
       exceptionStore().throwPossibleException();
       return QList<T>();
    }
+
    QFutureInterfaceBase::waitForResult(-1);
 
    QList<T> res;
@@ -265,6 +266,7 @@ class QFutureInterface<void> : public QFutureInterfaceBase
    QFutureInterface<void>(State initialState = NoState)
       : QFutureInterfaceBase(initialState) {
    }
+
    QFutureInterface<void>(const QFutureInterface<void> &other)
       : QFutureInterfaceBase(other) {
    }
@@ -281,12 +283,12 @@ class QFutureInterface<void> : public QFutureInterfaceBase
    inline QFuture<void> future(); // implemented in qfuture.h
 
    void reportResult(const void *, int) { }
-   void reportResults(const QVector<void> &, int) { }
-   void reportFinished(void * = 0) {
+   void reportResults(const QVector<void> &, int) {
+   }
+
+   void reportFinished(void * = nullptr) {
       QFutureInterfaceBase::reportFinished();
    }
 };
 
-QT_END_NAMESPACE
-
-#endif // QFUTUREINTERFACE_H
+#endif

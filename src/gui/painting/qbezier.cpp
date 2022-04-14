@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -138,14 +138,15 @@ void QBezier::addToPolygon(QPolygonF *polygon, qreal bezier_flattening_threshold
    }
 }
 
-void QBezier::addToPolygon(QDataBuffer<QPointF> &polygon, qreal bezier_flattening_threshold) const
+void QBezier::addToPolygon(QVector<QPointF> &polygon, qreal bezier_flattening_threshold) const
 {
    QBezier beziers[10];
    int levels[10];
    beziers[0] = *this;
-   levels[0] = 9;
+   levels[0]  = 9;
+
    QBezier *b = beziers;
-   int *lvl = levels;
+   int *lvl   = levels;
 
    while (b >= beziers) {
       // check if we can pop the top bezier curve from the stack
@@ -153,6 +154,7 @@ void QBezier::addToPolygon(QDataBuffer<QPointF> &polygon, qreal bezier_flattenin
       qreal x4x1 = b->x4 - b->x1;
       qreal l = qAbs(x4x1) + qAbs(y4y1);
       qreal d;
+
       if (l > 1.) {
          d = qAbs( (x4x1) * (b->y1 - b->y2) - (y4y1) * (b->x1 - b->x2) )
             + qAbs( (x4x1) * (b->y1 - b->y3) - (y4y1) * (b->x1 - b->x3) );
@@ -163,9 +165,10 @@ void QBezier::addToPolygon(QDataBuffer<QPointF> &polygon, qreal bezier_flattenin
       }
       if (d < bezier_flattening_threshold * l || *lvl == 0) {
          // good enough, we pop it off and add the endpoint
-         polygon.add(QPointF(b->x4, b->y4));
+         polygon.append(QPointF(b->x4, b->y4));
          --b;
          --lvl;
+
       } else {
          // split, second half of the polygon goes lower into the stack
          b->split(b + 1, b);
@@ -175,6 +178,7 @@ void QBezier::addToPolygon(QDataBuffer<QPointF> &polygon, qreal bezier_flattenin
       }
    }
 }
+
 QRectF QBezier::bounds() const
 {
    qreal xmin = x1;
@@ -620,7 +624,8 @@ qreal QBezier::tAtLength(qreal l) const
    //int iters = 0;
    //qDebug()<<"LEN is "<<l<<len;
    qreal lastBigger = qreal(1.0);
-   while (1) {
+
+   while (true) {
       //qDebug()<<"\tt is "<<t;
       QBezier right = *this;
       QBezier left;

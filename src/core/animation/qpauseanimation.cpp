@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #include <qabstractanimation_p.h>
 
 #ifndef QT_NO_ANIMATION
-
-QT_BEGIN_NAMESPACE
 
 class QPauseAnimationPrivate : public QAbstractAnimationPrivate
 {
@@ -67,22 +65,13 @@ void QPauseAnimation::setDuration(int msecs)
    d->duration = msecs;
 }
 
-/*!
-    \reimp
- */
 bool QPauseAnimation::event(QEvent *e)
 {
    return QAbstractAnimation::event(e);
 }
 
-/*!
-    \reimp
- */
 void QPauseAnimation::updateCurrentTime(int)
 {
 }
-
-
-QT_END_NAMESPACE
 
 #endif //QT_NO_ANIMATION

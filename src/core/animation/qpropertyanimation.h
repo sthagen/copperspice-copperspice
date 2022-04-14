@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QPROPERTYANIMATION_H
 #define QPROPERTYANIMATION_H
 
-#include <QtCore/qvariantanimation.h>
-
-QT_BEGIN_NAMESPACE
+#include <qvariantanimation.h>
 
 #ifndef QT_NO_ANIMATION
 
@@ -44,27 +42,28 @@ class Q_CORE_EXPORT QPropertyAnimation : public QVariantAnimation
 
  public:
    QPropertyAnimation(QObject *parent = nullptr);
-   QPropertyAnimation(QObject *target, const QByteArray &propertyName, QObject *parent = nullptr);
+   QPropertyAnimation(QObject *target, const QString &propertyName, QObject *parent = nullptr);
+
+   QPropertyAnimation(const QPropertyAnimation &) = delete;
+   QPropertyAnimation &operator=(const QPropertyAnimation &) = delete;
+
    ~QPropertyAnimation();
 
    QObject *targetObject() const;
    void setTargetObject(QObject *target);
 
-   QByteArray propertyName() const;
-   void setPropertyName(const QByteArray &propertyName);
+   QString propertyName() const;
+   void setPropertyName(const QString &propertyName);
 
  protected:
    bool event(QEvent *event) override;
    void updateCurrentValue(const QVariant &value) override;
-   void updateState(QAbstractAnimation::State newState, QAbstractAnimation::State oldState) override; 
+   void updateState(QAbstractAnimation::State newState, QAbstractAnimation::State oldState) override;
 
  private:
-   Q_DISABLE_COPY(QPropertyAnimation)
    Q_DECLARE_PRIVATE(QPropertyAnimation)
 };
 
-#endif //QT_NO_ANIMATION
-
-QT_END_NAMESPACE
+#endif
 
 #endif // QPROPERTYANIMATION_H

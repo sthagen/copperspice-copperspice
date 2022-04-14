@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,38 +24,38 @@
 #ifndef QTEMPORARYFILE_H
 #define QTEMPORARYFILE_H
 
-#include <QtCore/qiodevice.h>
-#include <QtCore/qfile.h>
+#include <qiodevice.h>
+#include <qfile.h>
 
 #ifdef open
 #error qtemporaryfile.h must be included before any header file that defines open
 #endif
 
-QT_BEGIN_NAMESPACE
-
 #ifndef QT_NO_TEMPORARYFILE
 
 class QTemporaryFilePrivate;
+class QLockFilePrivate;
 
 class Q_CORE_EXPORT QTemporaryFile : public QFile
 {
    CORE_CS_OBJECT(QTemporaryFile)
 
-   Q_DECLARE_PRIVATE(QTemporaryFile)
-
  public:
    QTemporaryFile();
-   explicit QTemporaryFile(const QString &templateName);
+   explicit QTemporaryFile(const QString &tempPath);
 
    explicit QTemporaryFile(QObject *parent);
-   QTemporaryFile(const QString &templateName, QObject *parent);
+   QTemporaryFile(const QString &tempPath, QObject *parent);
+
+   QTemporaryFile(const QTemporaryFile &) = delete;
+   QTemporaryFile &operator=(const QTemporaryFile &) = delete;
 
    ~QTemporaryFile();
 
    bool autoRemove() const;
    void setAutoRemove(bool b);
 
-   // ### Hides open(flags)
+   // hide open(flags)
    bool open() {
       return open(QIODevice::ReadWrite);
    }
@@ -64,22 +64,23 @@ class Q_CORE_EXPORT QTemporaryFile : public QFile
    QString fileTemplate() const;
    void setFileTemplate(const QString &name);
 
-   inline static QTemporaryFile *createLocalFile(const QString &fileName) {
+   static QTemporaryFile *createNativeFile(const QString &fileName) {
       QFile file(fileName);
-      return createLocalFile(file);
+      return createNativeFile(file);
    }
-   static QTemporaryFile *createLocalFile(QFile &file);
+
+   static QTemporaryFile *createNativeFile(QFile &file);
 
  protected:
    bool open(OpenMode flags) override;
 
  private:
+   Q_DECLARE_PRIVATE(QTemporaryFile)
+
    friend class QFile;
-   Q_DISABLE_COPY(QTemporaryFile)
+   friend class QLockFilePrivate;
 };
 
 #endif // QT_NO_TEMPORARYFILE
 
-QT_END_NAMESPACE
-
-#endif // QTEMPORARYFILE_H
+#endif

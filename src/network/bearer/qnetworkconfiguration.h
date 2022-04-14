@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,6 @@
 #define QNETWORKCONFIGURATION_H
 
 #include <qglobal.h>
-#include <qmetatype.h>
 #include <qshareddata.h>
 #include <qstring.h>
 #include <qlist.h>
@@ -118,7 +117,5 @@ class Q_NETWORK_EXPORT QNetworkConfiguration
 
    QExplicitlySharedDataPointer<QNetworkConfigurationPrivate> d;
 };
-
-Q_DECLARE_METATYPE(QNetworkConfiguration)
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -78,13 +78,12 @@ class Q_CORE_EXPORT QDir
                    NoSort = -1
                  };
 
-
    using SortFlags = QFlags<SortFlag>;
 
-   QDir(const QDir &);
+   QDir(const QDir &dir);
    QDir(const QString &path = QString());
-   QDir(const QString &path, const QString &nameFilter,
-        SortFlags sort = SortFlags(Name | IgnoreCase), Filters filter = AllEntries);
+   QDir(const QString &path, const QString &nameFilter, SortFlags sort = SortFlags(Name | IgnoreCase),
+            Filters filters = AllEntries);
 
    ~QDir();
 
@@ -122,22 +121,22 @@ class Q_CORE_EXPORT QDir
    void setNameFilters(const QStringList &nameFilters);
 
    Filters filter() const;
-   void setFilter(Filters filter);
+   void setFilter(Filters filters);
    SortFlags sorting() const;
    void setSorting(SortFlags sort);
 
    uint count() const;
-   QString operator[](int) const;
+   QString operator[](int pos) const;
 
    static QStringList nameFiltersFromString(const QString &nameFilter);
 
    QStringList entryList(Filters filters = NoFilter, SortFlags sort = NoSort) const;
    QStringList entryList(const QStringList &nameFilters, Filters filters = NoFilter,
-                         SortFlags sort = NoSort) const;
+            SortFlags sort = NoSort) const;
 
    QFileInfoList entryInfoList(Filters filters = NoFilter, SortFlags sort = NoSort) const;
    QFileInfoList entryInfoList(const QStringList &nameFilters, Filters filters = NoFilter,
-                               SortFlags sort = NoSort) const;
+            SortFlags sort = NoSort) const;
 
    bool mkdir(const QString &dirName) const;
    bool rmdir(const QString &dirName) const;
@@ -209,7 +208,7 @@ class Q_CORE_EXPORT QDir
    static QString tempPath();
 
    static bool match(const QStringList &filters, const QString &fileName);
-   static bool match(const QString &filter, const QString &fileName);
+   static bool match(const QString &filters, const QString &fileName);
 
    static QString cleanPath(const QString &path);
    void refresh() const;

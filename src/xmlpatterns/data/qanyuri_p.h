@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -43,7 +43,7 @@ class AnyURI : public AtomicString
 
    template<const ReportContext::ErrorCode code, typename TReportContext>
    static inline QUrl toQUrl(const QString &value, const TReportContext &context,
-               const SourceLocationReflection *const r, bool *const isValid = 0, const bool issueError = true) {
+               const SourceLocationReflection *const r, bool *const isValid = nullptr, const bool issueError = true) {
 
       /* QUrl doesn't flag ":/..." so we workaround it. */
       const QString simplified(value.simplified());

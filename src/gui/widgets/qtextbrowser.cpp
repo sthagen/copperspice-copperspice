@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,13 +32,14 @@
 #include <qdesktopwidget.h>
 #include <qdebug.h>
 #include <qabstracttextdocumentlayout.h>
-#include <qtextdocumentlayout_p.h>
 #include <qtextcodec.h>
 #include <qpainter.h>
 #include <qdir.h>
 #include <qwhatsthis.h>
 #include <qtextobject.h>
 #include <qdesktopservices.h>
+
+#include <qtextdocumentlayout_p.h>
 
 class QTextBrowserPrivate : public QTextEditPrivate
 {

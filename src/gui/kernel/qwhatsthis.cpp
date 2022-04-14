@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -75,7 +75,7 @@ class QWhatsThat : public QWidget
    QPixmap background;
 };
 
-QWhatsThat *QWhatsThat::instance = 0;
+QWhatsThat *QWhatsThat::instance = nullptr;
 
 // shadowWidth not const, for XP drop-shadow-fu turns it to 0
 static int shadowWidth   = 6;   // also used as '5' and '6' and even '8' below
@@ -108,7 +108,7 @@ QWhatsThat::QWhatsThat(const QString &txt, QWidget *parent, QWidget *showTextFor
 #endif
 
    QRect r;
-   doc = 0;
+   doc = nullptr;
    ensurePolished(); // Ensures style sheet font before size calc
    if (Qt::mightBeRichText(text)) {
       doc = new QTextDocument();
@@ -146,7 +146,7 @@ QWhatsThat::QWhatsThat(const QString &txt, QWidget *parent, QWidget *showTextFor
 
 QWhatsThat::~QWhatsThat()
 {
-   instance = 0;
+   instance = nullptr;
    if (doc) {
       delete doc;
    }
@@ -313,7 +313,7 @@ void QWhatsThisPrivate::notifyToplevels(QEvent *e)
    }
 }
 
-QWhatsThisPrivate *QWhatsThisPrivate::instance = 0;
+QWhatsThisPrivate *QWhatsThisPrivate::instance = nullptr;
 
 QWhatsThisPrivate::QWhatsThisPrivate()
    : leaveOnMouseRelease(false)
@@ -354,7 +354,7 @@ QWhatsThisPrivate::~QWhatsThisPrivate()
    QAccessibleEvent event(this, QAccessible::ContextHelpEnd);
    QAccessible::updateAccessibility(&event);
 #endif
-   instance = 0;
+   instance = nullptr;
 }
 
 bool QWhatsThisPrivate::eventFilter(QObject *o, QEvent *e)
@@ -389,7 +389,8 @@ bool QWhatsThisPrivate::eventFilter(QObject *o, QEvent *e)
             Qt::ForbiddenCursor : Qt::WhatsThisCursor);
 #endif
       }
-      // fall through
+      [[fallthrough]];
+
       case QEvent::MouseButtonRelease:
       case QEvent::MouseButtonDblClick:
          if (leaveOnMouseRelease && e->type() == QEvent::MouseButtonRelease) {
@@ -444,7 +445,7 @@ QWhatsThisAction::QWhatsThisAction(QObject *parent) : QAction(tr("What's This?")
 #endif
 
    setCheckable(true);
-   connect(this, SIGNAL(triggered()), this, SLOT(actionTriggered()));
+   connect(this, &QWhatsThisAction::triggered, this, &QWhatsThisAction::actionTriggered);
 
 #ifndef QT_NO_SHORTCUT
    setShortcut(Qt::ShiftModifier + Qt::Key_F1);
@@ -459,7 +460,6 @@ void QWhatsThisAction::actionTriggered()
    }
 }
 
-
 void QWhatsThis::enterWhatsThisMode()
 {
    if (QWhatsThisPrivate::instance) {
@@ -472,7 +472,7 @@ void QWhatsThis::enterWhatsThisMode()
 
 bool QWhatsThis::inWhatsThisMode()
 {
-   return (QWhatsThisPrivate::instance != 0);
+   return (QWhatsThisPrivate::instance != nullptr);
 }
 
 void QWhatsThis::leaveWhatsThisMode()
@@ -489,17 +489,11 @@ void QWhatsThisPrivate::say(QWidget *widget, const QString &text, int x, int y)
    }
 
    // make a fresh widget, and set it up
-   QWhatsThat *whatsThat = new QWhatsThat(text, 0, widget);
+   QWhatsThat *whatsThat = new QWhatsThat(text, nullptr, widget);
 
-
-
-   // okay, now to find a suitable location
-
+   // find a suitable location
    int scr = (widget ?
-         QApplication::desktop()->screenNumber(widget) :
-         QApplication::desktop()->screenNumber(QPoint(x, y))
-
-      );
+         QApplication::desktop()->screenNumber(widget) : QApplication::desktop()->screenNumber(QPoint(x, y)));
 
    QRect screen = QApplication::desktop()->screenGeometry(scr);
 

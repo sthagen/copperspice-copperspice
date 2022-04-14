@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,6 @@
 #include <qobject.h>
 #include <qmediaobject.h>
 #include <qmediabindableinterface.h>
-#include <qmediaenumdebug.h>
 
 class QRadioDataPrivate;
 
@@ -62,21 +61,39 @@ class Q_MULTIMEDIA_EXPORT QRadioData : public QObject, public QMediaBindableInte
 public:
    enum Error { NoError, ResourceError, OpenError, OutOfRangeError };
 
-   enum ProgramType { Undefined = 0, News, CurrentAffairs, Information,
-        Sport, Education, Drama, Culture, Science, Varied,
-        PopMusic, RockMusic, EasyListening, LightClassical,
-        SeriousClassical, OtherMusic, Weather, Finance,
-        ChildrensProgrammes, SocialAffairs, Religion,
-        PhoneIn, Travel, Leisure, JazzMusic, CountryMusic,
-        NationalMusic, OldiesMusic, FolkMusic, Documentary,
-        AlarmTest, Alarm, Talk, ClassicRock, AdultHits,
-        SoftRock, Top40, Soft, Nostalgia, Classical,
-        RhythmAndBlues, SoftRhythmAndBlues, Language,
-        ReligiousMusic, ReligiousTalk, Personality, Public,
-        College
+   enum ProgramType {
+      Undefined = 0,
+      News,
+      CurrentAffairs,
+      Information,
+      Sport,
+      Education,
+      Drama,
+      Culture,
+      Science,
+      Varied,
+      PopMusic, RockMusic, EasyListening, LightClassical,
+      SeriousClassical, OtherMusic, Weather, Finance,
+      ChildrensProgrammes, SocialAffairs, Religion,
+      PhoneIn, Travel, Leisure, JazzMusic, CountryMusic,
+      NationalMusic, OldiesMusic, FolkMusic, Documentary,
+      AlarmTest, Alarm, Talk, ClassicRock, AdultHits,
+      SoftRock, Top40, Soft, Nostalgia, Classical,
+      RhythmAndBlues,
+      SoftRhythmAndBlues,
+      Language,
+      ReligiousMusic,
+      ReligiousTalk,
+      Personality,
+      Public,
+      College
    };
 
    explicit QRadioData(QMediaObject *mediaObject, QObject *parent = nullptr);
+
+   QRadioData(const QRadioData &) = delete;
+   QRadioData &operator=(const QRadioData &) = delete;
+
    ~QRadioData();
 
    QMultimedia::AvailabilityStatus availability() const;
@@ -117,24 +134,17 @@ public:
    MULTI_CS_SIGNAL_1(Public, void error(QRadioData::Error error))
    MULTI_CS_SIGNAL_OVERLOAD(error, (QRadioData::Error), error)
 
-protected:
+ protected:
    bool setMediaObject(QMediaObject *) override;
 
    QRadioDataPrivate *d_ptr;
 
-private:
-   Q_DISABLE_COPY(QRadioData)
+ private:
    Q_DECLARE_PRIVATE(QRadioData)
 
    MULTI_CS_SLOT_1(Private, void _q_serviceDestroyed())
    MULTI_CS_SLOT_2(_q_serviceDestroyed)
 };
-
-Q_DECLARE_METATYPE(QRadioData::Error)
-Q_DECLARE_METATYPE(QRadioData::ProgramType)
-
-Q_MEDIA_ENUM_DEBUG(QRadioData, Error)
-Q_MEDIA_ENUM_DEBUG(QRadioData, ProgramType)
 
 #endif
 

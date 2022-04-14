@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,8 +31,9 @@
 #include <qline.h>
 #include <qdebug.h>
 #include <qcoreapplication.h>
-#include <qhexstring_p.h>
 #include <qnumeric.h>
+
+#include <qhexstring_p.h>
 
 static void qt_cleanup_brush_pattern_image_cache();
 
@@ -154,7 +155,7 @@ Q_GUI_EXPORT QImage qt_imageForBrush(int brushStyle, bool invert)
 struct QTexturedBrushData : public QBrushData {
    QTexturedBrushData() {
       m_has_pixmap_texture = false;
-      m_pixmap = 0;
+      m_pixmap = nullptr;
    }
    ~QTexturedBrushData() {
       delete m_pixmap;
@@ -164,7 +165,7 @@ struct QTexturedBrushData : public QBrushData {
       delete m_pixmap;
 
       if (pm.isNull()) {
-         m_pixmap = 0;
+         m_pixmap = nullptr;
          m_has_pixmap_texture = false;
       } else {
          m_pixmap = new QPixmap(pm);
@@ -177,7 +178,7 @@ struct QTexturedBrushData : public QBrushData {
    void setImage(const QImage &image) {
       m_image = image;
       delete m_pixmap;
-      m_pixmap = 0;
+      m_pixmap = nullptr;
       m_has_pixmap_texture = false;
    }
 
@@ -221,11 +222,13 @@ struct QBrushDataPointerDeleter {
          case Qt::TexturePattern:
             delete static_cast<QTexturedBrushData *>(d);
             break;
+
          case Qt::LinearGradientPattern:
          case Qt::RadialGradientPattern:
          case Qt::ConicalGradientPattern:
             delete static_cast<QGradientBrushData *>(d);
             break;
+
          default:
             delete d;
       }
@@ -248,11 +251,13 @@ class QNullBrushData
       brush->style = Qt::BrushStyle(0);
       brush->color = Qt::black;
    }
+
    ~QNullBrushData() {
       if (!brush->ref.deref()) {
          delete brush;
       }
-      brush = 0;
+
+      brush = nullptr;
    }
 };
 
@@ -633,12 +638,11 @@ void QBrush::setTextureImage(const QImage &image)
 */
 const QGradient *QBrush::gradient() const
 {
-   if (d->style == Qt::LinearGradientPattern
-      || d->style == Qt::RadialGradientPattern
-      || d->style == Qt::ConicalGradientPattern) {
+   if (d->style == Qt::LinearGradientPattern || d->style == Qt::RadialGradientPattern || d->style == Qt::ConicalGradientPattern) {
       return &static_cast<const QGradientBrushData *>(d.data())->gradient;
    }
-   return 0;
+
+   return nullptr;
 }
 
 Q_GUI_EXPORT bool qt_isExtendedRadialGradient(const QBrush &brush)
@@ -660,18 +664,6 @@ Q_GUI_EXPORT bool qt_isExtendedRadialGradient(const QBrush &brush)
    return false;
 }
 
-/*!
-    Returns true if the brush is fully opaque otherwise false. A brush
-    is considered opaque if:
-
-    \list
-    \i The alpha component of the color() is 255.
-    \i Its texture() does not have an alpha channel and is not a QBitmap.
-    \i The colors in the gradient() all have an alpha component that is 255.
-    \i It is an extended radial gradient.
-    \endlist
-*/
-
 bool QBrush::isOpaque() const
 {
    bool opaqueColor = d->color.alpha() == 255;
@@ -685,15 +677,15 @@ bool QBrush::isOpaque() const
       return false;
    }
 
-   if (d->style == Qt::LinearGradientPattern
-      || d->style == Qt::RadialGradientPattern
-      || d->style == Qt::ConicalGradientPattern) {
-      QGradientStops stops = gradient()->stops();
+   if (d->style == Qt::LinearGradientPattern || d->style == Qt::RadialGradientPattern || d->style == Qt::ConicalGradientPattern) {
+
+      QVector<QPair<qreal, QColor>> stops = gradient()->stops();
       for (int i = 0; i < stops.size(); ++i)
          if (stops.at(i).second.alpha() != 255) {
             return false;
          }
       return true;
+
    } else if (d->style == Qt::TexturePattern) {
       return qHasPixmapTexture(*this)
          ? !texture().hasAlphaChannel() && !texture().isQBitmap()
@@ -703,30 +695,11 @@ bool QBrush::isOpaque() const
    return false;
 }
 
-
-/*!
-    \since 4.2
-
-    Sets \a matrix as an explicit transformation matrix on the
-    current brush. The brush transformation matrix is merged with
-    QPainter transformation matrix to produce the final result.
-
-    \sa matrix()
-*/
 void QBrush::setMatrix(const QMatrix &matrix)
 {
    setTransform(QTransform(matrix));
 }
 
-/*!
-    \since 4.3
-
-    Sets \a matrix as an explicit transformation matrix on the
-    current brush. The brush transformation matrix is merged with
-    QPainter transformation matrix to produce the final result.
-
-    \sa transform()
-*/
 void QBrush::setTransform(const QTransform &matrix)
 {
    detach(d->style);
@@ -750,7 +723,9 @@ bool QBrush::operator==(const QBrush &b) const
          // be used to avoid iterating over the data for a texture update, this should
          // still be better than doing an accurate comparison.
 
-         const QPixmap *us = 0, *them = 0;
+         const QPixmap *us   = nullptr;
+         const QPixmap *them = nullptr;
+
          qint64 cacheKey1, cacheKey2;
 
          if (qHasPixmapTexture(*this)) {
@@ -817,7 +792,7 @@ QDebug operator<<(QDebug dbg, const QBrush &b)
       "LinearGradientPattern",
       "RadialGradientPattern",
       "ConicalGradientPattern",
-      0, 0, 0, 0, 0, 0,
+      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
       "TexturePattern" // 24
    };
 
@@ -859,11 +834,12 @@ QDataStream &operator<<(QDataStream &s, const QBrush &b)
          // ensure that we write doubles here instead of streaming the stops
          // directly; otherwise, platforms that redefine qreal might generate
          // data that cannot be read on other platforms.
-         QVector<QGradientStop> stops = gradient->stops();
+
+         QVector<QPair<qreal, QColor>> stops = gradient->stops();
          s << quint32(stops.size());
 
          for (int i = 0; i < stops.size(); ++i) {
-            const QGradientStop &stop = stops.at(i);
+            const QPair<qreal, QColor> &stop = stops.at(i);
             s << QPair<double, QColor>(double(stop.first), stop.second);
          }
       }
@@ -906,7 +882,7 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
 
       int type_as_int;
       QGradient::Type type;
-      QGradientStops stops;
+      QVector<QPair<qreal, QColor>> stops;
       QGradient::CoordinateMode cmode = QGradient::LogicalMode;
       QGradient::Spread spread = QGradient::PadSpread;
       QGradient::InterpolationMode imode = QGradient::ColorInterpolation;
@@ -949,6 +925,7 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
          lg.setCoordinateMode(cmode);
          lg.setInterpolationMode(imode);
          b = QBrush(lg);
+
       } else if (type == QGradient::RadialGradient) {
          QPointF center, focal;
          double radius;
@@ -961,6 +938,7 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
          rg.setCoordinateMode(cmode);
          rg.setInterpolationMode(imode);
          b = QBrush(rg);
+
       } else { // type == QGradient::ConicalGradient
          QPointF center;
          double angle;
@@ -986,7 +964,7 @@ QDataStream &operator>>(QDataStream &s, QBrush &b)
 }
 
 QGradient::QGradient()
-   : m_type(NoGradient), dummy(0)
+   : m_type(NoGradient), dummy(nullptr)
 {
 }
 
@@ -998,6 +976,7 @@ void QGradient::setColorAt(qreal pos, const QColor &color)
    }
 
    int index = 0;
+
    if (!qIsNaN(pos))
       while (index < m_stops.size() && m_stops.at(index).first < pos) {
          ++index;
@@ -1006,11 +985,11 @@ void QGradient::setColorAt(qreal pos, const QColor &color)
    if (index < m_stops.size() && m_stops.at(index).first == pos) {
       m_stops[index].second = color;
    } else {
-      m_stops.insert(index, QGradientStop(pos, color));
+      m_stops.insert(index, QPair<qreal, QColor>(pos, color));
    }
 }
 
-void QGradient::setStops(const QGradientStops &stops)
+void QGradient::setStops(const QVector<QPair<qreal, QColor>> &stops)
 {
    m_stops.clear();
    for (int i = 0; i < stops.size(); ++i) {
@@ -1018,27 +997,19 @@ void QGradient::setStops(const QGradientStops &stops)
    }
 }
 
-
-/*!
-    Returns the stop points for this gradient.
-
-    If no stop points have been specified, a gradient of black at 0 to white
-    at 1 is used.
-
-    \sa setStops(), setColorAt()
-*/
-QGradientStops QGradient::stops() const
+QVector<QPair<qreal, QColor>> QGradient::stops() const
 {
    if (m_stops.isEmpty()) {
-      QGradientStops tmp;
-      tmp << QGradientStop(0, Qt::black) << QGradientStop(1, Qt::white);
+      QVector<QPair<qreal, QColor>> tmp;
+      tmp << QPair<qreal, QColor>(0, Qt::black) << QPair<qreal, QColor>(1, Qt::white);
+
       return tmp;
    }
+
    return m_stops;
 }
 
 #define Q_DUMMY_ACCESSOR union {void *p; uint i;}; p = dummy;
-
 
 QGradient::CoordinateMode QGradient::coordinateMode() const
 {
@@ -1046,12 +1017,6 @@ QGradient::CoordinateMode QGradient::coordinateMode() const
    return CoordinateMode(i & 0x03);
 }
 
-/*!
-    \since 4.4
-
-    Sets the coordinate mode of this gradient to \a mode. The default
-    mode is LogicalMode.
-*/
 void QGradient::setCoordinateMode(CoordinateMode mode)
 {
    Q_DUMMY_ACCESSOR
@@ -1059,7 +1024,6 @@ void QGradient::setCoordinateMode(CoordinateMode mode)
    i |= uint(mode);
    dummy = p;
 }
-
 
 QGradient::InterpolationMode QGradient::interpolationMode() const
 {

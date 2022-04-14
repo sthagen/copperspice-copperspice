@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,6 @@
 #include <qmediaobject.h>
 #include <qmediacontent.h>
 #include <qmediaplaylist.h>
-#include <qmediaenumdebug.h>
 #include <qnetworkconfiguration.h>
 
 class QAbstractVideoSurface;
@@ -133,6 +132,10 @@ class Q_MULTIMEDIA_EXPORT QMediaPlayer : public QMediaObject
    };
 
    explicit QMediaPlayer(QObject *parent = nullptr, Flags flags = Flags());
+
+   QMediaPlayer(const QMediaPlayer &) = delete;
+   QMediaPlayer &operator=(const QMediaPlayer &) = delete;
+
    ~QMediaPlayer();
 
    static QMultimedia::SupportEstimate hasSupport(const QString &mimeType,
@@ -140,8 +143,8 @@ class Q_MULTIMEDIA_EXPORT QMediaPlayer : public QMediaObject
 
    static QStringList supportedMimeTypes(Flags flags = Flags());
 
-   void setVideoOutput(QVideoWidget *);
-   void setVideoOutput(QGraphicsVideoItem *);
+   void setVideoOutput(QVideoWidget *widget);
+   void setVideoOutput(QGraphicsVideoItem *item);
    void setVideoOutput(QAbstractVideoSurface *surface);
 
    QMediaContent media() const;
@@ -244,7 +247,6 @@ class Q_MULTIMEDIA_EXPORT QMediaPlayer : public QMediaObject
    MULTI_CS_SIGNAL_2(networkConfigurationChanged, configuration)
 
  private:
-   Q_DISABLE_COPY(QMediaPlayer)
    Q_DECLARE_PRIVATE(QMediaPlayer)
 
    // wrapper for overloaded property
@@ -275,13 +277,5 @@ class Q_MULTIMEDIA_EXPORT QMediaPlayer : public QMediaObject
    MULTI_CS_SLOT_1(Private, void _q_handlePlaylistLoadFailed())
    MULTI_CS_SLOT_2(_q_handlePlaylistLoadFailed)
 };
-
-Q_DECLARE_METATYPE(QMediaPlayer::State)
-Q_DECLARE_METATYPE(QMediaPlayer::MediaStatus)
-Q_DECLARE_METATYPE(QMediaPlayer::Error)
-
-Q_MEDIA_ENUM_DEBUG(QMediaPlayer, State)
-Q_MEDIA_ENUM_DEBUG(QMediaPlayer, MediaStatus)
-Q_MEDIA_ENUM_DEBUG(QMediaPlayer, Error)
 
 #endif

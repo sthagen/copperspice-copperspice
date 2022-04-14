@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QMOUSEEVENTTRANSITION_H
 #define QMOUSEEVENTTRANSITION_H
 
-#include <QtCore/qeventtransition.h>
-
-QT_BEGIN_NAMESPACE
+#include <qeventtransition.h>
 
 #ifndef QT_NO_STATEMACHINE
 
@@ -43,9 +41,12 @@ class Q_GUI_EXPORT QMouseEventTransition : public QEventTransition
    GUI_CS_PROPERTY_WRITE(modifierMask, setModifierMask)
 
  public:
-   QMouseEventTransition(QState *sourceState = 0);
-   QMouseEventTransition(QObject *object, QEvent::Type type,
-                         Qt::MouseButton button, QState *sourceState = 0);
+   QMouseEventTransition(QState *sourceState = nullptr);
+   QMouseEventTransition(QObject *object, QEvent::Type type, Qt::MouseButton button, QState *sourceState = nullptr);
+
+   QMouseEventTransition(const QMouseEventTransition &) = delete;
+   QMouseEventTransition &operator=(const QMouseEventTransition &) = delete;
+
    ~QMouseEventTransition();
 
    Qt::MouseButton button() const;
@@ -62,12 +63,9 @@ class Q_GUI_EXPORT QMouseEventTransition : public QEventTransition
    bool eventTest(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QMouseEventTransition)
    Q_DECLARE_PRIVATE(QMouseEventTransition)
 };
 
 #endif //QT_NO_STATEMACHINE
-
-QT_END_NAMESPACE
 
 #endif

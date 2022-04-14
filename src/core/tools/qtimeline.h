@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QTIMELINE_H
 #define QTIMELINE_H
 
-#include <QtCore/qeasingcurve.h>
-#include <QtCore/qobject.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qeasingcurve.h>
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 class QTimeLinePrivate;
 
@@ -57,10 +55,12 @@ class Q_CORE_EXPORT QTimeLine : public QObject
       Paused,
       Running
    };
+
    enum Direction {
       Forward,
       Backward
    };
+
    enum CurveShape {
       EaseInCurve,
       EaseOutCurve,
@@ -71,6 +71,10 @@ class Q_CORE_EXPORT QTimeLine : public QObject
    };
 
    explicit QTimeLine(int duration = 1000, QObject *parent = nullptr);
+
+   QTimeLine(const QTimeLine &) = delete;
+   QTimeLine &operator=(const QTimeLine &) = delete;
+
    virtual ~QTimeLine();
 
    State state() const;
@@ -108,23 +112,31 @@ class Q_CORE_EXPORT QTimeLine : public QObject
 
    CORE_CS_SLOT_1(Public, void start())
    CORE_CS_SLOT_2(start)
+
    CORE_CS_SLOT_1(Public, void resume())
    CORE_CS_SLOT_2(resume)
+
    CORE_CS_SLOT_1(Public, void stop())
    CORE_CS_SLOT_2(stop)
+
    CORE_CS_SLOT_1(Public, void setPaused(bool paused))
    CORE_CS_SLOT_2(setPaused)
+
    CORE_CS_SLOT_1(Public, void setCurrentTime(int msec))
    CORE_CS_SLOT_2(setCurrentTime)
+
    CORE_CS_SLOT_1(Public, void toggleDirection())
    CORE_CS_SLOT_2(toggleDirection)
 
-   CORE_CS_SIGNAL_1(Public, void valueChanged(qreal x))
-   CORE_CS_SIGNAL_2(valueChanged, x)
-   CORE_CS_SIGNAL_1(Public, void frameChanged(int un_named_arg1))
-   CORE_CS_SIGNAL_2(frameChanged, un_named_arg1)
+   CORE_CS_SIGNAL_1(Public, void valueChanged(qreal value))
+   CORE_CS_SIGNAL_2(valueChanged, value)
+
+   CORE_CS_SIGNAL_1(Public, void frameChanged(int frame))
+   CORE_CS_SIGNAL_2(frameChanged, frame)
+
    CORE_CS_SIGNAL_1(Public, void stateChanged(QTimeLine::State newState))
    CORE_CS_SIGNAL_2(stateChanged, newState)
+
    CORE_CS_SIGNAL_1(Public, void finished())
    CORE_CS_SIGNAL_2(finished)
 
@@ -134,12 +146,8 @@ class Q_CORE_EXPORT QTimeLine : public QObject
    QScopedPointer<QTimeLinePrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QTimeLine)
    Q_DECLARE_PRIVATE(QTimeLine)
-  
 };
-
-QT_END_NAMESPACE
 
 #endif
 

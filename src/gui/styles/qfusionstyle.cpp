@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -1424,29 +1424,37 @@ void QFusionStyle::drawControl(ControlElement element, const QStyleOption *optio
                painter->setPen(QColor(255, 255, 255, 50));
                painter->drawRoundedRect(progressBar.adjusted(1, 1, -1, -1), 1, 1);
 
-               if (!indeterminate) {
+               if (! indeterminate) {
+
 #ifndef QT_NO_ANIMATION
                   (const_cast<QFusionStylePrivate *>(d))->stopAnimation(option->styleObject);
 #endif
+
                } else {
                   highlightedGradientStartColor.setAlpha(120);
                   painter->setPen(QPen(highlightedGradientStartColor, 9.0));
                   painter->setClipRect(progressBar.adjusted(1, 1, -1, -1));
+
 #ifndef QT_NO_ANIMATION
-                  if (QProgressStyleAnimation *animation = qobject_cast<QProgressStyleAnimation *>(d->animation(option->styleObject))) {
+                  QProgressStyleAnimation *animation = dynamic_cast<QProgressStyleAnimation *>(d->animationValue(option->styleObject));
+
+                  if (animation) {
                      step = animation->animationStep() % 22;
                   } else {
                      (const_cast<QFusionStylePrivate *>(d))->startAnimation(new QProgressStyleAnimation(d->animationFps, option->styleObject));
                   }
 #endif
+
                   for (int x = progressBar.left() - rect.height(); x < rect.right() ; x += 22)
                      painter->drawLine(x + step, progressBar.bottom() + 1,
                         x + rect.height() + step, progressBar.top() - 2);
                }
             }
          }
+
          painter->restore();
          break;
+
       case CE_ProgressBarLabel:
          if (const QStyleOptionProgressBar *bar = qstyleoption_cast<const QStyleOptionProgressBar *>(option)) {
             QRect leftRect;
@@ -2443,13 +2451,16 @@ void QFusionStyle::drawComplexControl(ComplexControl control, const QStyleOption
          }
          painter->restore();
          break;
+
       case CC_ScrollBar:
          painter->save();
+
          if (const QStyleOptionSlider *scrollBar = qstyleoption_cast<const QStyleOptionSlider *>(option)) {
-            bool wasActive = false;
-            qreal expandScale = 1.0;
-            qreal expandOffset = -1.0;
+            bool wasActive       = false;
+            qreal expandScale    = 1.0;
+            qreal expandOffset   = -1.0;
             QObject *styleObject = option->styleObject;
+
             if (styleObject && proxy()->styleHint(SH_ScrollBar_Transient, option, widget)) {
                qreal opacity = 0.0;
                bool shouldExpand = false;
@@ -2458,52 +2469,57 @@ void QFusionStyle::drawComplexControl(ComplexControl control, const QStyleOption
                int oldPos = styleObject->property("_q_stylepos").toInt();
                int oldMin = styleObject->property("_q_stylemin").toInt();
                int oldMax = styleObject->property("_q_stylemax").toInt();
+
+               QStyle::State oldState  = static_cast<QStyle::State>(styleObject->property("_q_stylestate").toInt());
+               uint oldActiveControls  = styleObject->property("_q_stylecontrols").toUInt();
                QRect oldRect = styleObject->property("_q_stylerect").toRect();
-               int oldState = styleObject->property("_q_stylestate").toInt();
-               uint oldActiveControls = styleObject->property("_q_stylecontrols").toUInt();
 
                // a scrollbar is transient when the the scrollbar itself and
                // its sibling are both inactive (ie. not pressed/hovered/moved)
-               bool transient = !option->activeSubControls && !(option->state & State_On);
+               bool transient = ! option->activeSubControls && ! (option->state & State_On);
 
-               if (!transient ||
-                  oldPos != scrollBar->sliderPosition ||
-                  oldMin != scrollBar->minimum ||
-                  oldMax != scrollBar->maximum ||
-                  oldRect != scrollBar->rect ||
-                  oldState != scrollBar->state ||
-                  oldActiveControls != scrollBar->activeSubControls) {
+               if (! transient ||
+                  oldPos   != scrollBar->sliderPosition ||
+                  oldMin   != scrollBar->minimum ||
+                  oldMax   != scrollBar->maximum ||
+                  oldRect  != scrollBar->rect    ||
+                  oldState != scrollBar->state   || oldActiveControls != scrollBar->activeSubControls) {
 
                   // if the scrollbar is transient or its attributes, geometry or
                   // state has changed, the opacity is reset back to 100% opaque
                   opacity = 1.0;
 
-                  styleObject->setProperty("_q_stylepos", scrollBar->sliderPosition);
-                  styleObject->setProperty("_q_stylemin", scrollBar->minimum);
-                  styleObject->setProperty("_q_stylemax", scrollBar->maximum);
+                  styleObject->setProperty("_q_stylepos",  scrollBar->sliderPosition);
+                  styleObject->setProperty("_q_stylemin",  scrollBar->minimum);
+                  styleObject->setProperty("_q_stylemax",  scrollBar->maximum);
                   styleObject->setProperty("_q_stylerect", scrollBar->rect);
-                  styleObject->setProperty("_q_stylestate", static_cast<int>(scrollBar->state));
+                  styleObject->setProperty("_q_stylestate",    static_cast<int>(scrollBar->state));
                   styleObject->setProperty("_q_stylecontrols", static_cast<uint>(scrollBar->activeSubControls));
 
 #ifndef QT_NO_ANIMATION
-                  QScrollbarStyleAnimation *anim  = qobject_cast<QScrollbarStyleAnimation *>(d->animation(styleObject));
+                  QScrollbarStyleAnimation *anim  = dynamic_cast<QScrollbarStyleAnimation *>(d->animationValue(styleObject));
+
                   if (transient) {
-                     if (!anim) {
+                     if (anim == nullptr) {
                         anim = new QScrollbarStyleAnimation(QScrollbarStyleAnimation::Deactivating, styleObject);
                         d->startAnimation(anim);
+
                      } else if (anim->mode() == QScrollbarStyleAnimation::Deactivating) {
                         // the scrollbar was already fading out while the
                         // state changed -> restart the fade out animation
                         anim->setCurrentTime(0);
                      }
+
                   } else if (anim && anim->mode() == QScrollbarStyleAnimation::Deactivating) {
                      d->stopAnimation(styleObject);
                   }
-#endif // !QT_NO_ANIMATION
+
+#endif
                }
 
 #ifndef QT_NO_ANIMATION
-               QScrollbarStyleAnimation *anim = qobject_cast<QScrollbarStyleAnimation *>(d->animation(styleObject));
+               QScrollbarStyleAnimation *anim = dynamic_cast<QScrollbarStyleAnimation *>(d->animationValue(styleObject));
+
                if (anim && anim->mode() == QScrollbarStyleAnimation::Deactivating) {
                   // once a scrollbar was active (hovered/pressed), it retains
                   // the active look even if it's no longer active while fading out
@@ -2512,7 +2528,7 @@ void QFusionStyle::drawComplexControl(ComplexControl control, const QStyleOption
                   }
 
                   wasActive = anim->wasActive();
-                  opacity = anim->currentValue();
+                  opacity   = anim->currentValue();
                }
 
                shouldExpand = (option->activeSubControls || wasActive);
@@ -2522,6 +2538,7 @@ void QFusionStyle::drawComplexControl(ComplexControl control, const QStyleOption
                      anim = new QScrollbarStyleAnimation(QScrollbarStyleAnimation::Activating, styleObject);
                      d->startAnimation(anim);
                   }
+
                   if (anim && anim->mode() == QScrollbarStyleAnimation::Activating) {
                      expandScale = 1.0 + (maxExpandScale - 1.0) * anim->currentValue();
                      expandOffset = 5.5 * anim->currentValue() - 1;
@@ -2531,6 +2548,7 @@ void QFusionStyle::drawComplexControl(ComplexControl control, const QStyleOption
                      expandOffset = 4.5;
                   }
                }
+
                painter->setOpacity(opacity);
 #endif
             }
@@ -3623,13 +3641,15 @@ QRect QFusionStyle::subControlRect(ComplexControl control, const QStyleOptionCom
                   if (tb->titleBarFlags & Qt::WindowContextHelpButtonHint) {
                      offset += delta;
                   }
+                  [[fallthrough]];
 
                case SC_TitleBarMinButton:
-                  if (!isMinimized && (tb->titleBarFlags & Qt::WindowMinimizeButtonHint)) {
+                  if (! isMinimized && (tb->titleBarFlags & Qt::WindowMinimizeButtonHint)) {
                      offset += delta;
                   } else if (sc == SC_TitleBarMinButton) {
                      break;
                   }
+                  [[fallthrough]];
 
                case SC_TitleBarNormalButton:
                   if (isMinimized && (tb->titleBarFlags & Qt::WindowMinimizeButtonHint)) {
@@ -3639,6 +3659,7 @@ QRect QFusionStyle::subControlRect(ComplexControl control, const QStyleOptionCom
                   } else if (sc == SC_TitleBarNormalButton) {
                      break;
                   }
+                  [[fallthrough]];
 
                case SC_TitleBarMaxButton:
                   if (!isMaximized && (tb->titleBarFlags & Qt::WindowMaximizeButtonHint)) {
@@ -3646,6 +3667,7 @@ QRect QFusionStyle::subControlRect(ComplexControl control, const QStyleOptionCom
                   } else if (sc == SC_TitleBarMaxButton) {
                      break;
                   }
+                  [[fallthrough]];
 
                case SC_TitleBarShadeButton:
                   if (!isMinimized && (tb->titleBarFlags & Qt::WindowShadeButtonHint)) {
@@ -3653,6 +3675,7 @@ QRect QFusionStyle::subControlRect(ComplexControl control, const QStyleOptionCom
                   } else if (sc == SC_TitleBarShadeButton) {
                      break;
                   }
+                  [[fallthrough]];
 
                case SC_TitleBarUnshadeButton:
                   if (isMinimized && (tb->titleBarFlags & Qt::WindowShadeButtonHint)) {
@@ -3660,6 +3683,7 @@ QRect QFusionStyle::subControlRect(ComplexControl control, const QStyleOptionCom
                   } else if (sc == SC_TitleBarUnshadeButton) {
                      break;
                   }
+                  [[fallthrough]];
 
                case SC_TitleBarCloseButton:
                   if (tb->titleBarFlags & Qt::WindowSystemMenuHint) {
@@ -3685,6 +3709,7 @@ QRect QFusionStyle::subControlRect(ComplexControl control, const QStyleOptionCom
             ret = visualRect(tb->direction, tb->rect, ret);
          }
          break;
+
       default:
          break;
    }

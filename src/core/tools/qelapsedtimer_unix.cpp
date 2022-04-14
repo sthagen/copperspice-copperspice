@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,11 +22,11 @@
 ***********************************************************************/
 
 #include <qelapsedtimer.h>
+#include <qcore_unix_p.h>
+
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
-
-#include "qcore_unix_p.h"
 
 #if defined(QT_NO_CLOCK_MONOTONIC)
 // turn off the monotonic clock
@@ -35,8 +35,6 @@
 # endif
 # define _POSIX_MONOTONIC_CLOCK -1
 #endif
-
-QT_BEGIN_NAMESPACE
 
 #if (_POSIX_MONOTONIC_CLOCK-0 != 0)
 static const bool monotonicClockChecked = true;
@@ -113,7 +111,7 @@ static inline void do_gettime(qint64 *sec, qint64 *frac)
 #endif
    // use gettimeofday
    struct timeval tv;
-   ::gettimeofday(&tv, 0);
+   ::gettimeofday(&tv, nullptr);
    *sec = tv.tv_sec;
    *frac = tv.tv_usec;
 }
@@ -200,4 +198,3 @@ bool operator<(const QElapsedTimer &v1, const QElapsedTimer &v2)
    return v1.t1 < v2.t1 || (v1.t1 == v2.t1 && v1.t2 < v2.t2);
 }
 
-QT_END_NAMESPACE

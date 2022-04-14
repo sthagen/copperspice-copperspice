@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,16 +26,16 @@
 
 #ifndef QT_NO_ACCESSIBILITY
 
-#include <QtCore/qcoreapplication.h>
-#include <QtCore/qdebug.h>
-#include <QtCore/qglobal.h>
-#include <QtCore/qobject.h>
-#include <QtCore/qrect.h>
-#include <QtCore/qset.h>
-#include <QtCore/qvector.h>
-#include <QtCore/qvariant.h>
-#include <QtGui/qcolor.h>
-#include <QtGui/qevent.h>
+#include <qcoreapplication.h>
+#include <qdebug.h>
+#include <qglobal.h>
+#include <qobject.h>
+#include <qrect.h>
+#include <qset.h>
+#include <qvector.h>
+#include <qvariant.h>
+#include <qcolor.h>
+#include <qevent.h>
 
 #include <stdlib.h>
 
@@ -332,10 +332,10 @@ class Q_GUI_EXPORT QAccessible
    using RootObjectHandler = void(*)(QObject *);
    using Id = unsigned;
 
-   static void installFactory(InterfaceFactory);
-   static void removeFactory(InterfaceFactory);
-   static UpdateHandler installUpdateHandler(UpdateHandler);
-   static RootObjectHandler installRootObjectHandler(RootObjectHandler);
+   static void installFactory(InterfaceFactory factory);
+   static void removeFactory(InterfaceFactory factory);
+   static UpdateHandler installUpdateHandler(UpdateHandler handler);
+   static RootObjectHandler installRootObjectHandler(RootObjectHandler handler);
 
    class Q_GUI_EXPORT ActivationObserver
    {
@@ -346,10 +346,10 @@ class Q_GUI_EXPORT QAccessible
 
    static void installActivationObserver(ActivationObserver *);
    static void removeActivationObserver(ActivationObserver *);
-   static QAccessibleInterface *queryAccessibleInterface(QObject *);
-   static Id uniqueId(QAccessibleInterface *iface);
+   static QAccessibleInterface *queryAccessibleInterface(QObject *object);
+   static Id uniqueId(QAccessibleInterface *interfaceId);
    static QAccessibleInterface *accessibleInterface(Id uniqueId);
-   static Id registerAccessibleInterface(QAccessibleInterface *iface);
+   static Id registerAccessibleInterface(QAccessibleInterface *interfaceId);
    static void deleteAccessibleInterface(Id uniqueId);
 
    static void updateAccessibility(QAccessibleEvent *event);
@@ -365,6 +365,7 @@ class Q_GUI_EXPORT QAccessible
    static UpdateHandler updateHandler;
    static RootObjectHandler rootObjectHandler;
    QAccessible() {}
+
    friend class QAccessibleCache;
 };
 
@@ -393,7 +394,7 @@ class Q_GUI_EXPORT QAccessibleInterface
    virtual QAccessibleInterface *parent() const = 0;
    virtual QAccessibleInterface *child(int index) const = 0;
    virtual int childCount() const = 0;
-   virtual int indexOfChild(const QAccessibleInterface *) const = 0;
+   virtual int indexOfChild(const QAccessibleInterface *child) const = 0;
 
    // properties and state
    virtual QString text(QAccessible::Text t) const = 0;
@@ -435,7 +436,8 @@ class Q_GUI_EXPORT QAccessibleInterface
 
    virtual void virtual_hook(int id, void *data);
 
-   virtual void *interface_cast(QAccessible::InterfaceType) {
+   virtual void *interface_cast(QAccessible::InterfaceType type) {
+      (void) type;
       return nullptr;
    }
 
@@ -448,6 +450,7 @@ class Q_GUI_EXPORT QAccessibleTextInterface
 {
  public:
    virtual ~QAccessibleTextInterface();
+
    // selection
    virtual void selection(int selectionIndex, int *startOffset, int *endOffset) const = 0;
    virtual int selectionCount() const = 0;
@@ -570,6 +573,7 @@ class Q_GUI_EXPORT QAccessibleImageInterface
 {
  public:
    virtual ~QAccessibleImageInterface();
+
    virtual QString imageDescription() const = 0;
    virtual QSize imageSize() const = 0;
    virtual QPoint imagePosition() const = 0;
@@ -577,12 +581,11 @@ class Q_GUI_EXPORT QAccessibleImageInterface
 
 class Q_GUI_EXPORT QAccessibleEvent
 {
-   Q_DISABLE_COPY(QAccessibleEvent)
  public:
-
-   inline QAccessibleEvent(QObject *obj, QAccessible::Event type)
-      : m_type(type), m_object(obj), m_child(-1) {
-      Q_ASSERT(obj);
+   inline QAccessibleEvent(QObject *object, QAccessible::Event eventType)
+      : m_type(eventType), m_object(object), m_child(-1)
+   {
+      Q_ASSERT(object);
 
       // All events below have a subclass of QAccessibleEvent.
       // Use the subclass, since it's expected that it's possible to cast to that.
@@ -596,10 +599,11 @@ class Q_GUI_EXPORT QAccessibleEvent
       Q_ASSERT(m_type != QAccessible::TableModelChanged);
    }
 
-   inline QAccessibleEvent(QAccessibleInterface *iface, QAccessible::Event type)
-      : m_type(type), m_object(nullptr) {
+   inline QAccessibleEvent(QAccessibleInterface *interfaceId, QAccessible::Event eventType)
+      : m_type(eventType), m_object(nullptr)
+   {
+      Q_ASSERT(interfaceId);
 
-      Q_ASSERT(iface);
       Q_ASSERT(m_type != QAccessible::ValueChanged);
       Q_ASSERT(m_type != QAccessible::StateChanged);
       Q_ASSERT(m_type != QAccessible::TextCaretMoved);
@@ -608,8 +612,12 @@ class Q_GUI_EXPORT QAccessibleEvent
       Q_ASSERT(m_type != QAccessible::TextRemoved);
       Q_ASSERT(m_type != QAccessible::TextUpdated);
       Q_ASSERT(m_type != QAccessible::TableModelChanged);
-      m_uniqueId = QAccessible::uniqueId(iface);
+
+      m_uniqueId = QAccessible::uniqueId(interfaceId);
    }
+
+   QAccessibleEvent(const QAccessibleEvent &) = delete;
+   QAccessibleEvent &operator=(const QAccessibleEvent &) = delete;
 
    virtual ~QAccessibleEvent();
 
@@ -623,8 +631,8 @@ class Q_GUI_EXPORT QAccessibleEvent
 
    QAccessible::Id uniqueId() const;
 
-   void setChild(int chld) {
-      m_child = chld;
+   void setChild(int child) {
+      m_child = child;
    }
 
    int child() const {
@@ -636,6 +644,7 @@ class Q_GUI_EXPORT QAccessibleEvent
  protected:
    QAccessible::Event m_type;
    QObject *m_object;
+
    union {
       int m_child;
       QAccessible::Id m_uniqueId;
@@ -647,32 +656,40 @@ class Q_GUI_EXPORT QAccessibleStateChangeEvent : public QAccessibleEvent
 {
  public:
    inline QAccessibleStateChangeEvent(QObject *obj, QAccessible::State state)
-      : QAccessibleEvent(obj, QAccessible::InvalidEvent), m_changedStates(state) {
+      : QAccessibleEvent(obj, QAccessible::InvalidEvent), m_changedStates(state)
+   {
       m_type = QAccessible::StateChanged;
    }
-   inline QAccessibleStateChangeEvent(QAccessibleInterface *iface, QAccessible::State state)
-      : QAccessibleEvent(iface, QAccessible::InvalidEvent), m_changedStates(state) {
+
+   inline QAccessibleStateChangeEvent(QAccessibleInterface *interfaceId, QAccessible::State state)
+      : QAccessibleEvent(interfaceId, QAccessible::InvalidEvent), m_changedStates(state)
+   {
       m_type = QAccessible::StateChanged;
    }
+
    ~QAccessibleStateChangeEvent();
+
    QAccessible::State changedStates() const {
       return m_changedStates;
    }
+
  protected:
    QAccessible::State m_changedStates;
 };
+
 // Update the cursor and optionally the selection.
 class Q_GUI_EXPORT QAccessibleTextCursorEvent : public QAccessibleEvent
 {
  public:
    inline QAccessibleTextCursorEvent(QObject *obj, int cursorPos)
-      : QAccessibleEvent(obj, QAccessible::InvalidEvent)
-      , m_cursorPosition(cursorPos) {
+      : QAccessibleEvent(obj, QAccessible::InvalidEvent), m_cursorPosition(cursorPos)
+   {
       m_type = QAccessible::TextCaretMoved;
    }
-   inline QAccessibleTextCursorEvent(QAccessibleInterface *iface, int cursorPos)
-      : QAccessibleEvent(iface, QAccessible::InvalidEvent)
-      , m_cursorPosition(cursorPos) {
+
+   inline QAccessibleTextCursorEvent(QAccessibleInterface *interfaceId, int cursorPos)
+      : QAccessibleEvent(interfaceId, QAccessible::InvalidEvent), m_cursorPosition(cursorPos)
+   {
       m_type = QAccessible::TextCaretMoved;
    }
 
@@ -681,6 +698,7 @@ class Q_GUI_EXPORT QAccessibleTextCursorEvent : public QAccessibleEvent
    void setCursorPosition(int position) {
       m_cursorPosition = position;
    }
+
    int cursorPosition() const {
       return m_cursorPosition;
    }
@@ -688,18 +706,20 @@ class Q_GUI_EXPORT QAccessibleTextCursorEvent : public QAccessibleEvent
  protected:
    int m_cursorPosition;
 };
+
 // Updates the cursor position simultaneously. By default the cursor is set to the end of the selection.
 class Q_GUI_EXPORT QAccessibleTextSelectionEvent : public QAccessibleTextCursorEvent
 {
  public:
    inline QAccessibleTextSelectionEvent(QObject *obj, int start, int end)
-      : QAccessibleTextCursorEvent(obj, (start == -1) ? 0 : end)
-      , m_selectionStart(start), m_selectionEnd(end) {
+      : QAccessibleTextCursorEvent(obj, (start == -1) ? 0 : end), m_selectionStart(start), m_selectionEnd(end)
+   {
       m_type = QAccessible::TextSelectionChanged;
    }
-   inline QAccessibleTextSelectionEvent(QAccessibleInterface *iface, int start, int end)
-      : QAccessibleTextCursorEvent(iface, (start == -1) ? 0 : end)
-      , m_selectionStart(start), m_selectionEnd(end) {
+
+   inline QAccessibleTextSelectionEvent(QAccessibleInterface *interfaceId, int start, int end)
+      : QAccessibleTextCursorEvent(interfaceId, (start == -1) ? 0 : end), m_selectionStart(start), m_selectionEnd(end)
+   {
       m_type = QAccessible::TextSelectionChanged;
    }
 
@@ -726,13 +746,14 @@ class Q_GUI_EXPORT QAccessibleTextInsertEvent : public QAccessibleTextCursorEven
 {
  public:
    inline QAccessibleTextInsertEvent(QObject *obj, int position, const QString &text)
-      : QAccessibleTextCursorEvent(obj, position + text.length())
-      , m_position(position), m_text(text) {
+      : QAccessibleTextCursorEvent(obj, position + text.length()), m_position(position), m_text(text)
+   {
       m_type = QAccessible::TextInserted;
    }
-   inline QAccessibleTextInsertEvent(QAccessibleInterface *iface, int position, const QString &text)
-      : QAccessibleTextCursorEvent(iface, position + text.length())
-      , m_position(position), m_text(text) {
+
+   inline QAccessibleTextInsertEvent(QAccessibleInterface *interfaceId, int position, const QString &text)
+      : QAccessibleTextCursorEvent(interfaceId, position + text.length()), m_position(position), m_text(text)
+   {
       m_type = QAccessible::TextInserted;
    }
 
@@ -741,6 +762,7 @@ class Q_GUI_EXPORT QAccessibleTextInsertEvent : public QAccessibleTextCursorEven
    QString textInserted() const {
       return m_text;
    }
+
    int changePosition() const {
       return m_position;
    }
@@ -754,13 +776,14 @@ class Q_GUI_EXPORT QAccessibleTextRemoveEvent : public QAccessibleTextCursorEven
 {
  public:
    inline QAccessibleTextRemoveEvent(QObject *obj, int position, const QString &text)
-      : QAccessibleTextCursorEvent(obj, position)
-      , m_position(position), m_text(text) {
+      : QAccessibleTextCursorEvent(obj, position), m_position(position), m_text(text)
+   {
       m_type = QAccessible::TextRemoved;
    }
-   inline QAccessibleTextRemoveEvent(QAccessibleInterface *iface, int position, const QString &text)
-      : QAccessibleTextCursorEvent(iface, position)
-      , m_position(position), m_text(text) {
+
+   inline QAccessibleTextRemoveEvent(QAccessibleInterface *interfaceId, int position, const QString &text)
+      : QAccessibleTextCursorEvent(interfaceId, position), m_position(position), m_text(text)
+   {
       m_type = QAccessible::TextRemoved;
    }
 
@@ -769,6 +792,7 @@ class Q_GUI_EXPORT QAccessibleTextRemoveEvent : public QAccessibleTextCursorEven
    QString textRemoved() const {
       return m_text;
    }
+
    int changePosition() const {
       return m_position;
    }
@@ -778,28 +802,31 @@ class Q_GUI_EXPORT QAccessibleTextRemoveEvent : public QAccessibleTextCursorEven
    QString m_text;
 };
 
-
 class Q_GUI_EXPORT QAccessibleTextUpdateEvent : public QAccessibleTextCursorEvent
 {
  public:
    inline QAccessibleTextUpdateEvent(QObject *obj, int position, const QString &oldText, const QString &text)
-      : QAccessibleTextCursorEvent(obj, position + text.length())
-      , m_position(position), m_oldText(oldText), m_text(text) {
+      : QAccessibleTextCursorEvent(obj, position + text.length()), m_position(position), m_oldText(oldText), m_text(text)
+   {
       m_type = QAccessible::TextUpdated;
    }
-   inline QAccessibleTextUpdateEvent(QAccessibleInterface *iface, int position, const QString &oldText, const QString &text)
-      : QAccessibleTextCursorEvent(iface, position + text.length())
-      , m_position(position), m_oldText(oldText), m_text(text) {
+
+   inline QAccessibleTextUpdateEvent(QAccessibleInterface *interfaceId, int position, const QString &oldText, const QString &text)
+      : QAccessibleTextCursorEvent(interfaceId, position + text.length()), m_position(position), m_oldText(oldText), m_text(text)
+   {
       m_type = QAccessible::TextUpdated;
    }
+
    ~QAccessibleTextUpdateEvent();
 
    QString textRemoved() const {
       return m_oldText;
    }
+
    QString textInserted() const {
       return m_text;
    }
+
    int changePosition() const {
       return m_position;
    }
@@ -809,26 +836,31 @@ class Q_GUI_EXPORT QAccessibleTextUpdateEvent : public QAccessibleTextCursorEven
    QString m_oldText;
    QString m_text;
 };
+
 class Q_GUI_EXPORT QAccessibleValueChangeEvent : public QAccessibleEvent
 {
  public:
    inline QAccessibleValueChangeEvent(QObject *obj, const QVariant &val)
-      : QAccessibleEvent(obj, QAccessible::InvalidEvent)
-      , m_value(val) {
+      : QAccessibleEvent(obj, QAccessible::InvalidEvent), m_value(val)
+   {
       m_type = QAccessible::ValueChanged;
    }
-   inline QAccessibleValueChangeEvent(QAccessibleInterface *iface, const QVariant &val)
-      : QAccessibleEvent(iface, QAccessible::InvalidEvent)
-      , m_value(val) {
+
+   inline QAccessibleValueChangeEvent(QAccessibleInterface *interfaceId, const QVariant &val)
+      : QAccessibleEvent(interfaceId, QAccessible::InvalidEvent), m_value(val)
+   {
       m_type = QAccessible::ValueChanged;
    }
+
    ~QAccessibleValueChangeEvent();
    void setValue(const QVariant &val) {
       m_value = val;
    }
+
    QVariant value() const {
       return m_value;
    }
+
  protected:
    QVariant m_value;
 };
@@ -846,15 +878,16 @@ class Q_GUI_EXPORT QAccessibleTableModelChangeEvent : public QAccessibleEvent
    };
 
    inline QAccessibleTableModelChangeEvent(QObject *obj, ModelChangeType changeType)
-      : QAccessibleEvent(obj, QAccessible::InvalidEvent)
-      , m_modelChangeType(changeType)
-      , m_firstRow(-1), m_firstColumn(-1), m_lastRow(-1), m_lastColumn(-1) {
+      : QAccessibleEvent(obj, QAccessible::InvalidEvent), m_modelChangeType(changeType),
+        m_firstRow(-1), m_firstColumn(-1), m_lastRow(-1), m_lastColumn(-1)
+   {
       m_type = QAccessible::TableModelChanged;
    }
-   inline QAccessibleTableModelChangeEvent(QAccessibleInterface *iface, ModelChangeType changeType)
-      : QAccessibleEvent(iface, QAccessible::InvalidEvent)
-      , m_modelChangeType(changeType)
-      , m_firstRow(-1), m_firstColumn(-1), m_lastRow(-1), m_lastColumn(-1) {
+
+   inline QAccessibleTableModelChangeEvent(QAccessibleInterface *interfaceId, ModelChangeType changeType)
+      : QAccessibleEvent(interfaceId, QAccessible::InvalidEvent), m_modelChangeType(changeType),
+        m_firstRow(-1), m_firstColumn(-1), m_lastRow(-1), m_lastColumn(-1)
+   {
       m_type = QAccessible::TableModelChanged;
    }
 
@@ -863,6 +896,7 @@ class Q_GUI_EXPORT QAccessibleTableModelChangeEvent : public QAccessibleEvent
    void setModelChangeType(ModelChangeType changeType) {
       m_modelChangeType = changeType;
    }
+
    ModelChangeType modelChangeType() const {
       return m_modelChangeType;
    }
@@ -907,9 +941,8 @@ Q_GUI_EXPORT QString qAccessibleRoleString(QAccessible::Role role);
 Q_GUI_EXPORT QString qAccessibleEventString(QAccessible::Event event);
 Q_GUI_EXPORT QString qAccessibleLocalizedActionDescription(const QString &actionName);
 
-Q_GUI_EXPORT QDebug operator<<(QDebug d, const QAccessibleInterface *iface);
-Q_GUI_EXPORT QDebug operator<<(QDebug d, const QAccessibleEvent &ev);
-
+Q_GUI_EXPORT QDebug operator<<(QDebug d, const QAccessibleInterface *interfaceId);
+Q_GUI_EXPORT QDebug operator<<(QDebug d, const QAccessibleEvent &event);
 
 #endif  // QT_NO_ACCESSIBILITY
 

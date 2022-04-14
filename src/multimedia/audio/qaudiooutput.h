@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,7 +39,11 @@ class Q_MULTIMEDIA_EXPORT QAudioOutput : public QObject
  public:
    explicit QAudioOutput(const QAudioFormat &format = QAudioFormat(), QObject *parent = nullptr);
    explicit QAudioOutput(const QAudioDeviceInfo &audioDeviceInfo, const QAudioFormat &format = QAudioFormat(),
-      QObject *parent = nullptr);
+                  QObject *parent = nullptr);
+
+   QAudioOutput(const QAudioOutput &) = delete;
+   QAudioOutput &operator=(const QAudioOutput &) = delete;
+
    ~QAudioOutput();
 
    QAudioFormat format() const;
@@ -67,22 +71,20 @@ class Q_MULTIMEDIA_EXPORT QAudioOutput : public QObject
    QAudio::Error error() const;
    QAudio::State state() const;
 
-   void setVolume(qreal);
+   void setVolume(qreal volume);
    qreal volume() const;
 
    QString category() const;
    void setCategory(const QString &category);
 
-   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudio::State un_named_arg1))
-   MULTI_CS_SIGNAL_2(stateChanged, un_named_arg1)
+   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudio::State state))
+   MULTI_CS_SIGNAL_2(stateChanged, state)
 
    MULTI_CS_SIGNAL_1(Public, void notify())
    MULTI_CS_SIGNAL_2(notify)
 
  private:
-   Q_DISABLE_COPY(QAudioOutput)
-
-   QAbstractAudioOutput *d;
+   QAbstractAudioOutput *m_audioOutput;
 };
 
 #endif

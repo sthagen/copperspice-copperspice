@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,18 +22,19 @@
 ***********************************************************************/
 
 #ifndef QT_NO_ICON
+
 #include <qiconloader_p.h>
 
-#include <QIconEnginePlugin>
-#include <QPixmapCache>
+#include <qiconengineplugin.h>
+#include <qpixmapcache.h>
 #include <qplatform_theme.h>
-#include <QIconEngine>
-#include <QPalette>
-#include <QtCore/QList>
+#include <qiconengine.h>
+#include <qpalette.h>
+#include <qlist.h>
 
-#include <QDir>
-#include <QSettings>
-#include <QPainter>
+#include <qdir.h>
+#include <qsettings.h>
+#include <qpainter.h>
 
 #include <qapplication_p.h>
 #include <qicon_p.h>
@@ -479,7 +480,7 @@ QIconLoaderEngineEntry *QIconLoaderEngine::entryForSize(const QSize &size)
 
    // Find the minimum distance icon
    int minimalSize = INT_MAX;
-   QIconLoaderEngineEntry *closestMatch = 0;
+   QIconLoaderEngineEntry *closestMatch = nullptr;
    for (int i = 0; i < numEntries; ++i) {
       QIconLoaderEngineEntry *entry = m_info.entries.at(i);
       int distance = directorySizeDistance(entry->dir, iconsize);
@@ -512,7 +513,7 @@ QSize QIconLoaderEngine::actualSize(const QSize &size, QIcon::Mode mode, QIcon::
 
 QPixmap PixmapEntry::pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state)
 {
-   Q_UNUSED(state);
+   (void) state;
 
    // Ensure that basePixmap is lazily initialized before generating the
    // key, otherwise the cache key is not unique

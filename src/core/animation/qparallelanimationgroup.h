@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QPARALLELANIMATIONGROUP_H
 #define QPARALLELANIMATIONGROUP_H
 
-#include <QtCore/qanimationgroup.h>
-
-QT_BEGIN_NAMESPACE
+#include <qanimationgroup.h>
 
 #ifndef QT_NO_ANIMATION
 
@@ -38,6 +36,10 @@ class Q_CORE_EXPORT QParallelAnimationGroup : public QAnimationGroup
 
  public:
    QParallelAnimationGroup(QObject *parent = nullptr);
+
+   QParallelAnimationGroup(const QParallelAnimationGroup &) = delete;
+   QParallelAnimationGroup &operator=(const QParallelAnimationGroup &) = delete;
+
    ~QParallelAnimationGroup();
 
    int duration() const override;
@@ -51,15 +53,12 @@ class Q_CORE_EXPORT QParallelAnimationGroup : public QAnimationGroup
    void updateDirection(QAbstractAnimation::Direction direction) override;
 
  private:
-   Q_DISABLE_COPY(QParallelAnimationGroup)
    Q_DECLARE_PRIVATE(QParallelAnimationGroup)
 
-   CORE_CS_SLOT_1(Private, void _q_uncontrolledAnimationFinished())
-   CORE_CS_SLOT_2(_q_uncontrolledAnimationFinished)
+   // slot
+   void _q_uncontrolledAnimationFinished() override;
 };
 
-#endif //QT_NO_ANIMATION
+#endif // QT_NO_ANIMATION
 
-QT_END_NAMESPACE
-
-#endif // QPARALLELANIMATIONGROUP
+#endif

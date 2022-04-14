@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,12 @@
 #ifndef QPATHCLIPPER_P_H
 #define QPATHCLIPPER_P_H
 
-#include <QtGui/qpainterpath.h>
-#include <QtCore/qlist.h>
+#include <qpainterpath.h>
+#include <qlist.h>
 #include <qbezier_p.h>
-#include <qdatabuffer_p.h>
-#include <stdio.h>
+#include <qvector.h>
 
-QT_BEGIN_NAMESPACE
+#include <stdio.h>
 
 class QWingedEdge;
 
@@ -46,17 +45,18 @@ class QPathClipper
 
    QPathClipper(const QPainterPath &subject, const QPainterPath &clip);
 
+   QPathClipper(const QPathClipper &) = delete;
+   QPathClipper &operator=(const QPathClipper &) = delete;
+
    QPainterPath clip(Operation op = BoolAnd);
 
    bool intersect();
    bool contains();
 
-   static bool pathToRect(const QPainterPath &path, QRectF *rect = 0);
+   static bool pathToRect(const QPainterPath &path, QRectF *rect = nullptr);
    static QPainterPath intersect(const QPainterPath &path, const QRectF &rect);
 
  private:
-   Q_DISABLE_COPY(QPathClipper)
-
    enum ClipperMode {
       ClipMode, // do the full clip
       CheckMode // for contains/intersects (only interested in whether the result path is non-empty)
@@ -162,7 +162,7 @@ class QPathSegments
    };
 
 
-   QPathSegments(int reserve);
+   QPathSegments(int capacity);
 
    void setPath(const QPainterPath &path);
    void addPath(const QPainterPath &path);
@@ -185,9 +185,9 @@ class QPathSegments
    void mergePoints();
 
  private:
-   QDataBuffer<QPointF> m_points;
-   QDataBuffer<Segment> m_segments;
-   QDataBuffer<Intersection> m_intersections;
+   QVector<QPointF> m_points;
+   QVector<Segment> m_segments;
+   QVector<Intersection> m_intersections;
 
    int m_pathId;
 };
@@ -246,10 +246,9 @@ class QWingedEdge
 
    qreal delta(int vertex, int a, int b) const;
 
-   QDataBuffer<QPathEdge> m_edges;
-   QDataBuffer<QPathVertex> m_vertices;
-
-   QVector<qreal> m_splitPoints;
+   QVector<QPathEdge>   m_edges;
+   QVector<QPathVertex> m_vertices;
+   QVector<qreal>       m_splitPoints;
 
    QPathSegments m_segments;
 };
@@ -307,11 +306,11 @@ inline QPathVertex::operator QPointF() const
    return QPointF(x, y);
 }
 
-inline QPathSegments::QPathSegments(int reserve) :
-   m_points(reserve),
-   m_segments(reserve),
-   m_intersections(reserve)
+inline QPathSegments::QPathSegments(int capacity)
 {
+   m_points.reserve(capacity);
+   m_segments.reserve(capacity);
+   m_intersections.reserve(capacity);
 }
 
 inline int QPathSegments::segments() const
@@ -360,7 +359,7 @@ inline const QPathSegments::Intersection *QPathSegments::intersectionAt(int inde
 {
    const int intersection = m_segments.at(index).intersection;
    if (intersection < 0) {
-      return 0;
+      return nullptr;
    } else {
       return &m_intersections.at(intersection);
    }
@@ -375,11 +374,13 @@ inline void QPathSegments::addIntersection(int index, const Intersection &inters
 {
    m_intersections << intersection;
 
-   Segment &segment = m_segments.at(index);
+   Segment &segment = m_segments[index];
+
    if (segment.intersection < 0) {
       segment.intersection = m_intersections.size() - 1;
+
    } else {
-      Intersection *isect = &m_intersections.at(segment.intersection);
+      Intersection *isect = &m_intersections[segment.intersection];
 
       while (isect->next != 0) {
          isect += isect->next;
@@ -396,12 +397,12 @@ inline int QWingedEdge::edgeCount() const
 
 inline QPathEdge *QWingedEdge::edge(int edge)
 {
-   return edge < 0 ? 0 : &m_edges.at(edge);
+   return edge < 0 ? nullptr : &m_edges[edge];
 }
 
 inline const QPathEdge *QWingedEdge::edge(int edge) const
 {
-   return edge < 0 ? 0 : &m_edges.at(edge);
+   return edge < 0 ? nullptr : &m_edges[edge];
 }
 
 inline int QWingedEdge::vertexCount() const
@@ -417,12 +418,12 @@ inline int QWingedEdge::addVertex(const QPointF &p)
 
 inline QPathVertex *QWingedEdge::vertex(int vertex)
 {
-   return vertex < 0 ? 0 : &m_vertices.at(vertex);
+   return vertex < 0 ? nullptr : &m_vertices[vertex];
 }
 
 inline const QPathVertex *QWingedEdge::vertex(int vertex) const
 {
-   return vertex < 0 ? 0 : &m_vertices.at(vertex);
+   return vertex < 0 ? nullptr : &m_vertices[vertex];
 }
 
 inline QPathEdge::Traversal QWingedEdge::flip(QPathEdge::Traversal traversal)
@@ -434,14 +435,17 @@ inline void QWingedEdge::TraversalStatus::flipTraversal()
 {
    traversal = QWingedEdge::flip(traversal);
 }
+
 inline QPathEdge::Direction QWingedEdge::flip(QPathEdge::Direction direction)
 {
    return direction == QPathEdge::Forward ? QPathEdge::Backward : QPathEdge::Forward;
 }
+
 inline void QWingedEdge::TraversalStatus::flipDirection()
 {
    direction = QWingedEdge::flip(direction);
 }
+
 inline void QWingedEdge::TraversalStatus::flip()
 {
    flipDirection();

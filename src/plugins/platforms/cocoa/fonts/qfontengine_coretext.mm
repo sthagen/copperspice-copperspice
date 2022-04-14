@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -161,7 +161,7 @@ static float getTraitValue(CFDictionaryRef allTraits, CFStringRef trait)
       return v;
    }
 
-   return 0;
+   return 0.0;
 }
 
 int QCoreTextFontEngine::antialiasingThreshold = 0;
@@ -173,6 +173,7 @@ CGAffineTransform qt_transform_from_fontdef(const QFontDef &fontDef)
    if (fontDef.stretch != 100) {
       transform = CGAffineTransformMakeScale(float(fontDef.stretch) / float(100), 1);
    }
+
    return transform;
 }
 
@@ -183,7 +184,7 @@ QCoreTextFontEngine::QCoreTextFontEngine(CTFontRef font, const QFontDef &def)
    transform = qt_transform_from_fontdef(fontDef);
    ctfont = font;
    CFRetain(ctfont);
-   cgFont = CTFontCopyGraphicsFont(font, NULL);
+   cgFont = CTFontCopyGraphicsFont(font, nullptr);
    init();
 }
 
@@ -196,7 +197,7 @@ QCoreTextFontEngine::QCoreTextFontEngine(CGFontRef font, const QFontDef &def)
 
    // Keep reference count balanced
    CFRetain(cgFont);
-   ctfont = CTFontCreateWithGraphicsFont(font, fontDef.pixelSize, &transform, NULL);
+   ctfont = CTFontCreateWithGraphicsFont(font, fontDef.pixelSize, &transform, nullptr);
    init();
 }
 
@@ -208,18 +209,18 @@ QCoreTextFontEngine::~QCoreTextFontEngine()
 
 void QCoreTextFontEngine::init()
 {
-   Q_ASSERT(ctfont != NULL);
-   Q_ASSERT(cgFont != NULL);
+   Q_ASSERT(ctfont != nullptr);
+   Q_ASSERT(cgFont != nullptr);
 
    face_id.index    = 0;
    QCFString name   = CTFontCopyName(ctfont, kCTFontUniqueNameKey);
-   face_id.filename = QCFString::toQString(name);
+   face_id.filename = name.toQString();
 
    QCFString family = CTFontCopyFamilyName(ctfont);
-   fontDef.family = family;
+   fontDef.family   = family.toQString();
 
    QCFString styleName = (CFStringRef) CTFontCopyAttribute(ctfont, kCTFontStyleNameAttribute);
-   fontDef.styleName = styleName;
+   fontDef.styleName   = styleName.toQString();
 
    synthesisFlags = 0;
    CTFontSymbolicTraits traits = CTFontGetSymbolicTraits(ctfont);
@@ -237,6 +238,7 @@ void QCoreTextFontEngine::init()
    CFDictionaryRef allTraits = CTFontCopyTraits(ctfont);
    fontDef.weight = QCoreTextFontEngine::qtWeightFromCFWeight(getTraitValue(allTraits, kCTFontWeightTrait));
    int slant = static_cast<int>(getTraitValue(allTraits, kCTFontSlantTrait) * 500 + 500);
+
    if (slant > 500 && !(traits & kCTFontItalicTrait)) {
       fontDef.style = QFont::StyleOblique;
    }
@@ -271,10 +273,9 @@ void QCoreTextFontEngine::init()
    // possible issue: hb_coretext requires both CTFont and CGFont but user_data is only void*
    Q_ASSERT((void *)(&ctfont + 1) == (void *)&cgFont);
 
-
    // faceData is a data member in QFontEngine
    faceData.user_data           = &ctfont;
-   faceData.font_table_func_ptr = ct_getSfntTable;
+   faceData.m_fontTable_funcPtr = ct_getSfntTable;      // harfbuzz
 }
 
 glyph_t QCoreTextFontEngine::glyphIndex(char32_t ch) const
@@ -369,7 +370,7 @@ glyph_metrics_t QCoreTextFontEngine::boundingBox(glyph_t glyph)
    glyph_metrics_t ret;
    CGGlyph g = glyph;
 
-   CGRect rect = CTFontGetBoundingRectsForGlyphs(ctfont, kCTFontOrientationHorizontal, &g, 0, 1);
+   CGRect rect = CTFontGetBoundingRectsForGlyphs(ctfont, kCTFontOrientationHorizontal, &g, nullptr, 1);
 
    if (synthesisFlags & QFontEngine::SynthesizedItalic) {
       rect.size.width += rect.size.height * SYNTHETIC_ITALIC_SKEW;
@@ -855,8 +856,8 @@ QFontEngine::Properties QCoreTextFontEngine::properties() const
    QCFString psName      = CTFontCopyPostScriptName(ctfont);
    QCFString copyright   = CTFontCopyName(ctfont, kCTFontCopyrightNameKey);
 
-   result.postscriptName = QCFString::toQString(psName);
-   result.copyright      = QCFString::toQString(copyright);
+   result.postscriptName = psName.toQString();
+   result.copyright      = copyright.toQString();
 
    qreal emSquare = CTFontGetUnitsPerEm(ctfont);
    qreal scale = emSquare / CTFontGetSize(ctfont);
@@ -884,4 +885,3 @@ QFontEngine::Properties QCoreTextFontEngine::properties() const
 
    return result;
 }
-

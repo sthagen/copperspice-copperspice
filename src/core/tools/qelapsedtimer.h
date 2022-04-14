@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QElapsedTimer_H
 #define QElapsedTimer_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
-QT_BEGIN_NAMESPACE
+#include <limits>
 
 class Q_CORE_EXPORT QElapsedTimer
 {
@@ -38,6 +38,12 @@ class Q_CORE_EXPORT QElapsedTimer
       MachAbsoluteTime,
       PerformanceCounter
    };
+
+   constexpr QElapsedTimer()
+        : t1(std::numeric_limits<qint64>::lowest()), t2(std::numeric_limits<qint64>::lowest())
+   {
+   }
+
    static ClockType clockType();
    static bool isMonotonic();
 
@@ -69,6 +75,4 @@ class Q_CORE_EXPORT QElapsedTimer
    qint64 t2;
 };
 
-QT_END_NAMESPACE
-
-#endif // QTIMESTAMP_H
+#endif

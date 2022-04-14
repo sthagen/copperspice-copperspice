@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QIODEVICEDELEGATE_P_H
 #define QIODEVICEDELEGATE_P_H
 
-#include <QtCore/QTimer>
-#include <QtNetwork/QNetworkReply>
-
-QT_BEGIN_NAMESPACE
+#include <qtimer.h>
+#include <qnetwork_reply.h>
 
 namespace QPatternist {
 /**
@@ -75,7 +73,5 @@ class QIODeviceDelegate : public QNetworkReply
    QTimer m_timeout;
 };
 }
-
-QT_END_NAMESPACE
 
 #endif

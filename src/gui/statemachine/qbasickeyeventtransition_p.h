@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,11 @@
 #ifndef QBASICKEYEVENTTRANSITION_P_H
 #define QBASICKEYEVENTTRANSITION_P_H
 
-#include <QtCore/qabstracttransition.h>
+#include <qabstracttransition.h>
 
 #ifndef QT_NO_STATEMACHINE
 
-#include <QtGui/qevent.h>
-
-QT_BEGIN_NAMESPACE
+#include <qevent.h>
 
 class QBasicKeyEventTransitionPrivate;
 
@@ -39,9 +37,13 @@ class QBasicKeyEventTransition : public QAbstractTransition
    GUI_CS_OBJECT(QBasicKeyEventTransition)
 
  public:
-   QBasicKeyEventTransition(QState *sourceState = 0);
-   QBasicKeyEventTransition(QEvent::Type type, int key, QState *sourceState = 0);
-   QBasicKeyEventTransition(QEvent::Type type, int key, Qt::KeyboardModifiers modifierMask, QState *sourceState = 0);
+   QBasicKeyEventTransition(QState *sourceState = nullptr);
+   QBasicKeyEventTransition(QEvent::Type type, int key, QState *sourceState = nullptr);
+   QBasicKeyEventTransition(QEvent::Type type, int key, Qt::KeyboardModifiers modifierMask, QState *sourceState = nullptr);
+
+   QBasicKeyEventTransition(const QBasicKeyEventTransition &) = delete;
+   QBasicKeyEventTransition &operator=(const QBasicKeyEventTransition &) = delete;
+
    ~QBasicKeyEventTransition();
 
    QEvent::Type eventType() const;
@@ -58,11 +60,8 @@ class QBasicKeyEventTransition : public QAbstractTransition
    void onTransition(QEvent *) override;
 
  private:
-   Q_DISABLE_COPY(QBasicKeyEventTransition)
    Q_DECLARE_PRIVATE(QBasicKeyEventTransition)
 };
-
-QT_END_NAMESPACE
 
 #endif //QT_NO_STATEMACHINE
 

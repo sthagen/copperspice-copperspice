@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -51,13 +51,7 @@
 int QDateTimeParser::getDigit(const QDateTime &t, int index) const
 {
    if (index < 0 || index >= sectionNodes.size()) {
-
-#ifndef QT_NO_DATESTRING
       qWarning("QDateTimeParser::getDigit() Internal error (%s %d)", csPrintable(t.toString()), index);
-#else
-      qWarning("QDateTimeParser::getDigit() Internal error (%d)", index);
-#endif
-
       return -1;
    }
 
@@ -98,12 +92,7 @@ int QDateTimeParser::getDigit(const QDateTime &t, int index) const
          break;
    }
 
-#ifndef QT_NO_DATESTRING
-   qWarning("QDateTimeParser::getDigit() Internal error 2 (%s %d)",
-      qPrintable(t.toString()), index);
-#else
-   qWarning("QDateTimeParser::getDigit() Internal error 2 (%d)", index);
-#endif
+   qWarning("QDateTimeParser::getDigit() Internal error 2 (%s %d)", csPrintable(t.toString()), index);
 
    return -1;
 }
@@ -123,14 +112,10 @@ int QDateTimeParser::getDigit(const QDateTime &t, int index) const
 bool QDateTimeParser::setDigit(QDateTime &v, int index, int newVal) const
 {
    if (index < 0 || index >= sectionNodes.size()) {
-#ifndef QT_NO_DATESTRING
-      qWarning("QDateTimeParser::setDigit() Internal error (%s %d %d)",
-         qPrintable(v.toString()), index, newVal);
-#else
-      qWarning("QDateTimeParser::setDigit() Internal error (%d %d)", index, newVal);
-#endif
+      qWarning("QDateTimeParser::setDigit() Internal error (%s %d %d)", csPrintable(v.toString()), index, newVal);
       return false;
    }
+
    const SectionNode &node = sectionNodes.at(index);
 
    int year = v.date().year();
@@ -401,7 +386,7 @@ bool QDateTimeParser::parseFormat(const QString &newFormat)
    QDTPDEBUGN("parseFormat: %s", newFormat.toLatin1().constData());
 
    QVector<SectionNode> newSectionNodes;
-   Sections newDisplay = 0;
+   Sections newDisplay = Qt::EmptyFlag;
 
    QStringList newSeparators;
    int i, index = 0;
@@ -869,8 +854,8 @@ int QDateTimeParser::parseSection(const QDateTime &currentValue, int sectionInde
                   state = Intermediate;
                } else {
                   state = Invalid;
-                  QDTPDEBUG << "invalid because" << sectiontext << "can't become a uint" << last << ok;
                }
+
             } else {
                num += last;
                const FieldInfo fi = fieldInfo(sectionIndex);
@@ -899,7 +884,7 @@ int QDateTimeParser::parseSection(const QDateTime &currentValue, int sectionInde
                      cursorPosition += missingZeroes;
                      ++(const_cast<QDateTimeParser *>(this)->sectionNodes[sectionIndex].zeroesAdded);
                   } else {
-                     state = Intermediate;;
+                     state = Intermediate;
                   }
                } else {
                   state = Acceptable;
@@ -922,11 +907,7 @@ int QDateTimeParser::parseSection(const QDateTime &currentValue, int sectionInde
 }
 #endif // QT_NO_TEXTDATE
 
-#ifndef QT_NO_DATESTRING
-/*!
-  \internal
-*/
-
+// internal
 QDateTimeParser::StateNode QDateTimeParser::parse(QString &input, int &cursorPosition,
    const QDateTime &currentValue, bool fixup) const
 {
@@ -971,7 +952,7 @@ QDateTimeParser::StateNode QDateTimeParser::parse(QString &input, int &cursorPos
 
          pos += separators.at(index).size();
          sectionNodes[index].pos = pos;
-         int *current = 0;
+         int *current = nullptr;
          const SectionNode sn = sectionNodes.at(index);
          int used;
 
@@ -1333,7 +1314,6 @@ end:
 
    return node;
 }
-#endif // QT_NO_DATESTRING
 
 #ifndef QT_NO_TEXTDATE
 /*!
@@ -1603,12 +1583,15 @@ int QDateTimeParser::SectionNode::maxChange() const
 
 QDateTimeParser::FieldInfo QDateTimeParser::fieldInfo(int index) const
 {
-   FieldInfo ret = 0;
+   FieldInfo ret = Qt::EmptyFlag;
+
    const SectionNode &sn = sectionNode(index);
+
    switch (sn.type) {
       case MSecSection:
          ret |= Fraction;
-      // fallthrough
+         [[fallthrough]];
+
       case SecondSection:
       case MinuteSection:
       case Hour24Section:
@@ -1623,31 +1606,37 @@ QDateTimeParser::FieldInfo QDateTimeParser::fieldInfo(int index) const
             ret |= FixedWidth;
          }
          break;
+
       case MonthSection:
       case DaySection:
          switch (sn.count) {
             case 2:
                ret |= FixedWidth;
-            // fallthrough
+               [[fallthrough]];
+
             case 1:
                ret |= (Numeric | AllowPartial);
                break;
          }
          break;
+
       case DayOfWeekSectionShort:
       case DayOfWeekSectionLong:
          if (sn.count == 3) {
             ret |= FixedWidth;
          }
          break;
+
       case AmPmSection:
          ret |= FixedWidth;
          break;
+
       default:
          qWarning("QDateTimeParser::fieldInfo Internal error 2 (%d %s %d)",
             index, qPrintable(sn.name()), sn.count);
          break;
    }
+
    return ret;
 }
 
@@ -1852,7 +1841,6 @@ QString QDateTimeParser::stateName(State s) const
    }
 }
 
-#ifndef QT_NO_DATESTRING
 bool QDateTimeParser::fromString(const QString &t, QDate *date, QTime *time) const
 {
    QDateTime val(QDate(1900, 1, 1), QDATETIMEEDIT_TIME_MIN);
@@ -1883,7 +1871,6 @@ bool QDateTimeParser::fromString(const QString &t, QDate *date, QTime *time) con
 
    return true;
 }
-#endif // QT_NO_DATESTRING
 
 QDateTime QDateTimeParser::getMinimum() const
 {
@@ -1905,12 +1892,11 @@ QString QDateTimeParser::getAmPmText(AmPm ap, Case cs) const
 /*
   \internal
 
-  I give arg2 preference because arg1 is always a QDateTime.
+  give arg2 preference because arg1 is always a QDateTime.
 */
 
 bool operator==(const QDateTimeParser::SectionNode &s1, const QDateTimeParser::SectionNode &s2)
 {
    return (s1.type == s2.type) && (s1.pos == s2.pos) && (s1.count == s2.count);
 }
-
 

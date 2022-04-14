@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,8 +32,12 @@ class Q_CORE_EXPORT QBitArray
 {
  public:
    inline QBitArray() {}
-   explicit QBitArray(int size, bool val = false);
-   QBitArray(const QBitArray &other) : d(other.d) {}
+   explicit QBitArray(int size, bool value = false);
+
+   QBitArray(const QBitArray &other)
+      : d(other.d)
+   {
+   }
 
    inline QBitArray &operator=(const QBitArray &other) {
       d = other.d;
@@ -94,21 +98,21 @@ class Q_CORE_EXPORT QBitArray
    QBitRef operator[](uint i);
    bool operator[](uint i) const;
 
-   QBitArray &operator&=(const QBitArray &);
-   QBitArray &operator|=(const QBitArray &);
-   QBitArray &operator^=(const QBitArray &);
+   QBitArray &operator&=(const QBitArray &other);
+   QBitArray &operator|=(const QBitArray &other);
+   QBitArray &operator^=(const QBitArray &other);
    QBitArray  operator~() const;
 
-   inline bool operator==(const QBitArray &a) const {
-      return d == a.d;
+   inline bool operator==(const QBitArray &other) const {
+      return d == other.d;
    }
 
-   inline bool operator!=(const QBitArray &a) const {
-      return d != a.d;
+   inline bool operator!=(const QBitArray &other) const {
+      return d != other.d;
    }
 
-   inline bool fill(bool val, int size = -1);
-   void fill(bool val, int first, int last);
+   inline bool fill(bool value, int size = -1);
+   void fill(bool value, int begin, int end);
 
    inline void truncate(int pos) {
       if (pos < size()) {
@@ -124,15 +128,15 @@ class Q_CORE_EXPORT QBitArray
  private:
    QByteArray d;
 
-   friend Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QBitArray &);
-   friend Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QBitArray &);
+   friend Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QBitArray &bitArray);
+   friend Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QBitArray &bitArray);
    friend Q_CORE_EXPORT uint qHash(const QBitArray &key, uint seed);
-
 };
 
-inline bool QBitArray::fill(bool aval, int asize)
+inline bool QBitArray::fill(bool value, int size)
 {
-   *this = QBitArray((asize < 0 ? this->size() : asize), aval);
+   *this = QBitArray((size < 0 ? this->size() : size), value);
+
    return true;
 }
 
@@ -236,8 +240,8 @@ inline QBitRef QBitArray::operator[](uint i)
    return QBitRef(*this, i);
 }
 
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QBitArray &);
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QBitArray &);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QBitArray &bitArray);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QBitArray &bitArray);
 
 Q_DECLARE_SHARED(QBitArray)
 

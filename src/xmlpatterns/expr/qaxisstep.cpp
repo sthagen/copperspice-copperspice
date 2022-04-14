@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -193,7 +193,7 @@ QXmlNodeModelIndex::Axis AxisStep::axis() const
 
 QString AxisStep::axisName(const QXmlNodeModelIndex::Axis axis)
 {
-   const char *result = 0;
+   const char *result = nullptr;
 
    switch (axis) {
       /* These must not be translated. */

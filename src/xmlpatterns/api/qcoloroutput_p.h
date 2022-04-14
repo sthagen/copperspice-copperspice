@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -84,8 +84,10 @@ class ColorOutput
    QString colorify(const QString &message, int color = -1) const;
 
  private:
+   ColorOutput(const ColorOutput &) = delete;
+   ColorOutput &operator=(const ColorOutput &) = delete;
+
    ColorOutputPrivate *d;
-   Q_DISABLE_COPY(ColorOutput)
 };
 }
 

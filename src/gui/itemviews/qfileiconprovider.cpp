@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,8 @@
 #include <qfileiconprovider_p.h>
 
 #include <qdir.h>
+#include <qglobal.h>
 #include <qpixmapcache.h>
-#include <qfunctions_p.h>
 #include <qguiapplication_p.h>
 #include <qicon_p.h>
 #include <qplatform_integration.h>
@@ -53,15 +53,17 @@ class QFileIconEngine : public QPixmapIconEngine
    { }
 
    QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override {
+      (void) mode;
+      (void) state;
 
       QPixmap pixmap;
 
-      if (!size.isValid()) {
+      if (! size.isValid()) {
          return pixmap;
       }
 
       const QPlatformTheme *theme = QGuiApplicationPrivate::platformTheme();
-      if (!theme) {
+      if (! theme) {
          return pixmap;
       }
 
@@ -91,9 +93,11 @@ class QFileIconEngine : public QPixmapIconEngine
    }
 
    QList<QSize> availableSizes(QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off) const override {
+      (void) mode;
+      (void) state;
 
       static QList<QSize> sizes;
-      static QPlatformTheme *theme = 0;
+      static QPlatformTheme *theme = nullptr;
 
       if (!theme) {
          theme = QGuiApplicationPrivate::platformTheme();
@@ -309,8 +313,10 @@ QIcon QFileIconProvider::icon(const QFileInfo &info) const
 
 #if defined(Q_OS_UNIX) && !defined(QT_NO_STYLE_GTK)
    const QByteArray desktopEnvironment = QGuiApplicationPrivate::platformIntegration()->services()->desktopEnvironment();
-   if (desktopEnvironment != QByteArrayLiteral("KDE")) {
+
+   if (desktopEnvironment != "KDE") {
       QIcon gtkIcon = QGtkStylePrivate::getFilesystemIcon(info);
+
       if (!gtkIcon.isNull()) {
          return gtkIcon;
       }
@@ -374,18 +380,16 @@ QIcon QFileIconProvider::icon(const QFileInfo &info) const
          }
       }
    }
+
    return QIcon();
 }
-
-/*!
-  Returns the type of the file described by \a info.
-*/
 
 QString QFileIconProvider::type(const QFileInfo &info) const
 {
    if (info.isRoot()) {
       return QApplication::translate("QFileDialog", "Drive");
    }
+
    if (info.isFile()) {
       if (!info.suffix().isEmpty()) {
          //: %1 is a file name suffix, for example txt

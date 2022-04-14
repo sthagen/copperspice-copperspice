@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 // Define the container allocation functions in a separate file, so users can easily override them.
 
-QT_BEGIN_NAMESPACE
-
 void *qMalloc(size_t size)
 {
    return ::malloc(size);
@@ -45,21 +43,23 @@ void *qRealloc(void *ptr, size_t size)
 
 void *qMallocAligned(size_t size, size_t alignment)
 {
-   return qReallocAligned(0, size, 0, alignment);
+   return qReallocAligned(nullptr, size, 0, alignment);
 }
 
 void *qReallocAligned(void *oldptr, size_t newsize, size_t oldsize, size_t alignment)
 {
    // fake an aligned allocation
-   Q_UNUSED(oldsize);
+   (void) oldsize;
 
-   void *actualptr = oldptr ? static_cast<void **>(oldptr)[-1] : 0;
+   void *actualptr = oldptr ? static_cast<void **>(oldptr)[-1] : nullptr;
+
    if (alignment <= sizeof(void *)) {
       // special, fast case
       void **newptr = static_cast<void **>(realloc(actualptr, newsize + sizeof(void *)));
-      if (!newptr) {
-         return 0;
+      if (! newptr) {
+         return nullptr;
       }
+
       if (newptr == actualptr) {
          // realloc succeeded without reallocating
          return oldptr;
@@ -78,8 +78,8 @@ void *qReallocAligned(void *oldptr, size_t newsize, size_t oldsize, size_t align
    // alignment anyway.
 
    void *real = realloc(actualptr, newsize + alignment);
-   if (!real) {
-      return 0;
+   if (! real) {
+      return nullptr;
    }
 
    quintptr faked = reinterpret_cast<quintptr>(real) + alignment;
@@ -103,6 +103,4 @@ void qFreeAligned(void *ptr)
    void **ptr2 = static_cast<void **>(ptr);
    free(ptr2[-1]);
 }
-
-QT_END_NAMESPACE
 

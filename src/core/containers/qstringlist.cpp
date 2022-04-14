@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -180,12 +180,12 @@ int QStringList::removeDuplicates()
    return n - j;
 }
 
-QDataStream &operator>>(QDataStream &in, QStringList &list)
+QDataStream &operator>>(QDataStream &stream, QStringList &list)
 {
-   return operator>>(in, static_cast<QList<QString> &>(list));
+   return operator>>(stream, static_cast<QList<QString> &>(list));
 }
 
-QDataStream &operator<<(QDataStream &out, const QStringList &list)
+QDataStream &operator<<(QDataStream &stream, const QStringList &list)
 {
-   return operator<<(out, static_cast<const QList<QString> &>(list));
+   return operator<<(stream, static_cast<const QList<QString> &>(list));
 }

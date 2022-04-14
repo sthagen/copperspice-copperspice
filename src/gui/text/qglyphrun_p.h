@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,14 +32,11 @@ class QGlyphRunPrivate: public QSharedData
 {
  public:
    QGlyphRunPrivate()
-      : flags(0)
-      , glyphIndexData(glyphIndexes.constData())
-      , glyphIndexDataSize(0)
-      , glyphPositionData(glyphPositions.constData())
-      , glyphPositionDataSize(0)
-      , textRangeStart(-1)
-      , textRangeEnd(-1)
-   { }
+      : flags(Qt::EmptyFlag), glyphIndexData(glyphIndexes.constData()), glyphIndexDataSize(0),
+        glyphPositionData(glyphPositions.constData()), glyphPositionDataSize(0),
+        textRangeStart(-1), textRangeEnd(-1)
+   {
+   }
 
    QGlyphRunPrivate(const QGlyphRunPrivate &other)
       : QSharedData(other)

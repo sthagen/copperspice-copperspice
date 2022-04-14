@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,15 +24,13 @@
 #ifndef RECENTFILES_H
 #define RECENTFILES_H
 
-#include <QString>
-#include <QStringList>
-#include <QTimer>
-
-QT_BEGIN_NAMESPACE
+#include <qstring.h>
+#include <qstringlist.h>
+#include <qtimer.h>
 
 class RecentFiles : public QObject
 {
-   Q_OBJECT
+   CS_OBJECT(RecentFiles)
 
  public:
    explicit RecentFiles(const int maxEntries);
@@ -40,13 +38,17 @@ class RecentFiles : public QObject
    bool isEmpty() {
       return m_strLists.isEmpty();
    }
+
    void addFiles(const QStringList &names);
+
    QString lastOpenedFile() const {
       if (m_strLists.isEmpty() || m_strLists.first().isEmpty()) {
-         return QString::null;
+         return QString();
       }
+
       return m_strLists.at(0).at(0);
    }
+
    const QList<QStringList> &filesLists() const {
       return m_strLists;
    }
@@ -54,7 +56,7 @@ class RecentFiles : public QObject
    void readConfig();
    void writeConfig() const;
 
- public slots:
+   // slot
    void closeGroup();
 
  private:
@@ -65,6 +67,4 @@ class RecentFiles : public QObject
    QTimer m_timer;
 };
 
-QT_END_NAMESPACE
-
-#endif // RECENTFILES_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,8 @@
 
 static int cache_limit = 10240;    // 10 MB cache limit for desktop
 
-QPixmapCache::Key::Key() : d(0)
+QPixmapCache::Key::Key()
+   : d(nullptr)
 {
 }
 
@@ -119,7 +120,6 @@ class QPMCache : public QObject, public QCache<QPixmapCache::Key, QPixmapCacheEn
    bool t;
 };
 
-
 Q_GLOBAL_STATIC(QPMCache, pm_cache)
 
 uint qHash(const QPixmapCache::Key &k)
@@ -128,9 +128,8 @@ uint qHash(const QPixmapCache::Key &k)
 }
 
 QPMCache::QPMCache()
-   : QObject(0),
-     QCache<QPixmapCache::Key, QPixmapCacheEntry>(cache_limit * 1024),
-     keyArray(0), theid(0), ps(0), keyArraySize(0), freeKey(0), t(false)
+   : QObject(nullptr), QCache<QPixmapCache::Key, QPixmapCacheEntry>(cache_limit * 1024),
+     keyArray(nullptr), theid(0), ps(0), keyArraySize(0), freeKey(0), t(false)
 {
 }
 
@@ -139,7 +138,6 @@ QPMCache::~QPMCache()
    clear();
    free(keyArray);
 }
-
 
 bool QPMCache::flushDetachedPixmaps(bool nt)
 {
@@ -176,19 +174,20 @@ void QPMCache::timerEvent(QTimerEvent *)
    }
 }
 
-
 QPixmap *QPMCache::object(const QString &key) const
 {
    QPixmapCache::Key cacheKey = cacheKeys.value(key);
    if (!cacheKey.d || !cacheKey.d->isValid) {
       const_cast<QPMCache *>(this)->cacheKeys.remove(key);
-      return 0;
+      return nullptr;
    }
+
    QPixmap *ptr = QCache<QPixmapCache::Key, QPixmapCacheEntry>::object(cacheKey);
    //We didn't find the pixmap in the cache, the key is not valid anymore
    if (!ptr) {
       const_cast<QPMCache *>(this)->cacheKeys.remove(key);
    }
+
    return ptr;
 }
 
@@ -328,14 +327,16 @@ void QPMCache::releaseKey(const QPixmapCache::Key &key)
 void QPMCache::clear()
 {
    free(keyArray);
-   keyArray = 0;
-   freeKey = 0;
+   keyArray     = nullptr;
+   freeKey      = 0;
    keyArraySize = 0;
+
    //Mark all keys as invalid
    QList<QPixmapCache::Key> keys = QCache<QPixmapCache::Key, QPixmapCacheEntry>::keys();
    for (int i = 0; i < keys.size(); ++i) {
       keys.at(i).d->isValid = false;
    }
+
    QCache<QPixmapCache::Key, QPixmapCacheEntry>::clear();
 }
 
@@ -373,7 +374,7 @@ bool QPixmapCache::find(const QString &key, QPixmap *pixmap)
    if (ptr && pixmap) {
       *pixmap = *ptr;
    }
-   return ptr != 0;
+   return ptr != nullptr;
 }
 
 bool QPixmapCache::find(const Key &key, QPixmap *pixmap)
@@ -387,7 +388,7 @@ bool QPixmapCache::find(const Key &key, QPixmap *pixmap)
    if (ptr && pixmap) {
       *pixmap = *ptr;
    }
-   return ptr != 0;
+   return ptr != nullptr;
 }
 
 bool QPixmapCache::insert(const QString &key, const QPixmap &pixmap)
@@ -395,12 +396,10 @@ bool QPixmapCache::insert(const QString &key, const QPixmap &pixmap)
    return pm_cache()->insert(key, pixmap, pixmap.width() * pixmap.height() * pixmap.depth() / 8);
 }
 
-
 QPixmapCache::Key QPixmapCache::insert(const QPixmap &pixmap)
 {
    return pm_cache()->insert(pixmap, pixmap.width() * pixmap.height() * pixmap.depth() / 8);
 }
-
 
 bool QPixmapCache::replace(const Key &key, const QPixmap &pixmap)
 {

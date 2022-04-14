@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,13 +23,11 @@
 
 #include "qtslib.h"
 
-
 #include <QSocketNotifier>
 #include <QStringList>
 #include <QPoint>
 #include <QWindowSystemInterface>
-
-#include <Qt>
+#include <qnamespace.h>
 
 #include <errno.h>
 #include <tslib.h>
@@ -63,7 +61,7 @@ QTsLibMouseHandler::QTsLibMouseHandler(const QString &key,
         m_notify = new QSocketNotifier(fd, QSocketNotifier::Read, this);
         connect(m_notify, SIGNAL(activated(int)), this, SLOT(readMouseData()));
     } else {
-        qWarning("Cannot open mouse input device '%s': %s", device.constData(), strerror(errno));
+        qWarning("Unable to open mouse input device '%s': %s", device.constData(), strerror(errno));
         return;
     }
 }
@@ -121,4 +119,3 @@ void QTsLibMouseHandler::readMouseData()
     }
 }
 
-QT_END_NAMESPACE

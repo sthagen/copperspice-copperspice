@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,9 +26,7 @@
 #ifndef QSCRIPTGRAMMAR_P_H
 #define QSCRIPTGRAMMAR_P_H
 
-#include <QtCore/qglobal.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
 
 class QScriptGrammar
 {
@@ -137,7 +135,7 @@ class QScriptGrammar
 #ifndef QLALR_NO_QSCRIPTGRAMMAR_DEBUG_INFO
    static const int     rule_index [];
    static const int      rule_info [];
-#endif // QLALR_NO_QSCRIPTGRAMMAR_DEBUG_INFO
+#endif
 
    static const short    goto_default [];
    static const short  action_default [];
@@ -165,7 +163,5 @@ class QScriptGrammar
    }
 };
 
-
-QT_END_NAMESPACE
-#endif // QSCRIPTGRAMMAR_P_H
+#endif
 

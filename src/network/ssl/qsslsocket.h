@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -44,7 +44,7 @@ class Q_NETWORK_EXPORT QSslSocket : public QTcpSocket
 {
    NET_CS_OBJECT(QSslSocket)
 
-public:
+ public:
    enum SslMode {
       UnencryptedMode,
       SslClientMode,
@@ -59,6 +59,10 @@ public:
    };
 
    QSslSocket(QObject *parent = nullptr);
+
+   QSslSocket(const QSslSocket &) = delete;
+   QSslSocket &operator=(const QSslSocket &) = delete;
+
    ~QSslSocket();
 
    void resume() override; // to continue after proxy authentication required, SSL errors etc.
@@ -67,7 +71,7 @@ public:
    void connectToHostEncrypted(const QString &hostName, quint16 port, OpenMode mode = ReadWrite,
                   NetworkLayerProtocol protocol = AnyIPProtocol);
 
-    void connectToHostEncrypted(const QString &hostName, quint16 port, const QString &sslPeerName,
+   void connectToHostEncrypted(const QString &hostName, quint16 port, const QString &sslPeerName,
                   OpenMode mode = ReadWrite, NetworkLayerProtocol protocol = AnyIPProtocol);
 
    bool setSocketDescriptor(qintptr socketDescriptor, SocketState state = ConnectedState,
@@ -115,7 +119,7 @@ public:
 
    // SSL configuration
    QSslConfiguration sslConfiguration() const;
-   void setSslConfiguration(const QSslConfiguration &config);
+   void setSslConfiguration(const QSslConfiguration &configuration);
 
    // Certificate & cipher accessors.
    void setLocalCertificateChain(const QList<QSslCertificate> &localChain);
@@ -194,13 +198,12 @@ public:
    NET_CS_SIGNAL_1(Public, void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator))
    NET_CS_SIGNAL_2(preSharedKeyAuthenticationRequired, authenticator)
 
-protected:
+ protected:
    qint64 readData(char *data, qint64 maxlen) override;
    qint64 writeData(const char *data, qint64 len) override;
 
-private:
+ private:
    Q_DECLARE_PRIVATE(QSslSocket)
-   Q_DISABLE_COPY(QSslSocket)
 
    NET_CS_SLOT_1(Private, void _q_connectedSlot())
    NET_CS_SLOT_2(_q_connectedSlot)

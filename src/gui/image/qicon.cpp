@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -63,7 +63,7 @@ static void qt_cleanup_icon_cache()
    qtIconCache()->clear();
 }
 
-static qreal qt_effective_device_pixel_ratio(QWindow *window = 0)
+static qreal qt_effective_device_pixel_ratio(QWindow *window = nullptr)
 {
    if (!qApp->testAttribute(Qt::AA_UseHighDpiPixmaps)) {
       return qreal(1.0);
@@ -73,21 +73,21 @@ static qreal qt_effective_device_pixel_ratio(QWindow *window = 0)
    }
    return qApp->devicePixelRatio(); // Don't know which window to target.
 }
+
 QIconPrivate::QIconPrivate()
-   : engine(0), ref(1),
-     serialNum(serialNumCounter.fetchAndAddRelaxed(1)),
-     detach_no(0), is_mask(false)
+   : engine(nullptr), ref(1), serialNum(serialNumCounter.fetchAndAddRelaxed(1)), detach_no(0), is_mask(false)
 {
 }
-
 
 qreal QIconPrivate::pixmapDevicePixelRatio(qreal displayDevicePixelRatio, const QSize &requestedSize, const QSize &actualSize)
 {
    QSize targetSize = requestedSize * displayDevicePixelRatio;
    qreal scale = 0.5 * (qreal(actualSize.width()) / qreal(targetSize.width()) +
          qreal(actualSize.height() / qreal(targetSize.height())));
+
    return qMax(qreal(1.0), displayDevicePixelRatio * scale);
 }
+
 QPixmapIconEngine::QPixmapIconEngine()
 {
 }
@@ -103,7 +103,7 @@ QPixmapIconEngine::~QPixmapIconEngine()
 
 void QPixmapIconEngine::paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State state)
 {
-   QSize pixmapSize = rect.size() * qt_effective_device_pixel_ratio(0);
+   QSize pixmapSize = rect.size() * qt_effective_device_pixel_ratio(nullptr);
    QPixmap px = pixmap(pixmapSize, mode, state);
    painter->drawPixmap(rect, px);
 }
@@ -141,8 +141,9 @@ static QPixmapIconEngineEntry *bestSizeMatch( const QSize &size, QPixmapIconEngi
 
 QPixmapIconEngineEntry *QPixmapIconEngine::tryMatch(const QSize &size, QIcon::Mode mode, QIcon::State state)
 {
-   QPixmapIconEngineEntry *pe = 0;
-   for (int i = 0; i < pixmaps.count(); ++i)
+   QPixmapIconEngineEntry *pe = nullptr;
+
+   for (int i = 0; i < pixmaps.count(); ++i) {
       if (pixmaps.at(i).mode == mode && pixmaps.at(i).state == state) {
          if (pe) {
             pe = bestSizeMatch(size, &pixmaps[i], pe);
@@ -150,14 +151,16 @@ QPixmapIconEngineEntry *QPixmapIconEngine::tryMatch(const QSize &size, QIcon::Mo
             pe = &pixmaps[i];
          }
       }
+   }
+
    return pe;
 }
-
 
 QPixmapIconEngineEntry *QPixmapIconEngine::bestMatch(const QSize &size, QIcon::Mode mode, QIcon::State state,
    bool sizeOnly)
 {
    QPixmapIconEngineEntry *pe = tryMatch(size, mode, state);
+
    while (!pe) {
       QIcon::State oppositeState = (state == QIcon::On) ? QIcon::Off : QIcon::On;
       if (mode == QIcon::Disabled || mode == QIcon::Selected) {
@@ -355,7 +358,7 @@ class ImageReader
  public:
    ImageReader(const QString &fileName) : m_reader(fileName), m_atEnd(false) {}
 
-   QByteArray format() const {
+   QString format() const {
       return m_reader.format();
    }
 
@@ -384,13 +387,17 @@ void QPixmapIconEngine::addFile(const QString &fileName, const QSize &size, QIco
    if (fileName.isEmpty()) {
       return;
    }
+
    const QString abs = fileName.startsWith(QLatin1Char(':')) ? fileName : QFileInfo(fileName).absoluteFilePath();
    const bool ignoreSize = !size.isValid();
    ImageReader imageReader(abs);
-   const QByteArray format = imageReader.format();
-   if (format.isEmpty()) { // Device failed to open or unsupported format.
+   const QString format = imageReader.format();
+
+   if (format.isEmpty()) {
+      // Device failed to open or unsupported format.
       return;
    }
+
    QImage image;
 
    if (format != "ico") {
@@ -535,12 +542,12 @@ QFactoryLoader *cs_internal_iconLoader()
 }
 
 QIcon::QIcon()
-   : d(0)
+   : d(nullptr)
 {
 }
 
 QIcon::QIcon(const QPixmap &pixmap)
-   : d(0)
+   : d(nullptr)
 {
    addPixmap(pixmap);
 }
@@ -554,22 +561,15 @@ QIcon::QIcon(const QIcon &other)
 }
 
 QIcon::QIcon(const QString &fileName)
-   : d(0)
+   : d(nullptr)
 {
    addFile(fileName);
 }
 
-
-/*!
-    Creates an icon with a specific icon \a engine. The icon takes
-    ownership of the engine.
-*/
 QIcon::QIcon(QIconEngine *engine)
    : d(new QIconPrivate)
 {
-
    d->engine = engine;
-
 }
 
 
@@ -579,7 +579,6 @@ QIcon::~QIcon()
       delete d;
    }
 }
-
 
 QIcon &QIcon::operator=(const QIcon &other)
 {
@@ -595,7 +594,6 @@ QIcon &QIcon::operator=(const QIcon &other)
    return *this;
 }
 
-
 QIcon::operator QVariant() const
 {
    return QVariant(QVariant::Icon, this);
@@ -607,9 +605,9 @@ qint64 QIcon::cacheKey() const
    if (!d) {
       return 0;
    }
+
    return (((qint64) d->serialNum) << 32) | ((qint64) (d->detach_no));
 }
-
 
 QPixmap QIcon::pixmap(const QSize &size, Mode mode, State state) const
 {
@@ -617,9 +615,8 @@ QPixmap QIcon::pixmap(const QSize &size, Mode mode, State state) const
       return QPixmap();
    }
 
-   return pixmap(0, size, mode, state);
+   return pixmap(nullptr, size, mode, state);
 }
-
 
 QSize QIcon::actualSize(const QSize &size, Mode mode, State state) const
 {
@@ -627,32 +624,39 @@ QSize QIcon::actualSize(const QSize &size, Mode mode, State state) const
       return QSize();
    }
 
-   return actualSize(0, size, mode, state);
+   return actualSize(nullptr, size, mode, state);
 }
+
 QPixmap QIcon::pixmap(QWindow *window, const QSize &size, Mode mode, State state) const
 {
    if (!d) {
       return QPixmap();
    }
+
    qreal devicePixelRatio = qt_effective_device_pixel_ratio(window);
    if (!(devicePixelRatio > 1.0)) {
       QPixmap pixmap = d->engine->pixmap(size, mode, state);
       pixmap.setDevicePixelRatio(1.0);
       return pixmap;
    }
+
    QPixmap pixmap = d->engine->pixmap(size * devicePixelRatio, mode, state);
    pixmap.setDevicePixelRatio(d->pixmapDevicePixelRatio(devicePixelRatio, size, pixmap.size()));
+
    return pixmap;
 }
+
 QSize QIcon::actualSize(QWindow *window, const QSize &size, Mode mode, State state) const
 {
    if (!d) {
       return QSize();
    }
+
    qreal devicePixelRatio = qt_effective_device_pixel_ratio(window);
    if (!(devicePixelRatio > 1.0)) {
       return d->engine->actualSize(size, mode, state);
    }
+
    QSize actualSize = d->engine->actualSize(size * devicePixelRatio, mode, state);
    return actualSize / d->pixmapDevicePixelRatio(devicePixelRatio, size, actualSize);
 }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,12 +25,11 @@
 #define QANIMATIONGROUP_P_H
 
 #include <qanimationgroup.h>
-#include <QtCore/qlist.h>
+#include <qlist.h>
+
 #include <qabstractanimation_p.h>
 
 #ifndef QT_NO_ANIMATION
-
-QT_BEGIN_NAMESPACE
 
 class QAnimationGroupPrivate : public QAbstractAnimationPrivate
 {
@@ -45,19 +44,16 @@ class QAnimationGroupPrivate : public QAbstractAnimationPrivate
    virtual void animationRemoved(int, QAbstractAnimation *);
 
    void disconnectUncontrolledAnimation(QAbstractAnimation *anim) {
-      // nullptr as the signal, might be called from the animation destructor
-      QObject::disconnect(anim, nullptr, q_func(), SLOT(_q_uncontrolledAnimationFinished()));
+      QObject::disconnect(anim, &QAbstractAnimation::finished, q_func(), &QAnimationGroup::_q_uncontrolledAnimationFinished);
    }
 
    void connectUncontrolledAnimation(QAbstractAnimation *anim) {
-      QObject::connect(anim, SIGNAL(finished()), q_func(), SLOT(_q_uncontrolledAnimationFinished()));
+      QObject::connect(anim, &QAbstractAnimation::finished, q_func(), &QAnimationGroup::_q_uncontrolledAnimationFinished);
    }
 
    QList<QAbstractAnimation *> animations;
 };
 
-QT_END_NAMESPACE
-
 #endif //QT_NO_ANIMATION
 
-#endif //QANIMATIONGROUP_P_H
+#endif

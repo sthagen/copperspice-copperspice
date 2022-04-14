@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,11 @@
 #ifndef QSSLKEY_H
 #define QSSLKEY_H
 
-#include <QtCore/qnamespace.h>
-#include <QtCore/qbytearray.h>
-#include <QtCore/qsharedpointer.h>
-#include <QtNetwork/qssl.h>
+#include <qnamespace.h>
+#include <qbytearray.h>
+#include <qsharedpointer.h>
+#include <qssl.h>
 #include <qcontainerfwd.h>
-
-QT_BEGIN_NAMESPACE
 
 #ifdef QT_SSL
 
@@ -77,9 +75,9 @@ class Q_NETWORK_EXPORT QSslKey
       qSwap(d, other.d);
    }
 
-   bool operator==(const QSslKey &key) const;
-   inline bool operator!=(const QSslKey &key) const {
-      return !operator==(key);
+   bool operator==(const QSslKey &other) const;
+   inline bool operator!=(const QSslKey &other) const {
+      return ! operator==(other);
    }
 
  private:
@@ -91,7 +89,5 @@ class Q_NETWORK_EXPORT QSslKey
 Q_NETWORK_EXPORT QDebug operator<<(QDebug debug, const QSslKey &key);
 
 #endif
-
-QT_END_NAMESPACE
 
 #endif

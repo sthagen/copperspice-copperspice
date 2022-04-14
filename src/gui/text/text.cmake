@@ -7,6 +7,17 @@ add_definitions(
    -DFT2_BUILD_LIBRARY
 )
 
+# Harfbuzz settings
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+   add_definitions(
+      -DHB_NO_WIN1256
+   )
+else()
+   add_definitions(
+      -DHAVE_PTHREAD
+   )
+endif()
+
 list(APPEND GUI_PUBLIC_INCLUDES
    QAbstractTextDocumentLayout
    QAbstractGraphicsShapeItem
@@ -96,6 +107,8 @@ list(APPEND GUI_INCLUDES
 )
 
 list(APPEND GUI_PRIVATE_INCLUDES
+   ${CMAKE_CURRENT_SOURCE_DIR}/text/qcssscanner_p.cpp
+
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qabstracttextdocumentlayout_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qcssparser_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qfont_p.h
@@ -107,6 +120,7 @@ list(APPEND GUI_PRIVATE_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qfontsubset_agl_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qfragmentmap_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qglyphrun_p.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/text/qharfbuzz_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qinputcontrol_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qrawfont_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qstatictext_p.h
@@ -125,8 +139,6 @@ list(APPEND GUI_PRIVATE_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qtexttable_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qzipreader_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qzipwriter_p.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/text/qcssscanner.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/text/qharfbuzz_gui_p.h
 )
 
 target_sources(CsGui
@@ -139,8 +151,9 @@ target_sources(CsGui
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qfontsubset.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qfontmetrics.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qfontdatabase.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/text/qharfbuzz_gui.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qglyphrun.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/text/qharfbuzz_script.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/text/qharfbuzz_font.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qinputcontrol.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qrawfont.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qstatictext.cpp
@@ -166,41 +179,25 @@ target_sources(CsGui
    ${CMAKE_CURRENT_SOURCE_DIR}/text/qzip.cpp
 
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/autofit/autofit.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftapi.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftbase.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftbbox.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftbdf.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftbitmap.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftcid.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftdebug.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftfstype.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftgasp.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftglyph.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftgxval.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftinit.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftlcdfil.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftmm.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftotval.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftpatent.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftpfr.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftstroke.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftsynth.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftsystem.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/fttype1.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftwinfnt.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftxf86.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/md5.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/bdf/bdf.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/bzip2/ftbzip2.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/cache/ftccache.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/cache/ftcmanag.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/cache/ftcmru.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/cff/cff.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/cid/type1cid.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/gxvalid/gxvalid.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/gzip/ftgzip.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/lzw/ftlzw.c
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/otvalid/otvalid.c
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/otvalid/otvbase.c
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/otvalid/otvcommn.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/pcf/pcf.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/pfr/pfrcmap.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/pfr/pfrdrivr.c
@@ -212,6 +209,10 @@ target_sources(CsGui
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/pshinter/pshinter.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/psnames/psnames.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/raster/raster.c
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/sdf/ftbsdf.c
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/sdf/ftsdf.c
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/sdf/ftsdfrend.c
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/sdf/ftsdfcommon.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/sfnt/sfnt.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/smooth/smooth.c
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/truetype/truetype.c
@@ -220,6 +221,7 @@ target_sources(CsGui
    ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/winfonts/winfnt.c
 
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/fonts/resource_harfbuzz.cpp
+
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-aat-layout.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-aat-map.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-blob.cc
@@ -227,9 +229,10 @@ target_sources(CsGui
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-buffer.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-common.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-face.cc
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-fallback-shape.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-font.cc
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ft.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-map.cc
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-number.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-cff1-table.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-cff2-table.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-color.cc
@@ -238,19 +241,19 @@ target_sources(CsGui
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-layout.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-map.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-math.cc
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-name-language.cc
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-metrics.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-name.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-arabic.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-default.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-hangul.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-hebrew.cc
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-indic-table.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-indic.cc
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-indic-table.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-khmer.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-myanmar.cc
+   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-syllabic.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-thai.cc
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-use-table.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-use.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-complex-vowel-constraints.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-ot-shape-fallback.cc
@@ -266,17 +269,30 @@ target_sources(CsGui
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-subset-cff1.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-subset-cff2.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-subset-cff-common.cc
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-subset-glyf.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-subset-input.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-subset-plan.cc
    ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-unicode.cc
-   ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-warning.cc
 )
 
-if(GTK2_FOUND)
+if (GTK2_FOUND)
    target_sources(CsGui
       PRIVATE
       ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-glib.cc
       ${CMAKE_SOURCE_DIR}/src/3rdparty/harfbuzz/src/hb-gobject-structs.cc
+   )
+endif()
+
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+   target_sources(CsGui
+      PRIVATE
+      ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/base/ftsystem.c
+   )
+else()
+   target_sources(CsGui
+      PRIVATE
+      ${CMAKE_SOURCE_DIR}/src/3rdparty/freetype/src/builds/unix/ftsystem.c
+   )
+   add_definitions(
+      -DHAVE_FCNTL_H
    )
 endif()

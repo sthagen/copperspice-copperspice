@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,6 @@ class Q_GUI_EXPORT QCalendarWidget : public QWidget
 {
    GUI_CS_OBJECT(QCalendarWidget)
 
-   GUI_CS_ENUM(Qt::DayOfWeek)
    GUI_CS_ENUM(HorizontalHeaderFormat)
    GUI_CS_ENUM(VerticalHeaderFormat)
    GUI_CS_ENUM(SelectionMode)
@@ -76,24 +75,34 @@ class Q_GUI_EXPORT QCalendarWidget : public QWidget
    GUI_CS_PROPERTY_WRITE(dateEditAcceptDelay, setDateEditAcceptDelay)
 
  public:
-   enum HorizontalHeaderFormat {
-      NoHorizontalHeader,
-      SingleLetterDayNames,
-      ShortDayNames,
-      LongDayNames
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum HorizontalHeaderFormat {
+         NoHorizontalHeader,
+         SingleLetterDayNames,
+         ShortDayNames,
+         LongDayNames
+      };
+   )
 
-   enum VerticalHeaderFormat {
-      NoVerticalHeader,
-      ISOWeekNumbers
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum VerticalHeaderFormat {
+         NoVerticalHeader,
+         ISOWeekNumbers
+      };
+   )
 
-   enum SelectionMode {
-      NoSelection,
-      SingleSelection
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum SelectionMode {
+         NoSelection,
+         SingleSelection
+      };
+   )
 
    explicit QCalendarWidget(QWidget *parent = nullptr);
+
+   QCalendarWidget(const QCalendarWidget &) = delete;
+   QCalendarWidget &operator=(const QCalendarWidget &) = delete;
+
    ~QCalendarWidget();
 
    QSize sizeHint() const override;
@@ -200,7 +209,6 @@ class Q_GUI_EXPORT QCalendarWidget : public QWidget
 
  private:
    Q_DECLARE_PRIVATE(QCalendarWidget)
-   Q_DISABLE_COPY(QCalendarWidget)
 
    GUI_CS_SLOT_1(Private, void _q_slotShowDate(const QDate &date))
    GUI_CS_SLOT_2(_q_slotShowDate)

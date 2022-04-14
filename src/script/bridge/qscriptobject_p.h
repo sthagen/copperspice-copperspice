@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include "JSObject.h"
 
-QT_BEGIN_NAMESPACE
-
 class QScriptObjectDelegate;
 
 class QScriptObject : public JSC::JSObject
@@ -39,7 +37,11 @@ class QScriptObject : public JSC::JSObject
       QScriptObjectDelegate *delegate;
       bool isMarking; // recursion guard
 
-      Data() : delegate(0), isMarking(false) {}
+      Data()
+         : delegate(nullptr), isMarking(false)
+      {
+      }
+
       ~Data();
    };
 
@@ -103,31 +105,33 @@ class QScriptObjectDelegate
    };
 
    QScriptObjectDelegate();
+
+   QScriptObjectDelegate(const QScriptObjectDelegate &) = delete;
+   QScriptObjectDelegate &operator=(const QScriptObjectDelegate &) = delete;
+
    virtual ~QScriptObjectDelegate();
 
    virtual Type type() const = 0;
 
    virtual bool getOwnPropertySlot(QScriptObject *, JSC::ExecState *,
-      const JSC::Identifier &propertyName,
-      JSC::PropertySlot &);
+      const JSC::Identifier &propertyName, JSC::PropertySlot &);
+
    virtual bool getOwnPropertyDescriptor(QScriptObject *, JSC::ExecState *,
-      const JSC::Identifier &propertyName,
-      JSC::PropertyDescriptor &);
+      const JSC::Identifier &propertyName, JSC::PropertyDescriptor &);
+
    virtual void put(QScriptObject *, JSC::ExecState *exec, const JSC::Identifier &propertyName,
       JSC::JSValue, JSC::PutPropertySlot &);
-   virtual bool deleteProperty(QScriptObject *, JSC::ExecState *,
-      const JSC::Identifier &propertyName);
+
+   virtual bool deleteProperty(QScriptObject *, JSC::ExecState *, const JSC::Identifier &propertyName);
+
    virtual void getOwnPropertyNames(QScriptObject *, JSC::ExecState *, JSC::PropertyNameArray &,
       JSC::EnumerationMode mode = JSC::ExcludeDontEnumProperties);
    virtual void markChildren(QScriptObject *, JSC::MarkStack &markStack);
    virtual JSC::CallType getCallData(QScriptObject *, JSC::CallData &);
    virtual JSC::ConstructType getConstructData(QScriptObject *, JSC::ConstructData &);
-   virtual bool hasInstance(QScriptObject *, JSC::ExecState *,
-      JSC::JSValue value, JSC::JSValue proto);
-   virtual bool compareToObject(QScriptObject *, JSC::ExecState *, JSC::JSObject *);
 
- private:
-   Q_DISABLE_COPY(QScriptObjectDelegate)
+   virtual bool hasInstance(QScriptObject *, JSC::ExecState *, JSC::JSValue value, JSC::JSValue proto);
+   virtual bool compareToObject(QScriptObject *, JSC::ExecState *, JSC::JSObject *);
 };
 
 inline JSC::JSValue QScriptObject::data() const
@@ -135,6 +139,7 @@ inline JSC::JSValue QScriptObject::data() const
    if (!d) {
       return JSC::JSValue();
    }
+
    return d->data;
 }
 
@@ -149,7 +154,7 @@ inline void QScriptObject::setData(JSC::JSValue data)
 inline QScriptObjectDelegate *QScriptObject::delegate() const
 {
    if (!d) {
-      return 0;
+      return nullptr;
    }
    return d->delegate;
 }
@@ -163,7 +168,5 @@ inline void QScriptObject::setDelegate(QScriptObjectDelegate *delegate)
    }
    d->delegate = delegate;
 }
-
-QT_END_NAMESPACE
 
 #endif

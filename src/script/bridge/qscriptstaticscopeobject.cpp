@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,39 +25,18 @@
 #include "qscriptstaticscopeobject_p.h"
 
 namespace JSC {
-ASSERT_CLASS_FITS_IN_CELL(QT_PREPEND_NAMESPACE(QScriptStaticScopeObject));
+   ASSERT_CLASS_FITS_IN_CELL(QT_PREPEND_NAMESPACE(QScriptStaticScopeObject));
 }
 
-QT_BEGIN_NAMESPACE
+const JSC::ClassInfo QScriptStaticScopeObject::info = { "QScriptStaticScopeObject", nullptr, nullptr, nullptr };
 
-/*!
-  \class QScriptStaticScopeObject
-  \internal
 
-    Represents a static scope object.
-
-    This class allows the VM to determine at JS script compile time whether
-    the object has a given property or not. If the object has the property,
-    a fast, index-based read/write operation will be used. If the object
-    doesn't have the property, the compiler knows it can safely skip this
-    object when dynamically resolving the property. Either way, this can
-    greatly improve performance.
-
-  \sa QScriptContext::pushScope()
-*/
-
-const JSC::ClassInfo QScriptStaticScopeObject::info = { "QScriptStaticScopeObject", 0, 0, 0 };
-
-/*!
-    Creates a static scope object with a fixed set of undeletable properties.
-
-    It's not possible to add new properties to the object after construction.
-*/
 QScriptStaticScopeObject::QScriptStaticScopeObject(WTF::NonNullPassRefPtr<JSC::Structure> structure,
-   int propertyCount, const PropertyInfo *props)
-   : JSC::JSVariableObject(structure, new Data(/*canGrow=*/false))
+      int propertyCount, const PropertyInfo *props)
+   : JSC::JSVariableObject(structure, new Data(false))
 {
    int index = growRegisterArray(propertyCount);
+
    for (int i = 0; i < propertyCount; ++i, --index) {
       const PropertyInfo &prop = props[i];
       JSC::SymbolTableEntry entry(index, prop.attributes);
@@ -66,19 +45,6 @@ QScriptStaticScopeObject::QScriptStaticScopeObject(WTF::NonNullPassRefPtr<JSC::S
    }
 }
 
-/*!
-    Creates an empty static scope object.
-
-    Properties can be added to the object after construction, either by
-    calling QScriptValue::setProperty(), or by pushing the object on the
-    scope chain; variable declarations ("var" statements) and function
-    declarations in JavaScript will create properties on the scope object.
-
-    Note that once the scope object has been used in a closure and the
-    resulting function has been compiled, it's no longer safe to add
-    properties to the scope object (because the VM will bypass this
-    object the next time the function is executed).
-*/
 QScriptStaticScopeObject::QScriptStaticScopeObject(WTF::NonNullPassRefPtr<JSC::Structure> structure)
    : JSC::JSVariableObject(structure, new Data(/*canGrow=*/true))
 {
@@ -104,9 +70,12 @@ bool QScriptStaticScopeObject::getOwnPropertyDescriptor(JSC::ExecState *, const 
 void QScriptStaticScopeObject::putWithAttributes(JSC::ExecState *exec, const JSC::Identifier &propertyName,
    JSC::JSValue value, unsigned attributes)
 {
+   (void) exec;
+
    if (symbolTablePutWithAttributes(propertyName, value, attributes)) {
       return;
    }
+
    Q_ASSERT(d_ptr()->canGrow);
    addSymbolTableProperty(propertyName, value, attributes);
 }
@@ -114,9 +83,12 @@ void QScriptStaticScopeObject::putWithAttributes(JSC::ExecState *exec, const JSC
 void QScriptStaticScopeObject::put(JSC::ExecState *exec, const JSC::Identifier &propertyName, JSC::JSValue value,
    JSC::PutPropertySlot &)
 {
+   (void) exec;
+
    if (symbolTablePut(propertyName, value)) {
       return;
    }
+
    Q_ASSERT(d_ptr()->canGrow);
    addSymbolTableProperty(propertyName, value, /*attributes=*/0);
 }
@@ -162,4 +134,3 @@ int QScriptStaticScopeObject::growRegisterArray(int count)
    return -oldSize - 1;
 }
 
-QT_END_NAMESPACE

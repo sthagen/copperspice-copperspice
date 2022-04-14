@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -233,7 +233,7 @@ class XSLTTokenizer : public Tokenizer, private MaintainingReader<XSLTTokenLooku
    bool queueSelectOrSequenceConstructor(const ReportContext::ErrorCode code,
                                          const bool emptynessAllowed,
                                          TokenSource::Queue *const to,
-                                         const QXmlStreamAttributes *const atts = 0,
+                                         const QXmlStreamAttributes *const atts = nullptr,
                                          const bool queueEmptyOnEmpty = true);
 
    /**
@@ -310,7 +310,7 @@ class XSLTTokenizer : public Tokenizer, private MaintainingReader<XSLTTokenLooku
    void handleXSLTVersion(TokenSource::Queue *const to,
                           QStack<Token> *const queueOnExit,
                           const bool isXSLTElement,
-                          const QXmlStreamAttributes *atts = 0,
+                          const QXmlStreamAttributes *atts = nullptr,
                           const bool generateCode = true,
                           const bool setGlobalVersion = false);
 
@@ -320,7 +320,7 @@ class XSLTTokenizer : public Tokenizer, private MaintainingReader<XSLTTokenLooku
    void handleXMLBase(TokenSource::Queue *const to,
                       QStack<Token> *const queueOnExit,
                       const bool isInstruction = true,
-                      const QXmlStreamAttributes *atts = 0);
+                      const QXmlStreamAttributes *atts = nullptr);
 
    /**
     * Concatenates text nodes, ignores comments and processing
@@ -356,13 +356,10 @@ class XSLTTokenizer : public Tokenizer, private MaintainingReader<XSLTTokenLooku
     * its value is @p isTrue, @c false if it is @p isFalse, and raise an
     * error otherwise.
     */
-   bool readToggleAttribute(const QString &attributeName,
-                            const QString &isTrue,
-                            const QString &isFalse,
-                            const QXmlStreamAttributes *const atts = 0) const;
+   bool readToggleAttribute(const QString &attributeName, const QString &isTrue, const QString &isFalse,
+                            const QXmlStreamAttributes *const atts = nullptr) const;
 
-   int readAlternativeAttribute(const QHash<QString, int> &alternatives,
-                                const QXmlStreamAttribute &attr) const;
+   int readAlternativeAttribute(const QHash<QString, int> &alternatives, const QXmlStreamAttribute &attr) const;
 
    /**
     * Returns @c true if the current text node can be skipped without

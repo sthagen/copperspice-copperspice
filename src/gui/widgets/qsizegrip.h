@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,8 @@
 
 #include <qwidget.h>
 
-
 #ifndef QT_NO_SIZEGRIP
+
 class QSizeGripPrivate;
 
 class Q_GUI_EXPORT QSizeGrip : public QWidget
@@ -36,34 +36,34 @@ class Q_GUI_EXPORT QSizeGrip : public QWidget
 
  public:
    explicit QSizeGrip(QWidget *parent);
+
+   QSizeGrip(const QSizeGrip &) = delete;
+   QSizeGrip &operator=(const QSizeGrip &) = delete;
+
    ~QSizeGrip();
 
    QSize sizeHint() const override;
-   void setVisible(bool) override;
+   void setVisible(bool visible) override;
 
  protected:
-   void paintEvent(QPaintEvent *) override;
-   void mousePressEvent(QMouseEvent *) override;
-   void mouseMoveEvent(QMouseEvent *) override;
-   void mouseReleaseEvent(QMouseEvent *mouseEvent) override;
-   void moveEvent(QMoveEvent *moveEvent) override;
-   void showEvent(QShowEvent *showEvent) override;
-   void hideEvent(QHideEvent *hideEvent) override;
-   bool eventFilter(QObject *, QEvent *) override;
+   void paintEvent(QPaintEvent *event) override;
+   void mousePressEvent(QMouseEvent *event) override;
+   void mouseMoveEvent(QMouseEvent *event) override;
+   void mouseReleaseEvent(QMouseEvent *event) override;
+   void moveEvent(QMoveEvent *event) override;
+   void showEvent(QShowEvent *event) override;
+   void hideEvent(QHideEvent *event) override;
+   bool eventFilter(QObject *object, QEvent *event) override;
 
-   bool event(QEvent *) override;
-
-
+   bool event(QEvent *event) override;
 
  private:
    Q_DECLARE_PRIVATE(QSizeGrip)
-   Q_DISABLE_COPY(QSizeGrip)
 
    GUI_CS_SLOT_1(Private, void _q_showIfNotHidden())
    GUI_CS_SLOT_2(_q_showIfNotHidden)
 };
+
 #endif // QT_NO_SIZEGRIP
-
-
 
 #endif

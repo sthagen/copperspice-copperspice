@@ -1,13 +1,13 @@
 /***********************************************************************
 *
-* Copyright (c) 2017-2020 Barbara Geller
-* Copyright (c) 2017-2020 Ansel Sermersheim
-
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
+*
 * Copyright (c) 1998-2009 John Maddock
 *
-* This file is part of CsString.
+* This file is part of CopperSpice.
 *
-* CsString is free software, released under the BSD 2-Clause license.
+* CopperSpice is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
 *
 * CopperSpice is distributed in the hope that it will be useful,
@@ -154,7 +154,7 @@ class LIB_CS_STRING_EXPORT raw_storage
 
 inline raw_storage::raw_storage()
 {
-   last = start = end = 0;
+   last = start = end = nullptr;
 }
 
 inline raw_storage::raw_storage(size_type n)

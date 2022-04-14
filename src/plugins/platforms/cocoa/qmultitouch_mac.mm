@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,10 +21,8 @@
 *
 ***********************************************************************/
 
-#include "qmultitouch_mac_p.h"
-#include "qcocoahelpers.h"
-
-QT_BEGIN_NAMESPACE
+#include <qmultitouch_mac_p.h>
+#include <qcocoahelpers.h>
 
 QHash<qint64, QCocoaTouch *> QCocoaTouch::_currentTouches;
 QPointF QCocoaTouch::_screenReferencePos;
@@ -88,7 +86,7 @@ QCocoaTouch *QCocoaTouch::findQCocoaTouch(NSTouch *nstouch)
    if (_currentTouches.contains(identity)) {
       return _currentTouches.value(identity);
    }
-   return 0;
+   return nullptr;
 }
 
 Qt::TouchPointState QCocoaTouch::toTouchPointState(NSTouchPhase nsState)
@@ -202,4 +200,3 @@ QList<QWindowSystemInterface::TouchPoint> QCocoaTouch::getCurrentTouchPointList(
    return touchPoints.values();
 }
 
-QT_END_NAMESPACE

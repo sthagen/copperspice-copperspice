@@ -1,10 +1,11 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2018 Barbara Geller
-* Copyright (c) 2012-2018 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
+*
+* Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
 * Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
 *
 * This file is part of CopperSpice.
 *
@@ -16,7 +17,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *
-* <http://www.gnu.org/licenses/>.
+* https://www.gnu.org/licenses/
 *
 ***********************************************************************/
 
@@ -235,8 +236,8 @@ JSValue QtPixmapInstance::defaultValue(ExecState* exec, PreferredPrimitiveType p
 {
     if (ptype == PreferNumber) {
         return jsBoolean(
-                (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QImage>()) && !(data.value<QImage>()).isNull())
-                || (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QPixmap>()) && !data.value<QPixmap>().isNull()));
+                (data.type() == QVariant::Image && ! data.value<QImage>().isNull() )
+                || (data.type() == QVariant::Pixmap && ! data.value<QPixmap>().isNull()));
     }
 
     if (ptype == PreferString)
@@ -260,30 +261,34 @@ QtPixmapInstance::QtPixmapInstance(PassRefPtr<RootObject> rootObj, const QVarian
 
 int QtPixmapInstance::width() const
 {
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QPixmap>()))
+    if (data.type() == QVariant::Pixmap)
         return data.value<QPixmap>().width();
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QImage>()))
+
+    if (data.type() == QVariant::Image)
         return data.value<QImage>().width();
+
     return 0;
 }
 
 int QtPixmapInstance::height() const
 {
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QPixmap>()))
+    if (data.type() == QVariant::Pixmap)
         return data.value<QPixmap>().height();
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QImage>()))
+
+    if (data.type() == QVariant::Image)
         return data.value<QImage>().height();
     return 0;
 }
 
 QPixmap QtPixmapInstance::toPixmap()
 {
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QPixmap>()))
+    if (data.type() == QVariant::Pixmap)
         return data.value<QPixmap>();
 
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QImage>())) {
+    if (data.type() == QVariant::Image) {
         const QPixmap pixmap = QPixmap::fromImage(data.value<QImage>());
         data = QVariant::fromValue<QPixmap>(pixmap);
+
         return pixmap;
     }
 
@@ -292,19 +297,20 @@ QPixmap QtPixmapInstance::toPixmap()
 
 QImage QtPixmapInstance::toImage()
 {
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QImage>()))
+    if (data.type() == QVariant::Image)
         return data.value<QImage>();
 
-    if (data.type() == static_cast<QVariant::Type>(qMetaTypeId<QPixmap>())) {
+    if (data.type() == QVariant::Pixmap) {
         const QImage image = data.value<QPixmap>().toImage();
         data = QVariant::fromValue<QImage>(image);
+
         return image;
     }
 
     return QImage();
 }
 
-QVariant QtPixmapInstance::variantFromObject(JSObject* object, QMetaType::Type hint)
+QVariant QtPixmapInstance::variantFromObject(JSObject* object, QVariant::Type hint)
 {
     if (! object)
         goto returnEmptyVariant;
@@ -328,9 +334,17 @@ QVariant QtPixmapInstance::variantFromObject(JSObject* object, QMetaType::Type h
         if (!pixmap)
             goto returnEmptyVariant;
 
-        return (hint == static_cast<QMetaType::Type>(qMetaTypeId<QPixmap>()))
-                  ? QVariant::fromValue<QPixmap>(*pixmap)
-                  : QVariant::fromValue<QImage>(pixmap->toImage());
+
+        QVariant retval;
+
+        if (hint == QVariant::Pixmap) {
+           retval = QVariant::fromValue<QPixmap>(*pixmap);
+
+        } else {
+           retval = QVariant::fromValue<QImage>(pixmap->toImage());
+        }
+
+        return retval;
     }
 
     if (object->inherits(&QtPixmapRuntimeObject::s_info)) {
@@ -339,18 +353,20 @@ QVariant QtPixmapInstance::variantFromObject(JSObject* object, QMetaType::Type h
         if (!instance)
             goto returnEmptyVariant;
 
-        if (hint == qMetaTypeId<QPixmap>())
+        if (hint == QVariant::Pixmap)
             return QVariant::fromValue<QPixmap>(instance->toPixmap());
 
-        if (hint == qMetaTypeId<QImage>())
+        if (hint == QVariant::Image)
             return QVariant::fromValue<QImage>(instance->toImage());
     }
 
 returnEmptyVariant:
-    if (hint == qMetaTypeId<QPixmap>())
+    if (hint == QVariant::Pixmap)
         return QVariant::fromValue<QPixmap>(QPixmap());
-    if (hint == qMetaTypeId<QImage>())
+
+    if (hint == QVariant::Image)
         return QVariant::fromValue<QImage>(QImage());
+
     return QVariant();
 }
 
@@ -366,9 +382,9 @@ JSObject* QtPixmapInstance::createPixmapRuntimeObject(ExecState* exec, PassRefPt
     return instance->createRuntimeObject(exec);
 }
 
-bool QtPixmapInstance::canHandle(QMetaType::Type hint)
+bool QtPixmapInstance::canHandle(QVariant::Type hint)
 {
-    return hint == qMetaTypeId<QImage>() || hint == qMetaTypeId<QPixmap>();
+    return hint == QVariant::Image || hint == QVariant::Pixmap;
 }
 
 }

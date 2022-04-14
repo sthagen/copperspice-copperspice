@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -205,7 +205,7 @@ class QAbstractItemViewPrivate : public QAbstractScrollAreaPrivate
 #endif
       ) {
          QStyleOption opt;
-         opt.init(q_func());
+         opt.initFrom(q_func());
          opt.rect = dropIndicatorRect;
          q_func()->style()->drawPrimitive(QStyle::PE_IndicatorItemViewItemDrop, &opt, painter, q_func());
       }
@@ -214,12 +214,13 @@ class QAbstractItemViewPrivate : public QAbstractScrollAreaPrivate
 #endif
 
    virtual QItemViewPaintPairs draggablePaintPairs(const QModelIndexList &indexes, QRect *r) const;
+
    // reimplemented in subclasses
    virtual void adjustViewOptionsForIndex(QStyleOptionViewItem *, const QModelIndex &) const {}
 
    inline void releaseEditor(QWidget *editor, const QModelIndex &index = QModelIndex()) const {
       if (editor) {
-         QObject::disconnect(editor, SIGNAL(destroyed(QObject *)), q_func(), SLOT(editorDestroyed(QObject *)));
+         QObject::disconnect(editor, &QObject::destroyed, q_func(), &QAbstractItemView::editorDestroyed);
 
          editor->removeEventFilter(itemDelegate);
          editor->hide();

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,32 +29,30 @@
 
 #ifndef QT_NO_ANIMATION
 
-QT_BEGIN_NAMESPACE
-
 class QPropertyAnimationPrivate : public QVariantAnimationPrivate
 {
    Q_DECLARE_PUBLIC(QPropertyAnimation)
 
  public:
    QPropertyAnimationPrivate()
-      : targetValue(0), propertyType(0), propertyIndex(-1) {
+      : targetValue(nullptr), propertyType(0), propertyIndex(-1) {
    }
 
+   void updateProperty(const QVariant &);
+   void updateMetaProperty();
+
    QWeakPointer<QObject> target;
-   //we use targetValue to be able to unregister the target from the global hash
+
+   //use targetValue to be able to unregister the target from the global hash
    QObject *targetValue;
 
-   //for the QProperty
+   // for the QProperty
    int propertyType;
    int propertyIndex;
 
-   QByteArray propertyName;
-   void updateProperty(const QVariant &);
-   void updateMetaProperty();
+   QString propertyName;
 };
-
-QT_END_NAMESPACE
 
 #endif //QT_NO_ANIMATION
 
-#endif //QPROPERTYANIMATION_P_H
+#endif

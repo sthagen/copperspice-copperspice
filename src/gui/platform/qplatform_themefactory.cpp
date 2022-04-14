@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,15 +22,26 @@
 ***********************************************************************/
 
 #include <qplatform_themefactory_p.h>
+
 #include <qplatform_themeplugin.h>
 #include <qdir.h>
-#include <qfactoryloader_p.h>
 #include <qmutex.h>
 #include <qguiapplication.h>
 #include <qdebug.h>
 
-Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, loader, (QPlatformThemeInterface_ID, "/platformthemes", Qt::CaseInsensitive))
-Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, directLoader, (QPlatformThemeInterface_ID, "", Qt::CaseInsensitive))
+#include <qfactoryloader_p.h>
+
+static QFactoryLoader *loader()
+{
+   static QFactoryLoader retval(QPlatformThemeInterface_ID, "/platformthemes", Qt::CaseInsensitive);
+   return &retval;
+}
+
+static QFactoryLoader *directLoader()
+{
+   static QFactoryLoader retval(QPlatformThemeInterface_ID, "", Qt::CaseInsensitive);
+   return &retval;
+}
 
 QPlatformTheme *QPlatformThemeFactory::create(const QString &key, const QString &platformPluginPath)
 {
@@ -50,7 +61,7 @@ QPlatformTheme *QPlatformThemeFactory::create(const QString &key, const QString 
       return ret;
    }
 
-   return 0;
+   return nullptr;
 }
 
 /*!

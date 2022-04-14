@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,11 +26,9 @@
 
 #include <qparallelanimationgroup.h>
 #include <qanimationgroup_p.h>
-#include <QtCore/qhash.h>
+#include <qhash.h>
 
 #ifndef QT_NO_ANIMATION
-
-QT_BEGIN_NAMESPACE
 
 class QParallelAnimationGroupPrivate : public QAnimationGroupPrivate
 {
@@ -41,10 +39,6 @@ class QParallelAnimationGroupPrivate : public QAnimationGroupPrivate
       : lastLoop(0), lastCurrentTime(0) {
    }
 
-   QHash<QAbstractAnimation *, int> uncontrolledFinishTime;
-   int lastLoop;
-   int lastCurrentTime;
-
    bool shouldAnimationStart(QAbstractAnimation *animation, bool startIfAtEnd) const;
    void applyGroupState(QAbstractAnimation *animation);
    bool isUncontrolledAnimationFinished(QAbstractAnimation *anim) const;
@@ -54,10 +48,12 @@ class QParallelAnimationGroupPrivate : public QAnimationGroupPrivate
    void animationRemoved(int index, QAbstractAnimation *) override;
 
    void _q_uncontrolledAnimationFinished();
-};
 
-QT_END_NAMESPACE
+   QHash<QAbstractAnimation *, int> uncontrolledFinishTime;
+   int lastLoop;
+   int lastCurrentTime;
+};
 
 #endif //QT_NO_ANIMATION
 
-#endif //QPARALLELANIMATIONGROUP_P_H
+#endif

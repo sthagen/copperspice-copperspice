@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -53,7 +53,7 @@ QString8 QString8::fromCFString(CFStringRef str)
 CFStringRef QString8::toCFString() const
 {
    return CFStringCreateWithBytes(kCFAllocatorDefault,
-                  reinterpret_cast<const UInt8 *>(this->constData()), this->size_storage(), kCFStringEncodingUTF8, false);
+               reinterpret_cast<const UInt8 *>(this->constData()), this->size_storage(), kCFStringEncodingUTF8, false);
 }
 
 QString8 QString8::fromNSString(const NSString *str)

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,7 +30,7 @@
 #include <qmediarecorder.h>
 
 class QVideoProbePrivate {
-public:
+  public:
     QPointer<QMediaObject> source;
     QPointer<QMediaVideoProbeControl> probee;
 };
@@ -43,11 +43,11 @@ QVideoProbe::QVideoProbe(QObject *parent)
 QVideoProbe::~QVideoProbe()
 {
     if (d->source) {
-        // Disconnect
         if (d->probee) {
-            disconnect(d->probee.data(), SIGNAL(videoFrameProbed(QVideoFrame)), this, SLOT(videoFrameProbed(QVideoFrame)));
-            disconnect(d->probee.data(), SIGNAL(flush()), this, SLOT(flush()));
+            disconnect(d->probee.data(), &QMediaVideoProbeControl::videoFrameProbed, this, &QVideoProbe::videoFrameProbed);
+            disconnect(d->probee.data(), &QMediaVideoProbeControl::flush,            this, &QVideoProbe::flush);
         }
+
         d->source.data()->service()->releaseControl(d->probee.data());
     }
 }
@@ -60,17 +60,18 @@ bool QVideoProbe::setSource(QMediaObject *source)
     // 3) connect if so
 
     // in case source was destroyed but probe control is still valid
-    if (!d->source && d->probee) {
-        disconnect(d->probee.data(), SIGNAL(videoFrameProbed(QVideoFrame)), this, SLOT(videoFrameProbed(QVideoFrame)));
-        disconnect(d->probee.data(), SIGNAL(flush()), this, SLOT(flush()));
+    if (! d->source && d->probee) {
+        disconnect(d->probee.data(), &QMediaVideoProbeControl::videoFrameProbed, this, &QVideoProbe::videoFrameProbed);
+        disconnect(d->probee.data(), &QMediaVideoProbeControl::flush,            this, &QVideoProbe::flush);
         d->probee.clear();
     }
 
     if (source != d->source.data()) {
         if (d->source) {
             Q_ASSERT(d->probee);
-            disconnect(d->probee.data(), SIGNAL(videoFrameProbed(QVideoFrame)), this, SLOT(videoFrameProbed(QVideoFrame)));
-            disconnect(d->probee.data(), SIGNAL(flush()), this, SLOT(flush()));
+            disconnect(d->probee.data(), &QMediaVideoProbeControl::videoFrameProbed, this, &QVideoProbe::videoFrameProbed);
+            disconnect(d->probee.data(), &QMediaVideoProbeControl::flush,            this, &QVideoProbe::flush);
+
             d->source.data()->service()->releaseControl(d->probee.data());
             d->source.clear();
             d->probee.clear();
@@ -83,33 +84,33 @@ bool QVideoProbe::setSource(QMediaObject *source)
             }
 
             if (d->probee) {
-                connect(d->probee.data(), SIGNAL(videoFrameProbed(QVideoFrame)), this, SLOT(videoFrameProbed(QVideoFrame)));
-                connect(d->probee.data(), SIGNAL(flush()), this, SLOT(flush()));
-                d->source = source;
+               connect(d->probee.data(), &QMediaVideoProbeControl::videoFrameProbed, this, &QVideoProbe::videoFrameProbed);
+               connect(d->probee.data(), &QMediaVideoProbeControl::flush,            this, &QVideoProbe::flush);
+               d->source = source;
             }
         }
     }
 
-    return (!source || d->probee != 0);
+    return (! source || d->probee != nullptr);
 }
 
 bool QVideoProbe::setSource(QMediaRecorder *mediaRecorder)
 {
-    QMediaObject *source = mediaRecorder ? mediaRecorder->mediaObject() : 0;
+    QMediaObject *source = mediaRecorder ? mediaRecorder->mediaObject() : nullptr;
     bool result = setSource(source);
 
-    if (!mediaRecorder)
-        return true;
+    if (! mediaRecorder) {
+       return true;
+    }
 
-    if (mediaRecorder && !source)
-        return false;
+    if (mediaRecorder && ! source) {
+       return false;
+    }
 
     return result;
 }
 
 bool QVideoProbe::isActive() const
 {
-    return d->probee != 0;
+    return d->probee != nullptr;
 }
-
-

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -68,6 +68,8 @@ class PageItem : public QGraphicsItem
 
 void PageItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+   (void) widget;
+
    QRectF paperRect(0, 0, paperSize.width(), paperSize.height());
 
    // Draw shadow
@@ -152,10 +154,10 @@ class QPrintPreviewWidgetPrivate : public QWidgetPrivate
 
  public:
    QPrintPreviewWidgetPrivate()
-      : scene(0), curPage(1),
-        viewMode(QPrintPreviewWidget::SinglePageView),
-        zoomMode(QPrintPreviewWidget::FitInView),
-        zoomFactor(1), initialized(false), fitting(true) {
+      : scene(nullptr), curPage(1), viewMode(QPrintPreviewWidget::SinglePageView),
+        zoomMode(QPrintPreviewWidget::FitInView), zoomFactor(1),
+        initialized(false), fitting(true)
+   {
    }
 
    // private slots

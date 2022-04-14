@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -150,7 +150,7 @@ void QGlyphRun::clear()
 {
    detach();
    d->rawFont = QRawFont();
-   d->flags = 0;
+   d->flags = Qt::EmptyFlag;
 
    setPositions(QVector<QPointF>());
    setGlyphIndexes(QVector<quint32>());

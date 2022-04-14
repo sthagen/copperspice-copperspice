@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -68,6 +68,10 @@ class Q_GUI_EXPORT QToolBar : public QWidget
  public:
    explicit QToolBar(const QString &title, QWidget *parent = nullptr);
    explicit QToolBar(QWidget *parent = nullptr);
+
+   QToolBar(const QToolBar &) = delete;
+   QToolBar &operator=(const QToolBar &) = delete;
+
    ~QToolBar();
 
    void setMovable(bool movable);
@@ -91,6 +95,7 @@ class Q_GUI_EXPORT QToolBar : public QWidget
    QAction *addAction(const QIcon &icon, const QString &text);
    QAction *addAction(const QString &text, const QObject *receiver, const QString &member);
    QAction *addAction(const QIcon &icon, const QString &text, const QObject *receiver, const QString &member);
+
    // addAction(QString): Connect to a QObject slot / functor or function pointer (with context)
    template<class Obj, typename Func1>
    typename std::enable_if < ! std::is_same<const char *, Func1>::value &&
@@ -111,18 +116,18 @@ class Q_GUI_EXPORT QToolBar : public QWidget
    // addAction(QString): Connect to a QObject slot / functor or function pointer (with context)
    template<class Obj, typename Func1>
    typename std::enable_if < ! std::is_same<const char *, Func1>::value &&
-   std::is_base_of<QObject, Obj>::value, QAction * >::type addAction(const QIcon &actionIcon, const QString &text, const Obj *object,
+   std::is_base_of<QObject, Obj>::value, QAction * >::type addAction(const QIcon &icon, const QString &text, const Obj *object,
       Func1 slot) {
 
-      QAction *result = addAction(actionIcon, text);
+      QAction *result = addAction(icon, text);
       connect(result, &QAction::triggered, object, slot);
       return result;
    }
 
    // addAction(QIcon, QString): Connect to a functor or function pointer (without context)
    template <typename Func1>
-   inline QAction *addAction(const QIcon &actionIcon, const QString &text, Func1 slot) {
-      QAction *result = addAction(actionIcon, text);
+   QAction *addAction(const QIcon &icon, const QString &text, Func1 slot) {
+      QAction *result = addAction(icon, text);
       connect(result, &QAction::triggered, slot);
       return result;
    }
@@ -187,7 +192,6 @@ class Q_GUI_EXPORT QToolBar : public QWidget
 
  private:
    Q_DECLARE_PRIVATE(QToolBar)
-   Q_DISABLE_COPY(QToolBar)
 
    GUI_CS_SLOT_1(Private, void _q_toggleView(bool un_named_arg1))
    GUI_CS_SLOT_2(_q_toggleView)
@@ -206,12 +210,11 @@ class Q_GUI_EXPORT QToolBar : public QWidget
    friend class QToolBarAreaLayout;
 };
 
-QAction *QToolBar::actionAt(int ax, int ay) const
+QAction *QToolBar::actionAt(int x, int y) const
 {
-   return actionAt(QPoint(ax, ay));
+   return actionAt(QPoint(x, y));
 }
 
 #endif // QT_NO_TOOLBAR
 
-
-#endif // QDYNAMICTOOLBAR_H
+#endif

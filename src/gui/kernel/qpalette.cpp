@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -83,8 +83,8 @@ QPalette::QPalette()
    // This makes it possible to instantiate QPalette outside QGuiApplication,
    // for example in the platform plugins.
 
-   if (QGuiApplicationPrivate::app_pal) {
-      d = QGuiApplicationPrivate::app_pal->d;
+   if (QGuiApplicationPrivate::app_palette) {
+      d = QGuiApplicationPrivate::app_palette->d;
       d->ref.ref();
 
    } else {

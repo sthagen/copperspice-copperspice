@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,32 +24,29 @@
 #ifndef QWGLNATIVECONTEXT_H
 #define QWGLNATIVECONTEXT_H
 
-#include <QMetaType>
-
 #include <wingdi.h>
 #include <GL/gl.h>
 
 class QWGLNativeContext
 {
 public:
-    QWGLNativeContext()
-        : m_context(0),
-          m_window(0)
-    { }
+   QWGLNativeContext()
+      : m_context(nullptr), m_window(nullptr)
+   { }
 
-    QWGLNativeContext(HGLRC ctx, HWND wnd)
-        : m_context(ctx),
-          m_window(wnd)
-    { }
+   QWGLNativeContext(HGLRC ctx, HWND wnd)
+      : m_context(ctx), m_window(wnd)
+   {
+   }
 
-    HGLRC context() const { return m_context; }
-    HWND window() const { return m_window; }
+   HGLRC context() const { return m_context; }
+   HWND window() const { return m_window; }
 
 private:
-    HGLRC m_context;
-    HWND m_window;
+   HGLRC m_context;
+   HWND m_window;
 };
 
-Q_DECLARE_METATYPE(QWGLNativeContext)
+CS_DECLARE_METATYPE(QWGLNativeContext)
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,21 +26,18 @@
 #include <qfiledevice_p.h>
 #include <qfsfileengine_p.h>
 
-QT_BEGIN_NAMESPACE
-
 static const int QFILE_WRITEBUFFER_SIZE = 16384;
 
 QFileDevicePrivate::QFileDevicePrivate()
-   : fileEngine(0), lastWasWrite(false),
-     writeBuffer(QFILE_WRITEBUFFER_SIZE), error(QFile::NoError),
-     cachedSize(0)
+   : fileEngine(nullptr), lastWasWrite(false),
+     writeBuffer(QFILE_WRITEBUFFER_SIZE), error(QFile::NoError), cachedSize(0)
 {
 }
 
 QFileDevicePrivate::~QFileDevicePrivate()
 {
    delete fileEngine;
-   fileEngine = 0;
+   fileEngine = nullptr;
 }
 
 QAbstractFileEngine *QFileDevicePrivate::engine() const
@@ -48,6 +45,7 @@ QAbstractFileEngine *QFileDevicePrivate::engine() const
    if (!fileEngine) {
       fileEngine = new QFSFileEngine;
    }
+
    return fileEngine;
 }
 
@@ -71,7 +69,7 @@ void QFileDevicePrivate::setError(QFileDevice::FileError err, int errNum)
 
 
 QFileDevice::QFileDevice()
-   : QIODevice(*new QFileDevicePrivate, 0)
+   : QIODevice(*new QFileDevicePrivate, nullptr)
 {
 }
 
@@ -106,10 +104,6 @@ int QFileDevice::handle() const
    return d->fileEngine->handle();
 }
 
-/*!
-    Returns the name of the file.
-    The default implementation in QFileDevice returns QString().
-*/
 QString QFileDevice::fileName() const
 {
    return QString();
@@ -124,10 +118,6 @@ static inline qint64 _qfile_writeData(QAbstractFileEngine *engine, QRingBuffer *
    return ret;
 }
 
-/*!
-    Flushes any buffered data to the file. Returns true if successful;
-    otherwise returns false.
-*/
 bool QFileDevice::flush()
 {
    Q_D(QFileDevice);
@@ -180,23 +170,11 @@ void QFileDevice::close()
    }
 }
 
-/*!
-  \reimp
-*/
 qint64 QFileDevice::pos() const
 {
    return QIODevice::pos();
 }
 
-/*!
-  Returns true if the end of the file has been reached; otherwise returns
-  false.
-
-  For regular empty files on Unix (e.g. those in \c /proc), this function
-  returns true, since the file system reports that the size of such a file is
-  0. Therefore, you should not depend on atEnd() when reading data from such a
-  file, but rather call read() until no more data can be read.
-*/
 bool QFileDevice::atEnd() const
 {
    Q_D(const QFileDevice);
@@ -221,8 +199,7 @@ bool QFileDevice::atEnd() const
       return d->fileEngine->atEnd();
    }
 
-   // if it looks like we are at the end, or if size is not cached,
-   // fall through to bytesAvailable() to make sure.
+   // if it looks like we are at the end or if size is not cached, use bytesAvailable()
    if (pos() < d->cachedSize) {
       return false;
    }
@@ -231,24 +208,10 @@ bool QFileDevice::atEnd() const
    return bytesAvailable() == 0;
 }
 
-/*!
-    \fn bool QFileDevice::seek(qint64 pos)
-
-    For random-access devices, this function sets the current position
-    to \a pos, returning true on success, or false if an error occurred.
-    For sequential devices, the default behavior is to do nothing and
-    return false.
-
-    Seeking beyond the end of a file:
-    If the position is beyond the end of a file, then seek() shall not
-    immediately extend the file. If a write is performed at this position,
-    then the file shall be extended. The content of the file between the
-    previous end of file and the newly written data is UNDEFINED and
-    varies between platforms and file systems.
-*/
 bool QFileDevice::seek(qint64 off)
 {
    Q_D(QFileDevice);
+
    if (!isOpen()) {
       qWarning("QFileDevice::seek: IODevice is not open");
       return false;
@@ -260,19 +223,20 @@ bool QFileDevice::seek(qint64 off)
 
    if (!d->fileEngine->seek(off) || !QIODevice::seek(off)) {
       QFileDevice::FileError err = d->fileEngine->error();
+
       if (err == QFileDevice::UnspecifiedError) {
          err = QFileDevice::PositionError;
       }
+
       d->setError(err, d->fileEngine->errorString());
       return false;
    }
+
    unsetError();
+
    return true;
 }
 
-/*!
-  \reimp
-*/
 qint64 QFileDevice::readLineData(char *data, qint64 maxlen)
 {
    Q_D(QFileDevice);
@@ -297,9 +261,6 @@ qint64 QFileDevice::readLineData(char *data, qint64 maxlen)
    return read;
 }
 
-/*!
-  \reimp
-*/
 qint64 QFileDevice::readData(char *data, qint64 len)
 {
    Q_D(QFileDevice);
@@ -461,10 +422,13 @@ void QFileDevice::unsetError()
 qint64 QFileDevice::size() const
 {
    Q_D(const QFileDevice);
-   if (!d->ensureFlushed()) {
+
+   if (! d->ensureFlushed()) {
       return 0;
    }
+
    d->cachedSize = d->engine()->size();
+
    return d->cachedSize;
 }
 
@@ -496,12 +460,6 @@ bool QFileDevice::resize(qint64 sz)
    return false;
 }
 
-/*!
-    Returns the complete OR-ed together combination of
-    QFile::Permission for the file.
-
-    \sa setPermissions()
-*/
 QFile::Permissions QFileDevice::permissions() const
 {
    Q_D(const QFileDevice);
@@ -510,13 +468,6 @@ QFile::Permissions QFileDevice::permissions() const
    return QFile::Permissions((int)perms); //ewww
 }
 
-/*!
-    Sets the permissions for the file to the \a permissions specified.
-    Returns true if successful, or false if the permissions cannot be
-    modified.
-
-    \sa permissions()
-*/
 bool QFileDevice::setPermissions(Permissions permissions)
 {
    Q_D(QFileDevice);
@@ -528,53 +479,23 @@ bool QFileDevice::setPermissions(Permissions permissions)
    return false;
 }
 
-/*!
-    \enum QFileDevice::MemoryMapFlags
-    \since 4.4
-
-    This enum describes special options that may be used by the map()
-    function.
-
-    \value NoOptions        No options.
-*/
-
-/*!
-    Maps \a size bytes of the file into memory starting at \a offset.  A file
-    should be open for a map to succeed but the file does not need to stay
-    open after the memory has been mapped.  When the QFile is destroyed
-    or a new file is opened with this object, any maps that have not been
-    unmapped will automatically be unmapped.
-
-    Any mapping options can be passed through \a flags.
-
-    Returns a pointer to the memory or 0 if there is an error.
-
-    \note On Windows CE 5.0 the file will be closed before mapping occurs.
-
-    \sa unmap()
- */
 uchar *QFileDevice::map(qint64 offset, qint64 size, MemoryMapFlags flags)
 {
    Q_D(QFileDevice);
+
    if (d->engine()
          && d->fileEngine->supportsExtension(QAbstractFileEngine::MapExtension)) {
       unsetError();
       uchar *address = d->fileEngine->map(offset, size, flags);
-      if (address == 0) {
+      if (address == nullptr) {
          d->setError(d->fileEngine->error(), d->fileEngine->errorString());
       }
       return address;
    }
-   return 0;
+
+   return nullptr;
 }
 
-/*!
-    Unmaps the memory \a address.
-
-    Returns true if the unmap succeeds; false otherwise.
-
-    \sa map()
- */
 bool QFileDevice::unmap(uchar *address)
 {
    Q_D(QFileDevice);
@@ -587,8 +508,9 @@ bool QFileDevice::unmap(uchar *address)
       }
       return success;
    }
+
    d->setError(PermissionsError, tr("No file engine available or engine does not support UnMapExtension"));
+
    return false;
 }
 
-QT_END_NAMESPACE

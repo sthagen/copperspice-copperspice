@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,17 +21,15 @@
 *
 ***********************************************************************/
 
-#include "globals.h"
+#include <globals.h>
 
 const QString &settingsPrefix()
 {
-   static QString prefix = QString(QLatin1String("%1.%2/"))
-                           .arg((QT_VERSION >> 16) & 0xff)
-                           .arg((QT_VERSION >> 8) & 0xff);
+   static QString prefix = QString("%1.%2/").formatArg((CS_VERSION >> 16) & 0xff).formatArg((CS_VERSION >> 8) & 0xff);
    return prefix;
 }
 
-QString settingPath(const char *path)
+QString settingPath(const QString &path)
 {
-   return settingsPrefix() + QLatin1String(path);
+   return settingsPrefix() + path;
 }

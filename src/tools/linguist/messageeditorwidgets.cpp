@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -41,8 +41,6 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
-QT_BEGIN_NAMESPACE
-
 ExpandingTextEdit::ExpandingTextEdit(QWidget *parent)
    : QTextEdit(parent)
 {
@@ -52,8 +50,9 @@ ExpandingTextEdit::ExpandingTextEdit(QWidget *parent)
    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
    QAbstractTextDocumentLayout *docLayout = document()->documentLayout();
-   connect(docLayout, SIGNAL(documentSizeChanged(QSizeF)), SLOT(updateHeight(QSizeF)));
-   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(reallyEnsureCursorVisible()));
+
+   connect(docLayout, &QAbstractTextDocumentLayout::documentSizeChanged, this, &ExpandingTextEdit::updateHeight);
+   connect(this,      &ExpandingTextEdit::cursorPositionChanged,         this, &ExpandingTextEdit::reallyEnsureCursorVisible);
 
    m_minimumHeight = qRound(docLayout->documentSize().height()) + frameWidth() * 2;
 }
@@ -79,6 +78,7 @@ void ExpandingTextEdit::reallyEnsureCursorVisible()
    QObject *ancestor = parent();
    while (ancestor) {
       QScrollArea *scrollArea = qobject_cast<QScrollArea *>(ancestor);
+
       if (scrollArea &&
             (scrollArea->verticalScrollBarPolicy() != Qt::ScrollBarAlwaysOff &&
              scrollArea->horizontalScrollBarPolicy() != Qt::ScrollBarAlwaysOff)) {
@@ -87,6 +87,7 @@ void ExpandingTextEdit::reallyEnsureCursorVisible()
          scrollArea->ensureVisible(c.x(), c.y());
          break;
       }
+
       ancestor = ancestor->parent();
    }
 }
@@ -145,35 +146,54 @@ void FormatTextEdit::setPlainText(const QString &text, bool userAction)
       m_highlighter->rehighlight();
       document()->setUndoRedoEnabled(true);
       blockSignals(oldBlockState);
+
    } else {
       ExpandingTextEdit::setPlainText(text);
    }
 }
+void FormatTextEdit::setVisualizeWhitespace(bool value)
+{
+    QTextOption option = document()->defaultTextOption();
+
+    if (value) {
+        option.setFlags(option.flags()
+                        | QTextOption::ShowLineAndParagraphSeparators
+                        | QTextOption::ShowTabsAndSpaces);
+    } else {
+        option.setFlags(option.flags()
+                        & ~QTextOption::ShowLineAndParagraphSeparators
+                        & ~QTextOption::ShowTabsAndSpaces);
+    }
+
+    document()->setDefaultTextOption(option);
+}
 
 FormWidget::FormWidget(const QString &label, bool isEditable, QWidget *parent)
-   : QWidget(parent),
-     m_hideWhenEmpty(false)
+   : QWidget(parent), m_hideWhenEmpty(false)
 {
    QVBoxLayout *layout = new QVBoxLayout;
    layout->setMargin(0);
 
    m_label = new QLabel(this);
+
    QFont fnt;
    fnt.setBold(true);
+
    m_label->setFont(fnt);
    m_label->setText(label);
    layout->addWidget(m_label);
 
    m_editor = new FormatTextEdit(this);
    m_editor->setEditable(isEditable);
-   //m_textEdit->setWhatsThis(tr("This area shows text from an auxillary translation."));
+
+   // m_textEdit->setWhatsThis(tr("This area shows text from an auxillary translation."));
    layout->addWidget(m_editor);
 
    setLayout(layout);
 
-   connect(m_editor, SIGNAL(textChanged()), SLOT(slotTextChanged()));
-   connect(m_editor, SIGNAL(selectionChanged()), SLOT(slotSelectionChanged()));
-   connect(m_editor, SIGNAL(cursorPositionChanged()), SIGNAL(cursorPositionChanged()));
+   connect(m_editor, &FormatTextEdit::textChanged,           this, &FormWidget::slotTextChanged);
+   connect(m_editor, &FormatTextEdit::selectionChanged,      this, &FormWidget::slotSelectionChanged);
+   connect(m_editor, &FormatTextEdit::cursorPositionChanged, this, &FormWidget::cursorPositionChanged);
 }
 
 void FormWidget::slotTextChanged()
@@ -232,29 +252,28 @@ class ButtonWrapper : public QWidget
 };
 
 FormMultiWidget::FormMultiWidget(const QString &label, QWidget *parent)
-   : QWidget(parent),
-     m_hideWhenEmpty(false),
-     m_multiEnabled(false),
-     m_plusIcon(QIcon(QLatin1String(":/images/plus.png"))),  // make static
-     m_minusIcon(QIcon(QLatin1String(":/images/minus.png")))
+   : QWidget(parent), m_hideWhenEmpty(false), m_multiEnabled(false),
+     m_plusIcon(QIcon(":/images/plus.png")), m_minusIcon(QIcon(":/images/minus.png"))
 {
    m_label = new QLabel(this);
+
    QFont fnt;
    fnt.setBold(true);
    m_label->setFont(fnt);
    m_label->setText(label);
 
-   m_plusButtons.append(
-      new ButtonWrapper(makeButton(m_plusIcon, SLOT(plusButtonClicked())), 0));
+   m_plusButtons.append(new ButtonWrapper(makeButton(m_plusIcon, "plusButtonClicked()"), nullptr));
 }
 
-QAbstractButton *FormMultiWidget::makeButton(const QIcon &icon, const char *slot)
+QAbstractButton *FormMultiWidget::makeButton(const QIcon &icon, const QString &slotMethod)
 {
    QAbstractButton *btn = new QToolButton(this);
    btn->setIcon(icon);
-   btn->setFixedSize(icon.availableSizes().first() /* + something */);
+   btn->setFixedSize(icon.availableSizes().first());
    btn->setFocusPolicy(Qt::NoFocus);
-   connect(btn, SIGNAL(clicked()), slot);
+
+   connect(btn, SIGNAL(clicked()), this, slotMethod);
+
    return btn;
 }
 
@@ -263,13 +282,13 @@ void FormMultiWidget::addEditor(int idx)
    FormatTextEdit *editor = new FormatTextEdit(this);
    m_editors.insert(idx, editor);
 
-   m_minusButtons.insert(idx, makeButton(m_minusIcon, SLOT(minusButtonClicked())));
-   m_plusButtons.insert(idx + 1,
-                        new ButtonWrapper(makeButton(m_plusIcon, SLOT(plusButtonClicked())), editor));
+   m_minusButtons.insert(idx, makeButton(m_minusIcon, "minusButtonClicked()"));
+   m_plusButtons.insert(idx + 1, new ButtonWrapper(makeButton(m_plusIcon, "plusButtonClicked()"), editor));
 
-   connect(editor, SIGNAL(textChanged()), SLOT(slotTextChanged()));
-   connect(editor, SIGNAL(selectionChanged()), SLOT(slotSelectionChanged()));
-   connect(editor, SIGNAL(cursorPositionChanged()), SIGNAL(cursorPositionChanged()));
+   connect(editor, &FormatTextEdit::textChanged,           this, &FormMultiWidget::slotTextChanged);
+   connect(editor, &FormatTextEdit::selectionChanged,      this, &FormMultiWidget::slotSelectionChanged);
+   connect(editor, &FormatTextEdit::cursorPositionChanged, this, &FormMultiWidget::cursorPositionChanged);
+
    editor->installEventFilter(this);
 
    emit editorCreated(editor);
@@ -278,20 +297,26 @@ void FormMultiWidget::addEditor(int idx)
 bool FormMultiWidget::eventFilter(QObject *watched, QEvent *event)
 {
    int i = 0;
+
    while (m_editors.at(i) != watched)
-      if (++i >= m_editors.count()) { // Happens when deleting an editor
+      if (++i >= m_editors.count()) {
+         // Happens when deleting an editor
          return false;
       }
+
    if (event->type() == QEvent::FocusOut) {
       m_minusButtons.at(i)->setToolTip(QString());
       m_plusButtons.at(i)->setToolTip(QString());
       m_plusButtons.at(i + 1)->setToolTip(QString());
+
    } else if (event->type() == QEvent::FocusIn) {
       m_minusButtons.at(i)->setToolTip(/*: translate, but don't change */ tr("Alt+Delete"));
       m_plusButtons.at(i)->setToolTip(/*: translate, but don't change */ tr("Shift+Alt+Insert"));
       m_plusButtons.at(i + 1)->setToolTip(/*: translate, but don't change */ tr("Alt+Insert"));
+
    } else if (event->type() == QEvent::KeyPress) {
       QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+
       if (ke->modifiers() & Qt::AltModifier) {
          if (ke->key() == Qt::Key_Delete) {
             deleteEditor(i);
@@ -305,6 +330,7 @@ bool FormMultiWidget::eventFilter(QObject *watched, QEvent *event)
          }
       }
    }
+
    return false;
 }
 
@@ -351,7 +377,7 @@ void FormMultiWidget::slotSelectionChanged()
 
 void FormMultiWidget::setTranslation(const QString &text, bool userAction)
 {
-   QStringList texts = text.split(QChar(Translator::BinaryVariantSeparator), QString::KeepEmptyParts);
+   QStringList texts = text.split(QChar(Translator::BinaryVariantSeparator), QStringParser::KeepEmptyParts);
 
    while (m_editors.count() > texts.count()) {
       delete m_minusButtons.takeLast();
@@ -364,7 +390,7 @@ void FormMultiWidget::setTranslation(const QString &text, bool userAction)
    updateLayout();
 
    for (int i = 0; i < texts.count(); ++i)
-      // XXX this will emit n textChanged signals
+      // this will emit n textChanged signals
    {
       m_editors.at(i)->setPlainText(texts.at(i), userAction);
    }
@@ -432,12 +458,11 @@ void FormMultiWidget::deleteEditor(int idx)
       QTextCursor c = m_editors.first()->textCursor();
       c.select(QTextCursor::Document);
       c.removeSelectedText();
+
    } else {
       if (!m_editors.at(idx)->toPlainText().isEmpty()) {
-         if (QMessageBox::question(topLevelWidget(), tr("Confirmation - Qt Linguist"),
-                                   tr("Delete non-empty length variant?"),
-                                   QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
-               != QMessageBox::Yes) {
+         if (QMessageBox::question(topLevelWidget(), tr("Confirm"), tr("Delete non empty length variant?"),
+               QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) != QMessageBox::Yes) {
             return;
          }
       }
@@ -456,4 +481,3 @@ void FormMultiWidget::insertEditor(int idx)
    emit textChanged(m_editors.at(idx));
 }
 
-QT_END_NAMESPACE

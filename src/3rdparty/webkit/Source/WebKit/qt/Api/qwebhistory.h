@@ -20,11 +20,11 @@
 #ifndef QWEBHISTORY_H
 #define QWEBHISTORY_H
 
-#include <QtCore/qurl.h>
-#include <QtCore/qstring.h>
-#include <QtGui/qicon.h>
-#include <QtCore/qdatetime.h>
-#include <QtCore/qshareddata.h>
+#include <qurl.h>
+#include <qstring.h>
+#include <qicon.h>
+#include <qdatetime.h>
+#include <qshareddata.h>
 
 #include "qwebkitglobal.h"
 
@@ -69,8 +69,12 @@ private:
 
 
 class QWebHistoryPrivate;
+
 class QWEBKIT_EXPORT QWebHistory {
-public:
+ public:
+    QWebHistory(const QWebHistory &) = delete;
+    QWebHistory &operator=(const QWebHistory &) = delete;
+
     void clear();
 
     QList<QWebHistoryItem> items() const;
@@ -104,8 +108,6 @@ private:
     friend class QWebPagePrivate;
     friend QWEBKIT_EXPORT QDataStream& operator>>(QDataStream&, QWebHistory&);
     friend QWEBKIT_EXPORT QDataStream& operator<<(QDataStream&, const QWebHistory&);
-
-    Q_DISABLE_COPY(QWebHistory)
 
     QWebHistoryPrivate *d;
 };

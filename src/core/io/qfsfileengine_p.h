@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,15 +25,13 @@
 #define QFSFILEENGINE_P_H
 
 #include <qplatformdefs.h>
-#include <QtCore/qfsfileengine.h>
+#include <qfsfileengine.h>
 #include <qabstractfileengine_p.h>
 #include <qfilesystementry_p.h>
 #include <qfilesystemmetadata_p.h>
 #include <qhash.h>
 
 #ifndef QT_NO_FSFILEENGINE
-
-QT_BEGIN_NAMESPACE
 
 class QFSFileEnginePrivate : public QAbstractFileEnginePrivate
 {
@@ -127,7 +125,7 @@ class QFSFileEnginePrivate : public QAbstractFileEnginePrivate
 
    bool isSymlink() const;
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
    int sysOpen(const QString &, int flags);
 #endif
 
@@ -139,8 +137,6 @@ class QFSFileEnginePrivate : public QAbstractFileEnginePrivate
    QAbstractFileEngine::FileFlags getPermissions(QAbstractFileEngine::FileFlags type) const;
 };
 
-QT_END_NAMESPACE
-
 #endif // QT_NO_FSFILEENGINE
 
-#endif // QFSFILEENGINE_P_H
+#endif

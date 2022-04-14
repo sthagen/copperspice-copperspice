@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,11 +25,10 @@
 #define QFILESYSTEMMETADATA_P_H
 
 #include <qplatformdefs.h>
-#include <QtCore/qglobal.h>
-#include <QtCore/qdatetime.h>
-#include <QtCore/qabstractfileengine.h>
+#include <qglobal.h>
+#include <qdatetime.h>
+#include <qabstractfileengine.h>
 
-// Platform-specific includes
 #if defined(Q_OS_WIN)
 #ifndef IO_REPARSE_TAG_SYMLINK
 #define IO_REPARSE_TAG_SYMLINK (0xA000000CL)
@@ -42,7 +41,7 @@ class QFileSystemMetaData
 {
  public:
    QFileSystemMetaData()
-      : knownFlagsMask(0) {
+      : knownFlagsMask(Qt::EmptyFlag) {
    }
 
    enum MetaDataFlag {
@@ -72,15 +71,16 @@ class QFileSystemMetaData
       BundleType          = 0x00080000,
       AliasType           = 0x08000000,
 #else
-      BundleType          =        0x0,
-      AliasType           =        0x0,
+      BundleType          = 0x0,
+      AliasType           = 0x0,
 #endif
 
 #if defined(Q_OS_WIN)
       WinLnkType          = 0x08000000,   // Note: Uses the same position for AliasType on Mac
 #else
-      WinLnkType          =        0x0,
+      WinLnkType          = 0x0,
 #endif
+
       SequentialType      = 0x00800000,   // Note: overlaps with QAbstractFileEngine::RootFlag
 
       LegacyLinkType      = LinkType | AliasType | WinLnkType,
@@ -140,7 +140,7 @@ class QFileSystemMetaData
    }
 
    void clear() {
-      knownFlagsMask = 0;
+      knownFlagsMask = Qt::EmptyFlag;
    }
 
    void clearFlags(MetaDataFlags flags = AllMetaDataFlags) {

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QXMLSCHEMAVALIDATOR_H
 #define QXMLSCHEMAVALIDATOR_H
 
-#include <QtCore/QUrl>
-#include <QtXmlPatterns/QXmlNamePool>
-
-QT_BEGIN_NAMESPACE
+#include <QUrl>
+#include <QXmlNamePool>
 
 class QAbstractMessageHandler;
 class QAbstractUriResolver;
@@ -60,15 +58,14 @@ class Q_XMLPATTERNS_EXPORT QXmlSchemaValidator
    void setUriResolver(const QAbstractUriResolver *resolver);
    const QAbstractUriResolver *uriResolver() const;
 
-   void setNetworkAccessManager(QNetworkAccessManager *networkmanager);
+   void setNetworkAccessManager(QNetworkAccessManager *manager);
    QNetworkAccessManager *networkAccessManager() const;
 
  private:
+   QXmlSchemaValidator(const QXmlSchemaValidator &) = delete;
+   QXmlSchemaValidator &operator=(const QXmlSchemaValidator &) = delete;
+
    QXmlSchemaValidatorPrivate *const d;
-
-   Q_DISABLE_COPY(QXmlSchemaValidator)
 };
-
-QT_END_NAMESPACE
 
 #endif

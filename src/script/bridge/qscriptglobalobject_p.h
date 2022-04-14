@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #define QSCRIPTGLOBALOBJECT_P_H
 
 #include "JSGlobalObject.h"
-
-QT_BEGIN_NAMESPACE
 
 namespace QScript {
 
@@ -120,12 +118,11 @@ class OriginalGlobalObjectProxy : public JSC::JSObject
    virtual JSC::JSValue lookupSetter(JSC::ExecState *exec, const JSC::Identifier &propertyName) {
       return originalGlobalObject->JSC::JSGlobalObject::lookupSetter(exec, propertyName);
    }
+
  private:
    JSC::JSGlobalObject *originalGlobalObject;
 };
 
 } // namespace QScript
-
-QT_END_NAMESPACE
 
 #endif

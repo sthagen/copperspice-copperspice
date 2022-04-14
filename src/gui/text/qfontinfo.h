@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,17 +24,17 @@
 #ifndef QFONTINFO_H
 #define QFONTINFO_H
 
-#include <QtGui/qfont.h>
-#include <QtCore/qsharedpointer.h>
+#include <qfont.h>
+#include <qsharedpointer.h>
 
 class Q_GUI_EXPORT QFontInfo
 {
  public:
-   QFontInfo(const QFont &);
-   QFontInfo(const QFontInfo &);
+   QFontInfo(const QFont &font);
+   QFontInfo(const QFontInfo &fi);
    ~QFontInfo();
 
-   QFontInfo &operator=(const QFontInfo &);
+   QFontInfo &operator=(const QFontInfo &other);
 
    void swap(QFontInfo &other) {
       qSwap(d, other.d);

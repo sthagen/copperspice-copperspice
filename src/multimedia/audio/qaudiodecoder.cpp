@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,24 +34,15 @@
 #include <qmediaobject_p.h>
 #include <qmediaserviceprovider_p.h>
 
-static int qRegisterAudioDecoderMetaTypes()
-{
-   qRegisterMetaType<QAudioDecoder::State>("QAudioDecoder::State");
-   qRegisterMetaType<QAudioDecoder::Error>("QAudioDecoder::Error");
-
-   return 0;
-}
-
-Q_CONSTRUCTOR_FUNCTION(qRegisterAudioDecoderMetaTypes)
-
 class QAudioDecoderPrivate : public QMediaObjectPrivate
 {
    Q_DECLARE_NON_CONST_PUBLIC(QAudioDecoder)
 
  public:
    QAudioDecoderPrivate()
-      : provider(0), control(0), state(QAudioDecoder::StoppedState), error(QAudioDecoder::NoError)
-   {}
+      : provider(nullptr), control(nullptr), state(QAudioDecoder::StoppedState), error(QAudioDecoder::NoError)
+   {
+   }
 
    QMediaServiceProvider *provider;
    QAudioDecoderControl *control;
@@ -93,9 +84,9 @@ QAudioDecoder::QAudioDecoder(QObject *parent)
    d->provider = QMediaServiceProvider::defaultServiceProvider();
 
    if (d->service) {
-      d->control = qobject_cast<QAudioDecoderControl *>(d->service->requestControl(QAudioDecoderControl_Key));
+      d->control = dynamic_cast<QAudioDecoderControl *>(d->service->requestControl(QAudioDecoderControl_Key));
 
-      if (d->control != 0) {
+      if (d->control != nullptr) {
          connect(d->control, &QAudioDecoderControl::stateChanged,           this, &QAudioDecoder::_q_stateChanged);
          connect(d->control, &QAudioDecoderControl::error,                  this, &QAudioDecoder::_q_error);
 
@@ -147,7 +138,7 @@ void QAudioDecoder::start()
 {
    Q_D(QAudioDecoder);
 
-   if (d->control == 0) {
+   if (d->control == nullptr) {
       QMetaObject::invokeMethod(this, "_q_error", Qt::QueuedConnection,
          Q_ARG(int, QAudioDecoder::ServiceMissingError),
          Q_ARG(const QString &, tr("QAudioDecoder object does not have a valid service")));
@@ -165,7 +156,7 @@ void QAudioDecoder::stop()
 {
    Q_D(QAudioDecoder);
 
-   if (d->control != 0) {
+   if (d->control != nullptr) {
       d->control->stop();
    }
 }
@@ -183,7 +174,7 @@ void QAudioDecoder::setSourceFilename(const QString &fileName)
 {
    Q_D(QAudioDecoder);
 
-   if (d->control != 0) {
+   if (d->control != nullptr) {
       d_func()->control->setSourceFilename(fileName);
    }
 }
@@ -194,14 +185,15 @@ QIODevice *QAudioDecoder::sourceDevice() const
    if (d->control) {
       return d->control->sourceDevice();
    }
-   return 0;
+
+   return nullptr;
 }
 
 void QAudioDecoder::setSourceDevice(QIODevice *device)
 {
    Q_D(QAudioDecoder);
 
-   if (d->control != 0) {
+   if (d->control != nullptr) {
       d_func()->control->setSourceDevice(device);
    }
 }
@@ -212,6 +204,7 @@ QAudioFormat QAudioDecoder::audioFormat() const
    if (d->control) {
       return d->control->audioFormat();
    }
+
    return QAudioFormat();
 }
 
@@ -223,23 +216,22 @@ void QAudioDecoder::setAudioFormat(const QAudioFormat &format)
       return;
    }
 
-   if (d->control != 0) {
+   if (d->control != nullptr) {
       d_func()->control->setAudioFormat(format);
    }
 }
 
-bool QAudioDecoder::bind(QObject *obj)
+bool QAudioDecoder::bind(QObject *object)
 {
-   return QMediaObject::bind(obj);
+   return QMediaObject::bind(object);
 }
 
-void QAudioDecoder::unbind(QObject *obj)
+void QAudioDecoder::unbind(QObject *object)
 {
-   QMediaObject::unbind(obj);
+   QMediaObject::unbind(object);
 }
 
-QMultimedia::SupportEstimate QAudioDecoder::hasSupport(const QString &mimeType,
-   const QStringList &codecs)
+QMultimedia::SupportEstimate QAudioDecoder::hasSupport(const QString &mimeType, const QStringList &codecs)
 {
    return QMediaServiceProvider::defaultServiceProvider()->hasSupport(QByteArray
          (Q_MEDIASERVICE_AUDIODECODER), mimeType, codecs);
@@ -248,27 +240,33 @@ QMultimedia::SupportEstimate QAudioDecoder::hasSupport(const QString &mimeType,
 bool QAudioDecoder::bufferAvailable() const
 {
    Q_D(const QAudioDecoder);
+
    if (d->control) {
       return d->control->bufferAvailable();
    }
+
    return false;
 }
 
 qint64 QAudioDecoder::position() const
 {
    Q_D(const QAudioDecoder);
+
    if (d->control) {
       return d->control->position();
    }
+
    return -1;
 }
 
 qint64 QAudioDecoder::duration() const
 {
    Q_D(const QAudioDecoder);
+
    if (d->control) {
       return d->control->duration();
    }
+
    return -1;
 }
 
@@ -283,14 +281,14 @@ QAudioBuffer QAudioDecoder::read() const
    }
 }
 
-void QAudioDecoder::_q_stateChanged(QAudioDecoder::State un_named_arg1)
+void QAudioDecoder::_q_stateChanged(QAudioDecoder::State state)
 {
    Q_D(QAudioDecoder);
-   d->_q_stateChanged(un_named_arg1);
+   d->_q_stateChanged(state);
 }
 
-void QAudioDecoder::_q_error(int un_named_arg1, const QString &un_named_arg2)
+void QAudioDecoder::_q_error(int error, const QString &errorString)
 {
    Q_D(QAudioDecoder);
-   d->_q_error(un_named_arg1, un_named_arg2);
+   d->_q_error(error, errorString);
 }

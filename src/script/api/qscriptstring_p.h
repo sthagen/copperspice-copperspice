@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QSCRIPTSTRING_P_H
 #define QSCRIPTSTRING_P_H
 
-#include <QtCore/qshareddata.h>
+#include <qshareddata.h>
 #include "Identifier.h"
 
 class QScriptEnginePrivate;
@@ -58,7 +58,7 @@ class QScriptStringPrivate : public QSharedData
 
 inline QScriptStringPrivate::QScriptStringPrivate(QScriptEnginePrivate *e, const JSC::Identifier &id,
    AllocationType tp)
-   : engine(e), identifier(id), type(tp), prev(0), next(0)
+   : engine(e), identifier(id), type(tp), prev(nullptr), next(nullptr)
 {
 }
 
@@ -78,7 +78,7 @@ inline QScriptStringPrivate *QScriptStringPrivate::get(const QScriptString &q)
 
 inline void QScriptStringPrivate::detachFromEngine()
 {
-   engine = 0;
+   engine = nullptr;
    identifier = JSC::Identifier();
 }
 

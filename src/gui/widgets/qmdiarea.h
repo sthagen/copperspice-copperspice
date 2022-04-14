@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QMDIAREA_H
 #define QMDIAREA_H
 
-#include <QtGui/qabstractscrollarea.h>
-#include <QtGui/qtabwidget.h>
+#include <qabstractscrollarea.h>
+#include <qtabwidget.h>
 
 #ifndef QT_NO_MDIAREA
 
@@ -71,18 +71,26 @@ class Q_GUI_EXPORT QMdiArea : public QAbstractScrollArea
    };
    using AreaOptions = QFlags<AreaOption>;
 
-   enum WindowOrder {
-      CreationOrder,
-      StackingOrder,
-      ActivationHistoryOrder
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum WindowOrder {
+         CreationOrder,
+         StackingOrder,
+         ActivationHistoryOrder
+      };
+   )
 
-   enum ViewMode {
-      SubWindowView,
-      TabbedView
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum ViewMode {
+         SubWindowView,
+         TabbedView
+      };
+   )
 
    QMdiArea(QWidget *parent = nullptr);
+
+   QMdiArea(const QMdiArea &) = delete;
+   QMdiArea &operator=(const QMdiArea &) = delete;
+
    ~QMdiArea();
 
    QSize sizeHint() const override;
@@ -92,7 +100,7 @@ class Q_GUI_EXPORT QMdiArea : public QAbstractScrollArea
    QMdiSubWindow *activeSubWindow() const;
    QList<QMdiSubWindow *> subWindowList(WindowOrder order = CreationOrder) const;
 
-   QMdiSubWindow *addSubWindow(QWidget *widget, Qt::WindowFlags flags = Qt::WindowFlags());
+   QMdiSubWindow *addSubWindow(QWidget *widget, Qt::WindowFlags flags = Qt::EmptyFlag);
    void removeSubWindow(QWidget *widget);
 
    QBrush background() const;
@@ -102,16 +110,16 @@ class Q_GUI_EXPORT QMdiArea : public QAbstractScrollArea
    void setActivationOrder(WindowOrder order);
 
    void setOption(AreaOption option, bool on = true);
-   bool testOption(AreaOption opton) const;
+   bool testOption(AreaOption option) const;
 
    void setViewMode(ViewMode mode);
    ViewMode viewMode() const;
 
 #ifndef QT_NO_TABBAR
    bool documentMode() const;
-   void setDocumentMode(bool enabled);
+   void setDocumentMode(bool enable);
 
-   void setTabsClosable(bool closable);
+   void setTabsClosable(bool closeable);
    bool tabsClosable() const;
 
    void setTabsMovable(bool movable);
@@ -126,8 +134,8 @@ class Q_GUI_EXPORT QMdiArea : public QAbstractScrollArea
    QTabWidget::TabPosition tabPosition() const;
 #endif
 
-   GUI_CS_SIGNAL_1(Public, void subWindowActivated(QMdiSubWindow *un_named_arg1))
-   GUI_CS_SIGNAL_2(subWindowActivated, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void subWindowActivated(QMdiSubWindow *window))
+   GUI_CS_SIGNAL_2(subWindowActivated, window)
 
    GUI_CS_SLOT_1(Public, void setActiveSubWindow(QMdiSubWindow *window))
    GUI_CS_SLOT_2(setActiveSubWindow)
@@ -165,28 +173,26 @@ class Q_GUI_EXPORT QMdiArea : public QAbstractScrollArea
    void scrollContentsBy(int dx, int dy) override;
 
  private:
-   Q_DISABLE_COPY(QMdiArea)
    Q_DECLARE_PRIVATE(QMdiArea)
 
    GUI_CS_SLOT_1(Private, void _q_deactivateAllWindows())
    GUI_CS_SLOT_2(_q_deactivateAllWindows)
 
-   GUI_CS_SLOT_1(Private, void _q_processWindowStateChanged(Qt::WindowStates un_named_arg1,
-         Qt::WindowStates un_named_arg2))
+   GUI_CS_SLOT_1(Private, void _q_processWindowStateChanged(Qt::WindowStates oldState, Qt::WindowStates newStates))
    GUI_CS_SLOT_2(_q_processWindowStateChanged)
 
-   GUI_CS_SLOT_1(Private, void _q_currentTabChanged(int un_named_arg1))
+   GUI_CS_SLOT_1(Private, void _q_currentTabChanged(int index))
    GUI_CS_SLOT_2(_q_currentTabChanged)
 
-   GUI_CS_SLOT_1(Private, void _q_closeTab(int un_named_arg1))
+   GUI_CS_SLOT_1(Private, void _q_closeTab(int index))
    GUI_CS_SLOT_2(_q_closeTab)
 
-   GUI_CS_SLOT_1(Private, void _q_moveTab(int un_named_arg1, int un_named_arg2))
+   GUI_CS_SLOT_1(Private, void _q_moveTab(int from, int to))
    GUI_CS_SLOT_2(_q_moveTab)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QMdiArea::AreaOptions)
 
-
 #endif // QT_NO_MDIAREA
-#endif // QMDIAREA_H
+
+#endif

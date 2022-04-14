@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -70,6 +70,8 @@ QWidget *QAbstractItemDelegate::createEditor(QWidget *,
 
 void QAbstractItemDelegate::destroyEditor(QWidget *editor, const QModelIndex &index) const
 {
+  (void) index;
+
    editor->deleteLater();
 }
 
@@ -78,8 +80,7 @@ void QAbstractItemDelegate::setEditorData(QWidget *, const QModelIndex &) const
    // does nothing
 }
 
-void QAbstractItemDelegate::setModelData(QWidget *,
-   QAbstractItemModel *, const QModelIndex &) const
+void QAbstractItemDelegate::setModelData(QWidget *, QAbstractItemModel *, const QModelIndex &) const
 {
    // does nothing
 }
@@ -296,7 +297,7 @@ QString QAbstractItemDelegatePrivate::textForRole(Qt::ItemDataRole role, const Q
    QString text;
 
    switch (value.userType()) {
-      case QMetaType::Float:
+      case QVariant::Float:
          text = locale.toString(value.toFloat());
          break;
 

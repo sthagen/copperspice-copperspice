@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,6 +33,10 @@ struct QTextOptionPrivate;
 
 class Q_GUI_EXPORT QTextOption
 {
+   GUI_CS_GADGET(QTextOption)
+
+   GUI_CS_ENUM(WrapMode)
+
  public:
    enum TabType {
       LeftTab,
@@ -40,6 +44,26 @@ class Q_GUI_EXPORT QTextOption
       CenterTab,
       DelimiterTab
    };
+
+   GUI_CS_REGISTER_ENUM(
+      enum WrapMode {
+         NoWrap,
+         WordWrap,
+         ManualWrap,
+         WrapAnywhere,
+         WrapAtWordBoundaryOrAnywhere
+      };
+   )
+
+   enum Flag {
+      ShowTabsAndSpaces = 0x1,
+      ShowLineAndParagraphSeparators = 0x2,
+      AddSpaceForLineAndParagraphSeparators = 0x4,
+      SuppressColors = 0x8,
+      IncludeTrailingSpaces = 0x80000000
+   };
+   using Flags = QFlags<Flag>;
+
 
    struct Q_GUI_EXPORT Tab {
       inline Tab()
@@ -69,8 +93,8 @@ class Q_GUI_EXPORT QTextOption
    QTextOption(Qt::Alignment alignment);
    ~QTextOption();
 
-   QTextOption(const QTextOption &o);
-   QTextOption &operator=(const QTextOption &o);
+   QTextOption(const QTextOption &other);
+   QTextOption &operator=(const QTextOption &other);
 
    inline void setAlignment(Qt::Alignment alignment);
 
@@ -78,38 +102,21 @@ class Q_GUI_EXPORT QTextOption
       return Qt::Alignment(align);
    }
 
-   void setTextDirection(Qt::LayoutDirection aDirection) {
-      this->direction = aDirection;
+   void setTextDirection(Qt::LayoutDirection layoutDirection) {
+      this->direction = layoutDirection;
    }
 
    Qt::LayoutDirection textDirection() const {
       return Qt::LayoutDirection(direction);
    }
 
-   enum WrapMode {
-      NoWrap,
-      WordWrap,
-      ManualWrap,
-      WrapAnywhere,
-      WrapAtWordBoundaryOrAnywhere
-   };
-
-   void setWrapMode(WrapMode wrap) {
-      wordWrap = wrap;
+   void setWrapMode(WrapMode mode) {
+      wordWrap = mode;
    }
 
    WrapMode wrapMode() const {
       return static_cast<WrapMode>(wordWrap);
    }
-
-   enum Flag {
-      ShowTabsAndSpaces = 0x1,
-      ShowLineAndParagraphSeparators = 0x2,
-      AddSpaceForLineAndParagraphSeparators = 0x4,
-      SuppressColors = 0x8,
-      IncludeTrailingSpaces = 0x80000000
-   };
-   using Flags = QFlags<Flag>;
 
    inline void setFlags(Flags flags);
 
@@ -128,8 +135,8 @@ class Q_GUI_EXPORT QTextOption
    void setTabs(const QList<Tab> &tabStops);
    QList<Tab> tabs() const;
 
-   void setUseDesignMetrics(bool b) {
-      design = b;
+   void setUseDesignMetrics(bool enable) {
+      design = enable;
    }
 
    bool useDesignMetrics() const {
@@ -150,21 +157,22 @@ class Q_GUI_EXPORT QTextOption
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QTextOption::Flags)
 
-inline void QTextOption::setAlignment(Qt::Alignment aalignment)
+inline void QTextOption::setAlignment(Qt::Alignment alignment)
 {
-   align = aalignment;
+   align = alignment;
 }
 
-inline void QTextOption::setFlags(Flags aflags)
+inline void QTextOption::setFlags(Flags flags)
 {
-   f = aflags;
+   f = flags;
 }
 
-inline void QTextOption::setTabStop(qreal atabStop)
+inline void QTextOption::setTabStop(qreal tabStop)
 {
-   tab = atabStop;
+   tab = tabStop;
 }
 
-Q_DECLARE_METATYPE( QTextOption::Tab )
+CS_DECLARE_METATYPE(QTextOption)
+CS_DECLARE_METATYPE(QTextOption::Tab)
 
 #endif

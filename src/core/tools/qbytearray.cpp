@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -148,7 +148,7 @@ int qAllocMore(int alloc, int extra)
 char *qstrdup(const char *src)
 {
    if (!src) {
-      return 0;
+      return nullptr;
    }
 
    char *dst = new char[strlen(src) + 1];
@@ -158,17 +158,16 @@ char *qstrdup(const char *src)
 char *qstrcpy(char *dst, const char *src)
 {
    if (!src) {
-      return 0;
+      return nullptr;
    }
 
    return strcpy(dst, src);
-
 }
 
 char *qstrncpy(char *dst, const char *src, uint len)
 {
    if (! src || !dst) {
-      return 0;
+      return nullptr;
    }
 
    strncpy(dst, src, len);
@@ -382,16 +381,18 @@ QByteArray qCompress(const uchar *data, int nbytes, int compressionLevel)
 
 QByteArray qUncompress(const uchar *data, int nbytes)
 {
-   if (!data) {
-      qWarning("qUncompress: Data is null");
+   if (! data) {
+      qWarning("qUncompress(): Data is null");
       return QByteArray();
    }
+
    if (nbytes <= 4) {
       if (nbytes < 4 || (data[0] != 0 || data[1] != 0 || data[2] != 0 || data[3] != 0)) {
-         qWarning("qUncompress: Input data is corrupted");
+         qWarning("qUncompress(): Input data is corrupted");
       }
       return QByteArray();
    }
+
    ulong expectedSize = (data[0] << 24) | (data[1] << 16) |
                         (data[2] <<  8) | (data[3]      );
    ulong len = qMax(expectedSize, 1ul);
@@ -401,14 +402,17 @@ QByteArray qUncompress(const uchar *data, int nbytes)
       ulong alloc = len;
       if (len  >= (1u << 31u) - sizeof(QByteArray::Data))
       {
-         //QByteArray does not support that huge size anyway.
-         qWarning("qUncompress: Input data is corrupted");
+         // QByteArray does not support that huge size anyway.
+         qWarning("qUncompress(): Input data is corrupted");
          return QByteArray();
       }
+
+      // emerald - review code
       QByteArray::Data *p = static_cast<QByteArray::Data *>(::realloc(d.data(), sizeof(QByteArray::Data) + alloc + 1));
-      if (!p) {
-         // Qt5 - throw an exception
-         qWarning("qUncompress: could not allocate enough memory to uncompress data");
+
+      if (p == nullptr) {
+         // may want to throw an exception
+         qWarning("qUncompress(): Unable to not allocate enough memory to uncompress data");
          return QByteArray();
       }
 
@@ -430,14 +434,16 @@ QByteArray qUncompress(const uchar *data, int nbytes)
                }
 
                QByteArray::Data *p = static_cast<QByteArray::Data *>(::realloc(d.data(), sizeof(QByteArray::Data) + len + 1));
-               if (!p) {
-                  // Qt5 - throw an exception
+                if (p == nullptr) {
+                  // may want to throw an exception
                   qWarning("qUncompress: could not allocate enough memory to uncompress data");
                   return QByteArray();
                }
+
                d.take(); // realloc was successful
                d.reset(p);
             }
+
             d->ref.initializeOwned();
             d->size = len;
             d->alloc = uint(len) + 1u;
@@ -451,7 +457,7 @@ QByteArray qUncompress(const uchar *data, int nbytes)
             }
 
          case Z_MEM_ERROR:
-            qWarning("qUncompress: Z_MEM_ERROR: Not enough memory");
+            qWarning("qUncompress(): Z_MEM_ERROR: Not enough memory");
             return QByteArray();
 
          case Z_BUF_ERROR:
@@ -459,7 +465,7 @@ QByteArray qUncompress(const uchar *data, int nbytes)
             continue;
 
          case Z_DATA_ERROR:
-            qWarning("qUncompress: Z_DATA_ERROR: Input data is corrupted");
+            qWarning("qUncompress(): Z_DATA_ERROR: Input data is corrupted");
             return QByteArray();
       }
    }
@@ -548,24 +554,34 @@ QByteArray::QByteArray(const char *data, int size)
    }
 }
 
-
 QByteArray::QByteArray(int size, char ch)
 {
    if (size <= 0) {
       d = Data::allocate(0);
+
    } else {
       d = Data::allocate(uint(size) + 1u);
-      Q_CHECK_PTR(d);
+
+      if (d == nullptr) {
+         qBadAlloc();
+      }
+
       d->size = size;
       memset(d->data(), ch, size);
       d->data()[size] = '\0';
    }
 }
 
-QByteArray::QByteArray(int size, Qt::Initialization)
+QByteArray::QByteArray(int size, Qt::NoDataOverload dummy)
 {
+   (void) dummy;
+
    d = Data::allocate(uint(size) + 1u);
-   Q_CHECK_PTR(d);
+
+   if (d == nullptr) {
+      qBadAlloc();
+   }
+
    d->size = size;
    d->data()[size] = '\0';
 }
@@ -581,12 +597,14 @@ void QByteArray::resize(int size)
       return;
    }
 
-   if (size == 0 && !d->capacityReserved) {
+   if (size == 0 && ! d->capacityReserved) {
       Data *x = Data::allocate(0);
       if (!d->ref.deref()) {
          Data::deallocate(d);
       }
+
       d = x;
+
    } else if (d->size == 0 && d->ref.isStatic()) {
       //
       // Optimize the idiom:
@@ -775,7 +793,7 @@ static inline QByteArray &qbytearray_insert(QByteArray *ba,
 {
    Q_ASSERT(pos >= 0);
 
-   if (pos < 0 || len <= 0 || arr == 0) {
+   if (pos < 0 || len <= 0 || arr == nullptr) {
       return *ba;
    }
 
@@ -820,7 +838,7 @@ QByteArray &QByteArray::remove(char c)
       return *this;
    }
 
-   QByteArray result(d->size, Qt::Uninitialized);
+   QByteArray result(d->size, Qt::NoData);
    const char *from    = d->data();
    const char *fromend = from + d->size;
 
@@ -1535,25 +1553,25 @@ void QByteArray::clear()
    d = Data::sharedNull();
 }
 
-QDataStream &operator<<(QDataStream &out, const QByteArray &ba)
+QDataStream &operator<<(QDataStream &stream, const QByteArray &byteArray)
 {
-   if (ba.isNull()) {
-      out << (quint32)0xffffffff;
-      return out;
+   if (byteArray.isNull()) {
+      stream << (quint32)0xffffffff;
+      return stream;
    }
 
-   return out.writeBytes(ba.constData(), ba.size());
+   return stream.writeBytes(byteArray.constData(), byteArray.size());
 }
 
-QDataStream &operator>>(QDataStream &in, QByteArray &ba)
+QDataStream &operator>>(QDataStream &stream, QByteArray &byteArray)
 {
-   ba.clear();
+   byteArray.clear();
 
    quint32 len;
-   in >> len;
+   stream >> len;
 
    if (len == 0xffffffff) {
-      return in;
+      return stream;
    }
 
    const quint32 Step = 1024 * 1024;
@@ -1561,19 +1579,20 @@ QDataStream &operator>>(QDataStream &in, QByteArray &ba)
 
    do {
       int blockSize = qMin(Step, len - allocated);
-      ba.resize(allocated + blockSize);
+      byteArray.resize(allocated + blockSize);
 
-      if (in.readRawData(ba.data() + allocated, blockSize) != blockSize) {
-         ba.clear();
-         in.setStatus(QDataStream::ReadPastEnd);
-         return in;
+      if (stream.readRawData(byteArray.data() + allocated, blockSize) != blockSize) {
+         byteArray.clear();
+         stream.setStatus(QDataStream::ReadPastEnd);
+
+         return stream;
       }
 
       allocated += blockSize;
 
    } while (allocated < len);
 
-   return in;
+   return stream;
 }
 
 QByteArray QByteArray::simplified() const
@@ -1582,7 +1601,7 @@ QByteArray QByteArray::simplified() const
       return *this;
    }
 
-   QByteArray result(d->size, Qt::Uninitialized);
+   QByteArray result(d->size, Qt::NoData);
    const char *from = d->data();
    const char *fromend = from + d->size;
    int outc = 0;
@@ -1816,7 +1835,7 @@ QByteArray QByteArray::toBase64() const
    const char padchar = '=';
    int padlen = 0;
 
-   QByteArray tmp((d->size * 4) / 3 + 3, Qt::Uninitialized);
+   QByteArray tmp((d->size * 4) / 3 + 3, Qt::NoData);
 
    int i = 0;
    char *out = tmp.data();
@@ -2000,22 +2019,23 @@ QByteArray QByteArray::fromRawData(const char *data, int size)
    return QByteArray(dataPtr);
 }
 
-QByteArray &QByteArray::setRawData(const char *data, uint size)
+QByteArray &QByteArray::setRawData(const char *str, int size)
 {
    if (d->ref.isShared() || d->alloc) {
-      *this = fromRawData(data, size);
+      *this = fromRawData(str, size);
 
    } else {
-      if (data) {
-         d->size = size;
-         d->offset = data - reinterpret_cast<char *>(d);
+      if (str != nullptr) {
+         d->size   = size;
+         d->offset = str - reinterpret_cast<char *>(d);
 
       } else {
-         d->offset = sizeof(QByteArrayData);
-         d->size = 0;
+         d->offset  = sizeof(QByteArrayData);
+         d->size    = 0;
          *d->data() = 0;
       }
    }
+
    return *this;
 }
 
@@ -2023,7 +2043,7 @@ QByteArray QByteArray::fromBase64(const QByteArray &base64)
 {
    unsigned int buf = 0;
    int nbits = 0;
-   QByteArray tmp((base64.size() * 3) / 4, Qt::Uninitialized);
+   QByteArray tmp((base64.size() * 3) / 4, Qt::NoData);
 
    int offset = 0;
    for (int i = 0; i < base64.size(); ++i) {
@@ -2062,7 +2082,7 @@ QByteArray QByteArray::fromBase64(const QByteArray &base64)
 
 QByteArray QByteArray::fromHex(const QByteArray &hexEncoded)
 {
-   QByteArray res((hexEncoded.size() + 1) / 2, Qt::Uninitialized);
+   QByteArray res((hexEncoded.size() + 1) / 2, Qt::NoData);
    uchar *result = (uchar *)res.data() + res.size();
 
    bool odd_digit = true;
@@ -2097,7 +2117,7 @@ QByteArray QByteArray::fromHex(const QByteArray &hexEncoded)
 
 QByteArray QByteArray::toHex() const
 {
-   QByteArray hex(d->size * 2, Qt::Uninitialized);
+   QByteArray hex(d->size * 2, Qt::NoData);
    char *hexData = hex.data();
    const uchar *data = (const uchar *)d->data();
 
@@ -2221,7 +2241,7 @@ static void q_toPercentEncoding(QByteArray *ba, const char *dontEncode, const ch
    int len = input.count();
 
    const char *inputData = input.constData();
-   char *output = 0;
+   char *output = nullptr;
    int length = 0;
 
    for (int i = 0; i < len; ++i) {
@@ -2268,7 +2288,7 @@ void q_toPercentEncoding(QByteArray *ba, const char *exclude, const char *includ
 void q_normalizePercentEncoding(QByteArray *ba, const char *exclude)
 {
    q_fromPercentEncoding(ba, '%');
-   q_toPercentEncoding(ba, exclude, 0, '%');
+   q_toPercentEncoding(ba, exclude, nullptr, '%');
 }
 
 QByteArray QByteArray::toPercentEncoding(const QByteArray &exclude, const QByteArray &include, char percent) const

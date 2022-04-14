@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -41,11 +41,10 @@ class QMediaPlayerControl;
 
 class QMediaPlaylistPrivate
 {
-   Q_DECLARE_PUBLIC(QMediaPlaylist)
-
  public:
    QMediaPlaylistPrivate()
-      : mediaObject(0), control(0), networkPlaylistControl(0), error(QMediaPlaylist::NoError) {
+      : mediaObject(nullptr), control(nullptr), networkPlaylistControl(nullptr), error(QMediaPlaylist::NoError)
+   {
    }
 
    virtual ~QMediaPlaylistPrivate() {}
@@ -59,13 +58,13 @@ class QMediaPlaylistPrivate
 
    void _q_mediaObjectDeleted() {
       Q_Q(QMediaPlaylist);
-      mediaObject = 0;
+      mediaObject = nullptr;
 
       if (control != networkPlaylistControl) {
-         control = 0;
+         control = nullptr;
       }
 
-      q->setMediaObject(0);
+      q->setMediaObject(nullptr);
    }
 
    QMediaObject *mediaObject;
@@ -87,6 +86,9 @@ class QMediaPlaylistPrivate
    QString errorString;
 
    QMediaPlaylist *q_ptr;
+
+ private:
+   Q_DECLARE_PUBLIC(QMediaPlaylist)
 };
 
 class QMediaNetworkPlaylistControl : public QMediaPlaylistControl
@@ -95,15 +97,15 @@ class QMediaNetworkPlaylistControl : public QMediaPlaylistControl
 
  public:
    QMediaNetworkPlaylistControl(QObject *parent)
-      : QMediaPlaylistControl(parent) {
+      : QMediaPlaylistControl(parent)
+   {
       QMediaPlaylistProvider *playlist = new QMediaNetworkPlaylistProvider(this);
       m_navigator = new QMediaPlaylistNavigator(playlist, this);
       m_navigator->setPlaybackMode(QMediaPlaylist::Sequential);
 
-      connect(m_navigator, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
-      connect(m_navigator, SIGNAL(activated(QMediaContent)), this, SLOT(currentMediaChanged(QMediaContent)));
-      connect(m_navigator, SIGNAL(playbackModeChanged(QMediaPlaylist::PlaybackMode)), this,
-         SLOT(playbackModeChanged(QMediaPlaylist::PlaybackMode)));
+      connect(m_navigator, &QMediaPlaylistNavigator::currentIndexChanged, this, &QMediaNetworkPlaylistControl::currentIndexChanged);
+      connect(m_navigator, &QMediaPlaylistNavigator::activated,           this, &QMediaNetworkPlaylistControl::currentMediaChanged);
+      connect(m_navigator, &QMediaPlaylistNavigator::playbackModeChanged, this, &QMediaNetworkPlaylistControl::playbackModeChanged);
    }
 
    virtual ~QMediaNetworkPlaylistControl() {};

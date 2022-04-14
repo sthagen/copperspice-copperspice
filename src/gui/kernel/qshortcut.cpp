@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -138,7 +138,7 @@ static bool correctWidgetContext(Qt::ShortcutContext context, QWidget *w, QWidge
    }
 
    if (context == Qt::ApplicationShortcut) {
-      return QApplicationPrivate::tryModalHelper(w, 0);   // true, unless w is shadowed by a modal dialog
+      return QApplicationPrivate::tryModalHelper(w, nullptr);   // true, unless w is shadowed by a modal dialog
    }
 
    if (context == Qt::WidgetShortcut) {
@@ -215,7 +215,7 @@ static bool correctGraphicsWidgetContext(Qt::ShortcutContext context, QGraphicsW
       // must still check if all views are shadowed.
       QList<QGraphicsView *> views = w->scene()->views();
       for (int i = 0; i < views.size(); ++i) {
-         if (QApplicationPrivate::tryModalHelper(views.at(i), 0)) {
+         if (QApplicationPrivate::tryModalHelper(views.at(i), nullptr)) {
             return true;
          }
       }
@@ -242,7 +242,7 @@ static bool correctGraphicsWidgetContext(Qt::ShortcutContext context, QGraphicsW
 
    // Find the active view (if any).
    QList<QGraphicsView *> views = w->scene()->views();
-   QGraphicsView *activeView = 0;
+   QGraphicsView *activeView = nullptr;
 
    for (int i = 0; i < views.size(); ++i) {
       QGraphicsView *view = views.at(i);
@@ -310,7 +310,7 @@ static bool correctActionContext(Qt::ShortcutContext context, QAction *a, QWidge
 
 #if defined(DEBUG_QSHORTCUTMAP)
    if (graphicsWidgets.isEmpty()) {
-      qDebug() << a << "not connected to any widgets; won't trigger";
+      qDebug() << a << " is not connected to any widgets and will not trigger";
    }
 #endif
 
@@ -384,7 +384,7 @@ QShortcut::QShortcut(QWidget *parent)
    : QObject(parent), d_ptr(new QShortcutPrivate)
 {
    d_ptr->q_ptr = this;
-   Q_ASSERT(parent != 0);
+   Q_ASSERT(parent != nullptr);
 }
 
 QShortcut::QShortcut(const QKeySequence &key, QWidget *parent, const QString &member,
@@ -395,7 +395,7 @@ QShortcut::QShortcut(const QKeySequence &key, QWidget *parent, const QString &me
    QAPP_CHECK("QShortcut");
 
    Q_D(QShortcut);
-   Q_ASSERT(parent != 0);
+   Q_ASSERT(parent != nullptr);
 
    d->sc_context  = context;
    d->sc_sequence = key;

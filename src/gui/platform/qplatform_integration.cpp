@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -53,7 +53,7 @@ QPlatformClipboard *QPlatformIntegration::clipboard() const
 {
    static QPlatformClipboard *clipboard = nullptr;
 
-   if (!clipboard) {
+   if (! clipboard) {
       clipboard = new QPlatformClipboard;
    }
 
@@ -64,10 +64,12 @@ QPlatformClipboard *QPlatformIntegration::clipboard() const
 #ifndef QT_NO_DRAGANDDROP
 QPlatformDrag *QPlatformIntegration::drag() const
 {
-   static QSimpleDrag *drag = 0;
-   if (!drag) {
+   static QSimpleDrag *drag = nullptr;
+
+   if (! drag) {
       drag = new QSimpleDrag;
    }
+
    return drag;
 }
 #endif
@@ -95,6 +97,8 @@ QPlatformPixmap *QPlatformIntegration::createPlatformPixmap(QPlatformPixmap::Pix
 #ifndef QT_NO_OPENGL
 QPlatformOpenGLContext *QPlatformIntegration::createPlatformOpenGLContext(QOpenGLContext *context) const
 {
+   (void) context;
+
    qWarning("This plugin does not support createPlatformOpenGLContext");
    return nullptr;
 }
@@ -108,6 +112,8 @@ QPlatformSharedGraphicsCache *QPlatformIntegration::createPlatformSharedGraphics
 
 QPaintEngine *QPlatformIntegration::createImagePaintEngine(QPaintDevice *paintDevice) const
 {
+   (void) paintDevice;
+
    return nullptr;
 }
 
@@ -127,7 +133,7 @@ QPlatformInputContext *QPlatformIntegration::inputContext() const
 #ifndef QT_NO_ACCESSIBILITY
 QPlatformAccessibility *QPlatformIntegration::accessibility() const
 {
-   return 0;
+   return nullptr;
 }
 #endif
 
@@ -257,12 +263,14 @@ QStringList QPlatformIntegration::themeNames() const
 
 class QPlatformTheme *QPlatformIntegration::createPlatformTheme(const QString &name) const
 {
+   (void) name;
    return new QPlatformTheme;
 }
 
 QPlatformOffscreenSurface *QPlatformIntegration::createPlatformOffscreenSurface(QOffscreenSurface *surface) const
 {
-   return 0;
+   (void) surface;
+   return nullptr;
 }
 
 #ifndef QT_NO_SESSIONMANAGER
@@ -286,4 +294,5 @@ QOpenGLContext::OpenGLModuleType QPlatformIntegration::openGLModuleType()
 
 void QPlatformIntegration::setApplicationIcon(const QIcon &icon) const
 {
+   (void) icon;
 }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,7 @@
 #ifndef QSOURCELOCATION_H
 #define QSOURCELOCATION_H
 
-#include <QMetaType>
-#include <QUrl>
+#include <qurl.h>
 
 class QSourceLocationPrivate;
 
@@ -34,7 +33,7 @@ class Q_XMLPATTERNS_EXPORT QSourceLocation
  public:
    QSourceLocation();
    QSourceLocation(const QSourceLocation &other);
-   QSourceLocation(const QUrl &uri, int line = -1, int column = -1);
+   QSourceLocation(const QUrl &url, int line = -1, int column = -1);
    ~QSourceLocation();
    QSourceLocation &operator=(const QSourceLocation &other);
    bool operator==(const QSourceLocation &other) const;
@@ -61,8 +60,5 @@ class Q_XMLPATTERNS_EXPORT QSourceLocation
 
 Q_XMLPATTERNS_EXPORT uint qHash(const QSourceLocation &location);
 Q_XMLPATTERNS_EXPORT QDebug operator<<(QDebug debug, const QSourceLocation &sourceLocation);
-
-Q_DECLARE_METATYPE(QSourceLocation) /* This macro must appear after QT_END_NAMESPACE. */
-
 
 #endif

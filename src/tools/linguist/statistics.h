@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,26 +24,27 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
-#include "ui_statistics.h"
-#include <QVariant>
+#include <ui_statistics.h>
 
-QT_BEGIN_NAMESPACE
+#include <qvariant.h>
 
 class Statistics : public QDialog, public Ui::Statistics
 {
-   Q_OBJECT
+   CS_OBJECT(Statistics)
 
  public:
-   Statistics(QWidget *parent = nullptr, Qt::WindowFlags fl = 0);
-   ~Statistics() {}
+   Statistics(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
 
- public slots:
-   virtual void updateStats(int w1, int c1, int cs1, int w2, int c2, int cs2);
+   ~Statistics()
+   {
+   }
 
- protected slots:
-   virtual void languageChange();
+   CS_SLOT_1(Public, virtual void updateStats(int w1,int c1,int cs1,int w2,int c2,int cs2))
+   CS_SLOT_2(updateStats)
+
+ protected:
+   CS_SLOT_1(Protected, virtual void languageChange())
+   CS_SLOT_2(languageChange)
 };
 
-QT_END_NAMESPACE
-
-#endif // STATISTICS_H
+#endif

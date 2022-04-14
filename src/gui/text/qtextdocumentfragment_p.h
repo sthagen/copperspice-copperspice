@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,17 +24,16 @@
 #ifndef QTEXTDOCUMENTFRAGMENT_P_H
 #define QTEXTDOCUMENTFRAGMENT_P_H
 
-#include <QtGui/qtextdocument.h>
+#include <qtextdocument.h>
 #include <qtexthtmlparser_p.h>
 #include <qtextdocument_p.h>
-#include <QtGui/qtexttable.h>
-#include <QtCore/qatomic.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qmap.h>
-#include <QtCore/qpointer.h>
-#include <QtCore/qvarlengtharray.h>
-#include <QtCore/qdatastream.h>
-
+#include <qtexttable.h>
+#include <qatomic.h>
+#include <qlist.h>
+#include <qmap.h>
+#include <qpointer.h>
+#include <qvarlengtharray.h>
+#include <qdatastream.h>
 
 class QTextDocumentFragmentPrivate;
 
@@ -77,7 +76,11 @@ class QTextDocumentFragmentPrivate
 {
  public:
    QTextDocumentFragmentPrivate(const QTextCursor &cursor = QTextCursor());
-   inline ~QTextDocumentFragmentPrivate() {
+
+   QTextDocumentFragmentPrivate(const QTextDocumentFragmentPrivate &) = delete;
+   QTextDocumentFragmentPrivate &operator=(const QTextDocumentFragmentPrivate &) = delete;
+
+   ~QTextDocumentFragmentPrivate() {
       delete doc;
    }
 
@@ -87,9 +90,6 @@ class QTextDocumentFragmentPrivate
    QTextDocument *doc;
 
    uint importedFromPlainText : 1;
-
- private:
-   Q_DISABLE_COPY(QTextDocumentFragmentPrivate)
 };
 
 #ifndef QT_NO_TEXTHTMLPARSER
@@ -97,6 +97,7 @@ class QTextDocumentFragmentPrivate
 class QTextHtmlImporter : public QTextHtmlParser
 {
    struct Table;
+
  public:
    enum ImportMode {
       ImportToFragment,
@@ -105,7 +106,7 @@ class QTextHtmlImporter : public QTextHtmlParser
 
    QTextHtmlImporter(QTextDocument *_doc, const QString &html,
       ImportMode mode,
-      const QTextDocument *resourceProvider = 0);
+      const QTextDocument *resourceProvider = nullptr);
 
    void import();
 
@@ -128,6 +129,7 @@ class QTextHtmlImporter : public QTextHtmlParser
       int listNode;
       QPointer<QTextList> list;
    };
+
    QVector<List> lists;
    int indent;
 
@@ -136,7 +138,10 @@ class QTextHtmlImporter : public QTextHtmlParser
    QStringList namedAnchors;
 
    struct TableCellIterator {
-      inline TableCellIterator(QTextTable *t = 0) : table(t), row(0), column(0) {}
+      inline TableCellIterator(QTextTable *t = nullptr)
+         : table(t), row(0), column(0)
+      {
+      }
 
       inline TableCellIterator &operator++() {
          if (atEnd()) {
@@ -158,7 +163,7 @@ class QTextHtmlImporter : public QTextHtmlParser
       }
 
       inline bool atEnd() const {
-         return table == 0 || row >= table->rows();
+         return table == nullptr || row >= table->rows();
       }
 
       QTextTableCell cell() const {

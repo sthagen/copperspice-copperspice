@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,15 @@
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 
-#include "qmenu.h"
-#include "qmenubar.h"
-#include "qmenubar_p.h"
-#include "qmacnativewidget_mac.h"
-
-#include <QtCore/QDebug>
-#include <QtGui/QGuiApplication>
-#include <QtGui/QWindow>
+#include <qmenu.h>
+#include <qmenubar.h>
+#include <qmacnativewidget_mac.h>
+#include <qdebug.h>
+#include <qguiapplication.h>
+#include <qwindow.h>
 #include <qplatform_nativeinterface.h>
 
+#include <qmenubar_p.h>
 
 #ifndef QT_NO_MENU
 
@@ -111,8 +110,9 @@ void QMenuPrivate::moveWidgetToPlatformItem(QWidget *widget, QPlatformMenuItem* 
 
     NSView *containerView = container->nativeView();
     QWindow *containerWindow = container->windowHandle();
-    Qt::WindowFlags wf = containerWindow->flags();
-    containerWindow->setFlags(wf | Qt::SubWindow);
+
+    Qt::WindowFlags flags = containerWindow->flags();
+    containerWindow->setFlags(flags | Qt::SubWindow);
     [(NSView *)widget->winId() setAutoresizingMask:NSViewWidthSizable];
 
     item->setNativeContents((WId)containerView);

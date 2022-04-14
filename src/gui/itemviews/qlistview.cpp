@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -543,42 +543,46 @@ void QListView::wheelEvent(QWheelEvent *e)
    Q_D(QListView);
 
    if (e->orientation() == Qt::Vertical) {
-      if (e->angleDelta().x() == 0
-         && ((d->flow == TopToBottom && d->wrap) || (d->flow == LeftToRight && !d->wrap))
-         && d->vbar->minimum() == 0 && d->vbar->maximum() == 0) {
+      if (e->angleDelta().x() == 0 && ((d->flow == TopToBottom && d->wrap) || (d->flow == LeftToRight && ! d->wrap))
+            && d->vbar->minimum() == 0 && d->vbar->maximum() == 0)  {
+
          QPoint pixelDelta(e->pixelDelta().y(), e->pixelDelta().x());
          QPoint angleDelta(e->angleDelta().y(), e->angleDelta().x());
-         QWheelEvent hwe(e->pos(), e->globalPos(), pixelDelta, angleDelta, e->delta(),
-            Qt::Horizontal, e->buttons(), e->modifiers(), e->phase(), e->source());
+
+         QWheelEvent hwe(e->pos(), e->globalPos(), pixelDelta, angleDelta, e->buttons(), e->modifiers(), e->phase(), e->source());
+
          if (e->spontaneous()) {
             qt_sendSpontaneousEvent(d->hbar, &hwe);
          } else {
             QApplication::sendEvent(d->hbar, &hwe);
          }
+
          e->setAccepted(hwe.isAccepted());
+
       } else {
          QApplication::sendEvent(d->vbar, e);
       }
+
    } else {
       QApplication::sendEvent(d->hbar, e);
    }
 }
-#endif // QT_NO_WHEELEVENT
+#endif
 
-/*!
-  \reimp
-*/
 void QListView::timerEvent(QTimerEvent *e)
 {
    Q_D(QListView);
 
    if (e->timerId() == d->batchLayoutTimer.timerId()) {
-      if (d->doItemsLayout(d->batchSize)) { // layout is done
+
+      if (d->doItemsLayout(d->batchSize)) {
+         // layout is done
          d->batchLayoutTimer.stop();
          updateGeometries();
          d->viewport->update();
       }
    }
+
    QAbstractItemView::timerEvent(e);
 }
 
@@ -672,8 +676,8 @@ QStyleOptionViewItem QListView::viewOptions() const
 
    if (!d->iconSize.isValid()) { // otherwise it was already set in abstractitemview
       int pm = (d->viewMode == QListView::ListMode
-            ? style()->pixelMetric(QStyle::PM_ListViewIconSize, 0, this)
-            : style()->pixelMetric(QStyle::PM_IconViewIconSize, 0, this));
+            ? style()->pixelMetric(QStyle::PM_ListViewIconSize, nullptr, this)
+            : style()->pixelMetric(QStyle::PM_IconViewIconSize, nullptr, this));
       option.decorationSize = QSize(pm, pm);
    }
 
@@ -1412,7 +1416,7 @@ bool QListView::event(QEvent *e)
 
 QListViewPrivate::QListViewPrivate()
    : QAbstractItemViewPrivate(),
-     commonListView(0),
+     commonListView(nullptr),
      wrap(false),
      space(0),
      flow(QListView::TopToBottom),
@@ -1457,11 +1461,10 @@ void QListViewPrivate::prepareItemsLayout()
    // Qt::ScrollBarAlwaysOn but scrollbar extent must be deduced if policy
    // is Qt::ScrollBarAsNeeded
    int verticalMargin = vbarpolicy == Qt::ScrollBarAsNeeded
-      ? q->style()->pixelMetric(QStyle::PM_ScrollBarExtent, 0, vbar) + frameAroundContents
-      : 0;
+      ? q->style()->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, vbar) + frameAroundContents : 0;
+
    int horizontalMargin =  hbarpolicy == Qt::ScrollBarAsNeeded
-      ? q->style()->pixelMetric(QStyle::PM_ScrollBarExtent, 0, hbar) + frameAroundContents
-      : 0;
+      ? q->style()->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, hbar) + frameAroundContents : 0;
 
    layoutBounds.adjust(0, 0, -verticalMargin, -horizontalMargin);
 
@@ -2877,7 +2880,7 @@ void QIconModeViewBase::doDynamicLayout(const QListViewLayoutInfo &info)
    }
 
    QRect rect(QPoint(), topLeft);
-   QListViewItem *item = 0;
+   QListViewItem *item = nullptr;
    for (int row = info.first; row <= info.last; ++row) {
       item = &items[row];
       if (isHidden(row)) {
@@ -2991,7 +2994,7 @@ QVector<QModelIndex> QIconModeViewBase::intersectingSet(const QRect &area) const
    QVector<QModelIndex> res;
    that->interSectingVector = &res;
    that->tree.climbTree(area, &QIconModeViewBase::addLeaf, data);
-   that->interSectingVector = 0;
+   that->interSectingVector = nullptr;
    return res;
 }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QABSTRACTANIMATION_H
 #define QABSTRACTANIMATION_H
 
-#include <QtCore/qobject.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_ANIMATION
 
@@ -80,6 +78,10 @@ class Q_CORE_EXPORT QAbstractAnimation : public QObject
    CORE_CS_ENUM(Direction)
 
    QAbstractAnimation(QObject *parent = nullptr);
+
+   QAbstractAnimation(const QAbstractAnimation &) = delete;
+   QAbstractAnimation &operator=(const QAbstractAnimation &) = delete;
+
    virtual ~QAbstractAnimation();
 
    State state() const;
@@ -105,8 +107,8 @@ class Q_CORE_EXPORT QAbstractAnimation : public QObject
    CORE_CS_SIGNAL_2(stateChanged, newState, oldState)
    CORE_CS_SIGNAL_1(Public, void currentLoopChanged(int currentLoop))
    CORE_CS_SIGNAL_2(currentLoopChanged, currentLoop)
-   CORE_CS_SIGNAL_1(Public, void directionChanged(QAbstractAnimation::Direction direction))
-   CORE_CS_SIGNAL_2(directionChanged, direction)
+   CORE_CS_SIGNAL_1(Public, void directionChanged(QAbstractAnimation::Direction newDirection))
+   CORE_CS_SIGNAL_2(directionChanged, newDirection)
 
    CORE_CS_SLOT_1(Public, void start(QAbstractAnimation::DeletionPolicy policy = KeepWhenStopped))
    CORE_CS_SLOT_2(start)
@@ -132,14 +134,12 @@ class Q_CORE_EXPORT QAbstractAnimation : public QObject
    QScopedPointer<QAbstractAnimationPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QAbstractAnimation)
    Q_DECLARE_PRIVATE(QAbstractAnimation)
 };
 
 class Q_CORE_EXPORT QAnimationDriver : public QObject
 {
    CORE_CS_OBJECT(QAnimationDriver)
-   Q_DECLARE_PRIVATE(QAnimationDriver)
 
  public:
    QAnimationDriver(QObject *parent = nullptr);
@@ -158,15 +158,13 @@ class Q_CORE_EXPORT QAnimationDriver : public QObject
    QScopedPointer<QAnimationDriverPrivate> d_ptr;
 
  private:
+   Q_DECLARE_PRIVATE(QAnimationDriver)
    friend class QUnifiedTimer;
 
    void start();
    void stop();
 };
 
+#endif // QT_NO_ANIMATION
 
-#endif //QT_NO_ANIMATION
-
-QT_END_NAMESPACE
-
-#endif // QABSTRACTANIMATION_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,17 +25,16 @@
 #define QINPUTMETHOD_H
 
 #include <qobject.h>
+#include <qrectf.h>
 
 class QInputMethodPrivate;
 class QWindow;
-class QRectF;
 class QTransform;
 class QInputMethodQueryEvent;
 
 class Q_GUI_EXPORT QInputMethod : public QObject
 {
    GUI_CS_OBJECT(QInputMethod)
-   Q_DECLARE_PRIVATE(QInputMethod)
 
    GUI_CS_ENUM(Action)
 
@@ -58,6 +57,11 @@ class Q_GUI_EXPORT QInputMethod : public QObject
    GUI_CS_PROPERTY_NOTIFY(inputDirection, inputDirectionChanged)
 
  public:
+   enum Action {
+      Click,
+      ContextMenu
+   };
+
    QTransform inputItemTransform() const;
    void setInputItemTransform(const QTransform &transform);
 
@@ -69,11 +73,6 @@ class Q_GUI_EXPORT QInputMethod : public QObject
 
    // keyboard geometry in window coords
    QRectF keyboardRectangle() const;
-
-   enum Action {
-      Click,
-      ContextMenu
-   };
 
    bool isVisible() const;
    void setVisible(bool visible);
@@ -114,6 +113,8 @@ class Q_GUI_EXPORT QInputMethod : public QObject
    GUI_CS_SIGNAL_2(inputDirectionChanged, newDirection)
 
  private:
+   Q_DECLARE_PRIVATE(QInputMethod)
+
    QInputMethod();
    ~QInputMethod();
 

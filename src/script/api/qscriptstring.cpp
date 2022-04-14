@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,20 +21,18 @@
 *
 ***********************************************************************/
 
-#include "config.h" // compile on Windows
-#include "qscriptstring.h"
-#include "qscriptstring_p.h"
-#include "qscriptengine.h"
-#include "qscriptengine_p.h"
+#include "config.h"
+
+#include <qscriptstring.h>
+#include <qscriptstring_p.h>
+#include <qscriptengine.h>
+#include <qscriptengine_p.h>
 
 QScriptString::QScriptString()
-   : d_ptr(0)
+   : d_ptr(nullptr)
 {
 }
 
-/*!
-  Constructs a new QScriptString that is a copy of \a other.
-*/
 QScriptString::QScriptString(const QScriptString &other)
    : d_ptr(other.d_ptr)
 {
@@ -47,9 +45,6 @@ QScriptString::QScriptString(const QScriptString &other)
    }
 }
 
-/*!
-  Destroys this QScriptString.
-*/
 QScriptString::~QScriptString()
 {
    Q_D(QScriptString);

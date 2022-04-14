@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,8 +31,6 @@
 #include <qhash.h>
 #include <qmutex.h>
 
-QT_BEGIN_NAMESPACE
-
 class QInotifyFileSystemWatcherEngine : public QFileSystemWatcherEngine
 {
    CORE_CS_OBJECT(QInotifyFileSystemWatcherEngine)
@@ -60,6 +58,6 @@ class QInotifyFileSystemWatcherEngine : public QFileSystemWatcherEngine
    QHash<int, QString> idToPath;
 };
 
-QT_END_NAMESPACE
 #endif // QT_NO_FILESYSTEMWATCHER
-#endif // QFILESYSTEMWATCHER_INOTIFY_P_H
+
+#endif

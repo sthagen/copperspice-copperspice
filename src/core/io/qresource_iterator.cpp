@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,10 +25,7 @@
 #include <qresource_iterator_p.h>
 #include <qvariant.h>
 
-QT_BEGIN_NAMESPACE
-
-QResourceFileEngineIterator::QResourceFileEngineIterator(QDir::Filters filters,
-      const QStringList &filterNames)
+QResourceFileEngineIterator::QResourceFileEngineIterator(QDir::Filters filters, const QStringList &filterNames)
    : QAbstractFileEngineIterator(filters, filterNames), index(-1)
 {
 }
@@ -70,5 +67,3 @@ QString QResourceFileEngineIterator::currentFileName() const
    }
    return entries.at(index - 1);
 }
-
-QT_END_NAMESPACE

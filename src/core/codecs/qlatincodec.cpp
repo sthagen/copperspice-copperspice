@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,7 +32,7 @@ QLatin1Codec::~QLatin1Codec()
 
 QString QLatin1Codec::convertToUnicode(const char *chars, int len, ConverterState *) const
 {
-   if (chars == 0) {
+   if (chars == nullptr) {
       return QString();
    }
 
@@ -41,7 +41,7 @@ QString QLatin1Codec::convertToUnicode(const char *chars, int len, ConverterStat
 
 QByteArray QLatin1Codec::convertFromUnicode(QStringView str, ConverterState *state) const
 {
-   const char replacement = (state && state->flags & ConvertInvalidToNull) ? 0 : '?';
+   const char replacement = (state && state->m_flags & ConvertInvalidToNull) ? 0 : '?';
 
    QByteArray retval;
 
@@ -93,7 +93,7 @@ QLatin15Codec::~QLatin15Codec()
 
 QString QLatin15Codec::convertToUnicode(const char *chars, int len, ConverterState *) const
 {
-   if (chars == 0) {
+   if (chars == nullptr) {
       return QString();
    }
 
@@ -173,7 +173,7 @@ QString QLatin15Codec::convertToUnicode(const char *chars, int len, ConverterSta
 
 QByteArray QLatin15Codec::convertFromUnicode(QStringView str, ConverterState *state) const
 {
-   const char replacement = (state && state->flags & ConvertInvalidToNull) ? 0 : '?';
+   const char replacement = (state && state->m_flags & ConvertInvalidToNull) ? 0 : '?';
 
    QByteArray retval;
    int invalid = 0;

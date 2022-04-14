@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QTCPSOCKET_H
 #define QTCPSOCKET_H
 
-#include <QtNetwork/qabstractsocket.h>
-#include <QtCore/qvariant.h>
-
-
+#include <qabstractsocket.h>
+#include <qvariant.h>
 
 class QTcpSocketPrivate;
 
@@ -37,6 +35,10 @@ class Q_NETWORK_EXPORT QTcpSocket : public QAbstractSocket
 
  public:
    explicit QTcpSocket(QObject *parent = nullptr);
+
+   QTcpSocket(const QTcpSocket &) = delete;
+   QTcpSocket &operator=(const QTcpSocket &) = delete;
+
    virtual ~QTcpSocket();
 
  protected:
@@ -44,10 +46,7 @@ class Q_NETWORK_EXPORT QTcpSocket : public QAbstractSocket
    QTcpSocket(QAbstractSocket::SocketType socketType, QTcpSocketPrivate &dd, QObject *parent = nullptr);
 
  private:
-   Q_DISABLE_COPY(QTcpSocket)
    Q_DECLARE_PRIVATE(QTcpSocket)
 };
 
-
-
-#endif // QTCPSOCKET_H
+#endif

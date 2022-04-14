@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -224,6 +224,7 @@ class QSortFilterProxyModelPrivate : public QAbstractProxyModelPrivate
 
    void sort();
    bool update_source_sort_column();
+
    void sort_source_rows(QVector<int> &source_rows,
       const QModelIndex &source_parent) const;
    QVector<QPair<int, QVector<int >>> proxy_intervals_for_source_items_to_add(
@@ -630,6 +631,7 @@ QVector<QPair<int, QVector<int >>> QSortFilterProxyModelPrivate::proxy_intervals
    int source_items_index = 0;
    QVector<int> source_items_in_interval;
    bool compare = (orient == Qt::Vertical && source_sort_column >= 0 && dynamic_sortfilter);
+
    while (source_items_index < source_items.size()) {
       source_items_in_interval.clear();
       int first_new_source_item = source_items.at(source_items_index);
@@ -1474,6 +1476,8 @@ void QSortFilterProxyModelPrivate::_q_sourceRowsAboutToBeMoved(const QModelIndex
    int sourceEnd, const QModelIndex &destParent, int dest)
 {
    (void) sourceStart;
+   (void) sourceEnd;
+   (void) dest;
 
    Q_Q(QSortFilterProxyModel);
 
@@ -1499,9 +1503,14 @@ void QSortFilterProxyModelPrivate::_q_sourceRowsAboutToBeMoved(const QModelIndex
 
    saved_persistent_indexes = store_persistent_indexes();
 }
+
 void QSortFilterProxyModelPrivate::_q_sourceRowsMoved(const QModelIndex &sourceParent, int sourceStart,
    int sourceEnd, const QModelIndex &destParent, int dest)
 {
+   (void) sourceStart;
+   (void) sourceEnd;
+   (void) dest;
+
    Q_Q(QSortFilterProxyModel);
 
    // Optimize: We only need to clear and update the persistent indexes which are children of
@@ -1527,11 +1536,15 @@ void QSortFilterProxyModelPrivate::_q_sourceRowsMoved(const QModelIndex &sourceP
 
    emit q->layoutChanged(parents);
 }
+
 void QSortFilterProxyModelPrivate::_q_sourceColumnsAboutToBeInserted(
    const QModelIndex &source_parent, int start, int end)
 {
-   //Force the creation of a mapping now, even if its empty.
-   //We need it because the proxy can be acessed at the moment it emits columnsAboutToBeInserted in insert_source_items
+   (void) start;
+   (void) end;
+
+   // Force the creation of a mapping now, even if its empty.
+   // We need it because the proxy can be acessed at the moment it emits columnsAboutToBeInserted in insert_source_items
 
    if (can_create_mapping(source_parent)) {
       create_mapping(source_parent);
@@ -1630,9 +1643,11 @@ void QSortFilterProxyModelPrivate::_q_sourceColumnsMoved(
 
    QList<QPersistentModelIndex> parents;
    parents << q->mapFromSource(sourceParent);
+
    if (sourceParent != destParent) {
       parents << q->mapFromSource(destParent);
    }
+
    emit q->layoutChanged(parents);
 }
 
@@ -1649,7 +1664,7 @@ QSortFilterProxyModel::QSortFilterProxyModel(QObject *parent)
    d->filter_role = Qt::DisplayRole;
    d->dynamic_sortfilter = true;
 
-   connect(this, SIGNAL(modelReset()), this, SLOT(_q_clearMapping()));
+   connect(this, &QSortFilterProxyModel::modelReset, this, &QSortFilterProxyModel::_q_clearMapping);
 }
 
 QSortFilterProxyModel::~QSortFilterProxyModel()
@@ -2364,49 +2379,15 @@ void QSortFilterProxyModel::setFilterRole(int role)
    d->filter_changed();
 }
 
-/*!
-    \obsolete
-
-    This function is obsolete. Use invalidate() instead.
-*/
-void QSortFilterProxyModel::clear()
-{
-   Q_D(QSortFilterProxyModel);
-
-   emit layoutAboutToBeChanged();
-   d->_q_clearMapping();
-   emit layoutChanged();
-}
-
 void QSortFilterProxyModel::invalidate()
 {
    Q_D(QSortFilterProxyModel);
+
    emit layoutAboutToBeChanged();
    d->_q_clearMapping();
    emit layoutChanged();
 }
 
-/*!
-   \obsolete
-
-    This function is obsolete. Use invalidateFilter() instead.
-*/
-void QSortFilterProxyModel::filterChanged()
-{
-   Q_D(QSortFilterProxyModel);
-   d->filter_changed();
-}
-
-/*!
-   \since 4.3
-
-   Invalidates the current filtering.
-
-   This function should be called if you are implementing custom filtering
-   (e.g. filterAcceptsRow()), and your filter parameters have changed.
-
-   \sa invalidate()
-*/
 void QSortFilterProxyModel::invalidateFilter()
 {
    Q_D(QSortFilterProxyModel);
@@ -2476,7 +2457,8 @@ bool QSortFilterProxyModel::lessThan(const QModelIndex &source_left, const QMode
 
       case QVariant::ULongLong:
          return l.toULongLong() < r.toULongLong();
-      case QMetaType::Float:
+
+      case QVariant::Float:
          return l.toFloat() < r.toFloat();
 
       case QVariant::Double:

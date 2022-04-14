@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,10 +28,10 @@
 #include <qstate.h>
 #include <qstate_p.h>
 #include <qstatemachine.h>
-#include <qstatemachine_p.h>
 #include <qdebug.h>
 
-QT_BEGIN_NAMESPACE
+#include <qstatemachine_p.h>
+#include <qsignaltransition_p.h>
 
 void QSignalTransition::unregister()
 {
@@ -52,7 +52,7 @@ void QSignalTransition::maybeRegister()
 }
 
 QSignalTransition::QSignalTransition(QState *sourceState)
-   : QAbstractTransition(sourceState)
+   : QAbstractTransition(*new QSignalTransitionPrivate, sourceState)
 {
    m_sender = nullptr;
 }
@@ -61,12 +61,12 @@ QSignalTransition::~QSignalTransition()
 {
 }
 
-QObject *QSignalTransition::senderObject() const
+const QObject *QSignalTransition::senderObject() const
 {
    return m_sender;
 }
 
-void QSignalTransition::setSenderObject(QObject *sender)
+void QSignalTransition::setSenderObject(const QObject *sender)
 {
    if (sender == m_sender) {
       return;
@@ -96,7 +96,7 @@ bool QSignalTransition::eventTest(QEvent *event)
 
 void QSignalTransition::onTransition(QEvent *event)
 {
-   Q_UNUSED(event);
+   (void) event;
 }
 
 bool QSignalTransition::event(QEvent *e)
@@ -104,11 +104,10 @@ bool QSignalTransition::event(QEvent *e)
    return QAbstractTransition::event(e);
 }
 
-void QSignalTransition::callOnTransition(QEvent *e)
+void QSignalTransitionPrivate::callOnTransition(QEvent *e)
 {
-   onTransition(e);
+   Q_Q(QSignalTransition);
+   q->onTransition(e);
 }
-
-QT_END_NAMESPACE
 
 #endif //QT_NO_STATEMACHINE

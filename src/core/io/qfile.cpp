@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -78,7 +78,7 @@ bool QFilePrivate::openExternalFile(int flags, int fd, QFile::FileHandleFlags ha
 
 #else
    delete fileEngine;
-   fileEngine = 0;
+   fileEngine = nullptr;
    QFSFileEngine *fe = new QFSFileEngine;
    fileEngine = fe;
 
@@ -94,7 +94,7 @@ bool QFilePrivate::openExternalFile(int flags, FILE *fh, QFile::FileHandleFlags 
    return false;
 #else
    delete fileEngine;
-   fileEngine = 0;
+   fileEngine = nullptr;
    QFSFileEngine *fe = new QFSFileEngine;
    fileEngine = fe;
    return fe->open(QIODevice::OpenMode(flags), fh, handleFlags);
@@ -164,7 +164,7 @@ void QFile::setFileName(const QString &name)
 
    if (d->fileEngine) { //get a new file engine later
       delete d->fileEngine;
-      d->fileEngine = 0;
+      d->fileEngine = nullptr;
    }
 
    d->fileName = name;
@@ -587,7 +587,7 @@ bool QFile::open(OpenMode mode)
    Q_D(QFile);
 
    if (isOpen()) {
-      qWarning("QFile::open: File (%s) already open", qPrintable(fileName()));
+      qWarning("QFile::open: File (%s) already open", csPrintable(fileName()));
       return false;
    }
 
@@ -675,8 +675,10 @@ bool QFile::open(int fd, OpenMode mode, FileHandleFlags handleFlags)
 
    if (d->openExternalFile(mode, fd, handleFlags)) {
       QIODevice::open(mode);
+
       if (mode & Append) {
          seek(size());
+
       } else {
          qint64 pos = (qint64)QT_LSEEK(fd, QT_OFF_T(0), SEEK_CUR);
          if (pos != -1) {
@@ -723,5 +725,3 @@ qint64 QFile::size() const
 {
    return QFileDevice::size();
 }
-
-

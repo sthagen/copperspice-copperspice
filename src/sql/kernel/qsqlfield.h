@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QSQLFIELD_H
 #define QSQLFIELD_H
 
-#include <QtCore/qvariant.h>
-#include <QtCore/qstring.h>
-
-QT_BEGIN_NAMESPACE
+#include <qvariant.h>
+#include <qstring.h>
 
 class QSqlFieldPrivate;
 
@@ -43,15 +41,18 @@ class Q_SQL_EXPORT QSqlField
    QSqlField(const QSqlField &other);
    QSqlField &operator=(const QSqlField &other);
    bool operator==(const QSqlField &other) const;
+
    inline bool operator!=(const QSqlField &other) const {
       return !operator==(other);
    }
+
    ~QSqlField();
 
    void setValue(const QVariant &value);
    inline QVariant value() const {
       return val;
    }
+
    void setName(const QString &name);
    QString name() const;
    bool isNull() const;
@@ -62,10 +63,12 @@ class Q_SQL_EXPORT QSqlField
    bool isAutoValue() const;
 
    void setType(QVariant::Type type);
+
    void setRequiredStatus(RequiredStatus status);
-   inline void setRequired(bool required) {
-      setRequiredStatus(required ? Required : Optional);
+   inline void setRequired(bool status) {
+      setRequiredStatus(status ? Required : Optional);
    }
+
    void setLength(int fieldLength);
    void setPrecision(int precision);
    void setDefaultValue(const QVariant &value);
@@ -87,9 +90,6 @@ class Q_SQL_EXPORT QSqlField
    QSqlFieldPrivate *d;
 };
 
-
 Q_SQL_EXPORT QDebug operator<<(QDebug, const QSqlField &);
-
-QT_END_NAMESPACE
 
 #endif // QSQLFIELD_H

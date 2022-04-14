@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QORDEREDMUTEXLOCKER_P_H
 #define QORDEREDMUTEXLOCKER_P_H
 
-#include <QtCore/qmutex.h>
-
-QT_BEGIN_NAMESPACE
+#include <qmutex.h>
 
 /*
   Locks 2 mutexes in a defined order, avoiding a recursive lock if
@@ -37,7 +35,7 @@ class QOrderedMutexLocker
  public:
    QOrderedMutexLocker(QMutex *m1, QMutex *m2)
       : mtx1((m1 == m2) ? m1 : (m1 < m2 ? m1 : m2)),
-        mtx2((m1 == m2) ?  0 : (m1 < m2 ? m2 : m1)),
+        mtx2((m1 == m2) ? nullptr : (m1 < m2 ? m2 : m1)),
         locked(false) {
       relock();
    }
@@ -90,7 +88,5 @@ class QOrderedMutexLocker
    QMutex *mtx1, *mtx2;
    bool locked;
 };
-
-QT_END_NAMESPACE
 
 #endif

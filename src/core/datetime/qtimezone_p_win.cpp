@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,7 +31,6 @@
 
 #define QT_USE_REGISTRY_TIMEZONE 1
 
-
 #define MAX_KEY_LENGTH 255
 #define FILETIME_UNIX_EPOCH Q_UINT64_C(116444736000000000)
 
@@ -45,16 +44,16 @@
 // http://msdn.microsoft.com/en-gb/library/windows/desktop/ms724253%28v=vs.85%29.aspx
 
 #ifdef QT_USE_REGISTRY_TIMEZONE
-static const char tzRegPath[] = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones";
+static const char tzRegPath[]     = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones";
 static const char currTzRegPath[] = "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation";
 #endif
 
 enum {
-   MIN_YEAR = -292275056,
-   MAX_YEAR = 292278994,
+   MIN_YEAR      = -292275056,
+   MAX_YEAR      = 292278994,
    MSECS_PER_DAY = 86400000,
-   TIME_T_MAX = 2145916799,  // int maximum 2037-12-31T23:59:59 UTC
-   JULIAN_DAY_FOR_EPOCH = 2440588 // result of julianDayFromDate(1970, 1, 1)
+   TIME_T_MAX    = 2145916799,      // int maximum 2037-12-31T23:59:59 UTC
+   JULIAN_DAY_FOR_EPOCH = 2440588   // result of julianDayFromDate(1970, 1, 1)
 };
 
 // Copied from MSDN, see above for link
@@ -118,12 +117,12 @@ static bool openRegistryKey(const QString &keyPath, HKEY *key)
 
 static QString readRegistryString(const HKEY &key, const wchar_t *value)
 {
-   std::wstring buffer{MAX_PATH};
+   std::wstring buffer(MAX_PATH, L'\0');
 
    DWORD size = sizeof(wchar_t) * MAX_PATH;
-   RegQueryValueEx(key, (LPCWSTR)value, NULL, NULL, (LPBYTE)&buffer[0], &size);
+   RegQueryValueEx(key, (LPCWSTR)value, nullptr, nullptr, (LPBYTE)&buffer[0], &size);
 
-   buffer.resize(size);
+   buffer.resize(size/sizeof(wchar_t));
 
    return QString::fromStdWString(buffer);
 }
@@ -132,7 +131,7 @@ static int readRegistryValue(const HKEY &key, const wchar_t *value)
 {
    DWORD buffer;
    DWORD size = sizeof(buffer);
-   RegQueryValueEx(key, (LPCWSTR)value, NULL, NULL, (LPBYTE)&buffer, &size);
+   RegQueryValueEx(key, (LPCWSTR)value, nullptr, nullptr, (LPBYTE)&buffer, &size);
 
    return buffer;
 }
@@ -144,8 +143,7 @@ static QWinTimeZonePrivate::QWinTransitionRule readRegistryRule(const HKEY &key,
    REG_TZI_FORMAT tzi;
    DWORD tziSize = sizeof(tzi);
 
-   if (RegQueryValueEx(key, (LPCWSTR)value, NULL, NULL, (BYTE *)&tzi, &tziSize)
-      == ERROR_SUCCESS) {
+   if (RegQueryValueEx(key, (LPCWSTR)value, nullptr, nullptr, (BYTE *)&tzi, &tziSize) == ERROR_SUCCESS) {
       rule.startYear = 0;
       rule.standardTimeBias = tzi.Bias + tzi.StandardBias;
       rule.daylightTimeBias = tzi.Bias + tzi.DaylightBias - rule.standardTimeBias;
@@ -153,6 +151,7 @@ static QWinTimeZonePrivate::QWinTransitionRule readRegistryRule(const HKEY &key,
       rule.daylightTimeRule = tzi.DaylightDate;
       *ok = true;
    }
+
    return rule;
 }
 
@@ -162,20 +161,19 @@ static TIME_ZONE_INFORMATION getRegistryTzi(const QByteArray &windowsId, bool *o
    TIME_ZONE_INFORMATION tzi;
    REG_TZI_FORMAT regTzi;
    DWORD regTziSize = sizeof(regTzi);
-   HKEY key = NULL;
+   HKEY key = nullptr;
 
    const QString tziKeyPath = QString::fromUtf8(tzRegPath) + '\\' + QString::fromUtf8(windowsId);
 
    if (openRegistryKey(tziKeyPath, &key)) {
 
       DWORD size = sizeof(tzi.DaylightName);
-      RegQueryValueEx(key, L"Dlt", NULL, NULL, (LPBYTE)tzi.DaylightName, &size);
+      RegQueryValueEx(key, L"Dlt", nullptr, nullptr, (LPBYTE)tzi.DaylightName, &size);
 
       size = sizeof(tzi.StandardName);
-      RegQueryValueEx(key, L"Std", NULL, NULL, (LPBYTE)tzi.StandardName, &size);
+      RegQueryValueEx(key, L"Std", nullptr, nullptr, (LPBYTE)tzi.StandardName, &size);
 
-      if (RegQueryValueEx(key, L"TZI", NULL, NULL, (BYTE *) &regTzi, &regTziSize)
-         == ERROR_SUCCESS) {
+      if (RegQueryValueEx(key, L"TZI", nullptr, nullptr, (BYTE *) &regTzi, &regTziSize) == ERROR_SUCCESS) {
          tzi.Bias = regTzi.Bias;
          tzi.StandardBias = regTzi.StandardBias;
          tzi.DaylightBias = regTzi.DaylightBias;
@@ -207,14 +205,17 @@ static void enumerateTimeZones()
    DYNAMIC_TIME_ZONE_INFORMATION dtzInfo;
    quint32 index = 0;
    QString prevTimeZoneKeyName;
+
    while (SUCCEEDED(EnumDynamicTimeZoneInformation(index++, &dtzInfo))) {
       QWinDynamicTimeZone item;
       item.timezoneName = QString::fromWCharArray(dtzInfo.TimeZoneKeyName);
+
       // As soon as key name repeats, break. Some systems continue to always
       // return the last item independent of index being out of range
       if (item.timezoneName == prevTimeZoneKeyName) {
          break;
       }
+
       item.standardName = QString::fromWCharArray(dtzInfo.StandardName);
       item.daylightName = QString::fromWCharArray(dtzInfo.DaylightName);
       item.daylightTime = !dtzInfo.DynamicDaylightTimeDisabled;
@@ -229,16 +230,21 @@ static DYNAMIC_TIME_ZONE_INFORMATION dynamicInfoForId(const QByteArray &windowsI
    DYNAMIC_TIME_ZONE_INFORMATION dtzInfo;
    quint32 index = 0;
    QString prevTimeZoneKeyName;
+
    while (SUCCEEDED(EnumDynamicTimeZoneInformation(index++, &dtzInfo))) {
       const QString timeZoneName = QString::fromWCharArray(dtzInfo.TimeZoneKeyName);
-      if (timeZoneName == QLatin1String(windowsId)) {
+
+      if (timeZoneName.constData() == windowsId) {
          break;
       }
+
       if (timeZoneName == prevTimeZoneKeyName) {
          break;
       }
+
       prevTimeZoneKeyName = timeZoneName;
    }
+
    return dtzInfo;
 }
 #endif // QT_USE_REGISTRY_TIMEZONE
@@ -246,33 +252,37 @@ static DYNAMIC_TIME_ZONE_INFORMATION dynamicInfoForId(const QByteArray &windowsI
 static QList<QByteArray> availableWindowsIds()
 {
 #ifdef QT_USE_REGISTRY_TIMEZONE
-   // TODO Consider caching results in a global static, very unlikely to change.
+   // TODO Consider caching results in a global static, very unlikely to change
    QList<QByteArray> list;
-   HKEY key = NULL;
+   HKEY key = nullptr;
 
    if (openRegistryKey(QString::fromUtf8(tzRegPath), &key)) {
       DWORD idCount = 0;
 
-      if (RegQueryInfoKey(key, 0, 0, 0, &idCount, 0, 0, 0, 0, 0, 0, 0) == ERROR_SUCCESS && idCount > 0) {
+      if (RegQueryInfoKey(key, nullptr, nullptr, nullptr, &idCount, nullptr, nullptr,
+                  nullptr, nullptr, nullptr, nullptr, nullptr) == ERROR_SUCCESS && idCount > 0) {
 
          for (DWORD i = 0; i < idCount; ++i) {
             DWORD maxLen = MAX_KEY_LENGTH;
-            std::wstring buffer{MAX_KEY_LENGTH};
+            std::wstring buffer(MAX_KEY_LENGTH, L'\0');
 
-            if (RegEnumKeyEx(key, i, &buffer[0], &maxLen, 0, 0, 0, 0) == ERROR_SUCCESS) {
+            if (RegEnumKeyEx(key, i, &buffer[0], &maxLen, nullptr, nullptr, nullptr, nullptr) == ERROR_SUCCESS) {
                buffer.resize(maxLen);
                list.append(QString::fromStdWString(buffer).toUtf8());
             }
          }
       }
+
       RegCloseKey(key);
    }
+
    return list;
 
 #else
    if (gTimeZones->isEmpty()) {
       enumerateTimeZones();
    }
+
    return gTimeZones->keys();
 #endif
 }
@@ -282,7 +292,7 @@ static QByteArray windowsSystemZoneId()
 #ifdef QT_USE_REGISTRY_TIMEZONE
    // On Vista and later is held in the value TimeZoneKeyName in key currTzRegPath
    QString id;
-   HKEY key = NULL;
+   HKEY key = nullptr;
    QString tziKeyPath = QString::fromUtf8(currTzRegPath);
 
    if (openRegistryKey(tziKeyPath, &key)) {
@@ -330,6 +340,7 @@ static QDate calculateTransitionLocalDate(const SYSTEMTIME &rule, int year)
       if (time.wDayOfWeek == 0) {
          time.wDayOfWeek = 7;
       }
+
       QDate date(year, time.wMonth, 1);
       int startDow = date.dayOfWeek();
       if (startDow <= time.wDayOfWeek) {
@@ -337,7 +348,9 @@ static QDate calculateTransitionLocalDate(const SYSTEMTIME &rule, int year)
       } else {
          date = date.addDays(time.wDayOfWeek - startDow);
       }
+
       date = date.addDays(time.wDay * 7);
+
       while (date.month() != time.wMonth) {
          date = date.addDays(-7);
       }
@@ -351,8 +364,7 @@ static QDate calculateTransitionLocalDate(const SYSTEMTIME &rule, int year)
 // Converts a date/time value into msecs
 static inline qint64 timeToMSecs(const QDate &date, const QTime &time)
 {
-   return ((date.toJulianDay() - JULIAN_DAY_FOR_EPOCH) * MSECS_PER_DAY)
-      + time.msecsSinceStartOfDay();
+   return ((date.toJulianDay() - JULIAN_DAY_FOR_EPOCH) * MSECS_PER_DAY) + time.msecsSinceStartOfDay();
 }
 
 static void calculateTransitionsForYear(const QWinTimeZonePrivate::QWinTransitionRule &rule, int year,
@@ -362,7 +374,8 @@ static void calculateTransitionsForYear(const QWinTimeZonePrivate::QWinTransitio
    // The local time in Daylight Time when switches to Standard Time
    QDate standardDate = calculateTransitionLocalDate(rule.standardTimeRule, year);
    QTime standardTime = QTime(rule.standardTimeRule.wHour, rule.standardTimeRule.wMinute,
-         rule.standardTimeRule.wSecond);
+            rule.standardTimeRule.wSecond);
+
    if (standardDate.isValid() && standardTime.isValid()) {
       *stdMSecs = timeToMSecs(standardDate, standardTime)
          + ((rule.standardTimeBias + rule.daylightTimeBias)  * 60000);
@@ -373,7 +386,8 @@ static void calculateTransitionsForYear(const QWinTimeZonePrivate::QWinTransitio
    // The local time in Standard Time when switches to Daylight Time
    QDate daylightDate = calculateTransitionLocalDate(rule.daylightTimeRule, year);
    QTime daylightTime = QTime(rule.daylightTimeRule.wHour, rule.daylightTimeRule.wMinute,
-         rule.daylightTimeRule.wSecond);
+            rule.daylightTimeRule.wSecond);
+
    if (daylightDate.isValid() && daylightTime.isValid()) {
       *dstMSecs = timeToMSecs(daylightDate, daylightTime) + (rule.standardTimeBias * 60000);
    } else {
@@ -384,7 +398,7 @@ static void calculateTransitionsForYear(const QWinTimeZonePrivate::QWinTransitio
 static QLocale::Country userCountry()
 {
    const GEOID id = GetUserGeoID(GEOCLASS_NATION);
-   std::wstring code{3};
+   std::wstring code(3, L'\0');
 
    const int size = GetGeoInfo(id, GEO_ISO2, &code[0], 3, 0);
    return (size == 3) ? QLocalePrivate::codeToCountry(QString::fromStdWString(code)) : QLocale::AnyCountry;
@@ -425,31 +439,34 @@ void QWinTimeZonePrivate::init(const QByteArray &ianaId)
    if (ianaId.isEmpty()) {
       m_windowsId = windowsSystemZoneId();
       m_id = systemTimeZoneId();
+
    } else {
       m_windowsId = ianaIdToWindowsId(ianaId);
       m_id = ianaId;
    }
 
-   if (!m_windowsId.isEmpty()) {
+   if (! m_windowsId.isEmpty()) {
+
 #ifdef QT_USE_REGISTRY_TIMEZONE
       // Open the base TZI for the time zone
-      HKEY baseKey = NULL;
-      const QString baseKeyPath = QString::fromUtf8(tzRegPath) + QLatin1Char('\\')
-         + QString::fromUtf8(m_windowsId);
+      HKEY baseKey = nullptr;
+
+      const QString baseKeyPath = QString::fromUtf8(tzRegPath) + '\\' + QString::fromUtf8(m_windowsId);
+
       if (openRegistryKey(baseKeyPath, &baseKey)) {
          //  Load the localized names
-         m_displayName = readRegistryString(baseKey,  L"Display");
+         m_displayName  = readRegistryString(baseKey, L"Display");
          m_standardName = readRegistryString(baseKey, L"Std");
          m_daylightName = readRegistryString(baseKey, L"Dlt");
 
          // On Vista and later the optional dynamic key holds historic data
          const QString dynamicKeyPath = baseKeyPath + "\\Dynamic DST";
 
-         HKEY dynamicKey = NULL;
+         HKEY dynamicKey = nullptr;
          if (openRegistryKey(dynamicKeyPath, &dynamicKey)) {
             // Find out the start and end years stored, then iterate over them
             int startYear = readRegistryValue(dynamicKey, L"FirstEntry");
-            int endYear = readRegistryValue(dynamicKey, L"LastEntry");
+            int endYear   = readRegistryValue(dynamicKey, L"LastEntry");
 
             for (int year = startYear; year <= endYear; ++year) {
                bool ruleOk;
@@ -469,32 +486,40 @@ void QWinTimeZonePrivate::init(const QByteArray &ianaId)
             bool ruleOk;
             QWinTransitionRule rule = readRegistryRule(baseKey, L"TZI", &ruleOk);
             rule.startYear = 1970;
+
             if (ruleOk) {
                m_tranRules.append(rule);
             }
          }
          RegCloseKey(baseKey);
       }
-#else // QT_USE_REGISTRY_TIMEZONE
+
+#else
       if (gTimeZones->isEmpty()) {
          enumerateTimeZones();
       }
+
       QWinRTTimeZoneHash::const_iterator it = gTimeZones->find(m_windowsId);
+
       if (it != gTimeZones->constEnd()) {
-         m_displayName = it->timezoneName;
-         m_standardName = it->standardName;
-         m_daylightName = it->daylightName;
-         DWORD firstYear = 0;
-         DWORD lastYear = 0;
+         m_displayName    = it->timezoneName;
+         m_standardName   = it->standardName;
+         m_daylightName   = it->daylightName;
+         DWORD firstYear  = 0;
+         DWORD lastYear   = 0;
+
          DYNAMIC_TIME_ZONE_INFORMATION dtzi = dynamicInfoForId(m_windowsId);
          GetDynamicTimeZoneInformationEffectiveYears(&dtzi, &firstYear, &lastYear);
+
          // If there is no dynamic information, you can still query for
          // year 0, which helps simplifying following part
          for (DWORD year = firstYear; year <= lastYear; ++year) {
             TIME_ZONE_INFORMATION tzi;
+
             if (!GetTimeZoneInformationForYear(year, &dtzi, &tzi)) {
                continue;
             }
+
             QWinTransitionRule rule;
             rule.standardTimeBias = tzi.Bias + tzi.StandardBias;
             rule.daylightTimeBias = tzi.Bias + tzi.DaylightBias - rule.standardTimeBias;
@@ -504,7 +529,7 @@ void QWinTimeZonePrivate::init(const QByteArray &ianaId)
             m_tranRules.append(rule);
          }
       }
-#endif // QT_USE_REGISTRY_TIMEZONE
+#endif
    }
 
    // If there are no rules then we failed to find a windowsId or any tzi info
@@ -521,14 +546,14 @@ QString QWinTimeZonePrivate::comment() const
 }
 
 QString QWinTimeZonePrivate::displayName(QTimeZone::TimeType timeType,
-   QTimeZone::NameType nameType,
-   const QLocale &locale) const
+   QTimeZone::NameType nameType, const QLocale &locale) const
 {
    // TODO Registry holds MUI keys, should be able to look up translations?
-   Q_UNUSED(locale);
+   (void) locale;
 
    if (nameType == QTimeZone::OffsetName) {
       QWinTransitionRule rule = ruleForYear(QDate::currentDate().year());
+
       if (timeType == QTimeZone::DaylightTime) {
          return isoOffsetFormat((rule.standardTimeBias + rule.daylightTimeBias) * -60);
       } else {
@@ -537,13 +562,16 @@ QString QWinTimeZonePrivate::displayName(QTimeZone::TimeType timeType,
    }
 
    switch (timeType) {
-      case  QTimeZone::DaylightTime :
+      case  QTimeZone::DaylightTime:
          return m_daylightName;
-      case  QTimeZone::GenericTime :
+
+      case  QTimeZone::GenericTime:
          return m_displayName;
-      case  QTimeZone::StandardTime :
+
+      case  QTimeZone::StandardTime:
          return m_standardName;
    }
+
    return m_standardName;
 }
 
@@ -582,34 +610,42 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::data(qint64 forMSecsSinceEpoch) cons
    // Convert MSecs to year to get transitions for, assumes no transitions around 31 Dec/1 Jan
    int year = msecsToDate(forMSecsSinceEpoch).year();
 
-   qint64 first;
-   qint64 second;
-   qint64 next = maxMSecs();
-   qint64 stdMSecs;
-   qint64 dstMSecs;
+   qint64 first      = 0;
+   qint64 second     = 0;
+   qint64 next       = maxMSecs();
+   qint64 stdMSecs   = 0;
+   qint64 dstMSecs   = 0;
+
    QWinTransitionRule rule;
+
    do {
       // Convert the transition rules into msecs for the year we want to try
       rule = ruleForYear(year);
+
       // If no transition rules to calculate then no DST, so just use rule for std
       if (rule.standardTimeRule.wMonth == 0 && rule.daylightTimeRule.wMonth == 0) {
          break;
       }
+
       calculateTransitionsForYear(rule, year, &stdMSecs, &dstMSecs);
+
       if (stdMSecs < dstMSecs) {
-         first = stdMSecs;
+         first  = stdMSecs;
          second = dstMSecs;
       } else {
-         first = dstMSecs;
+         first  = dstMSecs;
          second = stdMSecs;
       }
+
       if (forMSecsSinceEpoch >= second && second != invalidMSecs()) {
          next = second;
       } else if (forMSecsSinceEpoch >= first && first != invalidMSecs()) {
          next = first;
       }
+
       // If didn't fall in this year, try the previous
       --year;
+
    } while (next == maxMSecs() && year >= MIN_YEAR);
 
    return ruleToData(rule, forMSecsSinceEpoch, (next == dstMSecs) ? QTimeZone::DaylightTime : QTimeZone::StandardTime);
@@ -622,6 +658,7 @@ bool QWinTimeZonePrivate::hasTransitions() const
          return true;
       }
    }
+
    return false;
 }
 
@@ -635,6 +672,7 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::nextTransition(qint64 afterMSecsSinc
    // valid future transition calculations then there is no next transition
    if (year > m_tranRules.last().startYear) {
       rule = ruleForYear(year);
+
       // If the rules have either a fixed year, or no month, then no future trans
       if (rule.standardTimeRule.wYear != 0 || rule.daylightTimeRule.wYear != 0
          || rule.standardTimeRule.wMonth == 0 || rule.daylightTimeRule.wMonth == 0) {
@@ -644,11 +682,13 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::nextTransition(qint64 afterMSecsSinc
 
    // Otherwise we have a valid rule for the required year that can be used
    // to calculate this year or next
-   qint64 first;
-   qint64 second;
-   qint64 next = minMSecs();
-   qint64 stdMSecs;
-   qint64 dstMSecs;
+
+   qint64 first      = 0;
+   qint64 second     = 0;
+   qint64 next       = minMSecs();
+   qint64 stdMSecs   = 0;
+   qint64 dstMSecs   = 0;
+
    do {
       // Convert the transition rules into msecs for the year we want to try
       rule = ruleForYear(year);
@@ -656,7 +696,9 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::nextTransition(qint64 afterMSecsSinc
       if (rule.standardTimeRule.wMonth == 0 && rule.daylightTimeRule.wMonth == 0) {
          return invalidData();
       }
+
       calculateTransitionsForYear(rule, year, &stdMSecs, &dstMSecs);
+
       // Find the first and second transition for the year
       if (stdMSecs < dstMSecs) {
          first = stdMSecs;
@@ -665,13 +707,16 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::nextTransition(qint64 afterMSecsSinc
          first = dstMSecs;
          second = stdMSecs;
       }
+
       if (afterMSecsSinceEpoch < first) {
          next = first;
       } else if (afterMSecsSinceEpoch < second) {
          next = second;
       }
+
       // If didn't fall in this year, try the next
       ++year;
+
    } while (next == minMSecs() && year <= MAX_YEAR);
 
    if (next == minMSecs() || next == invalidMSecs()) {
@@ -689,42 +734,51 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::previousTransition(qint64 beforeMSec
    QWinTransitionRule rule;
    // If the required year falls before the first rule start year and the first rule has no
    // valid transition calculations then there is no previous transition
+
    if (year < m_tranRules.first().startYear) {
       rule = ruleForYear(year);
+
       // If the rules have either a fixed year, or no month, then no previous trans
       if (rule.standardTimeRule.wYear != 0 || rule.daylightTimeRule.wYear != 0
-         || rule.standardTimeRule.wMonth == 0 || rule.daylightTimeRule.wMonth == 0) {
+               || rule.standardTimeRule.wMonth == 0 || rule.daylightTimeRule.wMonth == 0) {
          return invalidData();
       }
    }
 
-   qint64 first;
-   qint64 second;
-   qint64 next = maxMSecs();
-   qint64 stdMSecs;
-   qint64 dstMSecs;
+   qint64 first      = 0;
+   qint64 second     = 0;
+   qint64 next       = maxMSecs();
+   qint64 stdMSecs   = 0;
+   qint64 dstMSecs   = 0;
+
    do {
       // Convert the transition rules into msecs for the year we want to try
       rule = ruleForYear(year);
+
       // If no transition rules to calculate then no previous transition
       if (rule.standardTimeRule.wMonth == 0 && rule.daylightTimeRule.wMonth == 0) {
          return invalidData();
       }
+
       calculateTransitionsForYear(rule, year, &stdMSecs, &dstMSecs);
+
       if (stdMSecs < dstMSecs) {
-         first = stdMSecs;
+         first  = stdMSecs;
          second = dstMSecs;
       } else {
-         first = dstMSecs;
+         first  = dstMSecs;
          second = stdMSecs;
       }
+
       if (beforeMSecsSinceEpoch > second && second != invalidMSecs()) {
          next = second;
       } else if (beforeMSecsSinceEpoch > first && first != invalidMSecs()) {
          next = first;
       }
+
       // If didn't fall in this year, try the previous
       --year;
+
    } while (next == maxMSecs() && year >= MIN_YEAR);
 
    if (next == maxMSecs()) {
@@ -737,12 +791,14 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::previousTransition(qint64 beforeMSec
 QByteArray QWinTimeZonePrivate::systemTimeZoneId() const
 {
    const QLocale::Country country = userCountry();
-   const QByteArray windowsId = windowsSystemZoneId();
+   const QByteArray windowsId     = windowsSystemZoneId();
    QByteArray ianaId;
+
    // If we have a real country, then try get a specific match for that country
    if (country != QLocale::AnyCountry) {
       ianaId = windowsIdToDefaultIanaId(windowsId, country);
    }
+
    // If we don't have a real country, or there wasn't a specific match, try the global default
    if (ianaId.isEmpty()) {
       ianaId = windowsIdToDefaultIanaId(windowsId);
@@ -751,19 +807,23 @@ QByteArray QWinTimeZonePrivate::systemTimeZoneId() const
          return utcQByteArray();
       }
    }
+
    return ianaId;
 }
 
 QList<QByteArray> QWinTimeZonePrivate::availableTimeZoneIds() const
 {
    QList<QByteArray> result;
+
    for (const QByteArray &winId : availableWindowsIds()) {
       for (const QByteArray &ianaId : windowsIdToIanaIds(winId)) {
          result << ianaId;
       }
    }
+
    std::sort(result.begin(), result.end());
    result.erase(std::unique(result.begin(), result.end()), result.end());
+
    return result;
 }
 
@@ -774,6 +834,7 @@ QWinTimeZonePrivate::QWinTransitionRule QWinTimeZonePrivate::ruleForYear(int yea
          return m_tranRules.at(i);
       }
    }
+
    return m_tranRules.at(0);
 }
 
@@ -781,8 +842,9 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::ruleToData(const QWinTransitionRule 
    QTimeZone::TimeType type) const
 {
    QTimeZonePrivate::Data tran = QTimeZonePrivate::invalidData();
-   tran.atMSecsSinceEpoch = atMSecsSinceEpoch;
+   tran.atMSecsSinceEpoch  = atMSecsSinceEpoch;
    tran.standardTimeOffset = rule.standardTimeBias * -60;
+
    if (type == QTimeZone::DaylightTime) {
       tran.daylightTimeOffset = rule.daylightTimeBias * -60;
       tran.abbreviation = m_daylightName;
@@ -790,7 +852,9 @@ QTimeZonePrivate::Data QWinTimeZonePrivate::ruleToData(const QWinTransitionRule 
       tran.daylightTimeOffset = 0;
       tran.abbreviation = m_standardName;
    }
+
    tran.offsetFromUtc = tran.standardTimeOffset + tran.daylightTimeOffset;
+
    return tran;
 }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -79,25 +79,47 @@ class Q_MULTIMEDIA_EXPORT QVideoWidget : public QWidget, public QMediaBindableIn
 
    MULTI_CS_SLOT_1(Public, void setFullScreen(bool fullScreen))
    MULTI_CS_SLOT_2(setFullScreen)
+
    MULTI_CS_SLOT_1(Public, void setAspectRatioMode(Qt::AspectRatioMode mode))
    MULTI_CS_SLOT_2(setAspectRatioMode)
+
    MULTI_CS_SLOT_1(Public, void setBrightness(int brightness))
    MULTI_CS_SLOT_2(setBrightness)
+
    MULTI_CS_SLOT_1(Public, void setContrast(int contrast))
    MULTI_CS_SLOT_2(setContrast)
+
    MULTI_CS_SLOT_1(Public, void setHue(int hue))
    MULTI_CS_SLOT_2(setHue)
+
+   // these four slots were private
+   MULTI_CS_SLOT_1(Public, void _q_brightnessChanged(int un_named_arg1))
+   MULTI_CS_SLOT_2(_q_brightnessChanged)
+
+   MULTI_CS_SLOT_1(Public, void _q_contrastChanged(int un_named_arg1))
+   MULTI_CS_SLOT_2(_q_contrastChanged)
+
+   MULTI_CS_SLOT_1(Public, void _q_hueChanged(int un_named_arg1))
+   MULTI_CS_SLOT_2(_q_hueChanged)
+
+   MULTI_CS_SLOT_1(Public, void _q_saturationChanged(int un_named_arg1))
+   MULTI_CS_SLOT_2(_q_saturationChanged)
+
    MULTI_CS_SLOT_1(Public, void setSaturation(int saturation))
    MULTI_CS_SLOT_2(setSaturation)
 
    MULTI_CS_SIGNAL_1(Public, void fullScreenChanged(bool fullScreen))
    MULTI_CS_SIGNAL_2(fullScreenChanged, fullScreen)
+
    MULTI_CS_SIGNAL_1(Public, void brightnessChanged(int brightness))
    MULTI_CS_SIGNAL_2(brightnessChanged, brightness)
+
    MULTI_CS_SIGNAL_1(Public, void contrastChanged(int contrast))
    MULTI_CS_SIGNAL_2(contrastChanged, contrast)
+
    MULTI_CS_SIGNAL_1(Public, void hueChanged(int hue))
    MULTI_CS_SIGNAL_2(hueChanged, hue)
+
    MULTI_CS_SIGNAL_1(Public, void saturationChanged(int saturation))
    MULTI_CS_SIGNAL_2(saturationChanged, saturation)
 
@@ -110,10 +132,6 @@ class Q_MULTIMEDIA_EXPORT QVideoWidget : public QWidget, public QMediaBindableIn
    void paintEvent(QPaintEvent *event) override;
 
    bool setMediaObject(QMediaObject *object) override;
-
-#if defined(Q_WS_WIN)
-   bool winEvent(MSG *message, long *result);
-#endif
 
    QVideoWidget(QVideoWidgetPrivate &dd, QWidget *parent);
    QVideoWidgetPrivate *d_ptr;
@@ -128,18 +146,6 @@ class Q_MULTIMEDIA_EXPORT QVideoWidget : public QWidget, public QMediaBindableIn
 
    MULTI_CS_SLOT_1(Private, void _q_serviceDestroyed())
    MULTI_CS_SLOT_2(_q_serviceDestroyed)
-
-   MULTI_CS_SLOT_1(Private, void _q_brightnessChanged(int un_named_arg1))
-   MULTI_CS_SLOT_2(_q_brightnessChanged)
-
-   MULTI_CS_SLOT_1(Private, void _q_contrastChanged(int un_named_arg1))
-   MULTI_CS_SLOT_2(_q_contrastChanged)
-
-   MULTI_CS_SLOT_1(Private, void _q_hueChanged(int un_named_arg1))
-   MULTI_CS_SLOT_2(_q_hueChanged)
-
-   MULTI_CS_SLOT_1(Private, void _q_saturationChanged(int un_named_arg1))
-   MULTI_CS_SLOT_2(_q_saturationChanged)
 
    MULTI_CS_SLOT_1(Private, void _q_fullScreenChanged(bool un_named_arg1))
    MULTI_CS_SLOT_2(_q_fullScreenChanged)

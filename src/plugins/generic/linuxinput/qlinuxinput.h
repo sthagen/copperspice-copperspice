@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,10 +25,8 @@
 #define QLINUXINPUT_H
 
 #include <qobject.h>
-#include <Qt>
+#include <qnamespace.h>
 #include <termios.h>
-
-QT_BEGIN_NAMESPACE
 
 class QSocketNotifier;
 class QLinuxInputMouseHandlerData;
@@ -83,7 +81,5 @@ private:
     struct termios                m_tty_attr;
     int                           m_orig_kbmode;
 };
-
-QT_END_NAMESPACE
 
 #endif // QLINUXINPUT_H

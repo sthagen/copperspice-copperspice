@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -55,15 +55,10 @@ QSocketEngineHandler::~QSocketEngineHandler()
 }
 
 QAbstractSocketEnginePrivate::QAbstractSocketEnginePrivate()
-   : socketError(QAbstractSocket::UnknownSocketError)
-   , hasSetSocketError(false)
-   , socketErrorString(QLatin1String(QT_TRANSLATE_NOOP(QSocketLayer, "Unknown error")))
-   , socketState(QAbstractSocket::UnconnectedState)
-   , socketType(QAbstractSocket::UnknownSocketType)
-   , socketProtocol(QAbstractSocket::UnknownNetworkLayerProtocol)
-   , localPort(0)
-   , peerPort(0)
-   , receiver(0)
+   : socketError(QAbstractSocket::UnknownSocketError), hasSetSocketError(false),
+     socketErrorString(QString::fromLatin1(cs_mark_tr("QSocketLayer", "Unknown error"))),
+     socketState(QAbstractSocket::UnconnectedState), socketType(QAbstractSocket::UnknownSocketType),
+     socketProtocol(QAbstractSocket::UnknownNetworkLayerProtocol), localPort(0), peerPort(0), receiver(nullptr)
 {
 }
 
@@ -89,7 +84,7 @@ QAbstractSocketEngine *QAbstractSocketEngine::createSocketEngine(QAbstractSocket
 #ifndef QT_NO_NETWORKPROXY
    // proxy type must have been resolved by now
    if (proxy.type() == QNetworkProxy::DefaultProxy) {
-      return 0;
+      return nullptr;
    }
 #endif
 
@@ -103,7 +98,7 @@ QAbstractSocketEngine *QAbstractSocketEngine::createSocketEngine(QAbstractSocket
 #ifndef QT_NO_NETWORKPROXY
    // only NoProxy can have reached here
    if (proxy.type() != QNetworkProxy::NoProxy) {
-      return 0;
+      return nullptr;
    }
 #endif
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,6 @@
 #include <qsqlquerymodel.h>
 #include <QSqlRecord>
 
-
 class QSqlTableModelPrivate;
 class QSqlRecord;
 class QSqlField;
@@ -52,7 +51,7 @@ class Q_SQL_EXPORT QSqlTableModel: public QSqlQueryModel
 
    QSqlRecord record() const;
    QSqlRecord record(int row) const;
-   QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
+   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

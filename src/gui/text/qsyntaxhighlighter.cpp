@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -226,40 +226,34 @@ QSyntaxHighlighter::QSyntaxHighlighter(QTextDocument *parent)
 
 QSyntaxHighlighter::~QSyntaxHighlighter()
 {
-   setDocument(0);
+   setDocument(nullptr);
 }
 
-/*!
-    Installs the syntax highlighter on the given QTextDocument \a doc.
-    A QSyntaxHighlighter can only be used with one document at a time.
-*/
 void QSyntaxHighlighter::setDocument(QTextDocument *doc)
 {
    Q_D(QSyntaxHighlighter);
+
    if (d->doc) {
-      disconnect(d->doc, SIGNAL(contentsChange(int, int, int)), this, SLOT(_q_reformatBlocks(int, int, int)));
+      disconnect(d->doc.data(), &QTextDocument::contentsChange, this, &QSyntaxHighlighter::_q_reformatBlocks);
 
       QTextCursor cursor(d->doc);
       cursor.beginEditBlock();
+
       for (QTextBlock blk = d->doc->begin(); blk.isValid(); blk = blk.next()) {
          blk.layout()->clearFormats();
       }
+
       cursor.endEditBlock();
    }
 
    d->doc = doc;
    if (d->doc) {
-      connect(d->doc, SIGNAL(contentsChange(int, int, int)),
-         this, SLOT(_q_reformatBlocks(int, int, int)));
+      connect(d->doc.data(), &QTextDocument::contentsChange, this, &QSyntaxHighlighter::_q_reformatBlocks);
       d->rehighlightPending = true;
       QTimer::singleShot(0, this, SLOT(_q_delayedRehighlight()));
    }
 }
 
-/*!
-    Returns the QTextDocument on which this syntax highlighter is
-    installed.
-*/
 QTextDocument *QSyntaxHighlighter::document() const
 {
    Q_D(const QSyntaxHighlighter);
@@ -385,7 +379,7 @@ QTextBlockUserData *QSyntaxHighlighter::currentBlockUserData() const
 {
    Q_D(const QSyntaxHighlighter);
    if (!d->currentBlock.isValid()) {
-      return 0;
+      return nullptr;
    }
 
    return d->currentBlock.userData();

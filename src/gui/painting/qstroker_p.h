@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,10 +25,9 @@
 #define QSTROKER_P_H
 
 #include <qpainterpath.h>
-#include <qdatabuffer_p.h>
+#include <qvector.h>
+
 #include <qnumeric_p.h>
-
-
 
 #if defined QFIXED_IS_26_6
 typedef int qfixed;
@@ -155,8 +154,10 @@ class Q_GUI_EXPORT QStrokerOps
    inline void cubicTo(qfixed x1, qfixed y1, qfixed x2, qfixed y2, qfixed ex, qfixed ey);
 
    void strokePath(const QPainterPath &path, void *data, const QTransform &matrix);
-   void strokePolygon(const QPointF *points, int pointCount, bool implicit_close,
+
+   void strokePolygon(const QPointF *pointPtr, int pointCount, bool implicit_close,
       void *data, const QTransform &matrix);
+
    void strokeEllipse(const QRectF &ellipse, void *data, const QTransform &matrix);
 
    QRectF clipRect() const {
@@ -187,7 +188,8 @@ class Q_GUI_EXPORT QStrokerOps
    inline void emitCubicTo(qfixed c1x, qfixed c1y, qfixed c2x, qfixed c2y, qfixed ex, qfixed ey);
 
    virtual void processCurrentSubpath() = 0;
-   QDataBuffer<Element> m_elements;
+
+   QVector<Element> m_elements;
 
    QRectF m_clip_rect;
    qfixed m_curveThreshold;
@@ -356,25 +358,26 @@ inline void QStrokerOps::moveTo(qfixed x, qfixed y)
    if (m_elements.size() > 1) {
       processCurrentSubpath();
    }
-   m_elements.reset();
+   m_elements.clear();
    Element e = { QPainterPath::MoveToElement, x, y };
-   m_elements.add(e);
+   m_elements.append(e);
 }
 
 inline void QStrokerOps::lineTo(qfixed x, qfixed y)
 {
    Element e = { QPainterPath::LineToElement, x, y };
-   m_elements.add(e);
+   m_elements.append(e);
 }
 
 inline void QStrokerOps::cubicTo(qfixed x1, qfixed y1, qfixed x2, qfixed y2, qfixed ex, qfixed ey)
 {
    Element c1 = { QPainterPath::CurveToElement, x1, y1 };
    Element c2 = { QPainterPath::CurveToDataElement, x2, y2 };
-   Element e = { QPainterPath::CurveToDataElement, ex, ey };
-   m_elements.add(c1);
-   m_elements.add(c2);
-   m_elements.add(e);
+   Element e  = { QPainterPath::CurveToDataElement, ex, ey };
+
+   m_elements.append(c1);
+   m_elements.append(c2);
+   m_elements.append(e);
 }
 
 inline void QStroker::emitMoveTo(qfixed x, qfixed y)

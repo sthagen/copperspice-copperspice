@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,11 @@
 #ifndef QBASICMOUSEEVENTTRANSITION_P_H
 #define QBASICMOUSEEVENTTRANSITION_P_H
 
-#include <QtCore/qabstracttransition.h>
+#include <qabstracttransition.h>
 
 #ifndef QT_NO_STATEMACHINE
 
-#include <QtGui/qevent.h>
-
-QT_BEGIN_NAMESPACE
+#include <qevent.h>
 
 class QPainterPath;
 class QBasicMouseEventTransitionPrivate;
@@ -40,8 +38,12 @@ class QBasicMouseEventTransition : public QAbstractTransition
    GUI_CS_OBJECT(QBasicMouseEventTransition)
 
  public:
-   QBasicMouseEventTransition(QState *sourceState = 0);
-   QBasicMouseEventTransition(QEvent::Type type, Qt::MouseButton button, QState *sourceState = 0);
+   QBasicMouseEventTransition(QState *sourceState = nullptr);
+   QBasicMouseEventTransition(QEvent::Type type, Qt::MouseButton button, QState *sourceState = nullptr);
+
+   QBasicMouseEventTransition(const QBasicMouseEventTransition &) = delete;
+   QBasicMouseEventTransition &operator=(const QBasicMouseEventTransition &) = delete;
+
    ~QBasicMouseEventTransition();
 
    QEvent::Type eventType() const;
@@ -61,11 +63,8 @@ class QBasicMouseEventTransition : public QAbstractTransition
    void onTransition(QEvent *) override;
 
  private:
-   Q_DISABLE_COPY(QBasicMouseEventTransition)
    Q_DECLARE_PRIVATE(QBasicMouseEventTransition)
 };
-
-QT_END_NAMESPACE
 
 #endif //QT_NO_STATEMACHINE
 

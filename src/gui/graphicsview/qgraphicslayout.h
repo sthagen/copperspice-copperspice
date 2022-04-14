@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,6 +36,10 @@ class Q_GUI_EXPORT QGraphicsLayout : public QGraphicsLayoutItem
 {
  public:
    QGraphicsLayout(QGraphicsLayoutItem *parent = nullptr);
+
+   QGraphicsLayout(const QGraphicsLayout &) = delete;
+   QGraphicsLayout &operator=(const QGraphicsLayout &) = delete;
+
    ~QGraphicsLayout();
 
    void setContentsMargins(qreal left, qreal top, qreal right, qreal bottom);
@@ -46,7 +50,7 @@ class Q_GUI_EXPORT QGraphicsLayout : public QGraphicsLayoutItem
    virtual void invalidate();
    void updateGeometry() override;
 
-   virtual void widgetEvent(QEvent *e);
+   virtual void widgetEvent(QEvent *event);
 
    virtual int count() const = 0;
    virtual QGraphicsLayoutItem *itemAt(int i) const = 0;
@@ -60,13 +64,12 @@ class Q_GUI_EXPORT QGraphicsLayout : public QGraphicsLayoutItem
    void addChildLayoutItem(QGraphicsLayoutItem *layoutItem);
 
  private:
-   Q_DISABLE_COPY(QGraphicsLayout)
    Q_DECLARE_PRIVATE(QGraphicsLayout)
    friend class QGraphicsWidget;
 };
 
 CS_DECLARE_INTERFACE(QGraphicsLayout, "com.copperspice.QGraphicsLayout")
-
+CS_DECLARE_METATYPE(QGraphicsLayout)
 
 #endif
 

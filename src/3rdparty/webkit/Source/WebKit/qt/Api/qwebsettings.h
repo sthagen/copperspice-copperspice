@@ -22,10 +22,10 @@
 
 #include "qwebkitglobal.h"
 
-#include <QtCore/qstring.h>
-#include <QtGui/qpixmap.h>
-#include <QtGui/qicon.h>
-#include <QtCore/qshareddata.h>
+#include <qstring.h>
+#include <qpixmap.h>
+#include <qicon.h>
+#include <qshareddata.h>
 
 namespace WebCore {
     class Settings;
@@ -34,12 +34,10 @@ namespace WebCore {
 class QWebPage;
 class QWebPluginDatabase;
 class QWebSettingsPrivate;
-QT_BEGIN_NAMESPACE
 class QUrl;
-QT_END_NAMESPACE
 
 class QWEBKIT_EXPORT QWebSettings {
-public:
+ public:
     enum FontFamily {
         StandardFont,
         FixedFont,
@@ -48,6 +46,7 @@ public:
         CursiveFont,
         FantasyFont
     };
+
     enum WebAttribute {
         AutoLoadImages,
         JavascriptEnabled,
@@ -76,6 +75,7 @@ public:
         WebGLEnabled,
         HyperlinkAuditingEnabled
     };
+
     enum WebGraphic {
         MissingImageGraphic,
         MissingPluginGraphic,
@@ -86,12 +86,16 @@ public:
         SearchCancelButtonGraphic,
         SearchCancelButtonPressedGraphic
     };
+
     enum FontSize {
         MinimumFontSize,
         MinimumLogicalFontSize,
         DefaultFontSize,
         DefaultFixedFontSize
     };
+
+    QWebSettings(const QWebSettings &) = delete;
+    QWebSettings &operator=(const QWebSettings &) = delete;
 
     static QWebSettings *globalSettings();
 
@@ -136,9 +140,9 @@ public:
     static QString offlineWebApplicationCachePath();
     static void setOfflineWebApplicationCacheQuota(qint64 maximumSize);
     static qint64 offlineWebApplicationCacheQuota();
-    
+
     void setLocalStoragePath(const QString& path);
-    QString localStoragePath() const; 
+    QString localStoragePath() const;
 
     static void clearMemoryCaches();
 
@@ -149,8 +153,6 @@ public:
 private:
     friend class QWebPagePrivate;
     friend class QWebSettingsPrivate;
-
-    Q_DISABLE_COPY(QWebSettings)
 
     QWebSettings();
     QWebSettings(WebCore::Settings *settings);

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QGRAPHICSITEMANIMATION_H
 #define QGRAPHICSITEMANIMATION_H
 
-#include <QtCore/qobject.h>
+#include <qobject.h>
 #include <qcontainerfwd.h>
 
 #if ! defined(QT_NO_GRAPHICSVIEW)
-
-
 
 class QGraphicsItem;
 class QMatrix;
@@ -43,6 +41,10 @@ class Q_GUI_EXPORT QGraphicsItemAnimation : public QObject
 
  public:
    QGraphicsItemAnimation(QObject *parent = nullptr);
+
+   QGraphicsItemAnimation(const QGraphicsItemAnimation &) = delete;
+   QGraphicsItemAnimation &operator=(const QGraphicsItemAnimation &) = delete;
+
    virtual ~QGraphicsItemAnimation();
 
    QGraphicsItem *item() const;
@@ -53,7 +55,7 @@ class Q_GUI_EXPORT QGraphicsItemAnimation : public QObject
 
    QPointF posAt(qreal step) const;
    QList<QPair<qreal, QPointF>> posList() const;
-   void setPosAt(qreal step, const QPointF &pos);
+   void setPosAt(qreal step, const QPointF &point);
 
    QMatrix matrixAt(qreal step) const;
 
@@ -78,7 +80,7 @@ class Q_GUI_EXPORT QGraphicsItemAnimation : public QObject
 
    void clear();
 
-   GUI_CS_SLOT_1(Public, void setStep(qreal x))
+   GUI_CS_SLOT_1(Public, void setStep(qreal step))
    GUI_CS_SLOT_2(setStep)
 
    GUI_CS_SLOT_1(Public, void reset())
@@ -89,11 +91,9 @@ class Q_GUI_EXPORT QGraphicsItemAnimation : public QObject
    virtual void afterAnimationStep(qreal step);
 
  private:
-   Q_DISABLE_COPY(QGraphicsItemAnimation)
    QGraphicsItemAnimationPrivate *d;
 };
 
-
-
 #endif // QT_NO_GRAPHICSVIEW
+
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -52,10 +52,17 @@ class Q_GUI_EXPORT QTextInlineObject
 {
 
  public:
-   QTextInlineObject(int i, QTextEngine *e) : itm(i), eng(e) {}
-   inline QTextInlineObject() : itm(0), eng(nullptr) {}
+   QTextInlineObject(int index, QTextEngine *engine)
+      : itm(index), eng(engine)
+   {
+   }
 
-   inline bool isValid() const {
+   inline QTextInlineObject()
+      : itm(0), eng(nullptr)
+   {
+   }
+
+   bool isValid() const {
       return eng;
    }
 
@@ -77,23 +84,31 @@ class Q_GUI_EXPORT QTextInlineObject
    QTextFormat format() const;
 
  private:
-   friend class QTextLayout;
    int itm;
    QTextEngine *eng;
-};
 
+   friend class QTextLayout;
+};
 
 class Q_GUI_EXPORT QTextLayout
 {
  public:
+   enum CursorMode {
+      SkipCharacters,
+      SkipWords
+   };
+
    QTextLayout();
    QTextLayout(const QString &text);
    QTextLayout(const QString &text, const QFont &font, QPaintDevice *paintdevice = nullptr);
    QTextLayout(const QTextBlock &b);
 
+   QTextLayout(const QTextLayout &) = delete;
+   QTextLayout &operator=(const QTextLayout &) = delete;
+
    ~QTextLayout();
 
-   void setFont(const QFont &f);
+   void setFont(const QFont &font);
    QFont font() const;
 
    void setText(const QString &string);
@@ -122,8 +137,7 @@ class Q_GUI_EXPORT QTextLayout
       }
    };
 
-
-   void setFormats(const QVector<FormatRange> &overrides);
+   void setFormats(const QVector<FormatRange> &formats);
    QVector<FormatRange> formats() const;
    void clearFormats();
 
@@ -143,24 +157,19 @@ class Q_GUI_EXPORT QTextLayout
    QTextLine lineAt(int i) const;
    QTextLine lineForTextPosition(int pos) const;
 
-   enum CursorMode {
-      SkipCharacters,
-      SkipWords
-   };
-
    bool isValidCursorPosition(int pos) const;
    int nextCursorPosition(int oldPos, CursorMode mode = SkipCharacters) const;
    int previousCursorPosition(int oldPos, CursorMode mode = SkipCharacters) const;
    int leftCursorPosition(int oldPos) const;
    int rightCursorPosition(int oldPos) const;
 
-   void draw(QPainter *p, const QPointF &pos, const QVector<FormatRange> &selections = QVector<FormatRange>(),
+   void draw(QPainter *painter, const QPointF &point, const QVector<FormatRange> &selections = QVector<FormatRange>(),
       const QRectF &clip = QRectF()) const;
-   void drawCursor(QPainter *p, const QPointF &pos, int cursorPosition) const;
-   void drawCursor(QPainter *p, const QPointF &pos, int cursorPosition, int width) const;
+
+   void drawCursor(QPainter *painter, const QPointF &point, int cursorPosition, int width = 1) const;
 
    QPointF position() const;
-   void setPosition(const QPointF &p);
+   void setPosition(const QPointF &point);
 
    QRectF boundingRect() const;
 
@@ -172,13 +181,16 @@ class Q_GUI_EXPORT QTextLayout
    QTextEngine *engine() const {
       return d;
    }
+
    void setFlags(int flags);
 
  private:
-   QTextLayout(QTextEngine *e) : d(e) {}
-   Q_DISABLE_COPY(QTextLayout)
+   QTextLayout(QTextEngine *engine)
+      : d(engine)
+   {
+   }
 
-    QTextEngine *d;
+   QTextEngine *d;
 
    friend class QPainter;
 
@@ -203,9 +215,12 @@ class Q_GUI_EXPORT QTextLine
       CursorOnCharacter
    };
 
-   inline QTextLine() : index(0), m_textEngine(nullptr) {}
+   QTextLine()
+      : index(0), m_textEngine(nullptr)
+   {
+   }
 
-   inline bool isValid() const {
+   bool isValid() const {
       return m_textEngine;
    }
 
@@ -231,13 +246,12 @@ class Q_GUI_EXPORT QTextLine
       return cursorToX(&cursorPos, edge);
    }
 
-   int xToCursor(qreal x, CursorPosition = CursorBetweenCharacters) const;
+   int xToCursor(qreal x, CursorPosition cursorPos = CursorBetweenCharacters) const;
 
    void setLineWidth(qreal width);
-   void setNumColumns(int columns);
-   void setNumColumns(int columns, qreal alignmentWidth);
+   void setNumColumns(int columns, std::optional<qreal> alignmentWidth = std::optional<qreal>());
 
-   void setPosition(const QPointF &pos);
+   void setPosition(const QPointF &point);
    QPointF position() const;
 
    int textStart() const;
@@ -247,12 +261,16 @@ class Q_GUI_EXPORT QTextLine
       return index;
    }
 
-   void draw(QPainter *p, const QPointF &point, const QTextLayout::FormatRange *selection = nullptr) const;
+   void draw(QPainter *painter, const QPointF &point, const QTextLayout::FormatRange *selection = nullptr) const;
 
    QList<QGlyphRun> glyphRuns(int from = -1, int length = -1) const;
 
  private:
-   QTextLine(int line, QTextEngine *e) : index(line), m_textEngine(e) {}
+   QTextLine(int line, QTextEngine *engine)
+      : index(line), m_textEngine(engine)
+   {
+   }
+
    void layout_helper(int numGlyphs);
 
    int index;

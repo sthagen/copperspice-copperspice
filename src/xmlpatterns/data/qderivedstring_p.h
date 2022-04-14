@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -235,12 +235,10 @@ class DerivedString : public AtomicValue
                return error(np, simplified);
             }
          }
+
          case TypeID:
-         /* Fallthrough. */
          case TypeIDREF:
-         /* Fallthrough. */
          case TypeENTITY:
-         /* Fallthrough. */
          case TypeNCName: {
             /* We treat xs:ID, xs:ENTITY, xs:IDREF and xs:NCName in the exact same
              * way, except for the type annotation.
@@ -256,6 +254,7 @@ class DerivedString : public AtomicValue
                return error(np, trimmed);
             }
          }
+
          default: {
             Q_ASSERT_X(false, Q_FUNC_INFO, "This line is not supposed to be reached.");
             return AtomicValue::Ptr();

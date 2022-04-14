@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,12 +28,13 @@
 
 #ifndef QT_NO_FILESYSTEMWATCHER
 
-#include <QtCore/qmutex.h>
-#include <QtCore/qwaitcondition.h>
-#include <QtCore/qthread.h>
-#include <QtCore/qhash.h>
-#include <QtCore/qlinkedlist.h>
+#include <qmutex.h>
+#include <qwaitcondition.h>
+#include <qthread.h>
+#include <qhash.h>
+#include <qlinkedlist.h>
 #include <qcore_mac_p.h>
+
 #include <sys/stat.h>
 
 typedef struct __FSEventStream *FSEventStreamRef;
@@ -41,8 +42,6 @@ typedef const struct __FSEventStream *ConstFSEventStreamRef;
 typedef const struct __CFArray *CFArrayRef;
 typedef UInt32 FSEventStreamEventFlags;
 typedef uint64_t FSEventStreamEventId;
-
-QT_BEGIN_NAMESPACE
 
 #if ! defined(Q_OS_IOS)
 
@@ -106,4 +105,3 @@ class QFSEventsFileSystemWatcherEngine : public QFileSystemWatcherEngine
 
 #endif
 
-QT_END_NAMESPACE

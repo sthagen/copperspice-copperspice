@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,9 +28,9 @@
 #include <qlocale.h>
 #include <qdebug.h>
 
-#include "qsvgnode_p.h"
-#include "qsvgstyle_p.h"
-#include "qsvgtinydocument_p.h"
+#include <qsvgnode_p.h>
+#include <qsvgstyle_p.h>
+#include <qsvgtinydocument_p.h>
 
 QSvgG::QSvgG(QSvgNode *parent)
    : QSvgStructureNode(parent)
@@ -71,7 +71,7 @@ QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
 QSvgNode *QSvgStructureNode::scopeNode(const QString &id) const
 {
    QSvgTinyDocument *doc = document();
-   return doc ? doc->namedNode(id) : 0;
+   return doc ? doc->namedNode(id) : nullptr;
 }
 
 void QSvgStructureNode::addChild(QSvgNode *child, const QString &id)
@@ -157,7 +157,7 @@ QSvgNode::Type QSvgDefs::type() const
       && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
       && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
 /* The character set is not based on ISO-646.  */
-#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
+#error "gperf generated tables do not work with this execution character set. Report to <bug-gnu-gperf@gnu.org>."
 #endif
 
 enum {
@@ -349,8 +349,9 @@ QRectF QSvgStructureNode::bounds(QPainter *p, QSvgExtraStates &states) const
 
 QSvgNode *QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
 {
-   QSvgNode *prev = 0;
+   QSvgNode *prev = nullptr;
    QList<QSvgNode *>::const_iterator itr = m_renderers.constBegin();
+
    for (; itr != m_renderers.constEnd(); ++itr) {
       QSvgNode *node = *itr;
       if (node == n) {
@@ -358,6 +359,7 @@ QSvgNode *QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
       }
       prev = node;
    }
+
    return prev;
 }
 

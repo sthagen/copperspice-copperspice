@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,19 +24,16 @@
 #ifndef QSQLRELATIONALTABLEMODEL_H
 #define QSQLRELATIONALTABLEMODEL_H
 
-#include <QtSql/qsqltablemodel.h>
-
-
+#include <qsqltablemodel.h>
 
 class QSqlRelationalTableModelPrivate;
 
 class Q_SQL_EXPORT QSqlRelation
 {
-
  public:
    QSqlRelation() {}
-   QSqlRelation(const QString &aTableName, const QString &indexCol, const QString &displayCol)
-      : tName(aTableName), iColumn(indexCol), dColumn(displayCol) {}
+   QSqlRelation(const QString &tableName, const QString &indexColumn, const QString &displayColumn)
+      : tName(tableName), iColumn(indexColumn), dColumn(displayColumn) {}
 
    inline QString tableName() const {
       return tName;
@@ -55,8 +52,9 @@ class Q_SQL_EXPORT QSqlRelation
    }
 
  private:
-   QString tName, iColumn, dColumn;
-
+   QString tName;
+   QString iColumn;
+   QString dColumn;
 };
 
 class Q_SQL_EXPORT QSqlRelationalTableModel: public QSqlTableModel
@@ -72,8 +70,8 @@ class Q_SQL_EXPORT QSqlRelationalTableModel: public QSqlTableModel
    explicit QSqlRelationalTableModel(QObject *parent = nullptr, QSqlDatabase db = QSqlDatabase());
    virtual ~QSqlRelationalTableModel();
 
-   QVariant data(const QModelIndex &item, int role = Qt::DisplayRole) const override;
-   bool setData(const QModelIndex &item, const QVariant &value, int role = Qt::EditRole) override;
+   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
    bool removeColumns(int column, int count, const QModelIndex &parent = QModelIndex()) override;
 
    void clear() override;
@@ -97,7 +95,5 @@ class Q_SQL_EXPORT QSqlRelationalTableModel: public QSqlTableModel
  private:
    Q_DECLARE_PRIVATE(QSqlRelationalTableModel)
 };
-
-
 
 #endif // QSQLRELATIONALTABLEMODEL_H

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,6 @@
 #include <qsqlfield.h>
 #include <qstring.h>
 #include <qvector.h>
-
-QT_BEGIN_NAMESPACE
 
 class QSqlRecordPrivate
 {
@@ -510,7 +508,6 @@ void QSqlRecord::detach()
    qAtomicDetach(d);
 }
 
-
 QDebug operator<<(QDebug dbg, const QSqlRecord &r)
 {
    QDebugStateSaver saver(dbg);
@@ -536,4 +533,4 @@ QSqlRecord QSqlRecord::keyValues(const QSqlRecord &keyFields) const
 
    return retValues;
 }
-QT_END_NAMESPACE
+

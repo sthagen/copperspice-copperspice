@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,7 @@
 #define QCLIPBOARD_H
 
 #include <qobject.h>
-#include <QScopedPointer>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_CLIPBOARD
 
@@ -37,10 +37,10 @@ class Q_GUI_EXPORT QClipboard : public QObject
 {
    GUI_CS_OBJECT(QClipboard)
 
-   explicit QClipboard(QObject *parent);
-   ~QClipboard();
-
  public:
+   QClipboard(const QClipboard &) = delete;
+   QClipboard &operator=(const QClipboard &) = delete;
+
    enum Mode { Clipboard, Selection, FindBuffer, LastMode = FindBuffer };
 
    void clear(Mode mode = Clipboard);
@@ -54,15 +54,15 @@ class Q_GUI_EXPORT QClipboard : public QObject
 
    QString text(Mode mode = Clipboard) const;
    QString text(QString &subtype, Mode mode = Clipboard) const;
-   void setText(const QString &, Mode mode = Clipboard);
+   void setText(const QString &text, Mode mode = Clipboard);
 
    const QMimeData *mimeData(Mode mode = Clipboard ) const;
    void setMimeData(QMimeData *data, Mode mode = Clipboard);
 
    QImage image(Mode mode = Clipboard) const;
    QPixmap pixmap(Mode mode = Clipboard) const;
-   void setImage(const QImage &, Mode mode  = Clipboard);
-   void setPixmap(const QPixmap &, Mode mode  = Clipboard);
+   void setImage(const QImage &image, Mode mode  = Clipboard);
+   void setPixmap(const QPixmap &pixmap, Mode mode  = Clipboard);
 
    GUI_CS_SIGNAL_1(Public, void changed(QClipboard::Mode mode))
    GUI_CS_SIGNAL_2(changed, mode)
@@ -84,13 +84,14 @@ class Q_GUI_EXPORT QClipboard : public QObject
    friend class QPlatformClipboard;
 
  private:
-   Q_DISABLE_COPY(QClipboard)
+   explicit QClipboard(QObject *parent);
+   ~QClipboard();
 
    bool supportsMode(Mode mode) const;
    bool ownsMode(Mode mode) const;
    void emitChanged(Mode mode);
-
 };
 
 #endif // QT_NO_CLIPBOARD
+
 #endif

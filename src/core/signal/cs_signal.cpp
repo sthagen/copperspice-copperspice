@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2016-2022 Barbara Geller
+* Copyright (c) 2016-2022 Ansel Sermersheim
 *
 * This file is part of CsSignal.
 *
@@ -83,7 +83,7 @@ std::unordered_set<const CsSignal::SignalBase *> &CsSignal::SignalBase::get_bein
 
 void CsSignal::SignalBase::addConnection(std::unique_ptr<const Internal::BentoAbstract> signalMethod, const SlotBase *receiver,
                   std::unique_ptr<const Internal::BentoAbstract> slotMethod, ConnectionKind type,
-                  LibG::SharedList<ConnectStruct>::write_handle senderListHandle) const
+                  libguarded::SharedList<ConnectStruct>::write_handle senderListHandle) const
 {
    struct ConnectStruct tempStruct;
 

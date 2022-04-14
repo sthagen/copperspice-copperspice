@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QUNDOGROUP_H
 #define QUNDOGROUP_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qstring.h>
-#include <QScopedPointer>
-
-
+#include <qobject.h>
+#include <qstring.h>
+#include <qscopedpointer.h>
 
 class QUndoGroupPrivate;
 class QUndoStack;
@@ -39,10 +37,13 @@ class QAction;
 class Q_GUI_EXPORT QUndoGroup : public QObject
 {
    GUI_CS_OBJECT(QUndoGroup)
-   Q_DECLARE_PRIVATE(QUndoGroup)
 
  public:
    explicit QUndoGroup(QObject *parent = nullptr);
+
+   QUndoGroup(const QUndoGroup &) = delete;
+   QUndoGroup &operator=(const QUndoGroup &) = delete;
+
    ~QUndoGroup();
 
    void addStack(QUndoStack *stack);
@@ -89,11 +90,9 @@ class Q_GUI_EXPORT QUndoGroup : public QObject
    QScopedPointer<QUndoGroupPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QUndoGroup)
+   Q_DECLARE_PRIVATE(QUndoGroup)
 };
 
 #endif // QT_NO_UNDOGROUP
-
-
 
 #endif // QUNDOGROUP_H

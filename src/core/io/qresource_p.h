@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QRESOURCE_P_H
 #define QRESOURCE_P_H
 
-#include <QtCore/qabstractfileengine.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractfileengine.h>
 
 class QResourceFileEnginePrivate;
 
@@ -81,10 +79,8 @@ class QResourceFileEngine : public QAbstractFileEngine
    Iterator *beginEntryList(QDir::Filters filters, const QStringList &filterNames) override;
    Iterator *endEntryList() override;
 
-   bool extension(Extension extension, const ExtensionOption *option = 0, ExtensionReturn *output = 0) override;
+   bool extension(Extension extension, const ExtensionOption *option = nullptr, ExtensionReturn *output = nullptr) override;
    bool supportsExtension(Extension extension) const override;
 };
-
-QT_END_NAMESPACE
 
 #endif

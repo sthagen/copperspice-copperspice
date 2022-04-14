@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -52,7 +52,7 @@ static const int MaxWriteBufferSize = 128 * 1024;
 #define Q_INIT_CHECK(returnValue) do { \
     if (! d->data) { \
         return returnValue; \
-    } } while (0)
+    } } while (false)
 
 #define S5_VERSION_5 0x05
 #define S5_CONNECT 0x01
@@ -328,8 +328,9 @@ class QSocks5BindStore : public QObject
  protected:
    void timerEvent(QTimerEvent *event) override;
 
-   QMutex mutex;
+   QRecursiveMutex mutex;
    int sweepTimerId;
+
    //socket descriptor, data, timestamp
    QHash<int, QSocks5BindData *> store;
 };
@@ -337,10 +338,10 @@ class QSocks5BindStore : public QObject
 Q_GLOBAL_STATIC(QSocks5BindStore, socks5BindStore)
 
 QSocks5BindStore::QSocks5BindStore()
-   : mutex(QMutex::Recursive)
-   , sweepTimerId(-1)
+   : sweepTimerId(-1)
 {
    QCoreApplication *app = QCoreApplication::instance();
+
    if (app && app->thread() != thread()) {
       moveToThread(app->thread());
    }
@@ -352,12 +353,16 @@ QSocks5BindStore::~QSocks5BindStore()
 
 void QSocks5BindStore::add(qintptr socketDescriptor, QSocks5BindData *bindData)
 {
-   QMutexLocker lock(&mutex);
+   QRecursiveMutexLocker lock(&mutex);
+
    if (store.contains(socketDescriptor)) {
       // qDebug() << "delete it";
    }
+
    bindData->timeStamp.start();
+
    store.insert(socketDescriptor, bindData);
+
    // start sweep timer if not started
    if (sweepTimerId == -1) {
       sweepTimerId = startTimer(60000);
@@ -366,26 +371,27 @@ void QSocks5BindStore::add(qintptr socketDescriptor, QSocks5BindData *bindData)
 
 bool QSocks5BindStore::contains(qintptr socketDescriptor)
 {
-   QMutexLocker lock(&mutex);
+   QRecursiveMutexLocker lock(&mutex);
    return store.contains(socketDescriptor);
 }
 
 QSocks5BindData *QSocks5BindStore::retrieve(qintptr socketDescriptor)
 {
-   QMutexLocker lock(&mutex);
+   QRecursiveMutexLocker lock(&mutex);
    if (! store.contains(socketDescriptor)) {
-      return 0;
+      return nullptr;
    }
 
    QSocks5BindData *bindData = store.take(socketDescriptor);
    if (bindData) {
       if (bindData->controlSocket->thread() != QThread::currentThread()) {
          qWarning("Can not access socks5 bind data from different thread");
-         return 0;
+         return nullptr;
       }
    } else {
       QSOCKS5_DEBUG << "__ERROR__ binddata == 0";
    }
+
    // stop the sweep timer if not needed
    if (store.isEmpty()) {
       killTimer(sweepTimerId);
@@ -396,7 +402,8 @@ QSocks5BindData *QSocks5BindStore::retrieve(qintptr socketDescriptor)
 
 void QSocks5BindStore::timerEvent(QTimerEvent *event)
 {
-   QMutexLocker lock(&mutex);
+   QRecursiveMutexLocker lock(&mutex);
+
    if (event->timerId() == sweepTimerId) {
       QSOCKS5_DEBUG << "QSocks5BindStore performing sweep";
       QMutableHashIterator<int, QSocks5BindData *> it(store);
@@ -514,12 +521,12 @@ QSocks5SocketEnginePrivate::QSocks5SocketEnginePrivate()
    , writeNotificationEnabled(false)
    , exceptNotificationEnabled(false)
    , socketDescriptor(-1)
-   , data(0)
-   , connectData(0)
+   , data(nullptr)
+   , connectData(nullptr)
 #ifndef QT_NO_UDPSOCKET
-   , udpData(0)
+   , udpData(nullptr)
 #endif
-   , bindData(0)
+   , bindData(nullptr)
    , readNotificationActivated(false)
    , writeNotificationActivated(false)
    , readNotificationPending(false)
@@ -612,21 +619,25 @@ void QSocks5SocketEnginePrivate::setErrorState(Socks5State state, const QString 
                   q->setError(QAbstractSocket::ProxyConnectionRefusedError,
                               QSocks5SocketEngine::tr("Connection to proxy refused"));
                   break;
+
                case QAbstractSocket::RemoteHostClosedError:
                   q->setError(QAbstractSocket::ProxyConnectionClosedError,
                               QSocks5SocketEngine::tr("Connection to proxy closed prematurely"));
                   break;
+
                case QAbstractSocket::HostNotFoundError:
                   q->setError(QAbstractSocket::ProxyNotFoundError,
                               QSocks5SocketEngine::tr("Proxy host not found"));
                   break;
+
                case QAbstractSocket::SocketTimeoutError:
                   if (state == ConnectError) {
                      q->setError(QAbstractSocket::ProxyConnectionTimeoutError,
                                  QSocks5SocketEngine::tr("Connection to proxy timed out"));
                      break;
                   }
-               /* fall through */
+                  [[fallthrough]];
+
                default:
                   q->setError(controlSocketError, data->controlSocket->errorString());
                   break;
@@ -1049,21 +1060,21 @@ bool QSocks5SocketEngine::initialize(qintptr socketDescriptor, QAbstractSocket::
    QSocks5BindData *bindData = socks5BindStore()->retrieve(socketDescriptor);
    if (bindData) {
 
-      d->socketState = QAbstractSocket::ConnectedState;
-      d->socketType = QAbstractSocket::TcpSocket;
-      d->connectData = new QSocks5ConnectData;
-      d->data = d->connectData;
-      d->mode = QSocks5SocketEnginePrivate::ConnectMode;
-      d->data->controlSocket = bindData->controlSocket;
-      bindData->controlSocket = 0;
+      d->socketState          = QAbstractSocket::ConnectedState;
+      d->socketType           = QAbstractSocket::TcpSocket;
+      d->connectData          = new QSocks5ConnectData;
+      d->data                 = d->connectData;
+      d->mode                 = QSocks5SocketEnginePrivate::ConnectMode;
+      d->data->controlSocket  = bindData->controlSocket;
+      bindData->controlSocket = nullptr;
       d->data->controlSocket->setParent(this);
-      d->socketProtocol = d->data->controlSocket->localAddress().protocol();
-      d->data->authenticator = bindData->authenticator;
-      bindData->authenticator = 0;
-      d->localPort = bindData->localPort;
-      d->localAddress = bindData->localAddress;
-      d->peerPort = bindData->peerPort;
-      d->peerAddress = bindData->peerAddress;
+      d->socketProtocol       = d->data->controlSocket->localAddress().protocol();
+      d->data->authenticator  = bindData->authenticator;
+      bindData->authenticator = nullptr;
+      d->localPort            = bindData->localPort;
+      d->localAddress         = bindData->localAddress;
+      d->peerPort             = bindData->peerPort;
+      d->peerAddress          = bindData->peerAddress;
       delete bindData;
 
       QObject::connect(d->data->controlSocket, SIGNAL(connected()), this, SLOT(_q_controlSocketConnected()),
@@ -1222,8 +1233,8 @@ void QSocks5SocketEnginePrivate::_q_controlSocketReadNotification()
             parseRequestMethodReply();
             break;
          }
+         [[fallthrough]];
 
-      // fall through
       default:
          qWarning("QSocks5SocketEnginePrivate::_q_controlSocketReadNotification: "
                   "Unexpectedly received data while in state=%d and mode=%d",
@@ -1326,11 +1337,13 @@ void QSocks5SocketEnginePrivate::_q_udpSocketReadNotification()
       }
       QSocks5RevivedDatagram datagram;
       if (buf[pos++] != 0 || buf[pos++] != 0) {
-         QSOCKS5_D_DEBUG << "invalid datagram discarding";
+         QSOCKS5_D_DEBUG << "Invalid datagram, discarding";
          return;
       }
-      if (buf[pos++] != 0) { //### add fragmentation reading support
-         QSOCKS5_D_DEBUG << "don't support fragmentation yet disgarding";
+
+      if (buf[pos++] != 0) {
+         //### add fragmentation reading support
+         QSOCKS5_D_DEBUG << "Fragmentation is unsupported";
          return;
       }
 
@@ -1394,7 +1407,7 @@ bool QSocks5SocketEngine::bind(const QHostAddress &addr, quint16 port)
    QElapsedTimer stopWatch;
    stopWatch.start();
    d->data->controlSocket->connectToHost(d->proxyInfo.hostName(), d->proxyInfo.port());
-   if (!d->waitForConnected(msecs, 0) ||
+   if (!d->waitForConnected(msecs, nullptr) ||
          d->data->controlSocket->state() == QAbstractSocket::UnconnectedState) {
       // waitForConnected sets the error state and closes the socket
       QSOCKS5_Q_DEBUG << "waitForConnected to proxy server" << d->data->controlSocket->errorString();
@@ -1411,29 +1424,33 @@ bool QSocks5SocketEngine::bind(const QHostAddress &addr, quint16 port)
       d->udpData->associatePort = d->localPort;
       d->localPort = 0;
       QUdpSocket dummy;
+
 #ifndef QT_NO_BEARERMANAGEMENT
       dummy.setProperty("_q_networksession", property("_q_networksession"));
 #endif
+
       dummy.setProxy(QNetworkProxy::NoProxy);
+
       if (!dummy.bind()
-            || writeDatagram(0, 0, QIpPacketHeader(d->data->controlSocket->localAddress(), dummy.localPort())) != 0
+            || writeDatagram(nullptr, 0, QIpPacketHeader(d->data->controlSocket->localAddress(), dummy.localPort())) != 0
             || ! dummy.waitForReadyRead(qt_subtract_from_timeout(msecs, stopWatch.elapsed()))
-            || dummy.readDatagram(0, 0, &d->localAddress, &d->localPort) != 0) {
+            || dummy.readDatagram(nullptr, 0, &d->localAddress, &d->localPort) != 0) {
          QSOCKS5_DEBUG << "udp actual address and port lookup failed";
          setState(QAbstractSocket::UnconnectedState);
          setError(dummy.error(), dummy.errorString());
          d->data->controlSocket->close();
+
          //### reset and error
          return false;
       }
+
       QSOCKS5_DEBUG << "udp actual address and port" << d->localAddress << ':' << d->localPort;
       return true;
-#endif // QT_NO_UDPSOCKET
+#endif
    }
 
    // binding timed out
-   setError(QAbstractSocket::SocketTimeoutError,
-            QLatin1String(QT_TRANSLATE_NOOP("QSocks5SocketEngine", "Network operation timed out")));
+   setError(QAbstractSocket::SocketTimeoutError, QString::fromLatin1(cs_mark_tr("QSocks5SocketEngine", "Network operation timed out")));
 
    ///###    delete d->udpSocket;
    ///###    d->udpSocket = 0;
@@ -1474,14 +1491,14 @@ int QSocks5SocketEngine::accept()
       case QSocks5SocketEnginePrivate::BindSuccess:
          QSOCKS5_Q_DEBUG << "BindSuccess adding" << d->socketDescriptor << "to the bind store";
          d->data->controlSocket->disconnect();
-         d->data->controlSocket->setParent(0);
+         d->data->controlSocket->setParent(nullptr);
          d->bindData->localAddress = d->localAddress;
          d->bindData->localPort = d->localPort;
          sd = d->socketDescriptor;
 
          socks5BindStore()->add(sd, d->bindData);
-         d->data = 0;
-         d->bindData = 0;
+         d->data     = nullptr;
+         d->bindData = nullptr;
          d->socketDescriptor = 0;
 
          //### do something about this socket layer ... set it closed and an error about why ...
@@ -2000,7 +2017,7 @@ QSocks5SocketEngineHandler::createSocketEngine(QAbstractSocket::SocketType socke
    // proxy type must have been resolved by now
    if (proxy.type() != QNetworkProxy::Socks5Proxy) {
       QSOCKS5_DEBUG << "not proxying";
-      return 0;
+      return nullptr;
    }
    QScopedPointer<QSocks5SocketEngine> engine(new QSocks5SocketEngine(parent));
    engine->setProxy(proxy);
@@ -2014,7 +2031,7 @@ QAbstractSocketEngine *QSocks5SocketEngineHandler::createSocketEngine(qintptr so
       QSOCKS5_DEBUG << "bind store contains" << socketDescriptor;
       return new QSocks5SocketEngine(parent);
    }
-   return 0;
+   return nullptr;
 }
 
 void QSocks5SocketEngine::_q_controlSocketConnected()

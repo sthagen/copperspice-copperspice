@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -41,33 +41,32 @@
 
 #define QT_CONNECT_TIMEOUT 30000
 
-QT_BEGIN_NAMESPACE
-
-QLocalSocketPrivate::QLocalSocketPrivate() : QIODevicePrivate(),
-   delayConnect(0),
-   connectTimer(0),
-   connectingSocket(-1),
-   connectingOpenMode(0),
-   state(QLocalSocket::UnconnectedState)
+QLocalSocketPrivate::QLocalSocketPrivate()
+   : QIODevicePrivate(), delayConnect(nullptr), connectTimer(nullptr), connectingSocket(-1),
+      connectingOpenMode(Qt::EmptyFlag), state(QLocalSocket::UnconnectedState)
 {
 }
 
 void QLocalSocketPrivate::init()
 {
    Q_Q(QLocalSocket);
+
    // QIODevice signals
    q->connect(&unixSocket, SIGNAL(aboutToClose()), q, SLOT(aboutToClose()));
-   q->connect(&unixSocket, SIGNAL(bytesWritten(qint64)),
-              q, SLOT(bytesWritten(qint64)));
+   q->connect(&unixSocket, SIGNAL(bytesWritten(qint64)), q, SLOT(bytesWritten(qint64)));
    q->connect(&unixSocket, SIGNAL(readyRead()), q, SLOT(readyRead()));
+
    // QAbstractSocket signals
    q->connect(&unixSocket, SIGNAL(connected()), q, SLOT(connected()));
    q->connect(&unixSocket, SIGNAL(disconnected()), q, SLOT(disconnected()));
    q->connect(&unixSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
               q, SLOT(_q_stateChanged(QAbstractSocket::SocketState)));
+
    q->connect(&unixSocket, SIGNAL(error(QAbstractSocket::SocketError)),
               q, SLOT(_q_error(QAbstractSocket::SocketError)));
+
    q->connect(&unixSocket, SIGNAL(readChannelFinished()), q, SLOT(readChannelFinished()));
+
    unixSocket.setParent(q);
 }
 
@@ -335,7 +334,7 @@ void QLocalSocketPrivate::_q_connectToSocket()
 
    connectingSocket = -1;
    connectingName.clear();
-   connectingOpenMode = 0;
+   connectingOpenMode = Qt::EmptyFlag;
 }
 
 bool QLocalSocket::setSocketDescriptor(qintptr socketDescriptor, LocalSocketState socketState, OpenMode openMode)
@@ -374,10 +373,10 @@ void QLocalSocketPrivate::cancelDelayedConnect()
    if (delayConnect) {
       delayConnect->setEnabled(false);
       delete delayConnect;
-      delayConnect = 0;
+      delayConnect = nullptr;
       connectTimer->stop();
       delete connectTimer;
-      connectTimer = 0;
+      connectTimer = nullptr;
    }
 }
 
@@ -433,7 +432,7 @@ void QLocalSocket::close()
    }
    d->connectingSocket = -1;
    d->connectingName.clear();
-   d->connectingOpenMode = 0;
+   d->connectingOpenMode = Qt::EmptyFlag;
    d->serverName.clear();
    d->fullServerName.clear();
    QIODevice::close();
@@ -535,7 +534,7 @@ bool QLocalSocket::waitForConnected(int msec)
 
    while (state() == ConnectingState && (-1 == msec || timer.elapsed() < msec)) {
 
-      result = ::select(d->connectingSocket + 1, &fds, 0, 0, &timeout);
+      result = ::select(d->connectingSocket + 1, &fds, nullptr, nullptr, &timeout);
 
       if (-1 == result && errno != EINTR) {
          d->errorOccurred( QLocalSocket::UnknownSocketError, "QLocalSocket::waitForConnected");
@@ -568,7 +567,5 @@ bool QLocalSocket::waitForReadyRead(int msecs)
    }
    return (d->unixSocket.waitForReadyRead(msecs));
 }
-
-QT_END_NAMESPACE
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,11 @@
 #ifndef DIRECTSHOWMETADATACONTROL_H
 #define DIRECTSHOWMETADATACONTROL_H
 
-#include <dshow.h>
-
-#include <qmetadatareadercontrol.h>
-
-#include "directshowglobal.h"
-
 #include <qcoreevent.h>
+#include <qmetadatareadercontrol.h>
+#include <dsplayer_global.h>
+
+#include <dshow.h>
 
 class DirectShowPlayerService;
 

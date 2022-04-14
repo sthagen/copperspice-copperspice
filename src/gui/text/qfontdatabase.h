@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,15 @@
 #ifndef QFONTDATABASE_H
 #define QFONTDATABASE_H
 
-#include <qwindowdefs.h>
-#include <qstring.h>
-#include <qfont.h>
 #include <qcontainerfwd.h>
+#include <qfont.h>
+#include <qstring.h>
+#include <qwindowdefs.h>
 
 class QStringList;
 class QFontEngine;
 class QFontDatabasePrivate;
+
 struct QFontDef;
 
 class Q_GUI_EXPORT QFontDatabase
@@ -42,49 +43,51 @@ class Q_GUI_EXPORT QFontDatabase
    GUI_CS_ENUM(SystemFont)
 
  public:
-   // do not re-order or delete entries from this enum without updating the QPF2 format and makeqpf!!
-   enum WritingSystem {
-      Any,
+   // do not re-order or delete entries from this enum without updating the QPF2 format and makeqpf
 
-      Latin,
-      Greek,
-      Cyrillic,
-      Armenian,
-      Hebrew,
-      Arabic,
-      Syriac,
-      Thaana,
-      Devanagari,
-      Bengali,
-      Gurmukhi,
-      Gujarati,
-      Oriya,
-      Tamil,
-      Telugu,
-      Kannada,
-      Malayalam,
-      Sinhala,
-      Thai,
-      Lao,
-      Tibetan,
-      Myanmar,
-      Georgian,
-      Khmer,
-      SimplifiedChinese,
-      TraditionalChinese,
-      Japanese,
-      Korean,
-      Vietnamese,
+   GUI_CS_REGISTER_ENUM(
+      enum WritingSystem {
+         Any,
+         Latin,
+         Greek,
+         Cyrillic,
+         Armenian,
+         Hebrew,
+         Arabic,
+         Syriac,
+         Thaana,
+         Devanagari,
+         Bengali,
+         Gurmukhi,
+         Gujarati,
+         Oriya,
+         Tamil,
+         Telugu,
+         Kannada,
+         Malayalam,
+         Sinhala,
+         Thai,
+         Lao,
+         Tibetan,
+         Myanmar,
+         Georgian,
+         Khmer,
+         SimplifiedChinese,
+         TraditionalChinese,
+         Japanese,
+         Korean,
+         Vietnamese,
 
-      Symbol,
-      Other = Symbol,
+         Symbol,
+         Other = Symbol,
 
-      Ogham,
-      Runic,
-      Nko,
+         Ogham,
+         Runic,
+         Nko,
 
-      WritingSystemsCount
-   };
+         WritingSystemsCount
+      };
+   )
 
    enum SystemFont {
       GeneralFont,
@@ -104,8 +107,8 @@ class Q_GUI_EXPORT QFontDatabase
    QStringList styles(const QString &family) const;
    QList<int> pointSizes(const QString &family, const QString &style = QString());
    QList<int> smoothSizes(const QString &family, const QString &style);
-   QString styleString(const QFont &font);
-   QString styleString(const QFontInfo &fontInfo);
+   QString styleString(const QFont &font) const;
+   QString styleString(const QFontInfo &fontInfo) const;
 
    QFont font(const QString &family, const QString &style, int pointSize) const;
 
@@ -133,7 +136,7 @@ class Q_GUI_EXPORT QFontDatabase
    static QFont systemFont(SystemFont type);
 
  private:
-   QFontDatabasePrivate *d;
+   QFontDatabasePrivate *m_fontdatabase;
 
    static void createDatabase();
    static void parseFontName(const QString &name, QString &foundry, QString &family);
@@ -146,7 +149,6 @@ class Q_GUI_EXPORT QFontDatabase
    friend class QFontDialog;
    friend class QFontDialogPrivate;
    friend class QFontEngineMulti;
-
 };
 
 #endif

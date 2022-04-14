@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,6 @@
 #define QABSTRACTVIDEOBUFFER_H
 
 #include <qmultimedia.h>
-#include <qmetatype.h>
 #include <qstring.h>
 
 class QVariant;
@@ -52,6 +51,10 @@ class Q_MULTIMEDIA_EXPORT QAbstractVideoBuffer
    };
 
    QAbstractVideoBuffer(HandleType type);
+
+   QAbstractVideoBuffer(const QAbstractVideoBuffer &) = delete;
+   QAbstractVideoBuffer &operator=(const QAbstractVideoBuffer &) = delete;
+
    virtual ~QAbstractVideoBuffer();
 
    virtual void release();
@@ -74,13 +77,16 @@ class Q_MULTIMEDIA_EXPORT QAbstractVideoBuffer
 
  private:
    Q_DECLARE_PRIVATE(QAbstractVideoBuffer)
-   Q_DISABLE_COPY(QAbstractVideoBuffer)
 };
 
 class Q_MULTIMEDIA_EXPORT QAbstractPlanarVideoBuffer : public QAbstractVideoBuffer
 {
  public:
    QAbstractPlanarVideoBuffer(HandleType type);
+
+   QAbstractPlanarVideoBuffer(const QAbstractPlanarVideoBuffer &) = delete;
+   QAbstractPlanarVideoBuffer &operator=(const QAbstractPlanarVideoBuffer &) = delete;
+
    virtual ~QAbstractPlanarVideoBuffer();
 
    uchar *map(MapMode mode, int *numBytes, int *bytesPerLine);
@@ -88,18 +94,9 @@ class Q_MULTIMEDIA_EXPORT QAbstractPlanarVideoBuffer : public QAbstractVideoBuff
 
  protected:
    QAbstractPlanarVideoBuffer(QAbstractPlanarVideoBufferPrivate &dd, HandleType type);
-
- private:
-   Q_DISABLE_COPY(QAbstractPlanarVideoBuffer)
 };
-
 
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QAbstractVideoBuffer::HandleType);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QAbstractVideoBuffer::MapMode);
-
-
-Q_DECLARE_METATYPE(QAbstractVideoBuffer::HandleType)
-Q_DECLARE_METATYPE(QAbstractVideoBuffer::MapMode)
-
 
 #endif

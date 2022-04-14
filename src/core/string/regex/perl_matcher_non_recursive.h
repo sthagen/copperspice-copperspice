@@ -1,13 +1,13 @@
 /***********************************************************************
 *
-* Copyright (c) 2017-2020 Barbara Geller
-* Copyright (c) 2017-2020 Ansel Sermersheim
-
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
+*
 * Copyright (c) 1998-2009 John Maddock
 *
-* This file is part of CsString.
+* This file is part of CopperSpice.
 *
-* CsString is free software, released under the BSD 2-Clause license.
+* CopperSpice is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
 *
 * CopperSpice is distributed in the hope that it will be useful,
@@ -28,6 +28,7 @@
 #define CS_PERL_MATCHER_NON_RECURSIVE_H
 
 #include <cassert>
+#include <limits>
 #include <new>
 
 #include "regex/r_states.h"
@@ -127,7 +128,7 @@ struct save_state_init {
 
    ~save_state_init() {
       put_mem_block(*stack);
-      *stack = 0;
+      *stack = nullptr;
    }
 };
 
@@ -1018,6 +1019,7 @@ bool perl_matcher<BidiIterator, Allocator, traits>::match_endmark()
       if ((m_match_flags & match_nosubs) == 0) {
          m_presult->set_second(position, index);
       }
+
       if (!recursion_stack.empty()) {
          if (index == recursion_stack.back().idx) {
             pstate = recursion_stack.back().preturn_address;
@@ -1029,11 +1031,12 @@ bool perl_matcher<BidiIterator, Allocator, traits>::match_endmark()
       }
    } else if ((index < 0) && (index != -4)) {
       // matched forward lookahead:
-      pstate = 0;
+      pstate = nullptr;
       return true;
    }
 
    pstate = pstate->next.p;
+
    return true;
 }
 
@@ -1065,7 +1068,7 @@ bool perl_matcher<BidiIterator, Allocator, traits>::match_match()
    }
 
    m_presult->set_second(position);
-   pstate = 0;
+   pstate = nullptr;
 
    m_has_found_match = true;
 
@@ -1229,8 +1232,8 @@ bool perl_matcher<BidiIterator, Allocator, traits>::unwind(bool have_match)
 template <class BidiIterator, class Allocator, class traits>
 bool perl_matcher<BidiIterator, Allocator, traits>::unwind_end(bool)
 {
-   pstate = 0;   // nothing left to search
-   return false; // end of stack nothing more to search
+   pstate = nullptr;   // nothing left to search
+   return false;      // end of stack nothing more to search
 }
 
 template <class BidiIterator, class Allocator, class traits>
@@ -1264,8 +1267,9 @@ template <class BidiIterator, class Allocator, class traits>
 bool perl_matcher<BidiIterator, Allocator, traits>::unwind_recursion_stopper(bool)
 {
    cs_regex_ns::cs_regex_detail_ns::inplace_destroy(m_backup_state++);
-   pstate = 0;   // nothing left to search
-   return false; // end of stack nothing more to search
+   pstate = nullptr;   // nothing left to search
+
+   return false;      // end of stack nothing more to search
 }
 
 template <class BidiIterator, class Allocator, class traits>
@@ -1338,8 +1342,8 @@ bool perl_matcher<BidiIterator, Allocator, traits>::unwind_greedy_single_repeat(
 
    const re_repeat *rep = pmp->rep;
    std::size_t count = pmp->count;
-   assert(rep->next.p != 0);
-   assert(rep->alt.p != 0);
+   assert(rep->next.p != nullptr);
+   assert(rep->alt.p  != nullptr);
 
    count -= rep->min;
 
@@ -1385,8 +1389,8 @@ bool perl_matcher<BidiIterator, Allocator, traits>::unwind_slow_dot_repeat(bool 
    const re_repeat *rep = pmp->rep;
    std::size_t count = pmp->count;
    assert(rep->type == syntax_element_dot_rep);
-   assert(rep->next.p != 0);
-   assert(rep->alt.p != 0);
+   assert(rep->next.p != nullptr);
+   assert(rep->alt.p  != nullptr);
    assert(rep->next.p->type == syntax_element_wild);
 
    assert(count < rep->max);
@@ -1500,8 +1504,8 @@ bool perl_matcher<BidiIterator, Allocator, traits>::unwind_char_repeat(bool r)
    position = pmp->last_position;
 
    assert(rep->type == syntax_element_char_rep);
-   assert(rep->next.p != 0);
-   assert(rep->alt.p != 0);
+   assert(rep->next.p != nullptr);
+   assert(rep->alt.p  != nullptr);
    assert(rep->next.p->type == syntax_element_literal);
    assert(count < rep->max);
 
@@ -1564,8 +1568,8 @@ bool perl_matcher<BidiIterator, Allocator, traits>::unwind_short_set_repeat(bool
    position = pmp->last_position;
 
    assert(rep->type == syntax_element_short_set_rep);
-   assert(rep->next.p != 0);
-   assert(rep->alt.p  != 0);
+   assert(rep->next.p != nullptr);
+   assert(rep->alt.p  != nullptr);
    assert(rep->next.p->type == syntax_element_set);
    assert(count < rep->max);
 
@@ -1644,8 +1648,8 @@ bool perl_matcher<BidiIterator, Allocator, traits>::unwind_long_set_repeat(bool 
    position = pmp->last_position;
 
    assert(rep->type == syntax_element_long_set_rep);
-   assert(rep->next.p != 0);
-   assert(rep->alt.p  != 0);
+   assert(rep->next.p != nullptr);
+   assert(rep->alt.p  != nullptr);
    assert(rep->next.p->type == syntax_element_long_set);
    assert(count < rep->max);
 

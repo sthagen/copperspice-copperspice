@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -82,7 +82,7 @@ GLuint QGL2GradientCache::getBuffer(const QGradient &gradient, qreal opacity)
    QMutexLocker lock(&m_mutex);
    quint64 hash_val = 0;
 
-   QGradientStops stops = gradient.stops();
+   QVector<QPair<qreal, QColor>> stops = gradient.stops();
    for (int i = 0; i < stops.size() && i <= 2; i++) {
       hash_val += stops[i].second.rgba();
    }
@@ -153,7 +153,7 @@ void QGL2GradientCache::generateGradientColorTable(const QGradient &gradient, ui
       qreal opacity) const
 {
    int pos = 0;
-   QGradientStops s = gradient.stops();
+   QVector<QPair<qreal, QColor>> s = gradient.stops();
    QVector<uint> colors(s.size());
 
    for (int i = 0; i < s.size(); ++i) {

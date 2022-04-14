@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 #include <qobject.h>
 #include <qringbuffer_p.h>
 #include <qt_windows.h>
-
-QT_BEGIN_NAMESPACE
 
 class Q_CORE_EXPORT QWindowsPipeReader : public QObject
 {
@@ -75,10 +73,12 @@ private:
 
     class Overlapped : public OVERLAPPED
     {
-        Q_DISABLE_COPY(Overlapped)
-
-    public:
+      public:
         explicit Overlapped(QWindowsPipeReader *reader);
+
+        Overlapped(const Overlapped &) = delete;
+        Overlapped &operator=(const Overlapped &) = delete;
+
         void clear();
         QWindowsPipeReader *pipeReader;
     };

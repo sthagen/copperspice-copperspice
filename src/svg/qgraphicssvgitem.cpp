@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,15 +23,14 @@
 
 #include "qgraphicssvgitem.h"
 
-#if !defined(QT_NO_GRAPHICSVIEW) && ! defined(QT_NO_SVGWIDGET)
+#if ! defined(QT_NO_GRAPHICSVIEW) && ! defined(QT_NO_SVGWIDGET)
 
 #include <qpainter.h>
 #include <qstyleoption.h>
 #include <qsvgrenderer.h>
 #include <qdebug.h>
-#include <qgraphicsitem_p.h>
 
-
+#include <qgraphics_item_p.h>
 
 class QGraphicsSvgItemPrivate : public QGraphicsItemPrivate
 {
@@ -39,15 +38,16 @@ class QGraphicsSvgItemPrivate : public QGraphicsItemPrivate
    Q_DECLARE_PUBLIC(QGraphicsSvgItem)
 
    QGraphicsSvgItemPrivate()
-      : renderer(0), shared(false) {
+      : renderer(nullptr), shared(false)
+   {
    }
 
    void init(QGraphicsItem *parent) {
       Q_Q(QGraphicsSvgItem);
       q->setParentItem(parent);
       renderer = new QSvgRenderer(q);
-      QObject::connect(renderer, SIGNAL(repaintNeeded()),
-                       q, SLOT(_q_repaintItem()));
+
+      QObject::connect(renderer, SIGNAL(repaintNeeded()), q, SLOT(_q_repaintItem()));
       q->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
       q->setMaximumCacheSize(QSize(1024, 768));
    }
@@ -171,14 +171,9 @@ static void qt_graphicsItem_highlightSelected(
    painter->drawRect(item->boundingRect().adjusted(pad, pad, -pad, -pad));
 }
 
-/*!
-    \reimp
-*/
-void QGraphicsSvgItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                             QWidget *widget)
+void QGraphicsSvgItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-   //    Q_UNUSED(option);
-   Q_UNUSED(widget);
+   (void) widget;
 
    Q_D(QGraphicsSvgItem);
    if (!d->renderer->isValid()) {
@@ -196,9 +191,6 @@ void QGraphicsSvgItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
    }
 }
 
-/*!
-    \reimp
-*/
 int QGraphicsSvgItem::type() const
 {
    return Type;

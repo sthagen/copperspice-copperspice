@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,7 +23,7 @@
 
 #include <qpathclipper_p.h>
 #include <qbezier_p.h>
-#include <qdatabuffer_p.h>
+#include <qvector.h>
 #include <qdebug.h>
 #include <qnumeric_p.h>
 #include <qmath.h>
@@ -58,8 +58,7 @@ static inline bool fuzzyIsNull(qreal d)
 
 static inline bool comparePoints(const QPointF &a, const QPointF &b)
 {
-   return fuzzyIsNull(a.x() - b.x())
-      && fuzzyIsNull(a.y() - b.y());
+   return fuzzyIsNull(a.x() - b.x()) && fuzzyIsNull(a.y() - b.y());
 }
 
 //#define QDEBUG_CLIPPER
@@ -232,6 +231,7 @@ struct TreeNode {
          int first;
          int last;
       } interval;
+
       struct {
          int left;
          int right;
@@ -257,7 +257,7 @@ class SegmentTree
 
    void produceIntersectionsLeaf(const TreeNode &node, int segment);
    void produceIntersections(const TreeNode &node, int segment, const RectF &segmentBounds, const RectF &nodeBounds, int axis);
-   void intersectLines(const QLineF &a, const QLineF &b, QDataBuffer<QIntersection> &intersections);
+   void intersectLines(const QLineF &a, const QLineF &b, QVector<QIntersection> &intersections);
 
    QPathSegments &m_segments;
    QVector<int> m_index;
@@ -265,12 +265,11 @@ class SegmentTree
    RectF m_bounds;
 
    QVector<TreeNode> m_tree;
-   QDataBuffer<QIntersection> m_intersections;
+   QVector<QIntersection> m_intersections;
 };
 
 SegmentTree::SegmentTree(QPathSegments &segments)
-   : m_segments(segments),
-     m_intersections(0)
+   : m_segments(segments)
 {
    m_bounds.x1 = qt_inf();
    m_bounds.y1 = qt_inf();
@@ -386,7 +385,7 @@ TreeNode SegmentTree::buildTree(int first, int last, int depth, const RectF &bou
    return node;
 }
 
-void SegmentTree::intersectLines(const QLineF &a, const QLineF &b, QDataBuffer<QIntersection> &intersections)
+void SegmentTree::intersectLines(const QLineF &a, const QLineF &b, QVector<QIntersection> &intersections)
 {
    const QPointF p1 = a.p1();
    const QPointF p2 = a.p2();
@@ -432,7 +431,7 @@ void SegmentTree::intersectLines(const QLineF &a, const QLineF &b, QDataBuffer<Q
             intersection.alphaA = tq1;
             intersection.alphaB = 0;
             intersection.pos = q1;
-            intersections.add(intersection);
+            intersections.append(intersection);
          }
 
          if (tq2 > 0 && tq2 < 1) {
@@ -440,7 +439,7 @@ void SegmentTree::intersectLines(const QLineF &a, const QLineF &b, QDataBuffer<Q
             intersection.alphaA = tq2;
             intersection.alphaB = 1;
             intersection.pos = q2;
-            intersections.add(intersection);
+            intersections.append(intersection);
          }
 
          const qreal invDq = 1 / dot(qDelta, qDelta);
@@ -453,7 +452,7 @@ void SegmentTree::intersectLines(const QLineF &a, const QLineF &b, QDataBuffer<Q
             intersection.alphaA = 0;
             intersection.alphaB = tp1;
             intersection.pos = p1;
-            intersections.add(intersection);
+            intersections.append(intersection);
          }
 
          if (tp2 > 0 && tp2 < 1) {
@@ -461,7 +460,7 @@ void SegmentTree::intersectLines(const QLineF &a, const QLineF &b, QDataBuffer<Q
             intersection.alphaA = 1;
             intersection.alphaB = tp2;
             intersection.pos = p2;
-            intersections.add(intersection);
+            intersections.append(intersection);
          }
       }
 
@@ -511,7 +510,7 @@ void SegmentTree::intersectLines(const QLineF &a, const QLineF &b, QDataBuffer<Q
    intersection.alphaA = tp;
    intersection.alphaB = tq;
    intersection.pos = pt;
-   intersections.add(intersection);
+   intersections.append(intersection);
 }
 
 void SegmentTree::produceIntersections(int segment)
@@ -547,7 +546,7 @@ void SegmentTree::produceIntersectionsLeaf(const TreeNode &node, int segment)
          continue;
       }
 
-      m_intersections.reset();
+      m_intersections.clear();
 
       const QLineF lineB = m_segments.lineAt(other);
 
@@ -622,14 +621,13 @@ class QKdPointTree
    };
 
    QKdPointTree(const QPathSegments &segments)
-      : m_segments(&segments)
-      , m_nodes(m_segments->points())
-      , m_id(0) {
+      : m_segments(&segments), m_id(0)
+   {
       m_nodes.resize(m_segments->points());
 
       for (int i = 0; i < m_nodes.size(); ++i) {
-         m_nodes.at(i).point = i;
-         m_nodes.at(i).id = -1;
+         m_nodes[i].point = i;
+         m_nodes[i].id = -1;
       }
 
       m_rootNode = build(0, m_nodes.size());
@@ -638,7 +636,7 @@ class QKdPointTree
    int build(int begin, int end, int depth = 0);
 
    Node *rootNode() {
-      return &m_nodes.at(m_rootNode);
+      return &m_nodes[m_rootNode];
    }
 
    inline int nextId() {
@@ -647,7 +645,7 @@ class QKdPointTree
 
  private:
    const QPathSegments *m_segments;
-   QDataBuffer<Node> m_nodes;
+   QVector<Node> m_nodes;
 
    int m_rootNode;
    int m_id;
@@ -662,11 +660,11 @@ void qTraverseKdPointTree(QKdPointTree::Node &node, T &t, int depth = 0)
    const bool traverseLeft = (status == QKdPointTree::TraverseBoth || status == QKdPointTree::TraverseLeft);
 
    if (traverseLeft && node.left) {
-      QT_PREPEND_NAMESPACE(qTraverseKdPointTree<T>)(*node.left, t, depth + 1);
+      qTraverseKdPointTree<T>(*node.left, t, depth + 1);
    }
 
    if (traverseRight && node.right) {
-      QT_PREPEND_NAMESPACE(qTraverseKdPointTree<T>)(*node.right, t, depth + 1);
+      qTraverseKdPointTree<T>(*node.right, t, depth + 1);
    }
 }
 
@@ -674,6 +672,7 @@ static inline qreal component(const QPointF &point, unsigned int i)
 {
    Q_ASSERT(i < 2);
    const qreal components[] = { point.x(), point.y() };
+
    return components[i];
 }
 
@@ -692,23 +691,23 @@ int QKdPointTree::build(int begin, int end, int depth)
       if (value < pivot) {
          ++first;
       } else {
-         qSwap(m_nodes.at(first), m_nodes.at(last));
+         qSwap(m_nodes[first], m_nodes[last]);
          --last;
       }
    }
 
-   qSwap(m_nodes.at(last), m_nodes.at(begin));
+   qSwap(m_nodes[last], m_nodes[begin]);
 
    if (last > begin) {
-      m_nodes.at(last).left = &m_nodes.at(build(begin, last, depth + 1));
+      m_nodes[last].left = &m_nodes[build(begin, last, depth + 1)];
    } else {
-      m_nodes.at(last).left = 0;
+      m_nodes[last].left = nullptr;
    }
 
    if (last + 1 < end) {
-      m_nodes.at(last).right = &m_nodes.at(build(last + 1, end, depth + 1));
+      m_nodes[last].right = &m_nodes[build(last + 1, end, depth + 1)];
    } else {
-      m_nodes.at(last).right = 0;
+      m_nodes[last].right = nullptr;
    }
 
    return last;
@@ -718,9 +717,8 @@ class QKdPointFinder
 {
  public:
    QKdPointFinder(int point, const QPathSegments &segments, QKdPointTree &tree)
-      : m_result(-1)
-      , m_segments(&segments)
-      , m_tree(&tree) {
+      : m_result(-1), m_segments(&segments), m_tree(&tree)
+   {
       pointComponents[0] = segments.pointAt(point).x();
       pointComponents[1] = segments.pointAt(point).y();
    }
@@ -775,12 +773,12 @@ void QPathSegments::mergePoints()
    QKdPointTree tree(*this);
 
    if (tree.rootNode()) {
-      QDataBuffer<QPointF> mergedPoints(points());
-      QDataBuffer<int> pointIndices(points());
+      QVector<QPointF> mergedPoints;
+      QVector<int> pointIndices;
 
       for (int i = 0; i < points(); ++i) {
          QKdPointFinder finder(i, *this, tree);
-         QT_PREPEND_NAMESPACE(qTraverseKdPointTree<QKdPointFinder>)(*tree.rootNode(), finder);
+         qTraverseKdPointTree<QKdPointFinder>(*tree.rootNode(), finder);
 
          Q_ASSERT(finder.result() != -1);
 
@@ -792,12 +790,12 @@ void QPathSegments::mergePoints()
       }
 
       for (int i = 0; i < m_segments.size(); ++i) {
-         m_segments.at(i).va = pointIndices.at(m_segments.at(i).va);
-         m_segments.at(i).vb = pointIndices.at(m_segments.at(i).vb);
+         m_segments[i].va = pointIndices.at(m_segments.at(i).va);
+         m_segments[i].vb = pointIndices.at(m_segments.at(i).vb);
       }
 
       for (int i = 0; i < m_intersections.size(); ++i) {
-         m_intersections.at(i).vertex = pointIndices.at(m_intersections.at(i).vertex);
+         m_intersections[i].vertex = pointIndices.at(m_intersections.at(i).vertex);
       }
 
       m_points.swap(mergedPoints);
@@ -815,24 +813,25 @@ void QWingedEdge::intersectAndAdd()
       addVertex(m_segments.pointAt(i));
    }
 
-   QDataBuffer<QPathSegments::Intersection> intersections(m_segments.segments());
+   QVector<QPathSegments::Intersection> intersections;
+
    for (int i = 0; i < m_segments.segments(); ++i) {
-      intersections.reset();
+      intersections.clear();
 
       int pathId = m_segments.pathId(i);
-
       const QPathSegments::Intersection *isect = m_segments.intersectionAt(i);
+
       while (isect) {
          intersections << *isect;
 
          if (isect->next) {
             isect += isect->next;
          } else {
-            isect = 0;
+            isect = nullptr;
          }
       }
 
-      std::sort(intersections.data(), intersections.data() + intersections.size());
+      std::sort(intersections.begin(), intersections.end());
 
       int first = m_segments.segmentAt(i).va;
       int second = m_segments.segmentAt(i).vb;
@@ -845,6 +844,7 @@ void QWingedEdge::intersectAndAdd()
 
          if (ep) {
             const int dir = m_segments.pointAt(last).y() < m_segments.pointAt(isect.vertex).y() ? 1 : -1;
+
             if (pathId == 0) {
                ep->windingA += dir;
             } else {
@@ -868,17 +868,13 @@ void QWingedEdge::intersectAndAdd()
    }
 }
 
-QWingedEdge::QWingedEdge() :
-   m_edges(0),
-   m_vertices(0),
-   m_segments(0)
+QWingedEdge::QWingedEdge()
+   : m_segments(0)
 {
 }
 
-QWingedEdge::QWingedEdge(const QPainterPath &subject, const QPainterPath &clip) :
-   m_edges(subject.elementCount()),
-   m_vertices(subject.elementCount()),
-   m_segments(subject.elementCount())
+QWingedEdge::QWingedEdge(const QPainterPath &subject, const QPainterPath &clip)
+   : m_segments(subject.elementCount())
 {
    m_segments.setPath(subject);
    m_segments.addPath(clip);
@@ -926,9 +922,9 @@ static bool isLine(const QBezier &bezier)
 
 void QPathSegments::setPath(const QPainterPath &path)
 {
-   m_points.reset();
-   m_intersections.reset();
-   m_segments.reset();
+   m_points.clear();
+   m_intersections.clear();
+   m_segments.clear();
 
    m_pathId = 0;
 
@@ -942,6 +938,7 @@ void QPathSegments::addPath(const QPainterPath &path)
    bool hasMoveTo = false;
    int lastMoveTo = 0;
    int last = 0;
+
    for (int i = 0; i < path.elementCount(); ++i) {
       int current = m_points.size();
 
@@ -963,18 +960,23 @@ void QPathSegments::addPath(const QPainterPath &path)
             if (hasMoveTo && last != lastMoveTo && !comparePoints(m_points.at(last), m_points.at(lastMoveTo))) {
                m_segments << Segment(m_pathId, last, lastMoveTo);
             }
+
             hasMoveTo = true;
             last = lastMoveTo = current;
             break;
+
          case QPainterPath::LineToElement:
             m_segments << Segment(m_pathId, last, current);
             last = current;
             break;
+
          case QPainterPath::CurveToElement: {
             QBezier bezier = QBezier::fromPoints(m_points.at(last), path.elementAt(i), path.elementAt(i + 1),
                   path.elementAt(i + 2));
+
             if (isLine(bezier)) {
                m_segments << Segment(m_pathId, last, current);
+
             } else {
                QRectF bounds = bezier.bounds();
 
@@ -1027,7 +1029,7 @@ void QPathSegments::addPath(const QPainterPath &path)
          qSwap(y1, y2);
       }
 
-      m_segments.at(i).bounds = QRectF(x1, y1, x2 - x1, y2 - y1);
+      m_segments[i].bounds = QRectF(x1, y1, x2 - x1, y2 - y1);
    }
 
    ++m_pathId;
@@ -1197,7 +1199,7 @@ static double computeAngle(const QPointF &v)
       return 64. + 32. * vx;
    }
 #else
-   // doesn't seem to be robust enough
+   // does not seem to be robust enough
    return qAtan2(v.x(), v.y()) + Q_PI;
 #endif
 }
@@ -1487,33 +1489,11 @@ bool QPathClipper::contains()
    return true;
 }
 
-QPathClipper::QPathClipper(const QPainterPath &subject,
-   const QPainterPath &clip)
-   : subjectPath(subject)
-   , clipPath(clip)
+QPathClipper::QPathClipper(const QPainterPath &subject, const QPainterPath &clip)
+   : subjectPath(subject), clipPath(clip)
 {
    aMask = subjectPath.fillRule() == Qt::WindingFill ? ~0x0 : 0x1;
    bMask = clipPath.fillRule() == Qt::WindingFill ? ~0x0 : 0x1;
-}
-
-template <typename Iterator, typename Equality>
-Iterator qRemoveDuplicates(Iterator begin, Iterator end, Equality eq)
-{
-   if (begin == end) {
-      return end;
-   }
-
-   Iterator last = begin;
-   ++begin;
-   Iterator insert = begin;
-   for (Iterator it = begin; it != end; ++it) {
-      if (!eq(*it, *last)) {
-         *insert++ = *it;
-         last = it;
-      }
-   }
-
-   return insert;
 }
 
 static void clear(QWingedEdge &list, int edge, QPathEdge::Traversal traversal)
@@ -1537,7 +1517,7 @@ static void clear(QWingedEdge &list, int edge, QPathEdge::Traversal traversal)
 template <typename InputIterator>
 InputIterator qFuzzyFind(InputIterator first, InputIterator last, qreal val)
 {
-   while (first != last && !QT_PREPEND_NAMESPACE(qFuzzyCompare)(qreal(*first), qreal(val))) {
+   while (first != last && ! qFuzzyCompare(qreal(*first), qreal(val))) {
       ++first;
    }
    return first;
@@ -1602,8 +1582,8 @@ QPainterPath QPathClipper::clip(Operation operation)
          return op == BoolSub ? QPainterPath() : subjectPath;
       }
 
-      bool subjectIsRect = pathToRect(subjectPath, 0);
-      bool clipIsRect = pathToRect(clipPath, 0);
+      bool subjectIsRect = pathToRect(subjectPath, nullptr);
+      bool clipIsRect = pathToRect(clipPath, nullptr);
 
       const QRectF clipBounds = clipPath.boundingRect();
       const QRectF subjectBounds = subjectPath.boundingRect();
@@ -1612,20 +1592,27 @@ QPainterPath QPathClipper::clip(Operation operation)
          switch (op) {
             case BoolSub:
                return subjectPath;
+
             case BoolAnd:
                return QPainterPath();
+
             case BoolOr: {
                QPainterPath result = subjectPath;
+
                if (result.fillRule() == clipPath.fillRule()) {
                   result.addPath(clipPath);
+
                } else if (result.fillRule() == Qt::WindingFill) {
                   result = result.simplified();
                   result.addPath(clipPath);
+
                } else {
                   result.addPath(clipPath.simplified());
                }
+
                return result;
             }
+
             default:
                break;
          }
@@ -1636,10 +1623,13 @@ QPainterPath QPathClipper::clip(Operation operation)
             switch (op) {
                case BoolSub:
                   return QPainterPath();
+
                case BoolAnd:
                   return subjectPath;
+
                case BoolOr:
                   return clipPath;
+
                default:
                   break;
             }
@@ -1653,6 +1643,7 @@ QPainterPath QPathClipper::clip(Operation operation)
                      QPainterPath result = clipPath;
                      result.addRect(subjectBounds);
                      return result;
+
                   } else {
                      QPainterPath result = clipPath.simplified();
                      result.addRect(subjectBounds);
@@ -1674,6 +1665,7 @@ QPainterPath QPathClipper::clip(Operation operation)
       if (op == BoolAnd) {
          if (subjectIsRect) {
             return intersect(clipPath, subjectBounds);
+
          } else if (clipIsRect) {
             return intersect(subjectPath, clipBounds);
          }
@@ -1685,6 +1677,7 @@ QPainterPath QPathClipper::clip(Operation operation)
    doClip(list, ClipMode);
 
    QPainterPath path = list.toPath();
+
    return path;
 }
 
@@ -1692,25 +1685,29 @@ bool QPathClipper::doClip(QWingedEdge &list, ClipperMode mode)
 {
    QVector<qreal> y_coords;
    y_coords.reserve(list.vertexCount());
+
    for (int i = 0; i < list.vertexCount(); ++i) {
       y_coords << list.vertex(i)->y;
    }
 
    std::sort(y_coords.begin(), y_coords.end());
-   y_coords.resize(qRemoveDuplicates(y_coords.begin(), y_coords.end(), fuzzyCompare) - y_coords.begin());
+   y_coords.erase(std::unique(y_coords.begin(), y_coords.end(), fuzzyCompare), y_coords.end());
 
 #ifdef QDEBUG_CLIPPER
    printf("sorted y coords:\n");
+
    for (int i = 0; i < y_coords.size(); ++i) {
       printf("%.9f\n", y_coords[i]);
    }
 #endif
 
    bool found;
+
    do {
       found = false;
       int index = 0;
       qreal maxHeight = 0;
+
       for (int i = 0; i < list.edgeCount(); ++i) {
          QPathEdge *edge = list.edge(i);
 
@@ -1742,11 +1739,11 @@ bool QPathClipper::doClip(QWingedEdge &list, ClipperMode mode)
          QPathVertex *b = list.vertex(edge->second);
 
          // FIXME: this can be optimized by using binary search
-         const int first = qFuzzyFind(y_coords.begin(), y_coords.end(), qMin(a->y, b->y)) - y_coords.begin();
-         const int last = qFuzzyFind(y_coords.begin() + first, y_coords.end(), qMax(a->y, b->y)) - y_coords.begin();
+         const int first = qFuzzyFind(y_coords.cbegin(), y_coords.cend(), qMin(a->y, b->y)) - y_coords.cbegin();
+         const int last  = qFuzzyFind(y_coords.cbegin() + first, y_coords.cend(), qMax(a->y, b->y)) - y_coords.cbegin();
 
          Q_ASSERT(first < y_coords.size() - 1);
-         Q_ASSERT(last < y_coords.size());
+         Q_ASSERT(last  < y_coords.size());
 
          qreal bestY = 0.5 * (y_coords[first] + y_coords[first + 1]);
          qreal biggestGap = y_coords[first + 1] - y_coords[first];
@@ -1770,6 +1767,7 @@ bool QPathClipper::doClip(QWingedEdge &list, ClipperMode mode)
 
          edge->flag |= 0x3;
       }
+
    } while (found);
 
    if (mode == ClipMode) {
@@ -1815,11 +1813,14 @@ static bool bool_op(bool a, bool b, QPathClipper::Operation op)
    switch (op) {
       case QPathClipper::BoolAnd:
          return a && b;
-      case QPathClipper::BoolOr: // fall-through
+
+      case QPathClipper::BoolOr:
       case QPathClipper::Simplify:
          return a || b;
+
       case QPathClipper::BoolSub:
-         return a && !b;
+         return a && ! b;
+
       default:
          Q_ASSERT(false);
          return false;
@@ -1965,6 +1966,7 @@ QVector<QPainterPath> toSubpaths(const QPainterPath &path)
    QPainterPath current;
    for (int i = 0; i < path.elementCount(); ++i) {
       const QPainterPath::Element &e = path.elementAt(i);
+
       switch (e.type) {
          case QPainterPath::MoveToElement:
             if (current.elementCount() > 1) {
@@ -1973,14 +1975,17 @@ QVector<QPainterPath> toSubpaths(const QPainterPath &path)
             current = QPainterPath();
             current.moveTo(e);
             break;
+
          case QPainterPath::LineToElement:
             current.lineTo(e);
             break;
+
          case QPainterPath::CurveToElement: {
             current.cubicTo(e, path.elementAt(i + 1), path.elementAt(i + 2));
             i += 2;
             break;
          }
+
          case QPainterPath::CurveToDataElement:
             Q_ASSERT(!"toSubpaths(), bad element type");
             break;
@@ -2009,10 +2014,13 @@ bool compare(const QPointF &p, qreal t)
    switch (edge) {
       case Left:
          return p.x() < t;
+
       case Right:
          return p.x() > t;
+
       case Top:
          return p.y() < t;
+
       default:
          return p.y() > t;
    }
@@ -2022,10 +2030,12 @@ template <Edge edge>
 QPointF intersectLine(const QPointF &a, const QPointF &b, qreal t)
 {
    QLineF line(a, b);
+
    switch (edge) {
-      case Left: // fall-through
+      case Left:
       case Right:
          return line.pointAt((t - a.x()) / (b.x() - a.x()));
+
       default:
          return line.pointAt((t - a.y()) / (b.y() - a.y()));
    }
@@ -2047,6 +2057,7 @@ void clipLine(const QPointF &a, const QPointF &b, qreal t, QPainterPath &result)
 {
    bool outA = compare<edge>(a, t);
    bool outB = compare<edge>(b, t);
+
    if (outA && outB) {
       return;
    }
@@ -2096,20 +2107,24 @@ void clipBezier(const QPointF &a, const QPointF &b, const QPointF &c, const QPoi
    QBezier unflipped = bezier;
    QBezier flipped = bezier.mapBy(flip);
 
-   qreal t0 = 0, t1 = 1;
+   qreal t0 = 0;
+   qreal t1 = 1;
+
    int stationary = flipped.stationaryYPoints(t0, t1);
 
    qreal segments[4];
    QPointF points[4];
-   points[0] = unflipped.pt1();
+   points[0]   = unflipped.pt1();
    segments[0] = 0;
 
    int segmentCount = 0;
+
    if (stationary > 0) {
       ++segmentCount;
       segments[segmentCount] = t0;
       points[segmentCount] = unflipped.pointAt(t0);
    }
+
    if (stationary > 1) {
       ++segmentCount;
       segments[segmentCount] = t1;

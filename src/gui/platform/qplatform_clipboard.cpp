@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -52,7 +52,7 @@ class QClipboardData
 
 QClipboardData::QClipboardData()
 {
-   src = 0;
+   src = nullptr;
 }
 
 QClipboardData::~QClipboardData()
@@ -64,20 +64,20 @@ Q_GLOBAL_STATIC(QClipboardData, q_clipboardData);
 
 QPlatformClipboard::~QPlatformClipboard()
 {
-
 }
 
 QMimeData *QPlatformClipboard::mimeData(QClipboard::Mode mode)
 {
    //we know its clipboard
-   Q_UNUSED(mode);
+   (void) mode;
    return q_clipboardData()->source();
 }
 
 void QPlatformClipboard::setMimeData(QMimeData *data, QClipboard::Mode mode)
 {
    //we know its clipboard
-   Q_UNUSED(mode);
+   (void) mode;
+
    q_clipboardData()->setSource(data);
    emitChanged(mode);
 }
@@ -89,9 +89,10 @@ bool QPlatformClipboard::supportsMode(QClipboard::Mode mode) const
 
 bool QPlatformClipboard::ownsMode(QClipboard::Mode mode) const
 {
-   Q_UNUSED(mode);
+   (void) mode;
    return false;
 }
+
 void QPlatformClipboard::emitChanged(QClipboard::Mode mode)
 {
    if (!QGuiApplicationPrivate::is_app_closing)  {
@@ -99,6 +100,5 @@ void QPlatformClipboard::emitChanged(QClipboard::Mode mode)
       QGuiApplication::clipboard()->emitChanged(mode);
    }
 }
-
 
 #endif //QT_NO_CLIPBOARD

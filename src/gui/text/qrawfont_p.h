@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,76 +37,68 @@ class QRawFontPrivate
 {
  public:
    QRawFontPrivate()
-      : fontEngine(0)
-      , hintingPreference(QFont::PreferDefaultHinting)
-      , thread(0)
-   {}
+      : fontEngine(nullptr), hintingPreference(QFont::PreferDefaultHinting), thread(nullptr)
+   {
+   }
 
    QRawFontPrivate(const QRawFontPrivate &other)
-      : fontEngine(other.fontEngine)
-      , hintingPreference(other.hintingPreference)
-      , thread(other.thread) {
-      if (fontEngine != 0) {
-         fontEngine->ref.ref();
+      : fontEngine(other.fontEngine), hintingPreference(other.hintingPreference), thread(other.thread)
+   {
+      if (fontEngine != nullptr) {
+         fontEngine->m_refCount.ref();
       }
    }
 
    ~QRawFontPrivate() {
-      Q_ASSERT(ref.load() == 0);
       cleanUp();
    }
 
    inline void cleanUp() {
-      setFontEngine(0);
+      setFontEngine(nullptr);
       hintingPreference = QFont::PreferDefaultHinting;
    }
+
    inline bool isValid() const {
-      Q_ASSERT(fontEngine == 0 || thread == QThread::currentThread());
-      return fontEngine != 0;
+      Q_ASSERT(fontEngine == nullptr || thread == QThread::currentThread());
+      return fontEngine != nullptr;
    }
 
    inline void setFontEngine(QFontEngine *engine) {
-      Q_ASSERT(fontEngine == 0 || thread == QThread::currentThread());
+      Q_ASSERT(fontEngine == nullptr || thread == QThread::currentThread());
 
       if (fontEngine == engine) {
          return;
       }
 
-      if (fontEngine != 0) {
-         if (!fontEngine->ref.deref()) {
+      if (fontEngine != nullptr) {
+         if (! fontEngine->m_refCount.deref()) {
             delete fontEngine;
          }
 
-         thread = 0;
-
+         thread = nullptr;
       }
 
       fontEngine = engine;
 
-      if (fontEngine != 0) {
-         fontEngine->ref.ref();
+      if (fontEngine != nullptr) {
+         fontEngine->m_refCount.ref();
 
          thread = QThread::currentThread();
          Q_ASSERT(thread);
-
       }
    }
-   void loadFromData(const QByteArray &fontData,
-      qreal pixelSize,
-      QFont::HintingPreference hintingPreference);
 
-   static QRawFontPrivate *get(const QRawFont &font) {
-      return font.d.data();
+   void loadFromData(const QByteArray &fontData, qreal pixelSize, QFont::HintingPreference hintingPreference);
+
+   static std::shared_ptr<QRawFontPrivate> get(const QRawFont &font) {
+      return font.m_fontPrivate;
    }
 
    QFontEngine *fontEngine;
    QFont::HintingPreference hintingPreference;
 
-   QAtomicInt ref;
-
  private:
    QThread *thread;
-
 };
 
 #endif

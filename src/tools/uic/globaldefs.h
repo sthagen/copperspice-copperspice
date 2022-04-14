@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,9 @@
 #ifndef GLOBALDEFS_H
 #define GLOBALDEFS_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
-QT_BEGIN_NAMESPACE
+static constexpr const int BOXLAYOUT_DEFAULT_MARGIN  = 11;
+static constexpr const int BOXLAYOUT_DEFAULT_SPACING = 6;
 
-enum { BOXLAYOUT_DEFAULT_MARGIN = 11 };
-enum { BOXLAYOUT_DEFAULT_SPACING = 6 };
-
-QT_END_NAMESPACE
-
-#endif // GLOBALDEFS_H
+#endif

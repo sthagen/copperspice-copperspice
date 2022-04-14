@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,8 +39,13 @@
 #  include <unistd.h>
 #endif
 
-//#define QHOSTINFO_DEBUG
-Q_GLOBAL_STATIC(QHostInfoLookupManager, theHostInfoLookupManager)
+// #define QHOSTINFO_DEBUG
+
+QHostInfoLookupManager *cs_HostInfoLookupManager()
+{
+   static QHostInfoLookupManager retval;
+   return &retval;
+}
 
 static QAtomicInt theIdCounter = 1;
 
@@ -48,7 +53,7 @@ int QHostInfo::lookupHost(const QString &name, QObject *receiver, const QString 
 {
 
 #if defined QHOSTINFO_DEBUG
-   qDebug("QHostInfo::lookupHost(\"%s\", %p, %s)", name.toLatin1().constData(), receiver, member ? member + 1 : 0);
+   qDebug("QHostInfo::lookupHost(\"%s\", %p, %s)", csPrintable(name), receiver, csPrintable(member));
 #endif
 
    if (! QAbstractEventDispatcher::instance(QThread::currentThread())) {
@@ -76,7 +81,7 @@ int QHostInfo::lookupHost(const QString &name, QObject *receiver, const QString 
       return id;
    }
 
-   QHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QHostInfoLookupManager *manager = cs_HostInfoLookupManager();
 
    if (manager) {
       // the application is still alive
@@ -114,14 +119,14 @@ int QHostInfo::lookupHost(const QString &name, QObject *receiver, const QString 
 
 void QHostInfo::abortHostLookup(int id)
 {
-   theHostInfoLookupManager()->abortLookup(id);
+   cs_HostInfoLookupManager()->abortLookup(id);
 }
 
 QHostInfo QHostInfo::fromName(const QString &name)
 {
    QHostInfo hostInfo = QHostInfoAgent::fromName(name);
 
-   QAbstractHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QAbstractHostInfoLookupManager *manager = cs_HostInfoLookupManager();
    manager->cache.put(name, hostInfo);
 
    return hostInfo;
@@ -135,7 +140,7 @@ QHostInfo QHostInfoPrivate::fromName(const QString &name, QSharedPointer<QNetwor
 #endif
 
    QHostInfo hostInfo = QHostInfoAgent::fromName(name, session);
-   QAbstractHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QAbstractHostInfoLookupManager *manager = cs_HostInfoLookupManager();
    manager->cache.put(name, hostInfo);
    return hostInfo;
 }
@@ -161,9 +166,21 @@ QHostInfo::QHostInfo(const QHostInfo &other)
 {
 }
 
+QHostInfo::QHostInfo(QHostInfo &&other)
+   : d(nullptr)
+{
+   swap(d, other.d);
+}
+
 QHostInfo &QHostInfo::operator=(const QHostInfo &other)
 {
    *d.data() = *other.d.data();
+   return *this;
+}
+
+QHostInfo &QHostInfo::operator=(QHostInfo &&other)
+{
+   swap(d, other.d);
    return *this;
 }
 
@@ -232,10 +249,10 @@ QHostInfoRunnable::QHostInfoRunnable(const QString &hn, int i) : toBeLookedUp(hn
    setAutoDelete(true);
 }
 
-// the QHostInfoLookupManager will at some point call this via a QThreadPool
+// QHostInfoLookupManager will at some point call this via a QThreadPool
 void QHostInfoRunnable::run()
 {
-   QHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QHostInfoLookupManager *manager = cs_HostInfoLookupManager();
 
    // check aborted
    if (manager->wasAborted(id)) {
@@ -276,10 +293,12 @@ void QHostInfoRunnable::run()
 
    // now also iterate through the postponed ones
    {
-      QMutexLocker locker(&manager->mutex);
+      QRecursiveMutexLocker locker(&manager->mutex);
       QMutableListIterator<QHostInfoRunnable *> iterator(manager->postponedLookups);
+
       while (iterator.hasNext()) {
          QHostInfoRunnable *postponed = iterator.next();
+
          if (toBeLookedUp == postponed->toBeLookedUp) {
             // we can now emit
             iterator.remove();
@@ -295,10 +314,14 @@ void QHostInfoRunnable::run()
    // thread goes back to QThreadPool
 }
 
-QHostInfoLookupManager::QHostInfoLookupManager() : mutex(QMutex::Recursive), wasDeleted(false)
+QHostInfoLookupManager::QHostInfoLookupManager()
+   : wasDeleted(false)
 {
    moveToThread(QCoreApplicationPrivate::mainThread());
-   connect(QCoreApplication::instance(), SIGNAL(destroyed()), this, SLOT(waitForThreadPoolDone()), Qt::DirectConnection);
+
+   connect(QCoreApplication::instance(), &QCoreApplication::destroyed, this,
+            &QHostInfoLookupManager::waitForThreadPoolDone, Qt::DirectConnection);
+
    threadPool.setMaxThreadCount(20); // do 20 DNS lookups in parallel
 }
 
@@ -313,10 +336,12 @@ QHostInfoLookupManager::~QHostInfoLookupManager()
 void QHostInfoLookupManager::clear()
 {
    {
-      QMutexLocker locker(&mutex);
+      QRecursiveMutexLocker locker(&mutex);
+
       qDeleteAll(postponedLookups);
       qDeleteAll(scheduledLookups);
       qDeleteAll(finishedLookups);
+
       postponedLookups.clear();
       scheduledLookups.clear();
       finishedLookups.clear();
@@ -336,7 +361,7 @@ void QHostInfoLookupManager::work()
    //  - launch new lookups via the thread pool
    //  - make sure only one lookup per host/IP is in progress
 
-   QMutexLocker locker(&mutex);
+   QRecursiveMutexLocker locker(&mutex);
 
    if (!finishedLookups.isEmpty()) {
       // remove ID from aborted if it is in there
@@ -380,7 +405,7 @@ void QHostInfoLookupManager::work()
             if (currentLookups.at(i)->toBeLookedUp == scheduled->toBeLookedUp) {
                iterator.remove();
                postponedLookups.append(scheduled);
-               scheduled = 0;
+               scheduled = nullptr;
                break;
             }
          }
@@ -405,7 +430,7 @@ void QHostInfoLookupManager::scheduleLookup(QHostInfoRunnable *r)
       return;
    }
 
-   QMutexLocker locker(&this->mutex);
+   QRecursiveMutexLocker locker(&this->mutex);
    scheduledLookups.enqueue(r);
    work();
 }
@@ -417,7 +442,7 @@ void QHostInfoLookupManager::abortLookup(int id)
       return;
    }
 
-   QMutexLocker locker(&this->mutex);
+   QRecursiveMutexLocker locker(&this->mutex);
 
    // is postponed? delete and return
    for (int i = 0; i < postponedLookups.length(); i++) {
@@ -447,7 +472,7 @@ bool QHostInfoLookupManager::wasAborted(int id)
       return true;
    }
 
-   QMutexLocker locker(&this->mutex);
+   QRecursiveMutexLocker locker(&this->mutex);
    return abortedLookups.contains(id);
 }
 
@@ -458,7 +483,7 @@ void QHostInfoLookupManager::lookupFinished(QHostInfoRunnable *r)
       return;
    }
 
-   QMutexLocker locker(&this->mutex);
+   QRecursiveMutexLocker locker(&this->mutex);
    currentLookups.removeOne(r);
    finishedLookups.append(r);
    work();
@@ -471,7 +496,7 @@ QHostInfo qt_qhostinfo_lookup(const QString &name, QObject *receiver, const QStr
    *id = -1;
 
    // check cache
-   QAbstractHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QAbstractHostInfoLookupManager *manager = cs_HostInfoLookupManager();
 
    if (manager && manager->cache.isEnabled()) {
       QHostInfo info = manager->cache.get(name, valid);
@@ -490,7 +515,7 @@ QHostInfo qt_qhostinfo_lookup(const QString &name, QObject *receiver, const QStr
 
 void qt_qhostinfo_clear_cache()
 {
-   QAbstractHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QAbstractHostInfoLookupManager *manager = cs_HostInfoLookupManager();
    if (manager) {
       manager->clear();
    }
@@ -498,7 +523,7 @@ void qt_qhostinfo_clear_cache()
 
 void qt_qhostinfo_enable_cache(bool e)
 {
-   QAbstractHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QAbstractHostInfoLookupManager *manager = cs_HostInfoLookupManager();
    if (manager) {
       manager->cache.setEnabled(e);
    }
@@ -506,7 +531,8 @@ void qt_qhostinfo_enable_cache(bool e)
 
 void qt_qhostinfo_cache_inject(const QString &hostname, const QHostInfo &resolution)
 {
-   QAbstractHostInfoLookupManager *manager = theHostInfoLookupManager();
+   QAbstractHostInfoLookupManager *manager = cs_HostInfoLookupManager();
+
    if (!manager || !manager->cache.isEnabled()) {
       return;
    }
@@ -579,6 +605,6 @@ void QHostInfoCache::clear()
 
 QAbstractHostInfoLookupManager *QAbstractHostInfoLookupManager::globalInstance()
 {
-   return theHostInfoLookupManager();
+   return cs_HostInfoLookupManager();
 }
 

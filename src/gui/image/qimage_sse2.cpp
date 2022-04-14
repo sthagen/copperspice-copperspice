@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -73,8 +73,10 @@ bool convert_ARGB_to_ARGB_PM_inplace_sse2(QImageData *data, Qt::ImageConversionF
       QRgb *pe = p + spare;
 
       for (; p != pe; ++p) {
+
          if (*p < 0x00ffffff) {
             *p = 0;
+
          } else if (*p < 0xff000000) {
             *p = qPremultiply(*p);
          }

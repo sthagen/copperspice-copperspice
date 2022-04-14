@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QLISTVIEW_H
 #define QLISTVIEW_H
 
-#include <QtGui/qabstractitemview.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractitemview.h>
 
 #ifndef QT_NO_LISTVIEW
 
@@ -82,13 +80,47 @@ class Q_GUI_EXPORT QListView : public QAbstractItemView
    GUI_CS_PROPERTY_WRITE(selectionRectVisible, setSelectionRectVisible)
 
  public:
-   enum Movement { Static, Free, Snap };
-   enum Flow { LeftToRight, TopToBottom };
-   enum ResizeMode { Fixed, Adjust };
-   enum LayoutMode { SinglePass, Batched };
-   enum ViewMode { ListMode, IconMode };
+   GUI_CS_REGISTER_ENUM(
+      enum Movement {
+         Static,
+         Free,
+         Snap
+      };
+   )
+
+   GUI_CS_REGISTER_ENUM(
+      enum Flow {
+         LeftToRight,
+         TopToBottom
+      };
+   )
+
+   GUI_CS_REGISTER_ENUM(
+      enum ResizeMode {
+         Fixed,
+         Adjust
+      };
+   )
+
+   GUI_CS_REGISTER_ENUM(
+      enum LayoutMode {
+         SinglePass,
+         Batched
+      };
+   )
+
+   GUI_CS_REGISTER_ENUM(
+      enum ViewMode {
+         ListMode,
+         IconMode
+      };
+   )
 
    explicit QListView(QWidget *parent = nullptr);
+
+   QListView(const QListView &) = delete;
+   QListView &operator=(const QListView &) = delete;
+
    ~QListView();
 
    void setMovement(Movement movement);
@@ -149,7 +181,7 @@ class Q_GUI_EXPORT QListView : public QAbstractItemView
  protected:
    QListView(QListViewPrivate &, QWidget *parent = nullptr);
 
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
 
    void scrollContentsBy(int dx, int dy) override;
 
@@ -160,25 +192,26 @@ class Q_GUI_EXPORT QListView : public QAbstractItemView
    void rowsInserted(const QModelIndex &parent, int start, int end) override;
    void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
 
-   void mouseMoveEvent(QMouseEvent *e) override;
-   void mouseReleaseEvent(QMouseEvent *e) override;
+   void mouseMoveEvent(QMouseEvent *event) override;
+   void mouseReleaseEvent(QMouseEvent *event) override;
+
 #ifndef QT_NO_WHEELEVENT
-   void wheelEvent(QWheelEvent *e) override;
+   void wheelEvent(QWheelEvent *event) override;
 #endif
 
-   void timerEvent(QTimerEvent *e) override;
-   void resizeEvent(QResizeEvent *e) override;
+   void timerEvent(QTimerEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
 
 #ifndef QT_NO_DRAGANDDROP
-   void dragMoveEvent(QDragMoveEvent *e) override;
-   void dragLeaveEvent(QDragLeaveEvent *e) override;
-   void dropEvent(QDropEvent *e) override;
+   void dragMoveEvent(QDragMoveEvent *event) override;
+   void dragLeaveEvent(QDragLeaveEvent *event) override;
+   void dropEvent(QDropEvent *event) override;
 
    void startDrag(Qt::DropActions supportedActions) override;
 #endif
 
    QStyleOptionViewItem viewOptions() const override;
-   void paintEvent(QPaintEvent *e) override;
+   void paintEvent(QPaintEvent *event) override;
 
    int horizontalOffset() const override;
    int verticalOffset() const override;
@@ -186,7 +219,7 @@ class Q_GUI_EXPORT QListView : public QAbstractItemView
    QRect rectForIndex(const QModelIndex &index) const;
    void setPositionForIndex(const QPoint &position, const QModelIndex &index);
 
-   void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) override;
+   void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags flags) override;
    QRegion visualRegionForSelection(const QItemSelection &selection) const override;
    QModelIndexList selectedIndexes() const override;
 
@@ -198,13 +231,13 @@ class Q_GUI_EXPORT QListView : public QAbstractItemView
    void currentChanged(const QModelIndex &current, const QModelIndex &previous) override;
 
    QSize viewportSizeHint() const override;
- private:
-   int visualIndex(const QModelIndex &index) const;
 
+ private:
    Q_DECLARE_PRIVATE(QListView)
-   Q_DISABLE_COPY(QListView)
+
+   int visualIndex(const QModelIndex &index) const;
 };
 
 #endif // QT_NO_LISTVIEW
 
-#endif // QLISTVIEW_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,12 +31,8 @@
 QAtomicInt qgltextureglyphcache_serial_number = 1;
 
 QGLTextureGlyphCache::QGLTextureGlyphCache(QFontEngine::GlyphFormat format, const QTransform &matrix)
-    : QImageTextureGlyphCache(format, matrix)
-    , m_textureResource(0)
-    , pex(0)
-    , m_blitProgram(0)
-    , m_filterMode(Nearest)
-   , m_serialNumber(qgltextureglyphcache_serial_number.fetchAndAddRelaxed(1))
+    : QImageTextureGlyphCache(format, matrix), m_textureResource(nullptr), pex(nullptr), m_blitProgram(nullptr),
+      m_filterMode(Nearest), m_serialNumber(qgltextureglyphcache_serial_number.fetchAndAddRelaxed(1))
 {
 #ifdef QT_GL_TEXTURE_GLYPH_CACHE_DEBUG
    qDebug(" -> QGLTextureGlyphCache() %p for context %p.", this, QOpenGLContext::currentContext());
@@ -77,7 +73,7 @@ void QGLTextureGlyphCache::createTextureData(int width, int height)
 {
    QGLContext *ctx = const_cast<QGLContext *>(QGLContext::currentContext());
 
-   if (ctx == 0) {
+   if (ctx == nullptr) {
       qWarning("QGLTextureGlyphCache::createTextureData: Called with no context");
       return;
    }
@@ -103,7 +99,7 @@ void QGLTextureGlyphCache::createTextureData(int width, int height)
 
    if (m_textureResource && !m_textureResource->m_texture) {
         delete m_textureResource;
-        m_textureResource = 0;
+        m_textureResource = nullptr;
    }
 
     if (!m_textureResource)
@@ -112,7 +108,7 @@ void QGLTextureGlyphCache::createTextureData(int width, int height)
     funcs->glGenTextures(1, &m_textureResource->m_texture);
     funcs->glBindTexture(GL_TEXTURE_2D, m_textureResource->m_texture);
 
-    m_textureResource->m_width = width;
+    m_textureResource->m_width  = width;
     m_textureResource->m_height = height;
 
     if (m_format == QFontEngine::Format_A32) {
@@ -143,7 +139,7 @@ void QGLTextureGlyphCache::resizeTextureData(int width, int height)
 {
    QGLContext *ctx = const_cast<QGLContext *>(QGLContext::currentContext());
 
-   if (ctx == 0) {
+   if (ctx == nullptr) {
       qWarning("QGLTextureGlyphCache::resizeTextureData: Called with no context");
       return;
    }
@@ -183,8 +179,7 @@ void QGLTextureGlyphCache::resizeTextureData(int width, int height)
    GLuint tmp_texture;
    funcs->glGenTextures(1, &tmp_texture);
    funcs->glBindTexture(GL_TEXTURE_2D, tmp_texture);
-   funcs->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, oldWidth, oldHeight, 0,
-                        GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+   funcs->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, oldWidth, oldHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
    funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
    funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -194,13 +189,12 @@ void QGLTextureGlyphCache::resizeTextureData(int width, int height)
    m_filterMode = Nearest;
 
    funcs->glBindTexture(GL_TEXTURE_2D, 0);
-   funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                  GL_TEXTURE_2D, tmp_texture, 0);
+   funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tmp_texture, 0);
 
    funcs->glActiveTexture(GL_TEXTURE0 + QT_IMAGE_TEXTURE_UNIT);
    funcs->glBindTexture(GL_TEXTURE_2D, oldTexture);
 
-   if (pex != 0) {
+   if (pex != nullptr) {
       pex->transferMode(BrushDrawingMode);
    }
 
@@ -211,9 +205,10 @@ void QGLTextureGlyphCache::resizeTextureData(int width, int height)
 
    funcs->glViewport(0, 0, oldWidth, oldHeight);
 
-   QGLShaderProgram *blitProgram = 0;
-   if (pex == 0) {
-      if (m_blitProgram == 0) {
+   QGLShaderProgram *blitProgram = nullptr;
+
+   if (pex == nullptr) {
+      if (m_blitProgram == nullptr) {
          m_blitProgram = new QGLShaderProgram(ctx);
 
          {
@@ -265,19 +260,16 @@ void QGLTextureGlyphCache::resizeTextureData(int width, int height)
    blitProgram->setUniformValue("imageTexture", QT_IMAGE_TEXTURE_UNIT);
 
    funcs->glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    funcs->glBindTexture(GL_TEXTURE_2D, m_textureResource->m_texture);
-
+   funcs->glBindTexture(GL_TEXTURE_2D, m_textureResource->m_texture);
    funcs->glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, oldWidth, oldHeight);
 
-   funcs->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                     GL_RENDERBUFFER, 0);
+   funcs->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
    funcs->glDeleteTextures(1, &tmp_texture);
    funcs->glDeleteTextures(1, &oldTexture);
 
    funcs->glBindFramebuffer(GL_FRAMEBUFFER, ctx->d_ptr->current_fbo);
 
-   if (pex != 0) {
+   if (pex != nullptr) {
       funcs->glViewport(0, 0, pex->width, pex->height);
       pex->updateClipScissorTest();
    }
@@ -287,10 +279,11 @@ void QGLTextureGlyphCache::fillTexture(const Coord &c, glyph_t glyph, QFixed sub
 {
    QGLContext *ctx = const_cast<QGLContext *>(QGLContext::currentContext());
 
-   if (ctx == 0) {
+   if (ctx == nullptr) {
       qWarning("QGLTextureGlyphCache::fillTexture: Called with no context");
       return;
    }
+
    QOpenGLFunctions *funcs = ctx->contextHandle()->functions();
 
    if (!QGLFramebufferObject::hasOpenGLFramebufferObjects() || ctx->d_ptr->workaround_brokenFBOReadBack) {
@@ -396,7 +389,7 @@ int QGLTextureGlyphCache::maxTextureWidth() const
 {
    QGLContext *ctx = const_cast<QGLContext *>(QGLContext::currentContext());
 
-   if (ctx == 0) {
+   if (ctx == nullptr) {
       return QImageTextureGlyphCache::maxTextureWidth();
    } else {
       return ctx->d_ptr->maxTextureSize();
@@ -407,7 +400,7 @@ int QGLTextureGlyphCache::maxTextureHeight() const
 {
    QGLContext *ctx = const_cast<QGLContext *>(QGLContext::currentContext());
 
-   if (ctx == 0) {
+   if (ctx == nullptr) {
       return QImageTextureGlyphCache::maxTextureHeight();
    }
 
@@ -421,7 +414,7 @@ int QGLTextureGlyphCache::maxTextureHeight() const
 void QGLTextureGlyphCache::clear()
 {
    m_textureResource->free();
-   m_textureResource = 0;
+   m_textureResource = nullptr;
 
    m_w = 0;
    m_h = 0;
@@ -430,4 +423,3 @@ void QGLTextureGlyphCache::clear()
    m_currentRowHeight = 0;
    coords.clear();
 }
-

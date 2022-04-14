@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -49,10 +49,10 @@ class Q_MULTIMEDIA_EXPORT QAudioEncoderSettings
    bool isNull() const;
 
    QMultimedia::EncodingMode encodingMode() const;
-   void setEncodingMode(QMultimedia::EncodingMode);
+   void setEncodingMode(QMultimedia::EncodingMode mode);
 
    QString codec() const;
-   void setCodec(const QString &codec);
+   void setCodec(const QString &codecName);
 
    int bitRate() const;
    void setBitRate(int bitrate);
@@ -91,13 +91,13 @@ class Q_MULTIMEDIA_EXPORT QVideoEncoderSettings
    bool isNull() const;
 
    QMultimedia::EncodingMode encodingMode() const;
-   void setEncodingMode(QMultimedia::EncodingMode);
+   void setEncodingMode(QMultimedia::EncodingMode mode);
 
    QString codec() const;
-   void setCodec(const QString &);
+   void setCodec(const QString &codecName);
 
    QSize resolution() const;
-   void setResolution(const QSize &);
+   void setResolution(const QSize &resolution);
    void setResolution(int width, int height);
 
    qreal frameRate() const;
@@ -134,10 +134,10 @@ class Q_MULTIMEDIA_EXPORT QImageEncoderSettings
    bool isNull() const;
 
    QString codec() const;
-   void setCodec(const QString &);
+   void setCodec(const QString &codecName);
 
    QSize resolution() const;
-   void setResolution(const QSize &);
+   void setResolution(const QSize &resolution);
    void setResolution(int width, int height);
 
    QMultimedia::EncodingQuality quality() const;
@@ -151,9 +151,5 @@ class Q_MULTIMEDIA_EXPORT QImageEncoderSettings
  private:
    QSharedDataPointer<QImageEncoderSettingsPrivate> d;
 };
-
-Q_DECLARE_METATYPE(QAudioEncoderSettings)
-Q_DECLARE_METATYPE(QVideoEncoderSettings)
-Q_DECLARE_METATYPE(QImageEncoderSettings)
 
 #endif

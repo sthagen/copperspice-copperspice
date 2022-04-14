@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -43,7 +43,8 @@ class QVideoOutputControl;
 class QVideoWidgetControlInterface
 {
  public:
-   virtual ~QVideoWidgetControlInterface() {}
+   virtual ~QVideoWidgetControlInterface()
+   { }
 
    virtual void setBrightness(int brightness) = 0;
    virtual void setContrast(int contrast) = 0;
@@ -94,13 +95,12 @@ class QVideoWidgetControlBackend : public QObject, public QVideoWidgetControlInt
    QVideoWidgetControl *m_widgetControl;
 };
 
-
 class QRendererVideoWidgetBackend : public QVideoWidgetBackend
 {
    MULTI_CS_OBJECT(QRendererVideoWidgetBackend)
 
  public:
-   QRendererVideoWidgetBackend(QMediaService *service, QVideoRendererControl *control, QWidget *widget);
+   QRendererVideoWidgetBackend(QMediaService *service, QVideoRendererControl *control, QVideoWidget *widget);
    ~QRendererVideoWidgetBackend();
 
    void releaseControl();
@@ -126,18 +126,23 @@ class QRendererVideoWidgetBackend : public QVideoWidgetBackend
 
    MULTI_CS_SIGNAL_1(Public, void fullScreenChanged(bool fullScreen))
    MULTI_CS_SIGNAL_2(fullScreenChanged, fullScreen)
+
    MULTI_CS_SIGNAL_1(Public, void brightnessChanged(int brightness))
    MULTI_CS_SIGNAL_2(brightnessChanged, brightness)
+
    MULTI_CS_SIGNAL_1(Public, void contrastChanged(int contrast))
    MULTI_CS_SIGNAL_2(contrastChanged, contrast)
+
    MULTI_CS_SIGNAL_1(Public, void hueChanged(int hue))
    MULTI_CS_SIGNAL_2(hueChanged, hue)
+
    MULTI_CS_SIGNAL_1(Public, void saturationChanged(int saturation))
    MULTI_CS_SIGNAL_2(saturationChanged, saturation)
 
  private:
    MULTI_CS_SLOT_1(Private, void formatChanged(const QVideoSurfaceFormat &format))
    MULTI_CS_SLOT_2(formatChanged)
+
    MULTI_CS_SLOT_1(Private, void frameChanged())
    MULTI_CS_SLOT_2(frameChanged)
 
@@ -145,7 +150,7 @@ class QRendererVideoWidgetBackend : public QVideoWidgetBackend
 
    QMediaService *m_service;
    QVideoRendererControl *m_rendererControl;
-   QWidget *m_widget;
+   QVideoWidget *m_widget;
    QPainterVideoSurface *m_surface;
    Qt::AspectRatioMode m_aspectRatioMode;
    QRect m_boundingRect;
@@ -153,7 +158,6 @@ class QRendererVideoWidgetBackend : public QVideoWidgetBackend
    QSize m_nativeSize;
    bool m_updatePaintDevice;
 };
-
 
 class QWindowVideoWidgetBackend : public QVideoWidgetBackend
 {
@@ -183,10 +187,6 @@ class QWindowVideoWidgetBackend : public QVideoWidgetBackend
    void moveEvent(QMoveEvent *event) override;
    void paintEvent(QPaintEvent *event) override;
 
-#if defined(Q_WS_WIN)
-   bool winEvent(MSG *message, long *result);
-#endif
-
  private:
    QMediaService *m_service;
    QVideoWindowControl *m_windowControl;
@@ -200,9 +200,10 @@ class QVideoWidgetPrivate
 
  public:
    QVideoWidgetPrivate()
-      : q_ptr(0), mediaObject(0), service(0), widgetBackend(0), windowBackend(0), rendererBackend(0),
-        currentControl(0), currentBackend(0), brightness(0), contrast(0), hue(0), saturation(0),
-        aspectRatioMode(Qt::KeepAspectRatio), nonFullScreenFlags(0), wasFullScreen(false) {
+      : q_ptr(nullptr), mediaObject(nullptr), service(nullptr), widgetBackend(nullptr),
+        windowBackend(nullptr), rendererBackend(nullptr), currentControl(nullptr), currentBackend(nullptr),
+        brightness(0), contrast(0), hue(0), saturation(0),
+        aspectRatioMode(Qt::KeepAspectRatio), nonFullScreenFlags(Qt::EmptyFlag), wasFullScreen(false) {
    }
 
    QVideoWidget *q_ptr;

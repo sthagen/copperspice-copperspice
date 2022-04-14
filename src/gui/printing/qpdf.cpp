@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -381,11 +381,9 @@ QByteArray QPdf::generateDashes(const QPen &pen)
     return result;
 }
 
-
-
 static const char* const pattern_for_brush[] = {
-    0, // NoBrush
-    0, // SolidPattern
+    nullptr,    // NoBrush
+    nullptr,    // SolidPattern
     "0 J\n"
     "6 w\n"
     "[] 0 d\n"
@@ -393,7 +391,7 @@ static const char* const pattern_for_brush[] = {
     "4 8 l\n"
     "0 4 m\n"
     "8 4 l\n"
-    "S\n", // Dense1Pattern
+    "S\n",       // Dense1Pattern
 
     "0 J\n"
     "2 w\n"
@@ -412,7 +410,7 @@ static const char* const pattern_for_brush[] = {
     "[6 2] -3 d\n"
     "4 0 m\n"
     "4 8 l\n"
-    "S\n", // Dense2Pattern
+    "S\n",       // Dense2Pattern
 
     "0 J\n"
     "2 w\n"
@@ -431,7 +429,7 @@ static const char* const pattern_for_brush[] = {
     "[6 2] -3 d\n"
     "4 0 m\n"
     "4 8 l\n"
-    "S\n", // Dense3Pattern
+    "S\n",       // Dense3Pattern
 
     "0 J\n"
     "2 w\n"
@@ -450,7 +448,7 @@ static const char* const pattern_for_brush[] = {
     "[2 2] 1 d\n"
     "4 0 m\n"
     "4 8 l\n"
-    "S\n", // Dense4Pattern
+    "S\n",       // Dense4Pattern
 
     "0 J\n"
     "2 w\n"
@@ -469,7 +467,7 @@ static const char* const pattern_for_brush[] = {
     "[2 6] 3 d\n"
     "4 0 m\n"
     "4 8 l\n"
-    "S\n", // Dense5Pattern
+    "S\n",       // Dense5Pattern
 
     "0 J\n"
     "2 w\n"
@@ -482,7 +480,7 @@ static const char* const pattern_for_brush[] = {
     "[2 6] 3 d\n"
     "4 0 m\n"
     "4 8 l\n"
-    "S\n", // Dense6Pattern
+    "S\n",       // Dense6Pattern
 
     "0 J\n"
     "2 w\n"
@@ -491,38 +489,38 @@ static const char* const pattern_for_brush[] = {
     "0 8 l\n"
     "8 0 m\n"
     "8 8 l\n"
-    "S\n", // Dense7Pattern
+    "S\n",       // Dense7Pattern
 
     "1 w\n"
     "0 4 m\n"
     "8 4 l\n"
-    "S\n", // HorPattern
+    "S\n",       // HorPattern
 
     "1 w\n"
     "4 0 m\n"
     "4 8 l\n"
-    "S\n", // VerPattern
+    "S\n",       // VerPattern
 
     "1 w\n"
     "4 0 m\n"
     "4 8 l\n"
     "0 4 m\n"
     "8 4 l\n"
-    "S\n", // CrossPattern
+    "S\n",       // CrossPattern
 
     "1 w\n"
     "-1 5 m\n"
     "5 -1 l\n"
     "3 9 m\n"
     "9 3 l\n"
-    "S\n", // BDiagPattern
+    "S\n",       // BDiagPattern
 
     "1 w\n"
     "-1 3 m\n"
     "5 9 l\n"
     "3 -1 m\n"
     "9 5 l\n"
-    "S\n", // FDiagPattern
+    "S\n",       // FDiagPattern
 
     "1 w\n"
     "-1 3 m\n"
@@ -533,7 +531,7 @@ static const char* const pattern_for_brush[] = {
     "5 -1 l\n"
     "3 9 m\n"
     "9 3 l\n"
-    "S\n", // DiagCrossPattern
+    "S\n",       // DiagCrossPattern
 };
 
 QByteArray QPdf::patternForBrush(const QBrush &b)
@@ -543,7 +541,6 @@ QByteArray QPdf::patternForBrush(const QBrush &b)
         return QByteArray();
     return pattern_for_brush[style];
 }
-
 
 static void moveToHook(qfixed x, qfixed y, void *data)
 {
@@ -564,17 +561,17 @@ static void lineToHook(qfixed x, qfixed y, void *data)
     *t->stream << x << y << "l\n";
 }
 
-static void cubicToHook(qfixed c1x, qfixed c1y,
-                        qfixed c2x, qfixed c2y,
-                        qfixed ex, qfixed ey,
-                        void *data)
+static void cubicToHook(qfixed c1x, qfixed c1y, qfixed c2x, qfixed c2y,
+            qfixed ex, qfixed ey, void *data)
 {
     QPdf::Stroker *t = (QPdf::Stroker *)data;
+
     if (!t->cosmeticPen) {
         t->matrix.map(c1x, c1y, &c1x, &c1y);
         t->matrix.map(c2x, c2y, &c2x, &c2y);
         t->matrix.map(ex, ey, &ex, &ey);
     }
+
     *t->stream << c1x << c1y
                << c2x << c2y
                << ex << ey
@@ -582,9 +579,7 @@ static void cubicToHook(qfixed c1x, qfixed c1y,
 }
 
 QPdf::Stroker::Stroker()
-    : stream(0),
-    first(true),
-    dashStroker(&basicStroker)
+    : stream(nullptr), first(true), dashStroker(&basicStroker)
 {
     stroker = &basicStroker;
     basicStroker.setMoveToHook(moveToHook);
@@ -597,7 +592,7 @@ QPdf::Stroker::Stroker()
 void QPdf::Stroker::setPen(const QPen &pen, QPainter::RenderHints hints)
 {
     if (pen.style() == Qt::NoPen) {
-        stroker = 0;
+        stroker = nullptr;
         return;
     }
     qreal w = pen.widthF();
@@ -642,6 +637,7 @@ QByteArray QPdf::ascii85Encode(const QByteArray &input)
     output.resize(input.size()*5/4+7);
     char *out = output.data();
     const uchar *in = (const uchar *)input.constData();
+
     for (int i = 0; i < isize; i += 4) {
         uint val = (((uint)in[i])<<24) + (((uint)in[i+1])<<16) + (((uint)in[i+2])<<8) + (uint)in[i+3];
         if (val == 0) {
@@ -1356,15 +1352,13 @@ int QPdfEngine::metric(QPaintDevice::PaintDeviceMetric metricType) const
 
 QPdfEnginePrivate::QPdfEnginePrivate()
     : clipEnabled(false), allClipped(false), hasPen(true), hasBrush(false), simplePen(false),
-      outDevice(0), ownsDevice(false),
-      embedFonts(true),
-      grayscale(false),
+      outDevice(nullptr), ownsDevice(false), embedFonts(true), grayscale(false),
       m_pageLayout(QPageSize(QPageSize::A4), QPageLayout::Portrait, QMarginsF(10, 10, 10, 10))
 {
-    resolution = 1200;
-    currentObject = 1;
-    currentPage = 0;
-    stroker.stream = 0;
+    resolution     = 1200;
+    currentObject  = 1;
+    currentPage    = nullptr;
+    stroker.stream = nullptr;
 
     streampos = 0;
 
@@ -1428,17 +1422,17 @@ bool QPdfEngine::end()
     Q_D(QPdfEngine);
     d->writeTail();
 
-    d->stream->unsetDevice();
+    d->stream->setDevice(nullptr);
 
     qDeleteAll(d->fonts);
     d->fonts.clear();
     delete d->currentPage;
-    d->currentPage = 0;
+    d->currentPage = nullptr;
 
     if (d->outDevice && d->ownsDevice) {
         d->outDevice->close();
         delete d->outDevice;
-        d->outDevice = 0;
+        d->outDevice = nullptr;
     }
 
     setActive(false);
@@ -1842,9 +1836,11 @@ int QPdfEnginePrivate::writeCompressed(QIODevice *dev)
         int size = QPdfPage::chunkSize();
         int sum = 0;
         ::z_stream zStruct;
-        zStruct.zalloc = Z_NULL;
-        zStruct.zfree = Z_NULL;
-        zStruct.opaque = Z_NULL;
+
+        zStruct.zalloc = nullptr;
+        zStruct.zfree  = nullptr;
+        zStruct.opaque = nullptr;
+
         if (::deflateInit(&zStruct, Z_DEFAULT_COMPRESSION) != Z_OK) {
             qWarning("QPdfStream::writeCompressed: Error in deflateInit()");
             return sum;
@@ -1993,15 +1989,16 @@ struct QGradientBound {
 
 int QPdfEnginePrivate::createShadingFunction(const QGradient *gradient, int from, int to, bool reflect, bool alpha)
 {
-    QGradientStops stops = gradient->stops();
+    QVector<QPair<qreal, QColor>> stops = gradient->stops();
     if (stops.isEmpty()) {
-        stops << QGradientStop(0, Qt::black);
-        stops << QGradientStop(1, Qt::white);
+        stops << QPair<qreal, QColor>(0, Qt::black);
+        stops << QPair<qreal, QColor>(1, Qt::white);
     }
     if (stops.at(0).first > 0)
-        stops.prepend(QGradientStop(0, stops.at(0).second));
+        stops.prepend(QPair<qreal, QColor>(0, stops.at(0).second));
+
     if (stops.at(stops.size() - 1).first < 1)
-        stops.append(QGradientStop(1, stops.at(stops.size() - 1).second));
+        stops.append(QPair<qreal, QColor>(1, stops.at(stops.size() - 1).second));
 
     QVector<int> functions;
     const int numStops = stops.size();
@@ -2104,7 +2101,8 @@ int QPdfEnginePrivate::generateLinearGradientShader(const QLinearGradient *gradi
         break;
     case QGradient::ReflectSpread:
         reflect = true;
-        // fall through
+        [[fallthrough]];
+
     case QGradient::RepeatSpread: {
         // calculate required bounds
         QRectF pageRect = m_pageLayout.fullRectPixels(resolution);
@@ -2165,9 +2163,11 @@ int QPdfEnginePrivate::generateRadialGradientShader(const QRadialGradient *gradi
     switch (gradient->spread()) {
     case QGradient::PadSpread:
         break;
+
     case QGradient::ReflectSpread:
         reflect = true;
-        // fall through
+        [[fallthrough]];
+
     case QGradient::RepeatSpread: {
         Q_ASSERT(qFuzzyIsNull(r0)); // QPainter emulates if this is not 0
 
@@ -2267,7 +2267,7 @@ int QPdfEnginePrivate::gradientBrush(const QBrush &b, const QTransform &matrix, 
 
     if (!b.isOpaque()) {
         bool ca = true;
-        QGradientStops stops = gradient->stops();
+        QVector<QPair<qreal, QColor>> stops = gradient->stops();
         int a = stops.at(0).second.alpha();
         for (int i = 1; i < stops.size(); ++i) {
             if (stops.at(i).second.alpha() != a) {
@@ -2616,7 +2616,7 @@ void QPdfEnginePrivate::drawTextItem(const QPointF &p, const QTextItemInt &ti)
         noEmbed = true;
     }
 
-    QFontSubset *font = fonts.value(face_id, 0);
+    QFontSubset *font = fonts.value(face_id, nullptr);
     if (!font) {
         font = new QFontSubset(fe, requestObject());
         font->noEmbed = noEmbed;
@@ -2631,10 +2631,11 @@ void QPdfEnginePrivate::drawTextItem(const QPointF &p, const QTextItemInt &ti)
     QVarLengthArray<glyph_t> glyphs;
     QVarLengthArray<QFixedPoint> positions;
     QTransform m = QTransform::fromTranslate(p.x(), p.y());
-    ti.fontEngine->getGlyphPositions(ti.glyphs, m, ti.flags,
-                                     glyphs, positions);
+    ti.fontEngine->getGlyphPositions(ti.glyphs, m, ti.flags, glyphs, positions);
+
     if (glyphs.size() == 0)
         return;
+
     int synthesized = ti.fontEngine->synthesized();
     qreal stretch = synthesized & QFontEngine::SynthesizedStretch ? ti.fontEngine->fontDef.stretch/100. : 1.;
 

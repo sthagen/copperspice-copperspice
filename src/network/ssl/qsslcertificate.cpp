@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,14 +21,14 @@
 *
 ***********************************************************************/
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 #ifdef QT_OPENSSL
 #include <qsslsocket_openssl_symbols_p.h>
 #endif
 
 #ifdef QT_SECURETRANSPORT
-#include "qsslsocket_mac_p.h"
+#include <qsslsocket_mac_p.h>
 #endif
 
 #include <qssl_p.h>
@@ -58,7 +58,8 @@ QSslCertificate::QSslCertificate(const QByteArray &data, QSsl::EncodingFormat fo
    d->init(data, format);
 }
 
-QSslCertificate::QSslCertificate(const QSslCertificate &other) : d(other.d)
+QSslCertificate::QSslCertificate(const QSslCertificate &other)
+   : d(other.d)
 {
 }
 
@@ -76,6 +77,7 @@ bool QSslCertificate::isBlacklisted() const
 {
    return QSslCertificatePrivate::isBlacklisted(*this);
 }
+
 void QSslCertificate::clear()
 {
    if (isNull()) {
@@ -185,8 +187,7 @@ QList<QSslCertificate> QSslCertificate::fromDevice(QIODevice *device, QSsl::Enco
 
 QList<QSslCertificate> QSslCertificate::fromData(const QByteArray &data, QSsl::EncodingFormat format)
 {
-   return (format == QSsl::Pem)
-          ? QSslCertificatePrivate::certificatesFromPem(data)
+   return (format == QSsl::Pem) ? QSslCertificatePrivate::certificatesFromPem(data)
           : QSslCertificatePrivate::certificatesFromDer(data);
 }
 
@@ -196,7 +197,7 @@ QList<QSslError> QSslCertificate::verify(const QList<QSslCertificate> &certifica
 }
 
 bool QSslCertificate::importPkcs12(QIODevice *device, QSslKey *key, QSslCertificate *certificate,
-                                   QList<QSslCertificate> *caCertificates, const QByteArray &passPhrase)
+            QList<QSslCertificate> *caCertificates, const QByteArray &passPhrase)
 {
    return QSslSocketBackendPrivate::importPkcs12(device, key, certificate, caCertificates, passPhrase);
 }
@@ -248,12 +249,12 @@ static const char *const certificate_blacklist[] = {
    "27:83",                                           "NIC Certifying Authority", // intermediate certificate from NIC India (2007)
    "27:92",                                           "NIC CA 2011", // intermediate certificate from NIC India (2011)
    "27:b1",                                           "NIC CA 2014", // intermediate certificate from NIC India (2014)
-   0
+   nullptr
 };
 
 bool QSslCertificatePrivate::isBlacklisted(const QSslCertificate &certificate)
 {
-   for (int a = 0; certificate_blacklist[a] != 0; a++) {
+   for (int a = 0; certificate_blacklist[a] != nullptr; a++) {
       QString blacklistedCommonName = QString::fromUtf8(certificate_blacklist[(a + 1)]);
 
       if (certificate.serialNumber() == certificate_blacklist[a++] &&
@@ -313,7 +314,6 @@ QByteArray QSslCertificatePrivate::subjectInfoToString(QSslCertificate::SubjectI
 
 QDebug operator<<(QDebug debug, const QSslCertificate &certificate)
 {
-
    // QDebugStateSaver saver(debug);
    // debug.resetFormat().nospace();
 
@@ -324,11 +324,8 @@ QDebug operator<<(QDebug debug, const QSslCertificate &certificate)
          << ", " << certificate.issuerInfo(QSslCertificate::Organization)
          << ", " << certificate.subjectInfo(QSslCertificate::Organization)
          << ", " << certificate.subjectAlternativeNames()
-
-#ifndef QT_NO_DATESTRING
          << ", " << certificate.effectiveDate()
          << ", " << certificate.expiryDate()
-#endif
          << ')';
 
    return debug;

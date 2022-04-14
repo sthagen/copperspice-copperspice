@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QANIMATIONGROUP_H
 #define QANIMATIONGROUP_H
 
-#include <QtCore/qabstractanimation.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractanimation.h>
 
 #ifndef QT_NO_ANIMATION
 
@@ -38,6 +36,10 @@ class Q_CORE_EXPORT QAnimationGroup : public QAbstractAnimation
 
  public:
    QAnimationGroup(QObject *parent = nullptr);
+
+   QAnimationGroup(const QAnimationGroup &) = delete;
+   QAnimationGroup &operator=(const QAnimationGroup &) = delete;
+
    ~QAnimationGroup();
 
    QAbstractAnimation *animationAt(int index) const;
@@ -54,12 +56,12 @@ class Q_CORE_EXPORT QAnimationGroup : public QAbstractAnimation
    bool event(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QAnimationGroup)
    Q_DECLARE_PRIVATE(QAnimationGroup)
+
+   virtual void _q_uncontrolledAnimationFinished() {
+   }
 };
 
-#endif //QT_NO_ANIMATION
+#endif // QT_NO_ANIMATION
 
-QT_END_NAMESPACE
-
-#endif //QANIMATIONGROUP_H
+#endif

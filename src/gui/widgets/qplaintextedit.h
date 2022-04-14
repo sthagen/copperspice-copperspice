@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -46,7 +46,6 @@ class QPlainTextDocumentLayoutPrivate;
 class Q_GUI_EXPORT QPlainTextEdit : public QAbstractScrollArea
 {
    GUI_CS_OBJECT(QPlainTextEdit)
-   Q_DECLARE_PRIVATE(QPlainTextEdit)
 
    GUI_CS_ENUM(LineWrapMode)
 
@@ -101,13 +100,19 @@ class Q_GUI_EXPORT QPlainTextEdit : public QAbstractScrollArea
    GUI_CS_PROPERTY_WRITE(placeholderText, setPlaceholderText)
 
  public:
-   enum LineWrapMode {
-      NoWrap,
-      WidgetWidth
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum LineWrapMode {
+         NoWrap,
+         WidgetWidth
+      };
+   )
 
    explicit QPlainTextEdit(QWidget *parent = nullptr);
    explicit QPlainTextEdit(const QString &text, QWidget *parent = nullptr);
+
+   QPlainTextEdit(const QPlainTextEdit &) = delete;
+   QPlainTextEdit &operator=(const QPlainTextEdit &) = delete;
+
    virtual ~QPlainTextEdit();
 
    void setDocument(QTextDocument *document);
@@ -129,7 +134,7 @@ class Q_GUI_EXPORT QPlainTextEdit : public QAbstractScrollArea
    QTextCharFormat currentCharFormat() const;
 
    bool tabChangesFocus() const;
-   void setTabChangesFocus(bool b);
+   void setTabChangesFocus(bool enable);
 
    inline void setDocumentTitle(const QString &title);
    inline QString documentTitle() const;
@@ -149,7 +154,7 @@ class Q_GUI_EXPORT QPlainTextEdit : public QAbstractScrollArea
    void setBackgroundVisible(bool visible);
    bool backgroundVisible() const;
 
-   void setCenterOnScroll(bool enabled);
+   void setCenterOnScroll(bool enable);
    bool centerOnScroll() const;
 
    bool find(const QString &exp, QTextDocument::FindFlags options = QTextDocument::FindFlags());
@@ -240,19 +245,17 @@ class Q_GUI_EXPORT QPlainTextEdit : public QAbstractScrollArea
    GUI_CS_SLOT_1(Public, void zoomOut(int range = 1))
    GUI_CS_SLOT_2(zoomOut)
 
-
-
    GUI_CS_SIGNAL_1(Public, void textChanged())
    GUI_CS_SIGNAL_2(textChanged)
 
-   GUI_CS_SIGNAL_1(Public, void undoAvailable(bool b))
-   GUI_CS_SIGNAL_2(undoAvailable, b)
+   GUI_CS_SIGNAL_1(Public, void undoAvailable(bool status))
+   GUI_CS_SIGNAL_2(undoAvailable, status)
 
-   GUI_CS_SIGNAL_1(Public, void redoAvailable(bool b))
-   GUI_CS_SIGNAL_2(redoAvailable, b)
+   GUI_CS_SIGNAL_1(Public, void redoAvailable(bool status))
+   GUI_CS_SIGNAL_2(redoAvailable, status)
 
-   GUI_CS_SIGNAL_1(Public, void copyAvailable(bool b))
-   GUI_CS_SIGNAL_2(copyAvailable, b)
+   GUI_CS_SIGNAL_1(Public, void copyAvailable(bool status))
+   GUI_CS_SIGNAL_2(copyAvailable, status)
 
    GUI_CS_SIGNAL_1(Public, void selectionChanged())
    GUI_CS_SIGNAL_2(selectionChanged)
@@ -266,47 +269,47 @@ class Q_GUI_EXPORT QPlainTextEdit : public QAbstractScrollArea
    GUI_CS_SIGNAL_1(Public, void blockCountChanged(int newBlockCount))
    GUI_CS_SIGNAL_2(blockCountChanged, newBlockCount)
 
-   GUI_CS_SIGNAL_1(Public, void modificationChanged(bool un_named_arg1))
-   GUI_CS_SIGNAL_2(modificationChanged, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void modificationChanged(bool changed))
+   GUI_CS_SIGNAL_2(modificationChanged, changed)
 
  protected:
-   bool event(QEvent *e) override;
-   void timerEvent(QTimerEvent *e) override;
-   void keyPressEvent(QKeyEvent *e) override;
-   void keyReleaseEvent(QKeyEvent *e) override;
-   void resizeEvent(QResizeEvent *e) override;
-   void paintEvent(QPaintEvent *e) override;
-   void mousePressEvent(QMouseEvent *e) override;
-   void mouseMoveEvent(QMouseEvent *e) override;
-   void mouseReleaseEvent(QMouseEvent *e) override;
-   void mouseDoubleClickEvent(QMouseEvent *e) override;
+   bool event(QEvent *event) override;
+   void timerEvent(QTimerEvent *event) override;
+   void keyPressEvent(QKeyEvent *event) override;
+   void keyReleaseEvent(QKeyEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
+   void mousePressEvent(QMouseEvent *event) override;
+   void mouseMoveEvent(QMouseEvent *event) override;
+   void mouseReleaseEvent(QMouseEvent *event) override;
+   void mouseDoubleClickEvent(QMouseEvent *event) override;
    bool focusNextPrevChild(bool next) override;
 
 #ifndef QT_NO_CONTEXTMENU
-   void contextMenuEvent(QContextMenuEvent *e) override;
+   void contextMenuEvent(QContextMenuEvent *event) override;
 #endif
 
 #ifndef QT_NO_DRAGANDDROP
-   void dragEnterEvent(QDragEnterEvent *e) override;
-   void dragLeaveEvent(QDragLeaveEvent *e) override;
-   void dragMoveEvent(QDragMoveEvent *e) override;
-   void dropEvent(QDropEvent *e) override;
+   void dragEnterEvent(QDragEnterEvent *event) override;
+   void dragLeaveEvent(QDragLeaveEvent *event) override;
+   void dragMoveEvent(QDragMoveEvent *event) override;
+   void dropEvent(QDropEvent *event) override;
 #endif
 
-   void focusInEvent(QFocusEvent *e) override;
-   void focusOutEvent(QFocusEvent *e) override;
-   void showEvent(QShowEvent *) override;
-   void changeEvent(QEvent *e) override;
+   void focusInEvent(QFocusEvent *event) override;
+   void focusOutEvent(QFocusEvent *event) override;
+   void showEvent(QShowEvent *event) override;
+   void changeEvent(QEvent *event) override;
 
 #ifndef QT_NO_WHEELEVENT
-   void wheelEvent(QWheelEvent *e) override;
+   void wheelEvent(QWheelEvent *event) override;
 #endif
 
    QMimeData *createMimeDataFromSelection() const;
    bool canInsertFromMimeData(const QMimeData *source) const;
    void insertFromMimeData(const QMimeData *source);
 
-   void inputMethodEvent(QInputMethodEvent *) override;
+   void inputMethodEvent(QInputMethodEvent *event) override;
 
    QPlainTextEdit(QPlainTextEditPrivate &dd, QWidget *parent);
 
@@ -320,8 +323,9 @@ class Q_GUI_EXPORT QPlainTextEdit : public QAbstractScrollArea
    QAbstractTextDocumentLayout::PaintContext getPaintContext() const;
 
    void zoomInF(float range);
+
  private:
-   Q_DISABLE_COPY(QPlainTextEdit)
+   Q_DECLARE_PRIVATE(QPlainTextEdit)
 
    GUI_CS_SLOT_1(Private, void _q_repaintContents(const QRectF &r))
    GUI_CS_SLOT_2(_q_repaintContents)
@@ -367,7 +371,7 @@ class Q_GUI_EXPORT QPlainTextDocumentLayout : public QAbstractTextDocumentLayout
    void requestUpdate();
 
  protected:
-   void documentChanged(int from, int /*charsRemoved*/, int charsAdded) override;
+   void documentChanged(int from, int charsRemoved, int charsAdded) override;
 
  private:
    void setTextWidth(qreal newWidth);
@@ -413,4 +417,4 @@ int QPlainTextEdit::maximumBlockCount() const
 
 #endif // QT_NO_TEXTEDIT
 
-#endif // QPLAINTEXTEDIT_H
+#endif

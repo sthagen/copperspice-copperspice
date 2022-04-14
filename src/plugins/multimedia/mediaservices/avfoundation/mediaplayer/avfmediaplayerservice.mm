@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,7 +34,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 AVFMediaPlayerService::AVFMediaPlayerService(QObject *parent)
-   : QMediaService(parent), m_videoOutput(0), m_enableRenderControl(true)
+   : QMediaService(parent), m_videoOutput(nullptr), m_enableRenderControl(true)
 {
    m_session = new AVFMediaPlayerSession(this);
    m_control = new AVFMediaPlayerControl(this);
@@ -82,7 +82,6 @@ QMediaControl *AVFMediaPlayerService::requestControl(const QString &name)
       return m_videoOutput;
    }
 
-#ifndef QT_NO_WIDGETS
    if (name == QVideoWidgetControl_iid) {
       if (!m_videoOutput) {
          m_videoOutput = new AVFVideoWidgetControl(this);
@@ -91,7 +90,6 @@ QMediaControl *AVFMediaPlayerService::requestControl(const QString &name)
       m_session->setVideoOutput(qobject_cast<AVFVideoOutput *>(m_videoOutput));
       return m_videoOutput;
    }
-#endif
 
    if (name == QVideoWindowControl_iid) {
       if (! m_videoOutput) {
@@ -102,7 +100,7 @@ QMediaControl *AVFMediaPlayerService::requestControl(const QString &name)
       return m_videoOutput;
    }
 
-   return 0;
+   return nullptr;
 }
 
 void AVFMediaPlayerService::releaseControl(QMediaControl *control)
@@ -115,11 +113,11 @@ void AVFMediaPlayerService::releaseControl(QMediaControl *control)
       AVFVideoRendererControl *renderControl = qobject_cast<AVFVideoRendererControl *>(m_videoOutput);
 
       if (renderControl) {
-         renderControl->setSurface(0);
+         renderControl->setSurface(nullptr);
       }
 
-      m_videoOutput = 0;
-      m_session->setVideoOutput(0);
+      m_videoOutput = nullptr;
+      m_session->setVideoOutput(nullptr);
 
       delete control;
    }

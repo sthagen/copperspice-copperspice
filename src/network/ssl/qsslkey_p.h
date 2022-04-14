@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,20 +35,22 @@
 class QSslKeyPrivate
 {
  public:
-
    enum Cipher {
         DesCbc,
         DesEde3Cbc,
         Rc2Cbc
     };
 
-   inline QSslKeyPrivate()
-      : algorithm(QSsl::Opaque), opaque(0)
+   QSslKeyPrivate()
+      : algorithm(QSsl::Opaque), opaque(nullptr)
    {
       clear(false);
    }
 
-   inline ~QSslKeyPrivate() {
+   QSslKeyPrivate(const QSslKeyPrivate &) = delete;
+   QSslKeyPrivate &operator=(const QSslKeyPrivate &) = delete;
+
+   ~QSslKeyPrivate() {
       clear();
    }
 
@@ -94,10 +96,6 @@ class QSslKeyPrivate
 #endif
 
     QAtomicInt ref;
-
- private:
-   Q_DISABLE_COPY(QSslKeyPrivate)
 };
 
-
-#endif // QSSLKEY_P_H
+#endif

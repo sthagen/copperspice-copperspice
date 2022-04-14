@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,7 +30,6 @@
 #include <qevent.h>
 #include <qlist.h>
 
-
 class QActionGroupPrivate
 {
    Q_DECLARE_PUBLIC(QActionGroup)
@@ -45,20 +44,20 @@ class QActionGroupPrivate
    uint enabled : 1;
    uint visible : 1;
 
+ protected:
+   QActionGroup *q_ptr;
+
  private:
    void _q_actionTriggered();  //private slot
    void _q_actionChanged();    //private slot
    void _q_actionHovered();    //private slot
-
- protected:
-   QActionGroup *q_ptr;
 };
 
 void QActionGroupPrivate::_q_actionChanged()
 {
    Q_Q(QActionGroup);
    QAction *action = qobject_cast<QAction *>(q->sender());
-   Q_ASSERT_X(action != 0, "QWidgetGroup::_q_actionChanged", "internal error");
+   Q_ASSERT_X(action != nullptr, "QWidgetGroup::_q_actionChanged", "internal error");
 
    if (exclusive) {
       if (action->isChecked()) {
@@ -68,8 +67,9 @@ void QActionGroupPrivate::_q_actionChanged()
             }
             current = action;
          }
+
       } else if (action == current) {
-         current = 0;
+         current = nullptr;
       }
    }
 }
@@ -77,16 +77,20 @@ void QActionGroupPrivate::_q_actionChanged()
 void QActionGroupPrivate::_q_actionTriggered()
 {
    Q_Q(QActionGroup);
+
    QAction *action = qobject_cast<QAction *>(q->sender());
-   Q_ASSERT_X(action != 0, "QWidgetGroup::_q_actionTriggered", "internal error");
+   Q_ASSERT_X(action != nullptr, "QWidgetGroup::_q_actionTriggered", "internal error");
+
    emit q->triggered(action);
 }
 
 void QActionGroupPrivate::_q_actionHovered()
 {
    Q_Q(QActionGroup);
+
    QAction *action = qobject_cast<QAction *>(q->sender());
-   Q_ASSERT_X(action != 0, "QWidgetGroup::_q_actionHovered", "internal error");
+   Q_ASSERT_X(action != nullptr, "QWidgetGroup::_q_actionHovered", "internal error");
+
    emit q->hovered(action);
 }
 
@@ -96,38 +100,32 @@ QActionGroup::QActionGroup(QObject *parent)
    d_ptr->q_ptr = this;
 }
 
-
 QActionGroup::~QActionGroup()
 {
 }
 
-/*!
-    \fn QAction *QActionGroup::addAction(QAction *action)
-
-    Adds the \a action to this group, and returns it.
-
-    Normally an action is added to a group by creating it with the
-    group as its parent, so this function is not usually used.
-
-    \sa QAction::setActionGroup()
-*/
 QAction *QActionGroup::addAction(QAction *a)
 {
    Q_D(QActionGroup);
-   if (!d->actions.contains(a)) {
+
+   if (! d->actions.contains(a)) {
       d->actions.append(a);
-      QObject::connect(a, SIGNAL(triggered()), this, SLOT(_q_actionTriggered()));
-      QObject::connect(a, SIGNAL(changed()), this, SLOT(_q_actionChanged()));
-      QObject::connect(a, SIGNAL(hovered()), this, SLOT(_q_actionHovered()));
+
+      QObject::connect(a, &QAction::triggered, this, &QActionGroup::_q_actionTriggered);
+      QObject::connect(a, &QAction::changed,   this, &QActionGroup::_q_actionChanged);
+      QObject::connect(a, &QAction::hovered,   this, &QActionGroup::_q_actionHovered);
    }
-   if (!a->d_func()->forceDisabled) {
+
+   if (! a->d_func()->forceDisabled) {
       a->setEnabled(d->enabled);
       a->d_func()->forceDisabled = false;
    }
+
    if (!a->d_func()->forceInvisible) {
       a->setVisible(d->visible);
       a->d_func()->forceInvisible = false;
    }
+
    if (a->isChecked()) {
       d->current = a;
    }
@@ -142,75 +140,38 @@ QAction *QActionGroup::addAction(QAction *a)
    return a;
 }
 
-/*!
-    Creates and returns an action with \a text.  The newly created
-    action is a child of this action group.
-
-    Normally an action is added to a group by creating it with the
-    group as parent, so this function is not usually used.
-
-    \sa QAction::setActionGroup()
-*/
 QAction *QActionGroup::addAction(const QString &text)
 {
    return new QAction(text, this);
 }
 
-/*!
-    Creates and returns an action with \a text and an \a icon. The
-    newly created action is a child of this action group.
-
-    Normally an action is added to a group by creating it with the
-    group as its parent, so this function is not usually used.
-
-    \sa QAction::setActionGroup()
-*/
 QAction *QActionGroup::addAction(const QIcon &icon, const QString &text)
 {
    return new QAction(icon, text, this);
 }
 
-/*!
-  Removes the \a action from this group. The action will have no
-  parent as a result.
-
-  \sa QAction::setActionGroup()
-*/
 void QActionGroup::removeAction(QAction *action)
 {
    Q_D(QActionGroup);
 
    if (d->actions.removeAll(action)) {
       if (action == d->current) {
-         d->current = 0;
+         d->current = nullptr;
       }
-      QObject::disconnect(action, SIGNAL(triggered()), this, SLOT(_q_actionTriggered()));
-      QObject::disconnect(action, SIGNAL(changed()), this, SLOT(_q_actionChanged()));
-      QObject::disconnect(action, SIGNAL(hovered()), this, SLOT(_q_actionHovered()));
-      action->d_func()->group = 0;
+
+      QObject::disconnect(action, &QAction::triggered, this, &QActionGroup::_q_actionTriggered);
+      QObject::disconnect(action, &QAction::changed,   this, &QActionGroup::_q_actionChanged);
+      QObject::disconnect(action, &QAction::hovered,   this, &QActionGroup::_q_actionHovered);
+      action->d_func()->group = nullptr;
    }
 }
 
-/*!
-    Returns the list of this groups's actions. This may be empty.
-*/
 QList<QAction *> QActionGroup::actions() const
 {
    Q_D(const QActionGroup);
    return d->actions;
 }
 
-/*!
-    \property QActionGroup::exclusive
-    \brief whether the action group does exclusive checking
-
-    If exclusive is true, only one checkable action in the action group
-    can ever be active at any time. If the user chooses another
-    checkable action in the group, the one they chose becomes active and
-    the one that was active becomes inactive.
-
-    \sa QAction::checkable
-*/
 void QActionGroup::setExclusive(bool b)
 {
    Q_D(QActionGroup);
@@ -222,7 +183,6 @@ bool QActionGroup::isExclusive() const
    Q_D(const QActionGroup);
    return d->exclusive;
 }
-
 
 void QActionGroup::setEnabled(bool b)
 {
@@ -252,19 +212,11 @@ QAction *QActionGroup::checkedAction() const
    return d->current;
 }
 
-/*!
-    \property QActionGroup::visible
-    \brief whether the action group is visible
-
-    Each action in the action group will match the visible state of
-    this group unless it has been explicitly hidden.
-
-    \sa QAction::setEnabled()
-*/
 void QActionGroup::setVisible(bool b)
 {
    Q_D(QActionGroup);
    d->visible = b;
+
    for (QList<QAction *>::iterator it = d->actions.begin(); it != d->actions.end(); ++it) {
       if (!(*it)->d_func()->forceInvisible) {
          (*it)->setVisible(b);

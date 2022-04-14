@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -49,7 +49,10 @@ class QRelatedTableModel;
 
 struct QRelation {
  public:
-   QRelation(): model(0), m_parent(0), m_dictInitialized(false) {}
+   QRelation(): model(nullptr), m_parent(nullptr), m_dictInitialized(false)
+   {
+   }
+
    void init(QSqlRelationalTableModel *parent, const QSqlRelation &relation);
 
    void populateModel();
@@ -83,7 +86,7 @@ class QRelatedTableModel : public QSqlTableModel
 
 void QRelation::init(QSqlRelationalTableModel *parent, const QSqlRelation &relation)
 {
-   Q_ASSERT(parent != NULL);
+   Q_ASSERT(parent != nullptr);
    m_parent = parent;
    rel = relation;
 }
@@ -93,7 +96,7 @@ void QRelation::populateModel()
    if (!isValid()) {
       return;
    }
-   Q_ASSERT(m_parent != NULL);
+   Q_ASSERT(m_parent != nullptr);
 
    if (!model) {
       model = new QRelatedTableModel(this, m_parent, m_parent->database());
@@ -113,7 +116,7 @@ void QRelation::populateDictionary()
       return;
    }
 
-   if (model ==  NULL) {
+   if (model == nullptr) {
       populateModel();
    }
 
@@ -148,13 +151,13 @@ void QRelation::clearDictionary()
 void QRelation::clear()
 {
    delete model;
-   model = 0;
+   model = nullptr;
    clearDictionary();
 }
 
 bool QRelation::isValid()
 {
-   return (rel.isValid() && m_parent != NULL);
+   return (rel.isValid() && m_parent != nullptr);
 }
 
 QRelatedTableModel::QRelatedTableModel(QRelation *rel, QObject *parent, QSqlDatabase db) :
@@ -246,9 +249,6 @@ QSqlRelationalTableModel::~QSqlRelationalTableModel()
 {
 }
 
-/*!
-    \reimp
-*/
 QVariant QSqlRelationalTableModel::data(const QModelIndex &index, int role) const
 {
    Q_D(const QSqlRelationalTableModel);
@@ -301,24 +301,6 @@ bool QSqlRelationalTableModel::setData(const QModelIndex &index, const QVariant 
    return QSqlTableModel::setData(index, value, role);
 }
 
-/*!
-    Lets the specified \a column be a foreign index specified by \a relation.
-
-    Example:
-
-    \snippet examples/sql/relationaltablemodel/relationaltablemodel.cpp 0
-    \codeline
-    \snippet examples/sql/relationaltablemodel/relationaltablemodel.cpp 1
-
-    The setRelation() call specifies that column 2 in table \c
-    employee is a foreign key that maps with field \c id of table \c
-    city, and that the view should present the \c{city}'s \c name
-    field to the user.
-
-    Note: The table's primary key may not contain a relation to another table.
-
-    \sa relation()
-*/
 void QSqlRelationalTableModel::setRelation(int column, const QSqlRelation &relation)
 {
    Q_D(QSqlRelationalTableModel);
@@ -446,30 +428,22 @@ QString QSqlRelationalTableModel::selectStatement() const
    return Sql::concat(Sql::concat(stmt, where), orderByClause());
 }
 
-/*!
-    Returns a QSqlTableModel object for accessing the table for which
-    \a column is a foreign key, or 0 if there is no relation for the
-    given \a column.
-
-    The returned object is owned by the QSqlRelationalTableModel.
-
-    \sa setRelation(), relation()
-*/
 QSqlTableModel *QSqlRelationalTableModel::relationModel(int column) const
 {
    Q_D(const QSqlRelationalTableModel);
    if ( column < 0 || column >= d->relations.count()) {
-      return 0;
+      return nullptr;
    }
 
    QRelation &relation = const_cast<QSqlRelationalTableModelPrivate *>(d)->relations[column];
    if (!relation.isValid()) {
-      return 0;
+      return nullptr;
    }
 
    if (!relation.model) {
       relation.populateModel();
    }
+
    return relation.model;
 }
 
@@ -481,9 +455,6 @@ void QSqlRelationalTableModel::revertRow(int row)
    QSqlTableModel::revertRow(row);
 }
 
-/*!
-    \reimp
-*/
 void QSqlRelationalTableModel::clear()
 {
    Q_D(QSqlRelationalTableModel);
@@ -494,48 +465,17 @@ void QSqlRelationalTableModel::clear()
    endResetModel();
 }
 
-
-/*!
-    \enum QSqlRelationalTableModel::JoinMode
-    \since 4.8
-
-    This enum specifies the type of mode to use when joining two tables.
-
-    \value InnerJoin Inner join mode, return rows when there is at least one
-                     match in both tables.
-    \value LeftJoin  Left join mode, returns all rows from the left table
-                     (table_name1), even if there are no matches in the right
-                     table (table_name2).
-
-    \sa QSqlRelationalTableModel::setJoinMode()
-*/
-
-/*!
-    \since 4.8
-    Sets the SQL join mode to the value given by \a joinMode to show or hide
-    rows with NULL foreign keys.
-
-    In InnerJoin mode (the default) these rows will not be shown; use the
-    LeftJoin mode if you want to show them.
-
-    \sa QSqlRelationalTableModel::JoinMode
-*/
 void QSqlRelationalTableModel::setJoinMode(QSqlRelationalTableModel::JoinMode joinMode)
 {
    Q_D(QSqlRelationalTableModel);
    d->joinMode = joinMode;
 }
-/*!
-    \reimp
-*/
+
 bool QSqlRelationalTableModel::select()
 {
    return QSqlTableModel::select();
 }
 
-/*!
-    \reimp
-*/
 void QSqlRelationalTableModel::setTable(const QString &table)
 {
    Q_D(QSqlRelationalTableModel);
@@ -546,8 +486,7 @@ void QSqlRelationalTableModel::setTable(const QString &table)
    QSqlTableModel::setTable(table);
 }
 
-/*! \internal
- */
+// internal
 void QSqlRelationalTableModelPrivate::translateFieldNames(QSqlRecord &values) const
 {
    for (int i = 0; i < values.count(); ++i) {
@@ -561,9 +500,6 @@ void QSqlRelationalTableModelPrivate::translateFieldNames(QSqlRecord &values) co
    }
 }
 
-/*!
-    \reimp
-*/
 bool QSqlRelationalTableModel::updateRowInTable(int row, const QSqlRecord &values)
 {
    Q_D(QSqlRelationalTableModel);
@@ -574,9 +510,6 @@ bool QSqlRelationalTableModel::updateRowInTable(int row, const QSqlRecord &value
    return QSqlTableModel::updateRowInTable(row, rec);
 }
 
-/*!
-    \reimp
-*/
 bool QSqlRelationalTableModel::insertRowIntoTable(const QSqlRecord &values)
 {
    Q_D(QSqlRelationalTableModel);
@@ -587,9 +520,6 @@ bool QSqlRelationalTableModel::insertRowIntoTable(const QSqlRecord &values)
    return QSqlTableModel::insertRowIntoTable(rec);
 }
 
-/*!
-    \reimp
-*/
 QString QSqlRelationalTableModel::orderByClause() const
 {
    Q_D(const QSqlRelationalTableModel);
@@ -604,9 +534,6 @@ QString QSqlRelationalTableModel::orderByClause() const
    return Sql::orderBy(f);
 }
 
-/*!
-    \reimp
-*/
 bool QSqlRelationalTableModel::removeColumns(int column, int count, const QModelIndex &parent)
 {
    Q_D(QSqlRelationalTableModel);
@@ -623,5 +550,3 @@ bool QSqlRelationalTableModel::removeColumns(int column, int count, const QModel
    }
    return QSqlTableModel::removeColumns(column, count, parent);
 }
-
-

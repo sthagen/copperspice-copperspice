@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -58,10 +58,12 @@ QEventDispatcherUNIXPrivate::QEventDispatcherUNIXPrivate()
 #else
 
 #ifdef HAVE_SYS_EVENTFD_H
-    thread_pipe[0] = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-    if (thread_pipe[0] != -1)
-        thread_pipe[1] = -1;
-    else // fall through the next "if"
+   thread_pipe[0] = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+
+   if (thread_pipe[0] != -1) {
+      thread_pipe[1] = -1;
+   } else
+      // continue
 #endif
 
    if (qt_safe_pipe(thread_pipe, O_NONBLOCK) == -1) {
@@ -155,13 +157,15 @@ int QEventDispatcherUNIXPrivate::doSelect(QEventLoop::ProcessEventsFlags flags, 
                do {
                   switch (type) {
                      case 0: // read
-                        ret = select(sn->fd + 1, &fdset, 0, 0, &tm);
+                        ret = select(sn->fd + 1, &fdset, nullptr, nullptr, &tm);
                         break;
+
                      case 1: // write
-                        ret = select(sn->fd + 1, 0, &fdset, 0, &tm);
+                        ret = select(sn->fd + 1, nullptr, &fdset, nullptr, &tm);
                         break;
+
                      case 2: // except
-                        ret = select(sn->fd + 1, 0, 0, &fdset, &tm);
+                        ret = select(sn->fd + 1, nullptr, nullptr, &fdset, &tm);
                         break;
                   }
                } while (ret == -1 && (errno == EINTR || errno == EAGAIN));
@@ -219,27 +223,31 @@ int QEventDispatcherUNIXPrivate::processThreadWakeUp(int nsel)
 {
     if (nsel > 0 && FD_ISSET(thread_pipe[0], &sn_vec[0].select_fds)) {
         // some other thread woke us up... consume the data on the thread pipe so that
-        // select doesn't immediately return next time
+        // select does not immediately return next time
+
 #ifdef HAVE_SYS_EVENTFD_H
        if (thread_pipe[1] == -1) {
-            // eventfd
-            eventfd_t value;
-            eventfd_read(thread_pipe[0], &value);
+           // eventfd
+           eventfd_t value;
+           eventfd_read(thread_pipe[0], &value);
        } else
 
 #endif
         {
-            char c[16];
-            while (::read(thread_pipe[0], c, sizeof(c)) > 0) {
-            }
+           char c[16];
+           while (::read(thread_pipe[0], c, sizeof(c)) > 0) {
+           }
         }
 
-        if (!wakeUps.testAndSetRelease(1, 0)) {
-            // hopefully, this is dead code
-            qWarning("QEventDispatcherUNIX: internal error, wakeUps.testAndSetRelease(1, 0) failed!");
+        int expected = 1;
+
+        if (! wakeUps.compareExchange(expected, 0, std::memory_order_release)) {
+            qWarning("QEventDispatcherUNIX::processThreadWakeUp Internal error");
         }
+
         return 1;
     }
+
     return 0;
 }
 
@@ -414,7 +422,7 @@ void QEventDispatcherUNIX::unregisterSocketNotifier(QSocketNotifier *notifier)
    QSockNotType::List &list = d->sn_vec[type].list;
    fd_set *fds  =  &d->sn_vec[type].enabled_fds;
 
-   QSockNot *sn = 0;
+   QSockNot *sn = nullptr;
    int i;
 
    for (i = 0; i < list.size(); ++i) {
@@ -463,7 +471,7 @@ void QEventDispatcherUNIX::setSocketNotifierPending(QSocketNotifier *notifier)
 
    Q_D(QEventDispatcherUNIX);
    QSockNotType::List &list = d->sn_vec[type].list;
-   QSockNot *sn = 0;
+   QSockNot *sn = nullptr;
    int i;
    for (i = 0; i < list.size(); ++i) {
       sn = list[i];
@@ -529,7 +537,7 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
    emit awake();
 
    QThreadData *threadData = CSInternalThreadData::get_m_ThreadData(this);
-   QCoreApplicationPrivate::sendPostedEvents(0, 0, threadData);
+   QCoreApplicationPrivate::sendPostedEvents(nullptr, 0, threadData);
 
    int nevents = 0;
    const bool canWait = (threadData->canWaitLocked()
@@ -541,7 +549,7 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
    if (! d->interrupt.load()) {
       // return the maximum time we can wait for an event.
-      timespec *tm = 0;
+      timespec *tm = nullptr;
       timespec wait_tm = { 0l, 0l };
 
       if (!(flags & QEventLoop::X11ExcludeTimers)) {
@@ -593,7 +601,10 @@ int QEventDispatcherUNIX::remainingTime(int timerId)
 void QEventDispatcherUNIX::wakeUp()
 {
    Q_D(QEventDispatcherUNIX);
-   if (d->wakeUps.testAndSetAcquire(0, 1)) {
+
+   int expected = 0;
+
+   if (d->wakeUps.compareExchange(expected, 1, std::memory_order_acquire)) {
 
 #ifdef HAVE_SYS_EVENTFD_H
         if (d->thread_pipe[1] == -1) {

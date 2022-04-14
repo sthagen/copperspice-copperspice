@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QTRANSLATOR_H
 #define QTRANSLATOR_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qbytearray.h>
-#include <QScopedPointer>
-
-#ifndef QT_NO_TRANSLATION
+#include <qobject.h>
+#include <qbytearray.h>
+#include <qscopedpointer.h>
 
 class QLocale;
 class QTranslatorPrivate;
@@ -39,28 +37,35 @@ class Q_CORE_EXPORT QTranslator : public QObject
 
  public:
    explicit QTranslator(QObject *parent = nullptr);
+
+   QTranslator(const QTranslator &) = delete;
+   QTranslator &operator=(const QTranslator &) = delete;
+
    ~QTranslator();
 
-   virtual QString translate(const char *context, const char *sourceText, const char *disambiguation = 0, int n = -1) const;
+   virtual QString translate(const char *context, const char *text, const char *comment = nullptr,
+         std::optional<int> numArg = std::optional<int>()) const;
+
+   virtual QString translate(const QString &context, const QString &text, const QString &comment = QString(),
+         std::optional<int> numArg = std::optional<int>()) const;
+
    virtual bool isEmpty() const;
 
+   static QString replacePercentN(QString text, int numArg);
+
    bool load(const QString &filename, const QString &directory = QString(), const QString &search_delimiters = QString(),
-                   const QString &suffix = QString());
+                  const QString &suffix = QString());
 
    bool load(const QLocale &locale, const QString &filename, const QString &prefix = QString(),
                   const QString &directory = QString(), const QString &suffix = QString());
 
-   bool load(const uchar *data, int len);
+   bool load(const uchar *data, int len, const QString &directory = QString());
 
  protected:
    QScopedPointer<QTranslatorPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QTranslator)
    Q_DECLARE_PRIVATE(QTranslator)
-
 };
 
-#endif // QT_NO_TRANSLATION
-
-#endif // QTRANSLATOR_H
+#endif

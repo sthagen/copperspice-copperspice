@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -267,7 +267,9 @@ struct QTextureData {
 };
 
 struct QSpanData {
-   QSpanData() : tempImage(0) {}
+   QSpanData()
+      : tempImage(nullptr)
+   {}
 
    ~QSpanData() {
       delete tempImage;
@@ -824,7 +826,7 @@ do {                                            \
     case 1:      *--_d = *--_s;                 \
     } while (--n > 0);                          \
     }                                           \
-} while (0)
+} while (false)
 
 inline ushort qConvertRgb32To16(uint c)
 {

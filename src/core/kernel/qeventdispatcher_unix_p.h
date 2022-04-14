@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,20 +24,17 @@
 #ifndef QEVENTDISPATCHER_UNIX_P_H
 #define QEVENTDISPATCHER_UNIX_P_H
 
-#include <QtCore/qabstracteventdispatcher.h>
+#include <qabstracteventdispatcher.h>
+#include <qlist.h>
+#include <qvarlengtharray.h>
 
-#include <QtCore/qlist.h>
 #include <qabstracteventdispatcher_p.h>
 #include <qcore_unix_p.h>
 #include <qpodlist_p.h>
-#include <qvarlengtharray.h>
 #include <qtimerinfo_unix_p.h>
 
 #include <sys/time.h>
-
-#if (!defined(Q_OS_HPUX) || defined(__ia64)) && !defined(Q_OS_NACL)
-#  include <sys/select.h>
-#endif
+#include <sys/select.h>
 
 struct QSockNot {
    QSocketNotifier *obj;

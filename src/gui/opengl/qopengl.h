@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -109,7 +109,7 @@ typedef void* GLeglImageOES;
 */
 typedef char GLchar;
 
-#  include <qopengles2ext.h>
+#  include <qopengl_es2ext.h>
 # endif // Q_OS_DARWIN
 
 #else // non-ES2 platforms
@@ -134,7 +134,7 @@ typedef char GLchar;
 #  else
 #   include <GL/gl.h>
 #  endif
-#  include <qopenglext.h>
+#  include <qopengl_ext.h>
 # endif // Q_OS_DARWIN
 
 #endif // QT_OPENGL_ES_2
@@ -158,7 +158,7 @@ typedef char GLchar;
 #if !defined(QT_OPENGL_ES_2)
 
 // OS X 10.6 doesn't define these which are needed below
-// OS X 10.7 and later defien them in gl3.h
+// OS X 10.7 and later define them in gl3.h
 #ifndef APIENTRY
 #define APIENTRY
 #endif

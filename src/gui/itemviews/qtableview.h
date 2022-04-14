@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QTABLEVIEW_H
 #define QTABLEVIEW_H
 
-#include <QtGui/qabstractitemview.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractitemview.h>
 
 #ifndef QT_NO_TABLEVIEW
 
@@ -54,6 +52,10 @@ class Q_GUI_EXPORT QTableView : public QAbstractItemView
 
  public:
    explicit QTableView(QWidget *parent = nullptr);
+
+   QTableView(const QTableView &) = delete;
+   QTableView &operator=(const QTableView &) = delete;
+
    ~QTableView();
 
    void setModel(QAbstractItemModel *model) override;
@@ -100,9 +102,9 @@ class Q_GUI_EXPORT QTableView : public QAbstractItemView
 
    QRect visualRect(const QModelIndex &index) const override;
    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
-   QModelIndex indexAt(const QPoint &p) const override;
+   QModelIndex indexAt(const QPoint &pos) const override;
 
-   void setSpan(int row, int column, int rowSpan, int columnSpan);
+   void setSpan(int row, int column, int rowSpanCount, int columnSpanCount);
    int rowSpan(int row, int column) const;
    int columnSpan(int row, int column) const;
    void clearSpans();
@@ -145,7 +147,7 @@ class Q_GUI_EXPORT QTableView : public QAbstractItemView
    GUI_CS_SLOT_1(Public, void setShowGrid(bool show))
    GUI_CS_SLOT_2(setShowGrid)
 
- protected :
+ protected:
    GUI_CS_SLOT_1(Protected, void rowMoved(int row, int oldIndex, int newIndex))
    GUI_CS_SLOT_2(rowMoved)
    GUI_CS_SLOT_1(Protected, void columnMoved(int column, int oldIndex, int newIndex))
@@ -163,7 +165,7 @@ class Q_GUI_EXPORT QTableView : public QAbstractItemView
    void scrollContentsBy(int dx, int dy) override;
 
    QStyleOptionViewItem viewOptions() const override;
-   void paintEvent(QPaintEvent *e) override;
+   void paintEvent(QPaintEvent *event) override;
 
    void timerEvent(QTimerEvent *event) override;
 
@@ -171,7 +173,7 @@ class Q_GUI_EXPORT QTableView : public QAbstractItemView
    int verticalOffset() const override;
    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
 
-   void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) override;
+   void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags flags) override;
    QRegion visualRegionForSelection(const QItemSelection &selection) const override;
    QModelIndexList selectedIndexes() const override;
 
@@ -194,7 +196,6 @@ class Q_GUI_EXPORT QTableView : public QAbstractItemView
    int visualIndex(const QModelIndex &index) const;
 
    Q_DECLARE_PRIVATE(QTableView)
-   Q_DISABLE_COPY(QTableView)
 
    GUI_CS_SLOT_1(Private, void _q_selectRow(int un_named_arg1))
    GUI_CS_SLOT_2(_q_selectRow)
@@ -220,6 +221,5 @@ class Q_GUI_EXPORT QTableView : public QAbstractItemView
 };
 
 #endif // QT_NO_TABLEVIEW
-
 
 #endif // QTABLEVIEW_H

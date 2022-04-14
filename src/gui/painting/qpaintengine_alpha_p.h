@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,6 @@
 
 #include <qpaintengine_p.h>
 
-
 class QAlphaPaintEnginePrivate;
 
 class QAlphaPaintEngine : public QPaintEngine
@@ -44,14 +43,14 @@ class QAlphaPaintEngine : public QPaintEngine
    void updateState(const QPaintEngineState &state) override;
 
    void drawPath(const QPainterPath &path) override;
-   void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode) override;
+   void drawPolygon(const QPointF *pointPtr, int pointCount, PolygonDrawMode mode) override;
 
-   void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr) override;
-   void drawTextItem(const QPointF &p, const QTextItem &textItem) override;
-   void drawTiledPixmap(const QRectF &r, const QPixmap &pixmap, const QPointF &s) override;
+   void drawPixmap(const QRectF &rect, const QPixmap &pixmap, const QRectF &srcRect) override;
+   void drawTextItem(const QPointF &point, const QTextItem &textItem) override;
+   void drawTiledPixmap(const QRectF &rect, const QPixmap &pixmap, const QPointF &point) override;
 
  protected:
-   QAlphaPaintEngine(QAlphaPaintEnginePrivate &data, PaintEngineFeatures devcaps = 0);
+   QAlphaPaintEngine(QAlphaPaintEnginePrivate &data, PaintEngineFeatures devcaps = Qt::EmptyFlag);
    QRegion alphaClipping() const;
    bool continueCall() const;
    void flushAndInit(bool init = true);

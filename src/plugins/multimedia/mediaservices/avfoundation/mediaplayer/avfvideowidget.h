@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,7 @@
 #include <QWidget>
 
 @class AVPlayerLayer;
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_DARWIN)
 @class NSView;
 #else
 @class UIView;
@@ -56,7 +56,7 @@ class AVFVideoWidget : public QWidget
    Qt::AspectRatioMode m_aspectRatioMode;
    AVPlayerLayer *m_playerLayer;
 
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_DARWIN)
    NSView *m_nativeView;
 #else
    UIView *m_nativeView;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -152,7 +152,7 @@ bool QTextUndoCommand::tryMerge(const QTextUndoCommand &other)
 
 QTextDocumentPrivate::QTextDocumentPrivate()
    : wasUndoAvailable(false), wasRedoAvailable(false), docChangeOldLength(0), docChangeLength(0),
-     framesDirty(true), rtFrame(0), initialBlockCharFormatIndex(-1) // set correctly later in init()
+     framesDirty(true), rtFrame(nullptr), initialBlockCharFormatIndex(-1) // set correctly later in init()
 {
    editBlock = 0;
    editBlockCursorPosition = -1;
@@ -161,7 +161,7 @@ QTextDocumentPrivate::QTextDocumentPrivate()
    undoState = 0;
    revision = -1; // init() inserts a block, bringing it to 0
 
-   lout = 0;
+   lout = nullptr;
 
    modified = false;
    modifiedState = 0;
@@ -242,7 +242,7 @@ void QTextDocumentPrivate::clear()
       cachedResources.clear();
 
       delete rtFrame;
-      rtFrame = 0;
+      rtFrame = nullptr;
 
       init();
       cursors = oldCursors;
@@ -263,7 +263,7 @@ void QTextDocumentPrivate::clear()
 QTextDocumentPrivate::~QTextDocumentPrivate()
 {
    for (QTextCursorPrivate *curs : cursors) {
-      curs->priv = 0;
+      curs->priv = nullptr;
    }
 
    cursors.clear();
@@ -649,7 +649,7 @@ void QTextDocumentPrivate::move(int pos, int to, int length, QTextUndoCommand::O
 
       } else {
          b = blocks.previous(b);
-         tmpBlock = 0;
+         tmpBlock = nullptr;
 
          c.command = blocks.size(b) == 1 ? QTextUndoCommand::BlockDeleted : QTextUndoCommand::BlockRemoved;
          w = remove_block(key, &c.blockFormat, QTextUndoCommand::BlockAdded, op);
@@ -919,7 +919,8 @@ int QTextDocumentPrivate::undoRedo(bool undo)
    beginEditBlock();
    int editPos = -1;
    int editLength = -1;
-   while (1) {
+
+   while (true) {
       if (undo) {
          --undoState;
       }
@@ -1168,6 +1169,7 @@ void QTextDocumentPrivate::clearUndoRedoStacks(QTextDocument::Stacks stacksToCle
 {
    bool undoCommandsAvailable = undoState != 0;
    bool redoCommandsAvailable = undoState != undoStack.size();
+
    if (stacksToClear == QTextDocument::UndoStack && undoCommandsAvailable) {
       for (int i = 0; i < undoState; ++i) {
          QTextUndoCommand c = undoStack[undoState];
@@ -1175,6 +1177,7 @@ void QTextDocumentPrivate::clearUndoRedoStacks(QTextDocument::Stacks stacksToCle
             delete c.custom;
          }
       }
+
       undoStack.remove(0, undoState);
       undoStack.resize(undoStack.size() - undoState);
       undoState = 0;
@@ -1216,21 +1219,21 @@ void QTextDocumentPrivate::clearUndoRedoStacks(QTextDocument::Stacks stacksToCle
    }
 }
 
-void QTextDocumentPrivate::emitUndoAvailable(bool available)
+void QTextDocumentPrivate::emitUndoAvailable(bool status)
 {
-   if (available != wasUndoAvailable) {
+   if (status != wasUndoAvailable) {
       Q_Q(QTextDocument);
-      emit q->undoAvailable(available);
-      wasUndoAvailable = available;
+      emit q->undoAvailable(status);
+      wasUndoAvailable = status;
    }
 }
 
-void QTextDocumentPrivate::emitRedoAvailable(bool available)
+void QTextDocumentPrivate::emitRedoAvailable(bool status)
 {
-   if (available != wasRedoAvailable) {
+   if (status != wasRedoAvailable) {
       Q_Q(QTextDocument);
-      emit q->redoAvailable(available);
-      wasRedoAvailable = available;
+      emit q->redoAvailable(status);
+      wasRedoAvailable = status;
    }
 }
 
@@ -1569,7 +1572,7 @@ QTextFrame *QTextDocumentPrivate::frameAt(int pos) const
 {
    QTextFrame *f = rootFrame();
 
-   while (1) {
+   while (true) {
       QTextFrame *c = findChildFrame(f, pos);
 
       if (! c) {
@@ -1587,7 +1590,7 @@ void QTextDocumentPrivate::clearFrame(QTextFrame *f)
    }
 
    f->d_func()->childFrames.clear();
-   f->d_func()->parentFrame = 0;
+   f->d_func()->parentFrame = nullptr;
 }
 
 void QTextDocumentPrivate::scan_frames(int pos, int charsRemoved, int charsAdded)
@@ -1681,7 +1684,7 @@ QTextFrame *QTextDocumentPrivate::insertFrame(int start, int end, const QTextFra
    Q_ASSERT(start <= end || end == -1);
 
    if (start != end && frameAt(start) != frameAt(end)) {
-      return 0;
+      return nullptr;
    }
 
    beginEditBlock();
@@ -1730,10 +1733,10 @@ void QTextDocumentPrivate::removeFrame(QTextFrame *frame)
 QTextObject *QTextDocumentPrivate::objectForIndex(int objectIndex) const
 {
    if (objectIndex < 0) {
-      return 0;
+      return nullptr;
    }
 
-   QTextObject *object = objects.value(objectIndex, 0);
+   QTextObject *object = objects.value(objectIndex, nullptr);
 
    if (!object) {
       QTextDocumentPrivate *that = const_cast<QTextDocumentPrivate *>(this);

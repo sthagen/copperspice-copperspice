@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,9 +25,8 @@
 #define QMEDIARESOURCE_H
 
 #include <qmap.h>
-#include <qmetatype.h>
 #include <qstring.h>
-#include <qnetworkrequest.h>
+#include <qnetwork_request.h>
 
 class Q_MULTIMEDIA_EXPORT QMediaResource
 {
@@ -64,7 +63,7 @@ class Q_MULTIMEDIA_EXPORT QMediaResource
    void setAudioBitRate(int rate);
 
    int sampleRate() const;
-   void setSampleRate(int frequency);
+   void setSampleRate(int sampleRate);
 
    int channelCount() const;
    void setChannelCount(int channels);
@@ -75,7 +74,6 @@ class Q_MULTIMEDIA_EXPORT QMediaResource
    QSize resolution() const;
    void setResolution(const QSize &resolution);
    void setResolution(int width, int height);
-
 
  private:
    enum Property {
@@ -94,10 +92,5 @@ class Q_MULTIMEDIA_EXPORT QMediaResource
    };
    QMap<int, QVariant> values;
 };
-
-typedef QList<QMediaResource> QMediaResourceList;
-
-Q_DECLARE_METATYPE(QMediaResource)
-Q_DECLARE_METATYPE(QMediaResourceList)
 
 #endif

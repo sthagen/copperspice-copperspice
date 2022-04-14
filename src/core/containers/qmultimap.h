@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -229,14 +229,12 @@ class QMultiMap
       friend class QMultiMap<Key, Val, C>;
 
       // free functions
-      friend bool operator==(iterator iter1, const_iterator iter2)
-      {
-         return (iter2 == iter1);
+      friend bool operator==(iterator iter1, const_iterator iter2) {
+         return iter2.operator==(iter1);
       }
 
-      friend bool operator!=(iterator iter1, const_iterator iter2)
-      {
-         return (iter2 != iter1);
+      friend bool operator!=(iterator iter1, const_iterator iter2) {
+         return iter2.operator!=(iter1);
       }
 
     private:
@@ -272,8 +270,8 @@ class QMultiMap
    QMultiMap(const QMultiMap<Key, Val, C> &other) = default;
    QMultiMap(QMultiMap<Key, Val, C> &&other)      = default;
 
-   QMultiMap(std::initializer_list<std::pair<Key, Val>> list, const C &compare = C())
-      : m_data(list)  {}
+   QMultiMap(std::initializer_list<std::pair<const Key, Val>> list, const C &compare = C())
+      : m_data(list, compare) {}
 
    explicit QMultiMap(C compare)
       : m_data(compare) {}
@@ -381,31 +379,47 @@ class QMultiMap
       return find(key, value);
    }
 
+   iterator insert(const std::pair<const Key, Val> &data) {
+      auto iter = m_data.lower_bound(data.first);
+      return m_data.insert(iter, data);
+   }
+
    iterator insert(const Key &key, const Val &value)  {
       return insertMulti(key, value);
    }
 
    iterator insert(const_iterator hint, const Key &key, const Val &value) {
-      auto iter = m_data.emplace_hint(hint, key, value);
+      auto iter = m_data.emplace_hint(hint.m_iter, key, value);
       return iter;
    }
 
    iterator insertMulti(const Key &key, const Val &value)  {
-      // ensure newest item is first
+      // ensures newest item is first
       auto iter = m_data.lower_bound(key);
       return m_data.emplace_hint(iter, key, value);
    }
 
    iterator insertMulti(const_iterator hint, const Key &key, const Val &value) {
-      auto iter = m_data.emplace_hint(hint, key, value);
+      auto iter = m_data.emplace_hint(hint.m_iter, key, value);
       return iter;
    }
 
-   const Key key(const Val &value) const;
-   const Key key(const Val &value, const Key &defaultKey) const;
+   const Key key(const Val &value, const Key &defaultKey = Key()) const;
 
    QList<Key> keys() const;
    QList<Key> keys(const Val &value) const;
+
+   Val &last()  {
+      return (end()- 1).value();
+   }
+
+   const Val &last() const  {
+      return (end() - 1).value();
+   }
+
+   const Key &lastKey() const  {
+      return (end() - 1).key();
+   }
 
    iterator lowerBound(const Key &key) {
       return m_data.lower_bound(key);
@@ -471,20 +485,7 @@ class QMultiMap
       return *this;
    }
 
-   const Val value(const Key &key) const {
-      auto range = m_data.equal_range(key);
-
-      if (range.first == range.second) {
-         // key was not found
-         return Val();
-      }
-
-      // get last key in the range
-      auto iter = --range.second;
-
-      return iter->second;
-   }
-
+   const Val value(const Key &key) const;
    const Val value(const Key &key, const Val &defaultValue) const;
 
    QList<Val> values() const;
@@ -596,7 +597,7 @@ bool QMultiMap<Key, Val, C>::contains(const Key &key, const Val &value) const
 template <class Key, class Val, class C>
 typename QMultiMap<Key, Val, C>::size_type QMultiMap<Key, Val, C>::count(const Key &key, const Val &value) const
 {
-   int retval = 0;
+   size_type retval = 0;
 
    auto range = m_data.equal_range(key);
 
@@ -610,13 +611,7 @@ typename QMultiMap<Key, Val, C>::size_type QMultiMap<Key, Val, C>::count(const K
 }
 
 template <class Key, class Val, class C>
-const Key QMultiMap<Key, Val, C>::key(const Val &value) const
-{
-   return key(value, Key());
-}
-
-template <class Key, class Val, class C>
-const Key QMultiMap<Key, Val, C>::key(const Val &value, const Key &defaultValue) const
+const Key QMultiMap<Key, Val, C>::key(const Val &value, const Key &defaultKey) const
 {
    const_iterator iter = begin();
 
@@ -628,7 +623,7 @@ const Key QMultiMap<Key, Val, C>::key(const Val &value, const Key &defaultValue)
       ++iter;
    }
 
-   return defaultValue;
+   return defaultKey;
 }
 
 template <class Key, class Val, class C>
@@ -666,7 +661,7 @@ QList<Key> QMultiMap<Key, Val, C>::keys(const Val &value) const
 template <class Key, class Val, class C>
 typename QMultiMap<Key, Val, C>::size_type QMultiMap<Key, Val, C>::remove(const Key &key, const Val &value)
 {
-   int retval = 0;
+   size_type retval = 0;
 
    auto range = m_data.equal_range(key);
    auto iter  = range.first;
@@ -675,6 +670,7 @@ typename QMultiMap<Key, Val, C>::size_type QMultiMap<Key, Val, C>::remove(const 
       if (iter->second == value) {
          iter = m_data.erase(iter);
          ++retval;
+
       } else {
          ++iter;
       }
@@ -698,6 +694,38 @@ QList<Key> QMultiMap<Key, Val, C>::uniqueKeys() const
    }
 
    return retval;
+}
+
+template <class Key, class Val, class C>
+const Val QMultiMap<Key, Val, C>::value(const Key &key) const
+{
+   auto range = m_data.equal_range(key);
+
+   if (range.first == range.second) {
+      // key was not found
+      return Val();
+   }
+
+   // get last key in the range
+   auto iter = --range.second;
+
+   return iter->second;
+}
+
+template <class Key, class Val, class C>
+const Val QMultiMap<Key, Val, C>::value(const Key &key, const Val &defaultValue) const
+{
+   auto range = m_data.equal_range(key);
+
+   if (range.first == range.second) {
+      // key was not found
+      return defaultValue;
+   }
+
+   // get last key in the range
+   auto iter = --range.second;
+
+   return iter->second;
 }
 
 template <class Key, class Val, class C>
@@ -737,14 +765,16 @@ class QMultiMapIterator
    typedef const_iterator Item;
 
  public:
-   QMultiMapIterator(const QMultiMap<Key, Val, C> &container)
-      : c(&container), i(c->constBegin()), n(c->constEnd()) {}
+   QMultiMapIterator(const QMultiMap<Key, Val, C> &map)
+      : c(&map), i(c->constBegin()), n(c->constEnd())
+   {
+   }
 
    ~QMultiMapIterator() {
    }
 
-   QMultiMapIterator &operator=(const QMultiMap<Key, Val, C> &container) {
-      c = container;
+   QMultiMapIterator &operator=(const QMultiMap<Key, Val, C> &map) {
+      c = map;
       i = c->constBegin();
       n = c->constEnd();
 
@@ -798,18 +828,18 @@ class QMultiMapIterator
       return n.key();
    }
 
-   bool findNext(const Val &t) {
+   bool findNext(const Val &value) {
       while ((n = i) != c->constEnd()) {
-         if (*i++ == t) {
+         if (*i++ == value) {
             return true;
          }
       }
       return false;
    }
 
-   bool findPrevious(const Val &t) {
+   bool findPrevious(const Val &value) {
       while (i != c->constBegin()) {
-         if (*(n = --i) == t) {
+         if (*(n = --i) == value) {
             return true;
          }
       }
@@ -836,14 +866,17 @@ class QMutableMultiMapIterator
    typedef iterator Item;
 
  public:
-   QMutableMultiMapIterator(QMultiMap<Key, Val, C> &container)
-      : c(&container), i(c->begin()), n(c->end()) {}
+   QMutableMultiMapIterator(QMultiMap<Key, Val, C> &map)
+      : c(&map), i(c->begin()), n(c->end())
+   {
+   }
 
    ~QMutableMultiMapIterator()
-   { }
+   {
+   }
 
-   QMutableMultiMapIterator &operator=(QMultiMap<Key, Val, C> &container) {
-      c = &container;
+   QMutableMultiMapIterator &operator=(QMultiMap<Key, Val, C> &map) {
+      c = &map;
       i = c->begin();
       n = c->end();
 
@@ -915,9 +948,9 @@ class QMutableMultiMapIterator
       return n.key();
    }
 
-   bool findNext(const Val &t) {
+   bool findNext(const Val &value) {
       while (c->constEnd() != const_iterator(n = i)) {
-         if (*i++ == t)  {
+         if (*i++ == value)  {
             return true;
          }
       }
@@ -925,9 +958,9 @@ class QMutableMultiMapIterator
       return false;
    }
 
-   bool findPrevious(const Val &t) {
+   bool findPrevious(const Val &value) {
       while (c->constBegin() != const_iterator(i)) {
-         if (*(n = --i) == t) {
+         if (*(n = --i) == value) {
             return true;
          }
       }

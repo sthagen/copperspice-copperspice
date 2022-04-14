@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QKEYEVENTTRANSITION_H
 #define QKEYEVENTTRANSITION_H
 
-#include <QtCore/qeventtransition.h>
-
-QT_BEGIN_NAMESPACE
+#include <qeventtransition.h>
 
 #ifndef QT_NO_STATEMACHINE
 
@@ -42,9 +40,12 @@ class Q_GUI_EXPORT QKeyEventTransition : public QEventTransition
    GUI_CS_PROPERTY_WRITE(modifierMask, setModifierMask)
 
  public:
-   QKeyEventTransition(QState *sourceState = 0);
-   QKeyEventTransition(QObject *object, QEvent::Type type, int key,
-                       QState *sourceState = 0);
+   QKeyEventTransition(QState *sourceState = nullptr);
+   QKeyEventTransition(QObject *object, QEvent::Type type, int key, QState *sourceState = nullptr);
+
+   QKeyEventTransition(const QKeyEventTransition &) = delete;
+   QKeyEventTransition &operator=(const QKeyEventTransition &) = delete;
+
    ~QKeyEventTransition();
 
    int key() const;
@@ -58,12 +59,9 @@ class Q_GUI_EXPORT QKeyEventTransition : public QEventTransition
    bool eventTest(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QKeyEventTransition)
    Q_DECLARE_PRIVATE(QKeyEventTransition)
 };
 
 #endif //QT_NO_STATEMACHINE
-
-QT_END_NAMESPACE
 
 #endif

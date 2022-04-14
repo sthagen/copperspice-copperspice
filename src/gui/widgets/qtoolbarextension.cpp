@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,6 @@
 
 #ifndef QT_NO_TOOLBUTTON
 
-
-
 QToolBarExtension::QToolBarExtension(QWidget *parent)
    : QToolButton(parent)
 {
@@ -44,7 +42,8 @@ QToolBarExtension::QToolBarExtension(QWidget *parent)
 void QToolBarExtension::setOrientation(Qt::Orientation o)
 {
    QStyleOption opt;
-   opt.init(this);
+   opt.initFrom(this);
+
    if (o == Qt::Horizontal) {
       setIcon(style()->standardIcon(QStyle::SP_ToolBarHorizontalExtensionButton, &opt));
    } else {

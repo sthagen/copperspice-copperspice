@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,21 +36,25 @@ class Q_GUI_EXPORT QTextList : public QTextBlockGroup
 
  public:
    explicit QTextList(QTextDocument *doc);
+
+   QTextList(const QTextList &) = delete;
+   QTextList &operator=(const QTextList &) = delete;
+
    ~QTextList();
 
    int count() const;
 
-   inline bool isEmpty() const {
+   bool isEmpty() const {
       return count() == 0;
    }
 
    QTextBlock item(int i) const;
 
-   int itemNumber(const QTextBlock &) const;
-   QString itemText(const QTextBlock &) const;
+   int itemNumber(const QTextBlock &block) const;
+   QString itemText(const QTextBlock &block) const;
 
    void removeItem(int i);
-   void remove(const QTextBlock &);
+   void remove(const QTextBlock &block);
 
    void add(const QTextBlock &block);
 
@@ -61,14 +65,12 @@ class Q_GUI_EXPORT QTextList : public QTextBlockGroup
    }
 
  private:
-   Q_DISABLE_COPY(QTextList)
    Q_DECLARE_PRIVATE(QTextList)
 };
 
-inline void QTextList::setFormat(const QTextListFormat &aformat)
+inline void QTextList::setFormat(const QTextListFormat &format)
 {
-   QTextObject::setFormat(aformat);
+   QTextObject::setFormat(format);
 }
-
 
 #endif // QTEXTLIST_H

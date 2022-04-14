@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -331,14 +331,12 @@ static QScriptValue qmlsqldatabase_transaction(QScriptContext *context, QScriptE
 {
    return qmlsqldatabase_transaction_shared(context, engine, false);
 }
+
 static QScriptValue qmlsqldatabase_read_transaction(QScriptContext *context, QScriptEngine *engine)
 {
    return qmlsqldatabase_transaction_shared(context, engine, true);
 }
 
-/*
-    Currently documented in doc/src/declarative/globalobject.qdoc
-*/
 static QScriptValue qmlsqldatabase_open_sync(QScriptContext *context, QScriptEngine *engine)
 {
 #ifndef QT_NO_SETTINGS

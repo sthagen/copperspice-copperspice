@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,8 +45,8 @@ public:
     QPlatformPrinterSupport();
     virtual ~QPlatformPrinterSupport();
 
-    virtual QPrintEngine *createNativePrintEngine(QPrinter::PrinterMode printerMode);
-    virtual QPaintEngine *createPaintEngine(QPrintEngine *, QPrinter::PrinterMode printerMode);
+    virtual QPrintEngine *createNativePrintEngine(QPrinter::PrinterMode mode);
+    virtual QPaintEngine *createPaintEngine(QPrintEngine *engine, QPrinter::PrinterMode mode);
 
     virtual QPrintDevice createPrintDevice(const QString &id);
     virtual QPrintDevice createDefaultPrintDevice();

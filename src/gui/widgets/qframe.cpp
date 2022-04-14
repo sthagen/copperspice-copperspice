@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,17 +29,12 @@
 #include <qstyle.h>
 #include <qstyleoption.h>
 #include <qapplication.h>
+
 #include <qframe_p.h>
 
-
-
 QFramePrivate::QFramePrivate()
-   : frect(0, 0, 0, 0),
-     frameStyle(QFrame::NoFrame | QFrame::Plain),
-     lineWidth(1),
-     midLineWidth(0),
-     frameWidth(0),
-     leftFrameWidth(0), rightFrameWidth(0),
+   : frect(0, 0, 0, 0), frameStyle(QFrame::NoFrame | QFrame::Plain), lineWidth(1),
+     midLineWidth(0), frameWidth(0), leftFrameWidth(0), rightFrameWidth(0),
      topFrameWidth(0), bottomFrameWidth(0)
 {
 }
@@ -47,20 +42,21 @@ QFramePrivate::QFramePrivate()
 QFramePrivate::~QFramePrivate()
 {
 }
+
 inline void QFramePrivate::init()
 {
    setLayoutItemMargins(QStyle::SE_FrameLayoutItem);
 }
 
-QFrame::QFrame(QWidget *parent, Qt::WindowFlags f)
-   : QWidget(*new QFramePrivate, parent, f)
+QFrame::QFrame(QWidget *parent, Qt::WindowFlags flags)
+   : QWidget(*new QFramePrivate, parent, flags)
 {
    Q_D(QFrame);
    d->init();
 }
 
-QFrame::QFrame(QFramePrivate &dd, QWidget *parent, Qt::WindowFlags f)
-   : QWidget(dd, parent, f)
+QFrame::QFrame(QFramePrivate &dd, QWidget *parent, Qt::WindowFlags flags)
+   : QWidget(dd, parent, flags)
 {
    Q_D(QFrame);
    d->init();
@@ -68,7 +64,7 @@ QFrame::QFrame(QFramePrivate &dd, QWidget *parent, Qt::WindowFlags f)
 
 void QFrame::initStyleOption(QStyleOptionFrame *option) const
 {
-   if (!option) {
+   if (! option) {
       return;
    }
 
@@ -238,8 +234,7 @@ void QFramePrivate::updateStyledFrameWidths()
    topFrameWidth = cr.top() - opt.rect.top();
    rightFrameWidth = opt.rect.right() - cr.right(),
    bottomFrameWidth = opt.rect.bottom() - cr.bottom();
-   frameWidth = qMax(qMax(leftFrameWidth, rightFrameWidth),
-         qMax(topFrameWidth, bottomFrameWidth));
+   frameWidth = qMax(qMax(leftFrameWidth, rightFrameWidth), qMax(topFrameWidth, bottomFrameWidth));
 }
 
 /*!
@@ -256,14 +251,11 @@ void QFramePrivate::updateFrameWidth()
    setLayoutItemMargins(QStyle::SE_FrameLayoutItem);
 }
 
-
 int QFrame::frameWidth() const
 {
    Q_D(const QFrame);
    return d->frameWidth;
 }
-
-
 
 QRect QFrame::frameRect() const
 {
@@ -292,8 +284,10 @@ QSize QFrame::sizeHint() const
    switch (d->frameStyle & Shape_Mask) {
       case HLine:
          return QSize(-1, 3);
+
       case VLine:
          return QSize(3, -1);
+
       default:
          return QWidget::sizeHint();
    }
@@ -341,7 +335,9 @@ bool QFrame::event(QEvent *e)
    if (e->type() == QEvent::ParentChange) {
       d_func()->updateFrameWidth();
    }
+
    bool result = QWidget::event(e);
+
    //this has to be done after the widget has been polished
    if (e->type() == QEvent::Polish) {
       d_func()->updateFrameWidth();
@@ -349,4 +345,3 @@ bool QFrame::event(QEvent *e)
    return result;
 }
 
-QT_END_NAMESPACE

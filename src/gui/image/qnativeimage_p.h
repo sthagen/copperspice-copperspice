@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,17 +26,16 @@
 
 #include <qimage.h>
 
-
-
-
-
-
 class QWindow;
 
 class QNativeImage
 {
  public:
    QNativeImage(int width, int height, QImage::Format format, bool isTextBuffer = false, QWindow *window = nullptr);
+
+   QNativeImage(const QNativeImage &) = delete;
+   QNativeImage &operator=(const QNativeImage &) = delete;
+
    ~QNativeImage();
 
    inline int width() const;
@@ -45,8 +44,6 @@ class QNativeImage
    QImage image;
 
    static QImage::Format systemFormat();
- private:
-   Q_DISABLE_COPY(QNativeImage)
 };
 
 inline int QNativeImage::width() const

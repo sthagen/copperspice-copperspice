@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,6 +26,7 @@
 
 #include <qglobal.h>
 #include <qfont.h>
+#include <qfiledialog.h>
 #include <qobject.h>
 #include <qlist.h>
 #include <qshareddatapointer.h>
@@ -41,7 +42,7 @@ class QVariant;
 class QUrl;
 class QColorDialogOptionsPrivate;
 class QFontDialogOptionsPrivate;
-class QFileDialogOptionsPrivate;
+class QPlatformFileDialogOptionsPrivate;
 class QMessageDialogOptionsPrivate;
 
 class Q_GUI_EXPORT QPlatformDialogHelper : public QObject
@@ -128,7 +129,7 @@ class Q_GUI_EXPORT QPlatformDialogHelper : public QObject
    virtual QVariant styleHint(StyleHint hint) const;
 
    virtual void exec() = 0;
-   virtual bool show(Qt::WindowFlags windowFlags, Qt::WindowModality windowModality, QWindow *parent) = 0;
+   virtual bool show(Qt::WindowFlags flags, Qt::WindowModality windowModality, QWindow *parent) = 0;
    virtual void hide() = 0;
 
    static QVariant defaultStyleHint(QPlatformDialogHelper::StyleHint hint);
@@ -271,16 +272,14 @@ class Q_GUI_EXPORT QPlatformFontDialogHelper : public QPlatformDialogHelper
    QSharedPointer<QFontDialogOptions> m_options;
 };
 
-class Q_GUI_EXPORT QFileDialogOptions
+class Q_GUI_EXPORT QPlatformFileDialogOptions
 {
-   GUI_CS_GADGET(QFileDialogOptions)
+   GUI_CS_GADGET(QPlatformFileDialogOptions)
 
    GUI_CS_ENUM(ViewMode)
    GUI_CS_ENUM(FileMode)
    GUI_CS_ENUM(AcceptMode)
    GUI_CS_ENUM(DialogLabel)
-
-   GUI_CS_FLAG(FileDialogOption, FileDialogOptions)
 
  public:
    enum ViewMode { Detail, List };
@@ -288,34 +287,25 @@ class Q_GUI_EXPORT QFileDialogOptions
    enum AcceptMode { AcceptOpen, AcceptSave };
    enum DialogLabel { LookIn, FileName, FileType, Accept, Reject, DialogLabelCount };
 
-   enum FileDialogOption {
-      ShowDirsOnly                = 0x00000001,
-      DontResolveSymlinks         = 0x00000002,
-      DontConfirmOverwrite        = 0x00000004,
-      DontUseSheet                = 0x00000008,
-      DontUseNativeDialog         = 0x00000010,
-      ReadOnly                    = 0x00000020,
-      HideNameFilterDetails       = 0x00000040,
-      DontUseCustomDirectoryIcons = 0x00000080
-   };
-   using FileDialogOptions = QFlags<FileDialogOption>;
+   QPlatformFileDialogOptions();
 
-   QFileDialogOptions();
-   QFileDialogOptions(const QFileDialogOptions &rhs);
-   QFileDialogOptions &operator=(const QFileDialogOptions &rhs);
-   ~QFileDialogOptions();
+   QPlatformFileDialogOptions(const QPlatformFileDialogOptions &other);
+   QPlatformFileDialogOptions &operator=(const QPlatformFileDialogOptions &other);
 
-   void swap(QFileDialogOptions &other) {
+   ~QPlatformFileDialogOptions();
+
+   void swap(QPlatformFileDialogOptions &other) {
       qSwap(d, other.d);
    }
 
    QString windowTitle() const;
    void setWindowTitle(const QString &);
 
-   void setOption(FileDialogOption option, bool on = true);
-   bool testOption(FileDialogOption option) const;
-   void setOptions(FileDialogOptions options);
-   FileDialogOptions options() const;
+   void setOption(QFileDialog::FileDialogOption option, bool on = true);
+   bool testOption(QFileDialog::FileDialogOption option) const;
+   void setOptions(QFileDialog::FileDialogOptions options);
+
+   QFileDialog::FileDialogOptions options() const;
 
    QDir::Filters filter() const;
    void setFilter(QDir::Filters filters);
@@ -361,7 +351,7 @@ class Q_GUI_EXPORT QFileDialogOptions
    QStringList supportedSchemes() const;
 
  private:
-   QSharedDataPointer<QFileDialogOptionsPrivate> d;
+   QSharedDataPointer<QPlatformFileDialogOptionsPrivate> d;
 };
 
 class Q_GUI_EXPORT QPlatformFileDialogHelper : public QPlatformDialogHelper
@@ -380,8 +370,8 @@ class Q_GUI_EXPORT QPlatformFileDialogHelper : public QPlatformDialogHelper
 
    virtual bool isSupportedUrl(const QUrl &url) const;
 
-   const QSharedPointer<QFileDialogOptions> &options() const;
-   void setOptions(const QSharedPointer<QFileDialogOptions> &options);
+   const QSharedPointer<QPlatformFileDialogOptions> &options() const;
+   void setOptions(const QSharedPointer<QPlatformFileDialogOptions> &options);
 
    static QStringList cleanFilterList(const QString &filter);
    static const QString filterRegExp;
@@ -398,7 +388,7 @@ class Q_GUI_EXPORT QPlatformFileDialogHelper : public QPlatformDialogHelper
    GUI_CS_SIGNAL_2(filterSelected, filter)
 
  private:
-   QSharedPointer<QFileDialogOptions> m_options;
+   QSharedPointer<QPlatformFileDialogOptions> m_options;
 };
 
 class Q_GUI_EXPORT QMessageDialogOptions
@@ -455,8 +445,5 @@ class Q_GUI_EXPORT QPlatformMessageDialogHelper : public QPlatformDialogHelper
  private:
    QSharedPointer<QMessageDialogOptions> m_options;
 };
-
-Q_DECLARE_METATYPE(QPlatformDialogHelper::StandardButton)
-Q_DECLARE_METATYPE(QPlatformDialogHelper::ButtonRole)
 
 #endif

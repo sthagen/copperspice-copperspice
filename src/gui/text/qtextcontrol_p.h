@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -81,6 +81,10 @@ class Q_GUI_EXPORT QTextControl : public QInputControl
    explicit QTextControl(QObject *parent = nullptr);
    explicit QTextControl(const QString &text, QObject *parent = nullptr);
    explicit QTextControl(QTextDocument *doc, QObject *parent = nullptr);
+
+   QTextControl(const QTextControl &) = delete;
+   QTextControl &operator=(const QTextControl &) = delete;
+
    virtual ~QTextControl();
 
    void setDocument(QTextDocument *document);
@@ -97,9 +101,9 @@ class Q_GUI_EXPORT QTextControl : public QInputControl
    void setCurrentCharFormat(const QTextCharFormat &format);
    QTextCharFormat currentCharFormat() const;
 
-   bool find(const QString &exp, QTextDocument::FindFlags options = 0);
+   bool find(const QString &exp, QTextDocument::FindFlags options = Qt::EmptyFlag);
 
-   bool find(const QRegularExpression &exp, QTextDocument::FindFlags options = 0);
+   bool find(const QRegularExpression &exp, QTextDocument::FindFlags options = Qt::EmptyFlag);
    QString toPlainText() const;
 
 #ifndef QT_NO_TEXTHTMLPARSER
@@ -221,17 +225,17 @@ class Q_GUI_EXPORT QTextControl : public QInputControl
    GUI_CS_SIGNAL_1(Public, void textChanged())
    GUI_CS_SIGNAL_2(textChanged)
 
-   GUI_CS_SIGNAL_1(Public, void undoAvailable(bool b))
-   GUI_CS_SIGNAL_2(undoAvailable, b)
+   GUI_CS_SIGNAL_1(Public, void undoAvailable(bool status))
+   GUI_CS_SIGNAL_2(undoAvailable, status)
 
-   GUI_CS_SIGNAL_1(Public, void redoAvailable(bool b))
-   GUI_CS_SIGNAL_2(redoAvailable, b)
+   GUI_CS_SIGNAL_1(Public, void redoAvailable(bool status))
+   GUI_CS_SIGNAL_2(redoAvailable, status)
 
    GUI_CS_SIGNAL_1(Public, void currentCharFormatChanged(const QTextCharFormat &format))
    GUI_CS_SIGNAL_2(currentCharFormatChanged, format)
 
-   GUI_CS_SIGNAL_1(Public, void copyAvailable(bool b))
-   GUI_CS_SIGNAL_2(copyAvailable, b)
+   GUI_CS_SIGNAL_1(Public, void copyAvailable(bool status))
+   GUI_CS_SIGNAL_2(copyAvailable, status)
 
    GUI_CS_SIGNAL_1(Public, void selectionChanged())
    GUI_CS_SIGNAL_2(selectionChanged)
@@ -268,11 +272,11 @@ class Q_GUI_EXPORT QTextControl : public QInputControl
    QPalette palette() const;
    void setPalette(const QPalette &pal);
 
-   virtual void processEvent(QEvent *e, const QMatrix &matrix, QWidget *contextWidget = 0);
-   void processEvent(QEvent *e, const QPointF &coordinateOffset = QPointF(), QWidget *contextWidget = 0);
+   virtual void processEvent(QEvent *e, const QMatrix &matrix, QWidget *contextWidget = nullptr);
+   void processEvent(QEvent *e, const QPointF &coordinateOffset = QPointF(), QWidget *contextWidget = nullptr);
 
    // control methods
-   void drawContents(QPainter *painter, const QRectF &rect = QRectF(), QWidget *widget = 0);
+   void drawContents(QPainter *painter, const QRectF &rect = QRectF(), QWidget *widget = nullptr);
 
    void setFocus(bool focus, Qt::FocusReason = Qt::OtherFocusReason);
 
@@ -293,8 +297,6 @@ class Q_GUI_EXPORT QTextControl : public QInputControl
    QScopedPointer<QTextControlPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QTextControl)
-
    GUI_CS_SLOT_1(Private, void _q_updateCurrentCharFormatAndSelection())
    GUI_CS_SLOT_2(_q_updateCurrentCharFormatAndSelection)
 
@@ -316,7 +318,6 @@ class Q_GUI_EXPORT QTextControl : public QInputControl
    GUI_CS_SLOT_1(Private, void _q_contentsChanged(int arg1, int arg2, int arg3))
    GUI_CS_SLOT_2(_q_contentsChanged)
 };
-
 
 #ifndef QT_NO_CONTEXTMENU
 class QUnicodeControlCharacterMenu : public QMenu

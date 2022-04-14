@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,10 @@
 #ifndef QIMAGEWRITER_H
 #define QIMAGEWRITER_H
 
-#include <QtCore/qbytearray.h>
-#include <QtCore/qcoreapplication.h>
-#include <QtCore/qlist.h>
-#include <QtGui/qimageiohandler.h>
-
+#include <qbytearray.h>
+#include <qcoreapplication.h>
+#include <qlist.h>
+#include <qimageiohandler.h>
 
 class QIODevice;
 class QImage;
@@ -36,8 +35,6 @@ class QImageWriterPrivate;
 
 class Q_GUI_EXPORT QImageWriter
 {
-   Q_DECLARE_TR_FUNCTIONS(QImageWriter)
-
  public:
    enum ImageWriterError {
       UnknownError,
@@ -46,12 +43,16 @@ class Q_GUI_EXPORT QImageWriter
    };
 
    QImageWriter();
-   explicit QImageWriter(QIODevice *device, const QByteArray &format);
-   explicit QImageWriter(const QString &fileName, const QByteArray &format = QByteArray());
+   explicit QImageWriter(QIODevice *device, const QString &format);
+   explicit QImageWriter(const QString &fileName, const QString &format = QString());
+
+   QImageWriter(const QImageWriter &) = delete;
+   QImageWriter &operator=(const QImageWriter &) = delete;
+
    ~QImageWriter();
 
-   void setFormat(const QByteArray &format);
-   QByteArray format() const;
+   void setFormat(const QString &format);
+   QString format() const;
 
    void setDevice(QIODevice *device);
    QIODevice *device() const;
@@ -76,13 +77,9 @@ class Q_GUI_EXPORT QImageWriter
    void setProgressiveScanWrite(bool progressive);
    bool progressiveScanWrite() const;
    QImageIOHandler::Transformations transformation() const;
-   void setTransformation(QImageIOHandler::Transformations orientation);
-   // Obsolete as of 4.1
-   void setDescription(const QString &description);
-   QString description() const;
+   void setTransformation(QImageIOHandler::Transformations transform);
 
    void setText(const QString &key, const QString &text);
-
    bool canWrite() const;
    bool write(const QImage &image);
 
@@ -91,14 +88,12 @@ class Q_GUI_EXPORT QImageWriter
 
    bool supportsOption(QImageIOHandler::ImageOption option) const;
 
-   static QList<QByteArray> supportedImageFormats();
-   static QList<QByteArray> supportedMimeTypes();
+   static QList<QString> supportedImageFormats();
+   static QList<QString> supportedMimeTypes();
 
  private:
-   Q_DISABLE_COPY(QImageWriter)
+   Q_DECLARE_TR_FUNCTIONS(QImageWriter)
    QImageWriterPrivate *d;
 };
-
-
 
 #endif

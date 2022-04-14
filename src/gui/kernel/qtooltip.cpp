@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -91,9 +91,9 @@ QTipLabel *QTipLabel::instance = nullptr;
 QTipLabel::QTipLabel(const QString &text, QWidget *w, int msecDisplayTime)
 
 #ifndef QT_NO_STYLE_STYLESHEET
-   : QLabel(w, Qt::ToolTip | Qt::BypassGraphicsProxyWidget), widget(0), styleSheetParent(0)
+   : QLabel(w, Qt::ToolTip | Qt::BypassGraphicsProxyWidget), widget(nullptr), styleSheetParent(nullptr)
 #else
-   : QLabel(w, Qt::ToolTip | Qt::BypassGraphicsProxyWidget), widget(0)
+   : QLabel(w, Qt::ToolTip | Qt::BypassGraphicsProxyWidget), widget(nullptr)
 #endif
 {
    delete instance;
@@ -102,12 +102,12 @@ QTipLabel::QTipLabel(const QString &text, QWidget *w, int msecDisplayTime)
    setBackgroundRole(QPalette::ToolTipBase);
    setPalette(QToolTip::palette());
    ensurePolished();
-   setMargin(1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, 0, this));
+   setMargin(1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, nullptr, this));
    setFrameStyle(QFrame::NoFrame);
    setAlignment(Qt::AlignLeft);
    setIndent(1);
    qApp->installEventFilter(this);
-   setWindowOpacity(style()->styleHint(QStyle::SH_ToolTipLabel_Opacity, 0, this) / qreal(255.0));
+   setWindowOpacity(style()->styleHint(QStyle::SH_ToolTipLabel_Opacity, nullptr, this) / qreal(255.0));
    setMouseTracking(true);
    fadingOut = false;
    reuseTip(text, msecDisplayTime);
@@ -128,7 +128,7 @@ void QTipLabel::reuseTip(const QString &text, int msecDisplayTime)
 #ifndef QT_NO_STYLE_STYLESHEET
    if (styleSheetParent) {
       disconnect(styleSheetParent, SIGNAL(destroyed()), QTipLabel::instance, SLOT(styleSheetParentDestroyed()));
-      styleSheetParent = 0;
+      styleSheetParent = nullptr;
    }
 #endif
 
@@ -149,7 +149,8 @@ void QTipLabel::paintEvent(QPaintEvent *ev)
 {
    QStylePainter p(this);
    QStyleOptionFrame opt;
-   opt.init(this);
+   opt.initFrom(this);
+
    p.drawPrimitive(QStyle::PE_PanelTipLabel, opt);
    p.end();
 
@@ -160,7 +161,8 @@ void QTipLabel::resizeEvent(QResizeEvent *e)
 {
    QStyleHintReturnMask frameMask;
    QStyleOption option;
-   option.init(this);
+   option.initFrom(this);
+
    if (style()->styleHint(QStyle::SH_ToolTip_Mask, &option, this, &frameMask)) {
       setMask(frameMask.region);
    }
@@ -185,7 +187,7 @@ void QTipLabel::mouseMoveEvent(QMouseEvent *e)
 
 QTipLabel::~QTipLabel()
 {
-   instance = 0;
+   instance = nullptr;
 }
 
 void QTipLabel::hideTip()
@@ -381,7 +383,7 @@ void QToolTip::showText(const QPoint &pos, const QString &text, QWidget *w)
 
 bool QToolTip::isVisible()
 {
-   return (QTipLabel::instance != 0 && QTipLabel::instance->isVisible());
+   return (QTipLabel::instance != nullptr && QTipLabel::instance->isVisible());
 }
 
 QString QToolTip::text()
@@ -421,7 +423,7 @@ void QToolTip::setFont(const QFont &font)
 #ifndef QT_NO_STYLE_STYLESHEET
 void QTipLabel::styleSheetParentDestroyed() {
    setProperty("_q_stylesheet_parent", QVariant());
-   styleSheetParent = 0;
+   styleSheetParent = nullptr;
 }
 #endif
 

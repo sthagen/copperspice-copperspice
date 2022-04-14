@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,9 +28,9 @@
 
 #ifndef QT_NO_ITEMVIEWS
 
-#include <QtCore/qbitarray.h>
-#include <QtGui/qapplication.h>
-#include <QtGui/qlabel.h>
+#include <qbitarray.h>
+#include <qapplication.h>
+#include <qlabel.h>
 
 class QHeaderViewPrivate: public QAbstractItemViewPrivate
 {
@@ -40,39 +40,17 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    enum StateVersion { VersionMarker = 0xff };
 
    QHeaderViewPrivate()
-      : state(NoState),
-        offset(0),
-        sortIndicatorOrder(Qt::DescendingOrder),
-        sortIndicatorSection(0),
-        sortIndicatorShown(false),
-        lastPos(-1),
-        firstPos(-1),
-        originalSize(-1),
-        section(-1),
-        target(-1),
-        pressed(-1),
-        hover(-1),
-        length(0),
-        preventCursorChangeInSetOffset(false),
-        movableSections(false),
-        clickableSections(false),
-        highlightSelected(false),
-        stretchLastSection(false),
-        cascadingResizing(false),
-        resizeRecursionBlock(false),
-        allowUserMoveOfSection0(true), // will be false for QTreeView and true for QTableView
-        customDefaultSectionSize(false),
-        stretchSections(0),
-        contentsSections(0),
-        minimumSectionSize(-1),
-        maximumSectionSize(-1),
-        lastSectionSize(0),
-        sectionIndicatorOffset(0),
-        sectionIndicator(0),
-        globalResizeMode(QHeaderView::Interactive),
-        sectionStartposRecalc(true),
-        resizeContentsPrecision(1000)
-   {}
+      : state(NoState), offset(0), sortIndicatorOrder(Qt::DescendingOrder), sortIndicatorSection(0),
+        sortIndicatorShown(false), lastPos(-1), firstPos(-1), originalSize(-1), section(-1),
+        target(-1), pressed(-1), hover(-1), length(0), preventCursorChangeInSetOffset(false),
+        movableSections(false), clickableSections(false), highlightSelected(false),
+        stretchLastSection(false), cascadingResizing(false), resizeRecursionBlock(false),
+        allowUserMoveOfSection0(true),       // will be false for QTreeView and true for QTableView
+        customDefaultSectionSize(false), stretchSections(0), contentsSections(0), minimumSectionSize(-1),
+        maximumSectionSize(-1), lastSectionSize(0), sectionIndicatorOffset(0), sectionIndicator(nullptr),
+        globalResizeMode(QHeaderView::Interactive), sectionStartposRecalc(true), resizeContentsPrecision(1000)
+   {
+   }
 
    int lastVisibleVisualIndex() const;
    int sectionHandleAt(int position);
@@ -88,28 +66,28 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    bool isFirstVisibleSection(int section) const;
    bool isLastVisibleSection(int section) const;
 
-   inline bool rowIntersectsSelection(int row) const {
+   bool rowIntersectsSelection(int row) const {
       return (selectionModel ? selectionModel->rowIntersectsSelection(row, root) : false);
    }
 
-   inline bool columnIntersectsSelection(int column) const {
+   bool columnIntersectsSelection(int column) const {
       return (selectionModel ? selectionModel->columnIntersectsSelection(column, root) : false);
    }
 
-   inline bool sectionIntersectsSelection(int logical) const {
+   bool sectionIntersectsSelection(int logical) const {
       return (orientation == Qt::Horizontal ? columnIntersectsSelection(logical) : rowIntersectsSelection(logical));
    }
 
-   inline bool isRowSelected(int row) const {
+   bool isRowSelected(int row) const {
       return (selectionModel ? selectionModel->isRowSelected(row, root) : false);
    }
 
-   inline bool isColumnSelected(int column) const {
+   bool isColumnSelected(int column) const {
       return (selectionModel ? selectionModel->isColumnSelected(column, root) : false);
    }
 
-   inline void prepareSectionSelected() {
-      if (!selectionModel || !selectionModel->hasSelection()) {
+   void prepareSectionSelected() {
+      if (! selectionModel || !selectionModel->hasSelection()) {
          sectionSelected.clear();
 
       } else if (sectionSelected.count() != sectionCount() * 2) {
@@ -120,28 +98,28 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
       }
    }
 
-   inline int sectionCount() const {
+   int sectionCount() const {
       return sectionItems.count();
    }
 
-   inline bool reverse() const {
+   bool reverse() const {
       return orientation == Qt::Horizontal && q_func()->isRightToLeft();
    }
 
-   inline int logicalIndex(int visualIndex) const {
+   int logicalIndex(int visualIndex) const {
       return logicalIndices.isEmpty() ? visualIndex : logicalIndices.at(visualIndex);
    }
 
-   inline int visualIndex(int logicalIndex) const {
+   int visualIndex(int logicalIndex) const {
       return visualIndices.isEmpty() ? logicalIndex : visualIndices.at(logicalIndex);
    }
 
-   inline void setDefaultValues(Qt::Orientation o) {
+   void setDefaultValues(Qt::Orientation o) {
       orientation = o;
       updateDefaultSectionSizeFromStyle();
+
       defaultAlignment = (o == Qt::Horizontal
-            ? Qt::Alignment(Qt::AlignCenter)
-            : Qt::AlignLeft | Qt::AlignVCenter);
+            ? Qt::Alignment(Qt::AlignCenter) : Qt::AlignLeft | Qt::AlignVCenter);
    }
 
    inline bool isVisualIndexHidden(int visual) const {
@@ -163,10 +141,10 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    }
 
    inline void initializeIndexMapping() const {
-      if (visualIndices.count() != sectionCount()
-         || logicalIndices.count() != sectionCount()) {
+      if (visualIndices.count() != sectionCount() || logicalIndices.count() != sectionCount()) {
          visualIndices.resize(sectionCount());
          logicalIndices.resize(sectionCount());
+
          for (int s = 0; s < sectionCount(); ++s) {
             visualIndices[s] = s;
             logicalIndices[s] = s;
@@ -176,15 +154,15 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
 
    inline void clearCascadingSections() {
       firstCascadingSection = sectionItems.count();
-      lastCascadingSection = 0;
+      lastCascadingSection  = 0;
       cascadingSectionSize.clear();
    }
 
    inline void saveCascadingSectionSize(int visual, int size) {
-      if (!cascadingSectionSize.contains(visual)) {
+      if (! cascadingSectionSize.contains(visual)) {
          cascadingSectionSize.insert(visual, size);
          firstCascadingSection = qMin(firstCascadingSection, visual);
-         lastCascadingSection = qMax(lastCascadingSection, visual);
+         lastCascadingSection  = qMax(lastCascadingSection, visual);
       }
    }
 
@@ -194,8 +172,7 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
 
    inline int modelSectionCount() const {
       return (orientation == Qt::Horizontal
-            ? model->columnCount(root)
-            : model->rowCount(root));
+            ? model->columnCount(root) : model->rowCount(root));
    }
 
    inline bool modelIsEmpty() const {
@@ -213,6 +190,7 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
          const_cast<QHeaderView *>(q_func())->resizeSections();
       }
    }
+
    inline void setAllowUserMoveOfSection0(bool b) {
       allowUserMoveOfSection0 = b;
    }
@@ -229,11 +207,11 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    int sortIndicatorSection;
    bool sortIndicatorShown;
 
-   mutable QVector<int> visualIndices; // visualIndex = visualIndices.at(logicalIndex)
-   mutable QVector<int> logicalIndices; // logicalIndex = row or column in the model
-   mutable QBitArray sectionSelected; // from logical index to bit
+   mutable QVector<int> visualIndices;           // visualIndex = visualIndices.at(logicalIndex)
+   mutable QVector<int> logicalIndices;          // logicalIndex = row or column in the model
+   mutable QBitArray sectionSelected;            // from logical index to bit
 
-   mutable QHash<int, int> hiddenSectionSize; // from logical index to section size
+   mutable QHash<int, int> hiddenSectionSize;    // from logical index to section size
    mutable QHash<int, int> cascadingSectionSize; // from visual index to section size
    mutable QSize cachedSizeHint;
    mutable QBasicTimer delayedResize;
@@ -244,7 +222,7 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    int lastPos;
    int firstPos;
    int originalSize;
-   int section; // used for resizing and moving sections
+   int section;                   // used for resizing and moving sections
    int target;
    int pressed;
    int hover;
@@ -264,43 +242,51 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    int defaultSectionSize;
    int minimumSectionSize;
    int maximumSectionSize;
-   int lastSectionSize; // $$$
+   int lastSectionSize;
    int sectionIndicatorOffset;
+
    Qt::Alignment defaultAlignment;
    QLabel *sectionIndicator;
    QHeaderView::ResizeMode globalResizeMode;
    QList<QPersistentModelIndex> persistentHiddenSections;
    mutable bool sectionStartposRecalc;
    int resizeContentsPrecision;
-   // header section spans
 
+   // header section spans
    struct SectionItem {
-      uint size : 20;
-      uint isHidden : 1;
-      uint resizeMode : 5;  // (holding QHeaderView::ResizeMode)
+      uint size       : 20;
+      uint isHidden   : 1;
+      uint resizeMode : 5;                    // (holding QHeaderView::ResizeMode)
       uint currentlyUnusedPadding : 6;
 
-      union { // This union is made in order to save space and ensure good vector performance (on remove)
-         mutable int calculated_startpos; // <- this is the primary used member.
-         mutable int tmpLogIdx;         // When one of these 'tmp'-members has been used we call
-         int tmpDataStreamSectionCount; // recalcSectionStartPos() or set sectionStartposRecalc to true
-      };                                 // to ensure that calculated_startpos will be calculated afterwards.
+      union {                                 // used to save space and ensure good vector performance (on remove)
+         mutable int calculated_startpos;     // primary member
+         mutable int tmpLogIdx;               // When one of these 'tmp'-members has been used we call
+         int tmpDataStreamSectionCount;       // recalcSectionStartPos() or set sectionStartposRecalc to true
+      };                                      // to ensure that calculated_startpos will be calculated afterwards.
 
-      inline SectionItem() : size(0), isHidden(0), resizeMode(QHeaderView::Interactive) {}
+      inline SectionItem()
+         : size(0), isHidden(0), resizeMode(QHeaderView::Interactive)
+      { }
+
       inline SectionItem(int length, QHeaderView::ResizeMode mode)
-         : size(length), isHidden(0), resizeMode(mode), calculated_startpos(-1) {}
+         : size(length), isHidden(0), resizeMode(mode), calculated_startpos(-1)
+      { }
+
       inline int sectionSize() const {
          return size;
       }
+
       inline int calculatedEndPos() const {
          return calculated_startpos + size;
       }
-#ifndef QT_NO_DATASTREAM
+
       inline void write(QDataStream &out) const {
          out << static_cast<int>(size);
          out << 1;
          out << (int)resizeMode;
       }
+
       inline void read(QDataStream &in) {
          int m;
          in >> m;
@@ -309,7 +295,6 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
          in >> m;
          resizeMode = m;
       }
-#endif
    };
 
    QVector<SectionItem> sectionItems;
@@ -319,10 +304,12 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    void resizeSectionItem(int visualIndex, int oldSize, int newSize);
    void setDefaultSectionSize(int size);
    void updateDefaultSectionSizeFromStyle();
-   void recalcSectionStartPos() const; // not really const
+   void recalcSectionStartPos() const;           // not really const
 
-   inline int headerLength() const { // for debugging
+   inline int headerLength() const {
+      // for debugging
       int len = 0;
+
       for (int i = 0; i < sectionItems.count(); ++i) {
          len += sectionItems.at(i).size;
       }
@@ -331,8 +318,10 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
 
    QBitArray sectionsHiddenToBitVector() const {
       QBitArray sectionHidden;
-      if (!hiddenSectionSize.isEmpty()) {
+
+      if (! hiddenSectionSize.isEmpty()) {
          sectionHidden.resize(sectionItems.size());
+
          for (int u = 0; u < sectionItems.size(); ++u) {
             sectionHidden[u] = sectionItems.at(u).isHidden;
          }
@@ -346,7 +335,6 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
          sectionData[i].isHidden = sectionHidden.at(i);
       }
    }
-
 
    int headerSectionSize(int visual) const;
    int headerSectionPosition(int visual) const;
@@ -362,13 +350,9 @@ class QHeaderViewPrivate: public QAbstractItemViewPrivate
    int adjustedVisualIndex(int visualIndex) const;
    void setScrollOffset(const QScrollBar *scrollBar, QAbstractItemView::ScrollMode scrollMode);
 
-#ifndef QT_NO_DATASTREAM
    void write(QDataStream &out) const;
    bool read(QDataStream &in);
-#endif
-
 };
-
 
 #endif // QT_NO_ITEMVIEWS
 

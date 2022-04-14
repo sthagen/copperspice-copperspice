@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -1120,5 +1120,5 @@ const uint *QT_FASTCALL qt_fetch_radial_gradient_neon(uint *buffer, const Operat
    return qt_fetch_radial_gradient_template<QRadialFetchSimd<QSimdNeon>, uint>(buffer, op, data, y, x, length);
 }
 
-#endif // QT_HAVE_NEON
+#endif
 

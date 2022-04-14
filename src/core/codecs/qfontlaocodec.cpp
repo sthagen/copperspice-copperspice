@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #ifndef QT_NO_CODECS
 #ifndef QT_NO_BIG_CODECS
-
-QT_BEGIN_NAMESPACE
 
 static unsigned char const unicode_to_mulelao[256] = {
    // U+0E80
@@ -103,7 +101,6 @@ QByteArray QFontLaoCodec::convertFromUnicode(QStringView str, ConverterState *) 
    return retval;
 }
 
-QT_END_NAMESPACE
-
 #endif // QT_NO_BIG_CODECS
+
 #endif // QT_NO_CODECS

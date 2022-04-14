@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Friedemann Kleint 
+ * Copyright (C) 2006 Friedemann Kleint
  * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,11 @@
 #define ImageDecoderQt_h
 
 #include "ImageDecoder.h"
-#include <QtGui/QImageReader>
-#include <QtGui/QPixmap>
-#include <QtCore/QList>
-#include <QtCore/QHash>
-#include <QtCore/QBuffer>
+#include <QImageReader>
+#include <QPixmap>
+#include <QList>
+#include <QHash>
+#include <QBuffer>
 #include <wtf/OwnPtr.h>
 #include <wtf/PassOwnPtr.h>
 
@@ -67,7 +67,7 @@ private:
     void clearPointers();
 
 private:
-    QByteArray m_format;
+    QString m_format;
     OwnPtr<QBuffer> m_buffer;
     OwnPtr<QImageReader> m_reader;
     mutable int m_repetitionCount;

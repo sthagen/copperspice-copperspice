@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QTCONCURRENTFILTER_H
 #define QTCONCURRENTFILTER_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qtconcurrentfilterkernel.h>
-#include <QtCore/qtconcurrentfunctionwrappers.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
+#include <qtconcurrentfilterkernel.h>
+#include <qtconcurrentfunctionwrappers.h>
 
 namespace QtConcurrent {
 
@@ -49,10 +47,10 @@ QFuture<void> filter(Sequence &sequence, KeepFunctor keep)
 // filteredReduced() on sequences
 template <typename ResultType, typename Sequence, typename KeepFunctor, typename ReduceFunctor>
 QFuture<ResultType> filteredReduced(const Sequence &sequence, KeepFunctor keep, ReduceFunctor reduce,
-                                    ReduceOptions options = ReduceOptions(UnorderedReduce | SequentialReduce))
+            ReduceOptions reduceOptions = ReduceOptions(UnorderedReduce | SequentialReduce))
 {
    return startFilteredReduced<ResultType>(sequence, QtPrivate::createFunctionWrapper(keep),
-                                           QtPrivate::createFunctionWrapper(reduce), options);
+            QtPrivate::createFunctionWrapper(reduce), reduceOptions);
 }
 
 template <typename Sequence, typename KeepFunctor, typename ReduceFunctor>
@@ -66,10 +64,10 @@ QFuture<typename QtPrivate::ReduceResultType<ReduceFunctor>::ResultType> filtere
 // filteredReduced() on iterators
 template <typename ResultType, typename Iterator, typename KeepFunctor, typename ReduceFunctor>
 QFuture<ResultType> filteredReduced(Iterator begin, Iterator end, KeepFunctor keep, ReduceFunctor reduce,
-                                    ReduceOptions options = ReduceOptions(UnorderedReduce | SequentialReduce))
+            ReduceOptions reduceOptions = ReduceOptions(UnorderedReduce | SequentialReduce))
 {
    return startFilteredReduced<ResultType>(begin, end, QtPrivate::createFunctionWrapper(keep),
-                                           QtPrivate::createFunctionWrapper(reduce), options);
+            QtPrivate::createFunctionWrapper(reduce), reduceOptions);
 }
 
 template <typename Iterator, typename KeepFunctor, typename ReduceFunctor>
@@ -105,10 +103,10 @@ void blockingFilter(Sequence &sequence, KeepFunctor keep)
 // blocking filteredReduced() on sequences
 template <typename ResultType, typename Sequence, typename KeepFunctor, typename ReduceFunctor>
 ResultType blockingFilteredReduced(const Sequence &sequence, KeepFunctor keep, ReduceFunctor reduce,
-                                   ReduceOptions options = ReduceOptions(UnorderedReduce | SequentialReduce))
+            ReduceOptions reduceOptions = ReduceOptions(UnorderedReduce | SequentialReduce))
 {
    return startFilteredReduced<ResultType>(sequence, QtPrivate::createFunctionWrapper(keep),
-                                           QtPrivate::createFunctionWrapper(reduce), options).startBlocking();
+            QtPrivate::createFunctionWrapper(reduce), reduceOptions).startBlocking();
 }
 
 template <typename Sequence, typename KeepFunctor, typename ReduceFunctor>
@@ -122,10 +120,10 @@ typename QtPrivate::ReduceResultType<ReduceFunctor>::ResultType blockingFiltered
 // blocking filteredReduced() on iterators
 template <typename ResultType, typename Iterator, typename KeepFunctor, typename ReduceFunctor>
 ResultType blockingFilteredReduced(Iterator begin, Iterator end, KeepFunctor keep, ReduceFunctor reduce,
-                                   ReduceOptions options = ReduceOptions(UnorderedReduce | SequentialReduce))
+            ReduceOptions reduceOptions = ReduceOptions(UnorderedReduce | SequentialReduce))
 {
    return startFilteredReduced<ResultType> (begin, end, QtPrivate::createFunctionWrapper(keep),
-          QtPrivate::createFunctionWrapper(reduce), options).startBlocking();
+           QtPrivate::createFunctionWrapper(reduce), reduceOptions).startBlocking();
 }
 
 template <typename Iterator, typename KeepFunctor, typename ReduceFunctor>
@@ -155,7 +153,5 @@ OutputSequence blockingFiltered(Iterator begin, Iterator end, KeepFunctor keep)
 }
 
 } // namespace QtConcurrent
-
-QT_END_NAMESPACE
 
 #endif

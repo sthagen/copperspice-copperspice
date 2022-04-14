@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QMainWindow_H
 #define QMainWindow_H
 
-#include <QtGui/qwidget.h>
-#include <QtGui/qtabwidget.h>
+#include <qwidget.h>
+#include <qtabwidget.h>
 
 #ifndef QT_NO_MAINWINDOW
 
@@ -86,7 +86,11 @@ class Q_GUI_EXPORT QMainWindow : public QWidget
    };
    using DockOptions = QFlags<DockOption>;
 
-   explicit QMainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = 0);
+   explicit QMainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
+   QMainWindow(const QMainWindow &) = delete;
+   QMainWindow &operator=(const QMainWindow &) = delete;
+
    ~QMainWindow();
 
    QSize iconSize() const;
@@ -104,6 +108,7 @@ class Q_GUI_EXPORT QMainWindow : public QWidget
    void setCentralWidget(QWidget *widget);
 
    QWidget *takeCentralWidget();
+
 #ifndef QT_NO_DOCKWIDGET
    bool isAnimated() const;
    bool isDockNestingEnabled() const;
@@ -113,7 +118,7 @@ class Q_GUI_EXPORT QMainWindow : public QWidget
 
    void addDockWidget(Qt::DockWidgetArea area, QDockWidget *dockwidget);
    void addDockWidget(Qt::DockWidgetArea area, QDockWidget *dockwidget, Qt::Orientation orientation);
-   void splitDockWidget(QDockWidget *after, QDockWidget *dockwidget, Qt::Orientation orientation);
+   void splitDockWidget(QDockWidget *first, QDockWidget *second, Qt::Orientation orientation);
    void tabifyDockWidget(QDockWidget *first, QDockWidget *second);
 
    QList<QDockWidget *> tabifiedDockWidgets(QDockWidget *dockwidget) const;
@@ -143,16 +148,17 @@ class Q_GUI_EXPORT QMainWindow : public QWidget
    QTabWidget::TabPosition tabPosition(Qt::DockWidgetArea area) const;
    void setTabPosition(Qt::DockWidgetAreas areas, QTabWidget::TabPosition tabPosition);
 #endif
+
 #ifndef QT_NO_MENU
    virtual QMenu *createPopupMenu();
 #endif
 
 #ifndef QT_NO_MENUBAR
    QMenuBar *menuBar() const;
-   void setMenuBar(QMenuBar *menubar);
+   void setMenuBar(QMenuBar *menuBar);
 
    QWidget  *menuWidget() const;
-   void setMenuWidget(QWidget *menubar);
+   void setMenuWidget(QWidget *menuBar);
 #endif
 
 #ifndef QT_NO_STATUSBAR
@@ -178,7 +184,6 @@ class Q_GUI_EXPORT QMainWindow : public QWidget
 
    GUI_CS_SLOT_1(Public, void setUnifiedTitleAndToolBarOnMac(bool set))
    GUI_CS_SLOT_2(setUnifiedTitleAndToolBarOnMac)
-
 #endif
 
    QByteArray saveState(int version = 0) const;
@@ -198,12 +203,10 @@ class Q_GUI_EXPORT QMainWindow : public QWidget
 
  private:
    Q_DECLARE_PRIVATE(QMainWindow)
-   Q_DISABLE_COPY(QMainWindow)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QMainWindow::DockOptions)
 
 #endif // QT_NO_MAINWINDOW
 
-
-#endif // QDYNAMICMAINWINDOW_H
+#endif

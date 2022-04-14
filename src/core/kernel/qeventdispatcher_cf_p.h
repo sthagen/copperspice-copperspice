@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -66,7 +66,7 @@ public:
         CFRelease(m_source);
     }
 
-    void addToMode(CFStringRef mode, CFRunLoopRef runLoop = 0)
+    void addToMode(CFStringRef mode, CFRunLoopRef runLoop = nullptr)
     {
         if (!runLoop)
             runLoop = CFRunLoopGetCurrent();
@@ -110,7 +110,7 @@ public:
         CFRelease(m_observer);
     }
 
-    void addToMode(CFStringRef mode, CFRunLoopRef runLoop = 0)
+    void addToMode(CFStringRef mode, CFRunLoopRef runLoop = nullptr)
     {
         if (!runLoop)
             runLoop = CFRunLoopGetCurrent();
@@ -119,7 +119,7 @@ public:
             CFRunLoopAddObserver(runLoop, m_observer, mode);
     }
 
-    void removeFromMode(CFStringRef mode, CFRunLoopRef runLoop = 0)
+    void removeFromMode(CFStringRef mode, CFRunLoopRef runLoop = nullptr)
     {
         if (!runLoop)
             runLoop = CFRunLoopGetCurrent();

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,20 +27,12 @@
 #include "qprintdialog.h"
 #include <qpagelayout.h>
 
-QT_BEGIN_NAMESPACE
-
 #ifndef QT_NO_PRINTER
 
 QPlatformPrintDevice::QPlatformPrintDevice()
-    : m_isRemote(false),
-      m_supportsMultipleCopies(false),
-      m_supportsCollateCopies(false),
-      m_havePageSizes(false),
-      m_supportsCustomPageSizes(false),
-      m_haveResolutions(false),
-      m_haveInputSlots(false),
-      m_haveOutputBins(false),
-      m_haveDuplexModes(false),
+    : m_isRemote(false), m_supportsMultipleCopies(false), m_supportsCollateCopies(false),
+      m_havePageSizes(false), m_supportsCustomPageSizes(false), m_haveResolutions(false),
+      m_haveInputSlots(false), m_haveOutputBins(false), m_haveDuplexModes(false),
       m_haveColorModes(false)
 #ifndef QT_NO_MIMETYPES
 // emerald    , m_haveMimeTypes(false)
@@ -49,17 +41,10 @@ QPlatformPrintDevice::QPlatformPrintDevice()
 }
 
 QPlatformPrintDevice::QPlatformPrintDevice(const QString &id)
-    : m_id(id),
-      m_isRemote(false),
-      m_supportsMultipleCopies(false),
-      m_supportsCollateCopies(false),
-      m_havePageSizes(false),
-      m_supportsCustomPageSizes(false),
-      m_haveResolutions(false),
-      m_haveInputSlots(false),
-      m_haveOutputBins(false),
-      m_haveDuplexModes(false),
-      m_haveColorModes(false)
+    : m_id(id), m_isRemote(false), m_supportsMultipleCopies(false),
+      m_supportsCollateCopies(false), m_havePageSizes(false), m_supportsCustomPageSizes(false),
+      m_haveResolutions(false), m_haveInputSlots(false), m_haveOutputBins(false),
+      m_haveDuplexModes(false), m_haveColorModes(false)
 #ifndef QT_NO_MIMETYPES
 // emerald    , m_haveMimeTypes(false)
 #endif
@@ -253,12 +238,12 @@ QSize QPlatformPrintDevice::maximumPhysicalPageSize() const
 }
 
 QMarginsF QPlatformPrintDevice::printableMargins(const QPageSize &pageSize,
-                                                 QPageLayout::Orientation orientation,
-                                                 int resolution) const
+                  QPageLayout::Orientation orientation, int resolution) const
 {
-    Q_UNUSED(pageSize)
-    Q_UNUSED(orientation)
-    Q_UNUSED(resolution)
+    (void) pageSize;
+    (void) orientation;
+    (void) resolution;
+
     return QMarginsF(0, 0, 0, 0);
 }
 
@@ -273,9 +258,11 @@ int QPlatformPrintDevice::defaultResolution() const
 
 QList<int> QPlatformPrintDevice::supportedResolutions() const
 {
-    if (!m_haveResolutions)
-        loadResolutions();
-    return m_resolutions.toList();
+   if (! m_haveResolutions) {
+      loadResolutions();
+   }
+
+   return m_resolutions.toList();
 }
 
 void QPlatformPrintDevice::loadInputSlots() const
@@ -293,9 +280,11 @@ QPrint::InputSlot QPlatformPrintDevice::defaultInputSlot() const
 
 QList<QPrint::InputSlot> QPlatformPrintDevice::supportedInputSlots() const
 {
-    if (!m_haveInputSlots)
-        loadInputSlots();
-    return m_inputSlots.toList();
+   if (! m_haveInputSlots) {
+      loadInputSlots();
+   }
+
+   return m_inputSlots.toList();
 }
 
 void QPlatformPrintDevice::loadOutputBins() const
@@ -366,7 +355,8 @@ QList<QMimeType> QPlatformPrintDevice::supportedMimeTypes() const
     return m_mimeTypes.toList();
 }
 */
-#endif // QT_NO_MIMETYPE
+
+#endif
 
 QPageSize QPlatformPrintDevice::createPageSize(const QString &key, const QSize &size, const QString &localizedName)
 {
@@ -380,4 +370,3 @@ QPageSize QPlatformPrintDevice::createPageSize(int windowsId, const QSize &size,
 
 #endif // QT_NO_PRINTER
 
-QT_END_NAMESPACE

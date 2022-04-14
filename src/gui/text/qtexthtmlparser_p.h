@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,12 @@
 #ifndef QTEXTHTMLPARSER_P_H
 #define QTEXTHTMLPARSER_P_H
 
-#include <QtCore/qvector.h>
-#include <QtGui/qbrush.h>
-#include <QtGui/qcolor.h>
-#include <QtGui/qfont.h>
-#include <QtGui/qtextdocument.h>
-#include <QtGui/qtextcursor.h>
+#include <qvector.h>
+#include <qbrush.h>
+#include <qcolor.h>
+#include <qfont.h>
+#include <qtextdocument.h>
+#include <qtextcursor.h>
 #include <qtextformat_p.h>
 #include <qtextdocument_p.h>
 #include <qcssparser_p.h>

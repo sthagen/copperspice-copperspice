@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,7 @@
 #include <qstringlist.h>
 #include <qplugin.h>
 #include <qmultimedia.h>
-
-// emerald #include <qcamera.h>
+#include <qcamera.h>
 
 class QMediaService;
 class QMediaServiceProviderHintPrivate;
@@ -44,12 +43,12 @@ class Q_MULTIMEDIA_EXPORT QMediaServiceProviderHint
       StreamPlayback = 0x04,
       VideoSurface = 0x08
    };
-   Q_DECLARE_FLAGS(Features, Feature)
+   using Features = QFlags<Feature>;
 
    QMediaServiceProviderHint();
    QMediaServiceProviderHint(const QString &mimeType, const QStringList &codecs);
    QMediaServiceProviderHint(const QString &device);
-   // emerald     QMediaServiceProviderHint(QCamera::Position position);
+   QMediaServiceProviderHint(QCamera::Position position);
    QMediaServiceProviderHint(Features features);
    QMediaServiceProviderHint(const QMediaServiceProviderHint &other);
 
@@ -68,7 +67,7 @@ class Q_MULTIMEDIA_EXPORT QMediaServiceProviderHint
    QStringList codecs() const;
 
    QString device() const;
-   // emerald     QCamera::Position cameraPosition() const;
+   QCamera::Position cameraPosition() const;
 
    Features features() const;
 
@@ -108,11 +107,6 @@ struct Q_MULTIMEDIA_EXPORT QMediaServiceSupportedDevicesInterface {
 #define QMediaServiceSupportedDevicesInterface_ID "com.copperspice.CS.mediaServiceSupportedDevices/1.0"
 CS_DECLARE_INTERFACE(QMediaServiceSupportedDevicesInterface, QMediaServiceSupportedDevicesInterface_ID)
 
-// emerald - review
-// This should be part of QMediaServiceSupportedDevicesInterface the whole media service plugin API
-// should not be public in the first place. It should be and QMediaServiceDefaultDeviceInterface should
-// be merged with QMediaServiceSupportedDevicesInterface
-
 struct Q_MULTIMEDIA_EXPORT QMediaServiceDefaultDeviceInterface {
    virtual ~QMediaServiceDefaultDeviceInterface() {}
    virtual QString defaultDevice(const QString &service) const = 0;
@@ -122,19 +116,15 @@ struct Q_MULTIMEDIA_EXPORT QMediaServiceDefaultDeviceInterface {
 CS_DECLARE_INTERFACE(QMediaServiceDefaultDeviceInterface, QMediaServiceDefaultDeviceInterface_ID)
 
 
-/* emerald
-
 struct Q_MULTIMEDIA_EXPORT QMediaServiceCameraInfoInterface
 {
-    virtual ~QMediaServiceCameraInfoInterface() {}
-    virtual QCamera::Position cameraPosition(const QString &device) const = 0;
-    virtual int cameraOrientation(const QString &device) const = 0;
+   virtual ~QMediaServiceCameraInfoInterface() {}
+   virtual QCamera::Position cameraPosition(const QString &device) const = 0;
+   virtual int cameraOrientation(const QString &device) const = 0;
 };
 
 #define QMediaServiceCameraInfoInterface_ID "com.copperspice.CS.mediaServiceCameraInfo/1.0"
 CS_DECLARE_INTERFACE(QMediaServiceCameraInfoInterface, QMediaServiceCameraInfoInterface_ID)
-
-*/
 
 
 struct Q_MULTIMEDIA_EXPORT QMediaServiceFeaturesInterface {

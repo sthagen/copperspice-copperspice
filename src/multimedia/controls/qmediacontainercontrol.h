@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,7 +38,7 @@ public:
     virtual QString containerFormat() const = 0;
     virtual void setContainerFormat(const QString &format) = 0;
 
-    virtual QString containerDescription(const QString &formatMimeType) const = 0;
+    virtual QString containerDescription(const QString &format) const = 0;
 
 protected:
     explicit QMediaContainerControl(QObject *parent = nullptr);

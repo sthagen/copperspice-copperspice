@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -70,9 +70,13 @@ class Q_GUI_EXPORT QGraphicsEffect : public QObject
    };
 
    QGraphicsEffect(QObject *parent = nullptr);
+
+   QGraphicsEffect(const QGraphicsEffect &) = delete;
+   QGraphicsEffect &operator=(const QGraphicsEffect &) = delete;
+
    virtual ~QGraphicsEffect();
 
-   virtual QRectF boundingRectFor(const QRectF &sourceRect) const;
+   virtual QRectF boundingRectFor(const QRectF &rectF) const;
    QRectF boundingRect() const;
 
    bool isEnabled() const;
@@ -97,14 +101,13 @@ class Q_GUI_EXPORT QGraphicsEffect : public QObject
    QRectF sourceBoundingRect(Qt::CoordinateSystem system = Qt::LogicalCoordinates) const;
    void drawSource(QPainter *painter);
 
-   QPixmap sourcePixmap(Qt::CoordinateSystem system = Qt::LogicalCoordinates, QPoint *offset = 0,
+   QPixmap sourcePixmap(Qt::CoordinateSystem system = Qt::LogicalCoordinates, QPoint *offset = nullptr,
                         PixmapPadMode mode = PadToEffectiveBoundingRect) const;
 
    QScopedPointer<QGraphicsEffectPrivate> d_ptr;
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsEffect)
-   Q_DISABLE_COPY(QGraphicsEffect)
 
    friend class QGraphicsItem;
    friend class QGraphicsItemPrivate;
@@ -115,7 +118,7 @@ class Q_GUI_EXPORT QGraphicsEffect : public QObject
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QGraphicsEffect::ChangeFlags)
 
-class Q_GUI_EXPORT QGraphicsColorizeEffect: public QGraphicsEffect
+class Q_GUI_EXPORT QGraphicsColorizeEffect : public QGraphicsEffect
 {
    GUI_CS_OBJECT(QGraphicsColorizeEffect)
 
@@ -128,6 +131,10 @@ class Q_GUI_EXPORT QGraphicsColorizeEffect: public QGraphicsEffect
 
  public:
    QGraphicsColorizeEffect(QObject *parent = nullptr);
+
+   QGraphicsColorizeEffect(const QGraphicsColorizeEffect &) = delete;
+   QGraphicsColorizeEffect &operator=(const QGraphicsColorizeEffect &) = delete;
+
    ~QGraphicsColorizeEffect();
 
    QColor color() const;
@@ -148,10 +155,9 @@ class Q_GUI_EXPORT QGraphicsColorizeEffect: public QGraphicsEffect
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsColorizeEffect)
-   Q_DISABLE_COPY(QGraphicsColorizeEffect)
 };
 
-class Q_GUI_EXPORT QGraphicsBlurEffect: public QGraphicsEffect
+class Q_GUI_EXPORT QGraphicsBlurEffect : public QGraphicsEffect
 {
    GUI_CS_OBJECT(QGraphicsBlurEffect)
 
@@ -172,6 +178,10 @@ class Q_GUI_EXPORT QGraphicsBlurEffect: public QGraphicsEffect
    using BlurHints = QFlags<BlurHint>;
 
    QGraphicsBlurEffect(QObject *parent = nullptr);
+
+   QGraphicsBlurEffect(const QGraphicsBlurEffect &) = delete;
+   QGraphicsBlurEffect &operator=(const QGraphicsBlurEffect &) = delete;
+
    ~QGraphicsBlurEffect();
 
    QRectF boundingRectFor(const QRectF &rect) const override;
@@ -193,12 +203,11 @@ class Q_GUI_EXPORT QGraphicsBlurEffect: public QGraphicsEffect
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsBlurEffect)
-   Q_DISABLE_COPY(QGraphicsBlurEffect)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QGraphicsBlurEffect::BlurHints)
 
-class Q_GUI_EXPORT QGraphicsDropShadowEffect: public QGraphicsEffect
+class Q_GUI_EXPORT QGraphicsDropShadowEffect : public QGraphicsEffect
 {
    GUI_CS_OBJECT(QGraphicsDropShadowEffect)
 
@@ -224,6 +233,10 @@ class Q_GUI_EXPORT QGraphicsDropShadowEffect: public QGraphicsEffect
 
  public:
    QGraphicsDropShadowEffect(QObject *parent = nullptr);
+
+   QGraphicsDropShadowEffect(const QGraphicsDropShadowEffect &) = delete;
+   QGraphicsDropShadowEffect &operator=(const QGraphicsDropShadowEffect &) = delete;
+
    ~QGraphicsDropShadowEffect();
 
    QRectF boundingRectFor(const QRectF &rect) const override;
@@ -273,7 +286,6 @@ class Q_GUI_EXPORT QGraphicsDropShadowEffect: public QGraphicsEffect
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsDropShadowEffect)
-   Q_DISABLE_COPY(QGraphicsDropShadowEffect)
 };
 
 class Q_GUI_EXPORT QGraphicsOpacityEffect: public QGraphicsEffect
@@ -290,6 +302,10 @@ class Q_GUI_EXPORT QGraphicsOpacityEffect: public QGraphicsEffect
 
  public:
    QGraphicsOpacityEffect(QObject *parent = nullptr);
+
+   QGraphicsOpacityEffect(const QGraphicsOpacityEffect &) = delete;
+   QGraphicsOpacityEffect &operator=(const QGraphicsOpacityEffect &) = delete;
+
    ~QGraphicsOpacityEffect();
 
    qreal opacity() const;
@@ -310,7 +326,6 @@ class Q_GUI_EXPORT QGraphicsOpacityEffect: public QGraphicsEffect
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsOpacityEffect)
-   Q_DISABLE_COPY(QGraphicsOpacityEffect)
 };
 
 inline qreal QGraphicsDropShadowEffect::xOffset() const
@@ -338,8 +353,7 @@ inline void QGraphicsDropShadowEffect::cs_setOffset(const QPointF &ofs)
    setOffset(ofs);
 }
 
-
 #endif //QT_NO_GRAPHICSEFFECT
 
-#endif // QGRAPHICSEFFECT_H
+#endif
 

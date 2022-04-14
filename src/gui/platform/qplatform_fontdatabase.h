@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,8 +45,8 @@ class Q_GUI_EXPORT QSupportedWritingSystems
    QSupportedWritingSystems &operator=(const QSupportedWritingSystems &other);
    ~QSupportedWritingSystems();
 
-   void setSupported(QFontDatabase::WritingSystem, bool supported = true);
-   bool supported(QFontDatabase::WritingSystem) const;
+   void setSupported(QFontDatabase::WritingSystem writingSystem, bool supported = true);
+   bool supported(QFontDatabase::WritingSystem writingSystem) const;
 
  private:
    void detach();
@@ -93,10 +93,9 @@ class Q_GUI_EXPORT QPlatformFontDatabase
 
    //callback
    static void registerQPF2Font(const QByteArray &dataArray, void *handle);
-   static void registerFont(const QString &familyname, const QString &stylename,
-                  const QString &foundryname, QFont::Weight weight, QFont::Style style, QFont::Stretch stretch,
-                  bool antialiased, bool scalable, int pixelSize, bool fixedPitch,
-                  const QSupportedWritingSystems &writingSystems,  void *handle);
+   static void registerFont(const QString &familyName, const QString &styleName, const QString &foundryName,
+            QFont::Weight weight, QFont::Style style, QFont::Stretch stretch, bool antialiased, bool scalable,
+            int pixelSize, bool fixedPitch, const QSupportedWritingSystems &writingSystems, void *handle);
 
    static void registerFontFamily(const QString &familyName);
    static void registerAliasToFontFamily(const QString &familyName, const QString &alias);

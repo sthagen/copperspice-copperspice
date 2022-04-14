@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -67,7 +67,9 @@ class AbstractXmlPullProvider
    virtual QHash<QXmlName, QXmlItem> attributeItems() = 0;
 
  private:
-   Q_DISABLE_COPY(AbstractXmlPullProvider)
+   AbstractXmlPullProvider(const AbstractXmlPullProvider &) = delete;
+   AbstractXmlPullProvider &operator=(const AbstractXmlPullProvider &) = delete;
+
    AbstractXmlPullProviderPrivate *d;
 };
 }

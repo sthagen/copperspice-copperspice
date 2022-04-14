@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -276,6 +276,7 @@ NSArray *unignoredChildren(QAccessibleInterface *interface)
    }
    return NSAccessibilityUnignoredChildren(kids);
 }
+
 /*
     Translates a predefined QAccessibleActionInterface action to a Mac action constant.
     Returns 0 if the Action has no mac equivalent. Ownership of the NSString is not transferred
@@ -308,9 +309,8 @@ NSString *getTranslatedAction(const QString &qtAction)
    //      NSAccessibilityCancelAction;
    //      NSAccessibilityDeleteAction;
 
-   return 0;
+   return nullptr;
 }
-
 
 /*
     Translates between a Mac action constant and a QAccessibleActionInterface action

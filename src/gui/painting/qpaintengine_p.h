@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QPAINTENGINE_P_H
 #define QPAINTENGINE_P_H
 
-#include <QtGui/qpainter.h>
-#include <QtGui/qpaintengine.h>
-#include <QtGui/qregion.h>
+#include <qpainter.h>
+#include <qpaintengine.h>
+#include <qregion.h>
 
 class QPaintDevice;
 
@@ -35,11 +35,14 @@ class QPaintEnginePrivate
    Q_DECLARE_PUBLIC(QPaintEngine)
 
  public:
-   QPaintEnginePrivate() : pdev(0), q_ptr(0), currentClipDevice(0), hasSystemTransform(0),
-      hasSystemViewport(0) {}
+   QPaintEnginePrivate()
+      : pdev(nullptr), q_ptr(nullptr), currentClipDevice(nullptr), hasSystemTransform(0), hasSystemViewport(0)
+   {
+   }
 
    virtual ~QPaintEnginePrivate()
-   { }
+   {
+   }
 
    QPaintDevice *pdev;
    QPaintEngine *q_ptr;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,20 +29,26 @@
 #include <qopengl.h>
 #include <qopenglcontext.h>
 #include <qmutex.h>
-
-#include <QtCore/QByteArray>
-#include <QtCore/QHash>
-#include <QtCore/QSet>
+#include <qbytearray.h>
+#include <qhash.h>
+#include <qset.h>
 
 class QOpenGLFunctions;
 class QOpenGLContext;
 class QOpenGLFramebufferObject;
 class QOpenGLMultiGroupSharedResource;
+class QPaintEngineEx;
+class QOpenGLFunctions;
+class QOpenGLTextureHelper;
 
 class Q_GUI_EXPORT QOpenGLSharedResource
 {
  public:
    QOpenGLSharedResource(QOpenGLContextGroup *group);
+
+   QOpenGLSharedResource(const QOpenGLSharedResource &) = delete;
+   QOpenGLSharedResource &operator=(const QOpenGLSharedResource &) = delete;
+
    virtual ~QOpenGLSharedResource() = 0;
 
    QOpenGLContextGroup *group() const {
@@ -65,18 +71,16 @@ class Q_GUI_EXPORT QOpenGLSharedResource
    friend class QOpenGLContextGroup;
    friend class QOpenGLContextGroupPrivate;
    friend class QOpenGLMultiGroupSharedResource;
-
-   Q_DISABLE_COPY(QOpenGLSharedResource)
 };
 
 class Q_GUI_EXPORT QOpenGLSharedResourceGuard : public QOpenGLSharedResource
 {
  public:
    typedef void (*FreeResourceFunc)(QOpenGLFunctions *functions, GLuint id);
+
    QOpenGLSharedResourceGuard(QOpenGLContext *context, GLuint id, FreeResourceFunc func)
-      : QOpenGLSharedResource(context->shareGroup())
-      , m_id(id)
-      , m_func(func) {
+      : QOpenGLSharedResource(context->shareGroup()), m_id(id), m_func(func)
+   {
    }
 
    GLuint id() const {
@@ -101,9 +105,8 @@ class Q_GUI_EXPORT QOpenGLContextGroupPrivate
 
  public:
    QOpenGLContextGroupPrivate()
-      : m_context(0)
-      , m_mutex(QMutex::Recursive)
-      , m_refs(0) {
+      : m_context(nullptr), m_refs(0)
+   {
    }
 
    void addContext(QOpenGLContext *ctx);
@@ -116,7 +119,7 @@ class Q_GUI_EXPORT QOpenGLContextGroupPrivate
    QOpenGLContext *m_context;
 
    QList<QOpenGLContext *> m_shares;
-   QMutex m_mutex;
+   QRecursiveMutex m_mutex;
 
    QHash<QOpenGLMultiGroupSharedResource *, QOpenGLSharedResource *> m_resources;
    QAtomicInt m_refs;
@@ -126,7 +129,6 @@ class Q_GUI_EXPORT QOpenGLContextGroupPrivate
 
  protected:
    QOpenGLContextGroup *q_ptr;
-
 };
 
 class Q_GUI_EXPORT QOpenGLMultiGroupSharedResource
@@ -145,11 +147,13 @@ class Q_GUI_EXPORT QOpenGLMultiGroupSharedResource
    template <typename T>
    T *value(QOpenGLContext *context) {
       QOpenGLContextGroup *group = context->shareGroup();
+
       // Have to use our own mutex here, not the group's, since
       // m_groups has to be protected too against any concurrent access.
-      QMutexLocker locker(&m_mutex);
-      T *resource = static_cast<T *>(group->d_func()->m_resources.value(this, 0));
-      if (!resource) {
+      QRecursiveMutexLocker locker(&m_mutex);
+      T *resource = static_cast<T *>(group->d_func()->m_resources.value(this, nullptr));
+
+      if (! resource) {
          resource = new T(context);
          insert(context, resource);
       }
@@ -159,12 +163,8 @@ class Q_GUI_EXPORT QOpenGLMultiGroupSharedResource
  private:
    QAtomicInt active;
    QList<QOpenGLContextGroup *> m_groups;
-   QMutex m_mutex;
+   QRecursiveMutex m_mutex;
 };
-
-class QPaintEngineEx;
-class QOpenGLFunctions;
-class QOpenGLTextureHelper;
 
 class Q_GUI_EXPORT QOpenGLContextPrivate
 {
@@ -172,23 +172,11 @@ class Q_GUI_EXPORT QOpenGLContextPrivate
 
  public:
    QOpenGLContextPrivate()
-      : qGLContextHandle(0)
-      , qGLContextDeleteFunction(0)
-      , platformGLContext(0)
-      , shareContext(0)
-      , shareGroup(0)
-      , screen(0)
-      , surface(0)
-      , functions(0)
-      , textureFunctions(0)
-      , max_texture_size(-1)
-      , workaround_brokenFBOReadBack(false)
-      , workaround_brokenTexSubImage(false)
-      , workaround_missingPrecisionQualifiers(false)
-      , active_engine(0)
-      , qgl_current_fbo_invalid(false)
-      , qgl_current_fbo(nullptr)
-      , defaultFboRedirect(0) {
+      : qGLContextHandle(nullptr), qGLContextDeleteFunction(nullptr), platformGLContext(nullptr), shareContext(nullptr),
+        shareGroup(nullptr), screen(nullptr), surface(nullptr), functions(nullptr), textureFunctions(nullptr), max_texture_size(-1),
+        workaround_brokenFBOReadBack(false), workaround_brokenTexSubImage(false), workaround_missingPrecisionQualifiers(false),
+        active_engine(nullptr), qgl_current_fbo_invalid(false), qgl_current_fbo(nullptr), defaultFboRedirect(0)
+   {
       requestedFormat = QSurfaceFormat::defaultFormat();
    }
 
@@ -265,6 +253,6 @@ class Q_GUI_EXPORT QOpenGLContextPrivate
 Q_GUI_EXPORT void qt_gl_set_global_share_context(QOpenGLContext *context);
 Q_GUI_EXPORT QOpenGLContext *qt_gl_global_share_context();
 
-
 #endif // QT_NO_OPENGL
+
 #endif

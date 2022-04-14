@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -119,7 +119,7 @@ typedef void (^QCocoaDrawRectBlock)(NSRect, CGContextRef);
     do { \
         static const int sizes[] = { (large), (small), (mini) }; \
         return sizes[controlSize]; \
-    } while (0)
+    } while (false)
 
 bool qt_mac_buttonIsRenderedFlat(const QPushButton *pushButton, const QStyleOptionButton *option);
 
@@ -150,7 +150,7 @@ class QMacStylePrivate : public QCommonStylePrivate
    static ThemeDrawState getDrawState(QStyle::State flags);
 
    QAquaWidgetSize aquaSizeConstrain(const QStyleOption *option, const QWidget *widg,
-      QStyle::ContentsType ct = QStyle::CT_CustomBase, QSize szHint = QSize(-1, -1), QSize *insz = 0) const;
+      QStyle::ContentsType ct = QStyle::CT_CustomBase, QSize szHint = QSize(-1, -1), QSize *insz = nullptr) const;
 
    void getSliderInfo(QStyle::ComplexControl cc, const QStyleOptionSlider *slider,
       HIThemeTrackDrawInfo *tdi, const QWidget *needToRemoveMe) const;
@@ -160,7 +160,7 @@ class QMacStylePrivate : public QCommonStylePrivate
    }
 
    // Utility functions
-   void drawColorlessButton(const HIRect &macRect, HIThemeButtonDrawInfo *bdi, QPainter *p, const QStyleOption *opt) const;
+   void drawColorlessButton(const HIRect &macRect, HIThemeButtonDrawInfo *bdi, QPainter *painter, const QStyleOption *option) const;
 
    QSize pushButtonSizeFromContents(const QStyleOptionButton *btn) const;
 

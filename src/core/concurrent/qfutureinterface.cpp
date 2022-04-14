@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,6 @@
 #include <qthreadpool.h>
 #include <qthreadpool_p.h>
 #include <qfutureinterface_p.h>
-
-QT_BEGIN_NAMESPACE
 
 enum {
    MaxProgressEmitsPerSecond = 25
@@ -404,10 +402,13 @@ const QtConcurrent::ResultStoreBase &QFutureInterfaceBase::resultStoreBase() con
 QFutureInterfaceBase &QFutureInterfaceBase::operator=(const QFutureInterfaceBase &other)
 {
    other.d->refCount.ref();
-   if (!d->refCount.deref()) {
+
+   if (! d->refCount.deref()) {
       delete d;
    }
+
    d = other.d;
+
    return *this;
 }
 
@@ -419,7 +420,7 @@ bool QFutureInterfaceBase::referenceCountIsOne() const
 QFutureInterfaceBasePrivate::QFutureInterfaceBasePrivate(QFutureInterfaceBase::State initialState)
    : refCount(1), m_progressValue(0), m_progressMinimum(0), m_progressMaximum(0),
      state(initialState), pendingResults(0),
-     manualProgress(false), m_expectedResultCount(0), runnable(0)
+     manualProgress(false), m_expectedResultCount(0), runnable(nullptr)
 {
    progressTime.invalidate();
 }
@@ -570,6 +571,3 @@ void QFutureInterfaceBasePrivate::setState(QFutureInterfaceBase::State newState)
 {
    state = newState;
 }
-
-QT_END_NAMESPACE
-

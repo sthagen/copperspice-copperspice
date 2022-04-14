@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -44,7 +44,7 @@ class QPostEvent
 
    int priority;
    inline QPostEvent()
-      : receiver(0), event(0), priority(0) {
+      : receiver(nullptr), event(nullptr), priority(0) {
    }
 
    inline QPostEvent(QObject *r, QEvent *e, int p)
@@ -179,7 +179,7 @@ class QThreadData
    static void clearCurrentThreadData();
 
    static QThreadData *get2(QThread *thread) {
-      Q_ASSERT_X(thread != 0, "QThread", "internal error");
+      Q_ASSERT_X(thread != nullptr, "QThread", "internal error");
       return thread->d_func()->data;
    }
 
@@ -187,7 +187,7 @@ class QThreadData
    void deref();
 
    bool hasEventDispatcher() const {
-      return eventDispatcher.load() != 0;
+      return eventDispatcher.load() != nullptr;
    }
 
    bool canWaitLocked() {
@@ -237,7 +237,7 @@ class QAdoptedThread : public QThread
    Q_DECLARE_PRIVATE(QThread)
 
  public:
-   QAdoptedThread(QThreadData *data = 0);
+   QAdoptedThread(QThreadData *data = nullptr);
    ~QAdoptedThread();
    void init();
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,7 @@
 #include <qplatform_nativeinterface.h>
 #include <qpointer.h>
 #include <qpoint.h>
-#include <QPointF>
+#include <qpointf.h>
 #include <qregion.h>
 #include <qtime.h>
 #include <qwindow.h>
@@ -70,13 +70,11 @@ class QGestureManager;
 class QDrag;
 #endif
 
-extern Q_GUI_EXPORT bool qt_is_gui_used;
-
 #ifndef QT_NO_CLIPBOARD
 extern QClipboard *qt_clipboard;
 #endif
 
-#if defined (Q_OS_WIN32)
+#if defined (Q_OS_WIN)
 extern QSysInfo::WinVersion qt_winver;
 
 #elif defined (Q_OS_DARWIN)
@@ -129,7 +127,7 @@ class Q_GUI_EXPORT QApplicationPrivate : public QCoreApplicationPrivate
    void process_cmdline();
 
    // modality
-   virtual bool isWindowBlocked(QWindow *window, QWindow **blockingWindow = 0) const;
+   virtual bool isWindowBlocked(QWindow *window, QWindow **blockingWindow = nullptr) const;
 
    QPixmap getPixmapCursor(Qt::CursorShape cshape);
 
@@ -266,9 +264,9 @@ class Q_GUI_EXPORT QApplicationPrivate : public QCoreApplicationPrivate
    static QClipboard *qt_clipboard;
 #endif
 
-   static QPalette *app_pal;
-   static QPalette *sys_pal;
-   static QPalette *set_pal;
+   static QPalette *app_palette;
+   static QPalette *sys_palette;
+   static QPalette *set_palette;
    static QFont *sys_font;
    static QFont *set_font;
 
@@ -299,7 +297,7 @@ class Q_GUI_EXPORT QApplicationPrivate : public QCoreApplicationPrivate
 
    static bool isBlockedByModal(QWidget *widget);
    static bool modalState();
-   static bool tryModalHelper(QWidget *widget, QWidget **rettop = 0);
+   static bool tryModalHelper(QWidget *widget, QWidget **rettop = nullptr);
 
    // style
    static bool usesNativeStyle() {
@@ -425,19 +423,18 @@ class Q_GUI_EXPORT QApplicationPrivate : public QCoreApplicationPrivate
          return nativeParent->windowHandle();
       }
 
-      return 0;
+      return nullptr;
    }
 
 #ifdef Q_OS_WIN
    static HWND getHWNDForWidget(const QWidget *widget) {
       if (QWindow *window = windowForWidget(widget)) {
          if (window->handle()) {
-            return static_cast<HWND> (QApplication::platformNativeInterface()->
-                  nativeResourceForWindow(QByteArrayLiteral("handle"), window));
+            return static_cast<HWND> (QApplication::platformNativeInterface()->nativeResourceForWindow("handle", window));
          }
       }
 
-      return 0;
+      return nullptr;
    }
 #endif
 
@@ -463,7 +460,6 @@ class Q_GUI_EXPORT QApplicationPrivate : public QCoreApplicationPrivate
       const QList<QTouchEvent::TouchPoint> &touchPoints, ulong timestamp);
 
    static void translateTouchCancel(QTouchDevice *device, ulong timestamp);
-
 
  protected:
    virtual void notifyThemeChanged();

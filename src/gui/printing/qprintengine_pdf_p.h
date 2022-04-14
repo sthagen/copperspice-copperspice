@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -56,6 +56,10 @@ class QPdfPrintEngine: public QPdfEngine, public QPrintEngine
 
  public:
    QPdfPrintEngine(QPrinter::PrinterMode m);
+
+   QPdfPrintEngine(const QPdfPrintEngine &) = delete;
+   QPdfPrintEngine &operator=(const QPdfPrintEngine &) = delete;
+
    virtual ~QPdfPrintEngine();
 
    // reimplementations QPaintEngine
@@ -81,10 +85,6 @@ class QPdfPrintEngine: public QPdfEngine, public QPrintEngine
 
  protected:
    QPdfPrintEngine(QPdfPrintEnginePrivate &p);
-
- private:
-   Q_DISABLE_COPY(QPdfPrintEngine)
-
 };
 
 class Q_GUI_EXPORT QPdfPrintEnginePrivate : public QPdfEnginePrivate
@@ -93,17 +93,19 @@ class Q_GUI_EXPORT QPdfPrintEnginePrivate : public QPdfEnginePrivate
 
  public:
    QPdfPrintEnginePrivate(QPrinter::PrinterMode m);
+
+   QPdfPrintEnginePrivate(const QPdfPrintEnginePrivate &) = delete;
+   QPdfPrintEnginePrivate &operator=(const QPdfPrintEnginePrivate &) = delete;
+
    ~QPdfPrintEnginePrivate();
 
    virtual bool openPrintDevice();
    virtual void closePrintDevice();
 
  private:
-   Q_DISABLE_COPY(QPdfPrintEnginePrivate)
-
-
    friend class QCupsPrintEngine;
    friend class QCupsPrintEnginePrivate;
+
    QString printerName;
    QString printProgram;
    QString selectionOption;
@@ -113,7 +115,7 @@ class Q_GUI_EXPORT QPdfPrintEnginePrivate : public QPdfEnginePrivate
    QPrinter::PageOrder pageOrder;
    QPrinter::PaperSource paperSource;
 
-    int fd;
+   int fd;
 };
 
 #endif // QT_NO_PRINTER

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -179,20 +179,23 @@ void QOutlineMapper::endOutline()
          QPointF &e = elements[i];
          e = QPointF(e.x() + m_dx, e.y() + m_dy);
       }
+
    } else if (m_txop == QTransform::TxScale) {
       for (int i = 0; i < m_elements.size(); ++i) {
          QPointF &e = elements[i];
          e = QPointF(m_m11 * e.x() + m_dx, m_m22 * e.y() + m_dy);
       }
+
    } else if (m_txop < QTransform::TxProject) {
       for (int i = 0; i < m_elements.size(); ++i) {
          QPointF &e = elements[i];
          e = QPointF(m_m11 * e.x() + m_m21 * e.y() + m_dx,
                m_m22 * e.y() + m_m12 * e.x() + m_dy);
       }
+
    } else {
       const QVectorPath vp((qreal *)elements, m_elements.size(),
-         m_element_types.size() ? m_element_types.data() : 0);
+         m_element_types.size() ? m_element_types.data() : nullptr);
       QPainterPath path = vp.convertToPainterPath();
       path = QTransform(m_m11, m_m12, m_m13, m_m21, m_m22, m_m23, m_dx, m_dy, m_m33).map(path);
 

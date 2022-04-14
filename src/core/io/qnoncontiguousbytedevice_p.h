@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,12 @@
 #ifndef QNONCONTIGUOUSBYTEDEVICE_P_H
 #define QNONCONTIGUOUSBYTEDEVICE_P_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qbytearray.h>
-#include <QtCore/qbuffer.h>
-#include <QtCore/qiodevice.h>
-#include <QtCore/QSharedPointer>
+#include <qobject.h>
+#include <qbytearray.h>
+#include <qbuffer.h>
+#include <qiodevice.h>
+#include <qsharedpointer.h>
 #include <qringbuffer_p.h>
-
-QT_BEGIN_NAMESPACE
 
 class Q_CORE_EXPORT QNonContiguousByteDevice : public QObject
 {
@@ -79,8 +77,6 @@ class Q_CORE_EXPORT QNonContiguousByteDeviceFactory
 
    static QIODevice *wrap(QNonContiguousByteDevice *byteDevice);
 };
-
-// the actual implementations
 
 class QNonContiguousByteDeviceByteArrayImpl : public QNonContiguousByteDevice
 {
@@ -165,7 +161,6 @@ class QNonContiguousByteDeviceBufferImpl : public QNonContiguousByteDevice
    QNonContiguousByteDeviceByteArrayImpl *arrayImpl;
 };
 
-// ... and the reverse thing
 class QByteDeviceWrappingIoDevice : public QIODevice
 {
  public:
@@ -183,7 +178,5 @@ class QByteDeviceWrappingIoDevice : public QIODevice
 
    QNonContiguousByteDevice *byteDevice;
 };
-
-QT_END_NAMESPACE
 
 #endif

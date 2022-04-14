@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -70,7 +70,7 @@ class QDomImplementationPrivate
 class QDomNodePrivate
 {
  public:
-   QDomNodePrivate(QDomDocumentPrivate *, QDomNodePrivate *parent = 0);
+   QDomNodePrivate(QDomDocumentPrivate *, QDomNodePrivate *parent = nullptr);
    QDomNodePrivate(QDomNodePrivate *n, bool deep);
 
    virtual ~QDomNodePrivate();
@@ -103,7 +103,7 @@ class QDomNodePrivate
    virtual void clear();
 
    inline QDomNodePrivate *parent() const {
-      return hasParent ? ownerNode : 0;
+      return hasParent ? ownerNode : nullptr;
    }
 
    inline void setParent(QDomNodePrivate *p) {
@@ -112,7 +112,7 @@ class QDomNodePrivate
    }
 
    void setNoParent() {
-      ownerNode = hasParent ? (QDomNodePrivate *)ownerDocument() : 0;
+      ownerNode = hasParent ? (QDomNodePrivate *)ownerDocument() : nullptr;
       hasParent = false;
    }
 
@@ -172,10 +172,10 @@ class QDomNodePrivate
    QDomNodePrivate *first;
    QDomNodePrivate *last;
 
-   QString name; // this is the local name if prefix != null
+   QString name;               // this is the local name if prefix != null
    QString value;
-   QString prefix; // set this only for ElementNode and AttributeNode
-   QString namespaceURI; // set this only for ElementNode and AttributeNode
+   QString prefix;             // set this only for ElementNode and AttributeNode
+   QString namespaceURI;       // set this only for ElementNode and AttributeNode
    bool createdWithDom1Interface : 1;
    bool hasParent                : 1;
 
@@ -272,7 +272,7 @@ class QDomNamedNodeMapPrivate
 class QDomDocumentTypePrivate : public QDomNodePrivate
 {
  public:
-   QDomDocumentTypePrivate(QDomDocumentPrivate *, QDomNodePrivate *parent = 0);
+   QDomDocumentTypePrivate(QDomDocumentPrivate *, QDomNodePrivate *parent = nullptr);
    QDomDocumentTypePrivate(QDomDocumentTypePrivate *n, bool deep);
    ~QDomDocumentTypePrivate();
    void init();
@@ -305,7 +305,7 @@ class QDomDocumentTypePrivate : public QDomNodePrivate
 class QDomDocumentFragmentPrivate : public QDomNodePrivate
 {
  public:
-   QDomDocumentFragmentPrivate(QDomDocumentPrivate *, QDomNodePrivate *parent = 0);
+   QDomDocumentFragmentPrivate(QDomDocumentPrivate *, QDomNodePrivate *parent = nullptr);
    QDomDocumentFragmentPrivate(QDomNodePrivate *n, bool deep);
 
    // Reimplemented from QDomNodePrivate
@@ -598,9 +598,11 @@ class QDomDocumentPrivate : public QDomNodePrivate
    QDomElementPrivate *createElement(const QString &tagName);
    QDomElementPrivate        *createElementNS(const QString &nsURI, const QString &qName);
    QDomDocumentFragmentPrivate *createDocumentFragment();
-   QDomTextPrivate *createTextNode(const QString &data);
-   QDomCommentPrivate *createComment(const QString &data);
-   QDomCDATASectionPrivate *createCDATASection(const QString &data);
+
+   QDomTextPrivate *createTextNode(const QString &text);
+   QDomCommentPrivate *createComment(const QString &text);
+   QDomCDATASectionPrivate *createCDATASection(const QString &text);
+
    QDomProcessingInstructionPrivate *createProcessingInstruction(const QString &target, const QString &data);
    QDomAttrPrivate *createAttribute(const QString &name);
    QDomAttrPrivate *createAttributeNS(const QString &nsURI, const QString &qName);
@@ -625,7 +627,7 @@ class QDomDocumentPrivate : public QDomNodePrivate
    QExplicitlySharedDataPointer<QDomImplementationPrivate> impl;
    QExplicitlySharedDataPointer<QDomDocumentTypePrivate> type;
 
-   void saveDocument(QTextStream &stream, const int indent, QDomNode::EncodingPolicy encUsed) const;
+   void saveDocument(QTextStream &stream, const int indent, QDomNode::EncodingPolicy policy) const;
 
    long nodeListTime;
 };
@@ -943,50 +945,11 @@ QDomImplementationPrivate *QDomImplementationPrivate::clone()
  *
  **************************************************************/
 
-/*!
-    \class QDomImplementation
-    \reentrant
-    \brief The QDomImplementation class provides information about the
-    features of the DOM implementation.
-
-    \inmodule QtXml
-    \ingroup xml-tools
-
-    This class describes the features that are supported by the DOM
-    implementation. Currently the XML subset of DOM Level 1 and DOM
-    Level 2 Core are supported.
-
-    Normally you will use the function QDomDocument::implementation()
-    to get the implementation object.
-
-    You can create a new document type with createDocumentType() and a
-    new document with createDocument().
-
-    For further information about the Document Object Model see
-    \l{http://www.w3.org/TR/REC-DOM-Level-1/}{Level 1} and
-    \l{http://www.w3.org/TR/DOM-Level-2-Core/}{Level 2 Core}. For a more
-    general introduction of the DOM implementation see the QDomDocument
-    documentation.
-
-    The QDom classes have a few issues of nonconformance with the XML
-    specifications that cannot be fixed in Qt 4 without breaking backward
-    compatibility. The QtXmlPatterns module and the QXmlStreamReader and
-    QXmlStreamWriter classes have a higher degree of a conformance.
-
-    \sa hasFeature()
-*/
-
-/*!
-    Constructs a QDomImplementation object.
-*/
 QDomImplementation::QDomImplementation()
 {
-   impl = 0;
+   impl = nullptr;
 }
 
-/*!
-    Constructs a copy of \a x.
-*/
 QDomImplementation::QDomImplementation(const QDomImplementation &x)
 {
    impl = x.impl;
@@ -1004,9 +967,6 @@ QDomImplementation::QDomImplementation(QDomImplementationPrivate *p)
    }
 }
 
-/*!
-    Assigns \a x to this DOM implementation.
-*/
 QDomImplementation &QDomImplementation::operator=(const QDomImplementation &x)
 {
    if (x.impl) {
@@ -1119,8 +1079,9 @@ QDomDocumentType QDomImplementation::createDocumentType(const QString &qName, co
       return QDomDocumentType();
    }
 
-   QDomDocumentTypePrivate *dt = new QDomDocumentTypePrivate(0);
+   QDomDocumentTypePrivate *dt = new QDomDocumentTypePrivate(nullptr);
    dt->name = fixedName;
+
    if (systemId.isEmpty()) {
       dt->publicId.clear();
       dt->systemId.clear();
@@ -1128,7 +1089,9 @@ QDomDocumentType QDomImplementation::createDocumentType(const QString &qName, co
       dt->publicId = fixedPublicId;
       dt->systemId = fixedSystemId;
    }
+
    dt->ref.deref();
+
    return QDomDocumentType(dt);
 }
 
@@ -1153,7 +1116,7 @@ QDomDocument QDomImplementation::createDocument(const QString &nsURI, const QStr
 
 bool QDomImplementation::isNull()
 {
-   return (impl == 0);
+   return (impl == nullptr);
 }
 
 QDomImplementation::InvalidDataPolicy QDomImplementation::invalidDataPolicy()
@@ -1284,8 +1247,8 @@ void QDomNodeListPrivate::createList()
 
 QDomNodePrivate *QDomNodeListPrivate::item(int index)
 {
-   if (!node_impl) {
-      return 0;
+   if (! node_impl) {
+      return nullptr;
    }
 
    const QDomDocumentPrivate *const doc = node_impl->ownerDocument();
@@ -1294,7 +1257,7 @@ QDomNodePrivate *QDomNodeListPrivate::item(int index)
    }
 
    if (index >= list.size()) {
-      return 0;
+      return nullptr;
    }
 
    return list.at(index);
@@ -1302,7 +1265,7 @@ QDomNodePrivate *QDomNodeListPrivate::item(int index)
 
 int QDomNodeListPrivate::length() const
 {
-   if (!node_impl) {
+   if (! node_impl) {
       return 0;
    }
 
@@ -1351,7 +1314,7 @@ int QDomNodeListPrivate::length() const
 */
 QDomNodeList::QDomNodeList()
 {
-   impl = 0;
+   impl = nullptr;
 }
 
 QDomNodeList::QDomNodeList(QDomNodeListPrivate *p)
@@ -1421,7 +1384,7 @@ QDomNodeList::~QDomNodeList()
 
 QDomNode QDomNodeList::item(int index) const
 {
-   if (!impl) {
+   if (! impl) {
       return QDomNode();
    }
 
@@ -1455,23 +1418,25 @@ QDomNodePrivate::QDomNodePrivate(QDomDocumentPrivate *doc, QDomNodePrivate *par)
       setOwnerDocument(doc);
    }
 
-   prev = 0;
-   next = 0;
-   first = 0;
-   last = 0;
+   prev  = nullptr;
+   next  = nullptr;
+   first = nullptr;
+   last  = nullptr;
+
    createdWithDom1Interface = true;
-   lineNumber = -1;
+   lineNumber   = -1;
    columnNumber = -1;
 }
 
 QDomNodePrivate::QDomNodePrivate(QDomNodePrivate *n, bool deep)
 {
-   ref = 1;
+   ref   = 1;
    setOwnerDocument(n->ownerDocument());
-   prev = 0;
-   next = 0;
-   first = 0;
-   last = 0;
+
+   prev  = nullptr;
+   next  = nullptr;
+   first = nullptr;
+   last  = nullptr;
 
    name = n->name;
    value = n->value;
@@ -1504,8 +1469,9 @@ QDomNodePrivate::~QDomNodePrivate()
       }
       p = n;
    }
-   first = 0;
-   last = 0;
+
+   first = nullptr;
+   last  = nullptr;
 }
 
 void QDomNodePrivate::clear()
@@ -1520,38 +1486,40 @@ void QDomNodePrivate::clear()
       }
       p = n;
    }
-   first = 0;
-   last = 0;
+
+   first = nullptr;
+   last  = nullptr;
 }
 
 QDomNodePrivate *QDomNodePrivate::namedItem(const QString &n)
 {
    QDomNodePrivate *p = first;
+
    while (p) {
       if (p->nodeName() == n) {
          return p;
       }
       p = p->next;
    }
-   return 0;
-}
 
+   return nullptr;
+}
 
 QDomNodePrivate *QDomNodePrivate::insertBefore(QDomNodePrivate *newChild, QDomNodePrivate *refChild)
 {
    // Error check
-   if (!newChild) {
-      return 0;
+   if (! newChild) {
+      return nullptr;
    }
 
    // Error check
    if (newChild == refChild) {
-      return 0;
+      return nullptr;
    }
 
    // Error check
    if (refChild && refChild->parent() != this) {
-      return 0;
+      return nullptr;
    }
 
    // "mark lists as dirty"
@@ -1564,7 +1532,7 @@ QDomNodePrivate *QDomNodePrivate::insertBefore(QDomNodePrivate *newChild, QDomNo
    // all elements of the fragment instead of the fragment itself.
    if (newChild->isDocumentFragment()) {
       // Fragment is empty ?
-      if (newChild->first == 0) {
+      if (newChild->first == nullptr) {
          return newChild;
       }
 
@@ -1576,15 +1544,18 @@ QDomNodePrivate *QDomNodePrivate::insertBefore(QDomNodePrivate *newChild, QDomNo
       }
 
       // Insert at the beginning ?
-      if (!refChild || refChild->prev == 0) {
+      if (!refChild || refChild->prev == nullptr) {
          if (first) {
             first->prev = newChild->last;
          }
+
          newChild->last->next = first;
          if (!last) {
             last = newChild->last;
          }
+
          first = newChild->first;
+
       } else {
          // Insert in the middle
          newChild->last->next = refChild;
@@ -1597,8 +1568,8 @@ QDomNodePrivate *QDomNodePrivate::insertBefore(QDomNodePrivate *newChild, QDomNo
       // does not decrease the reference.
 
       // Remove the nodes from the fragment
-      newChild->first = 0;
-      newChild->last = 0;
+      newChild->first = nullptr;
+      newChild->last  = nullptr;
       return newChild;
    }
 
@@ -1616,22 +1587,26 @@ QDomNodePrivate *QDomNodePrivate::insertBefore(QDomNodePrivate *newChild, QDomNo
       if (first) {
          first->prev = newChild;
       }
+
       newChild->next = first;
       if (!last) {
          last = newChild;
       }
+
       first = newChild;
       return newChild;
    }
 
-   if (refChild->prev == 0) {
+   if (refChild->prev == nullptr) {
       if (first) {
          first->prev = newChild;
       }
+
       newChild->next = first;
       if (!last) {
          last = newChild;
       }
+
       first = newChild;
       return newChild;
    }
@@ -1647,18 +1622,18 @@ QDomNodePrivate *QDomNodePrivate::insertBefore(QDomNodePrivate *newChild, QDomNo
 QDomNodePrivate *QDomNodePrivate::insertAfter(QDomNodePrivate *newChild, QDomNodePrivate *refChild)
 {
    // Error check
-   if (!newChild) {
-      return 0;
+   if (! newChild) {
+      return nullptr;
    }
 
    // Error check
    if (newChild == refChild) {
-      return 0;
+      return nullptr;
    }
 
    // Error check
    if (refChild && refChild->parent() != this) {
-      return 0;
+      return nullptr;
    }
 
    // "mark lists as dirty"
@@ -1671,7 +1646,7 @@ QDomNodePrivate *QDomNodePrivate::insertAfter(QDomNodePrivate *newChild, QDomNod
    // all elements of the fragment instead of the fragment itself.
    if (newChild->isDocumentFragment()) {
       // Fragment is empty ?
-      if (newChild->first == 0) {
+      if (newChild->first == nullptr) {
          return newChild;
       }
 
@@ -1683,19 +1658,22 @@ QDomNodePrivate *QDomNodePrivate::insertAfter(QDomNodePrivate *newChild, QDomNod
       }
 
       // Insert at the end
-      if (!refChild || refChild->next == 0) {
+      if (!refChild || refChild->next == nullptr) {
          if (last) {
             last->next = newChild->first;
          }
+
          newChild->first->prev = last;
          if (!first) {
             first = newChild->first;
          }
+
          last = newChild->last;
+
       } else { // Insert in the middle
          newChild->first->prev = refChild;
-         newChild->last->next = refChild->next;
-         refChild->next->prev = newChild->last;
+         newChild->last->next  = refChild->next;
+         refChild->next->prev  = newChild->last;
          refChild->next = newChild->first;
       }
 
@@ -1703,8 +1681,9 @@ QDomNodePrivate *QDomNodePrivate::insertAfter(QDomNodePrivate *newChild, QDomNod
       // does not decrease the reference.
 
       // Remove the nodes from the fragment
-      newChild->first = 0;
-      newChild->last = 0;
+      newChild->first = nullptr;
+      newChild->last  = nullptr;
+
       return newChild;
    }
 
@@ -1724,22 +1703,26 @@ QDomNodePrivate *QDomNodePrivate::insertAfter(QDomNodePrivate *newChild, QDomNod
       if (last) {
          last->next = newChild;
       }
+
       newChild->prev = last;
       if (!first) {
          first = newChild;
       }
+
       last = newChild;
       return newChild;
    }
 
-   if (refChild->next == 0) {
+   if (refChild->next == nullptr) {
       if (last) {
          last->next = newChild;
       }
+
       newChild->prev = last;
       if (!first) {
          first = newChild;
       }
+
       last = newChild;
       return newChild;
    }
@@ -1754,14 +1737,16 @@ QDomNodePrivate *QDomNodePrivate::insertAfter(QDomNodePrivate *newChild, QDomNod
 
 QDomNodePrivate *QDomNodePrivate::replaceChild(QDomNodePrivate *newChild, QDomNodePrivate *oldChild)
 {
-   if (!newChild || !oldChild) {
-      return 0;
+   if (! newChild || !oldChild) {
+      return nullptr;
    }
+
    if (oldChild->parent() != this) {
-      return 0;
+      return nullptr;
    }
+
    if (newChild == oldChild) {
-      return 0;
+      return nullptr;
    }
 
    // mark lists as dirty
@@ -1774,7 +1759,7 @@ QDomNodePrivate *QDomNodePrivate::replaceChild(QDomNodePrivate *newChild, QDomNo
    // all elements of the fragment instead of the fragment itself.
    if (newChild->isDocumentFragment()) {
       // Fragment is empty ?
-      if (newChild->first == 0) {
+      if (newChild->first == nullptr) {
          return newChild;
       }
 
@@ -1785,10 +1770,10 @@ QDomNodePrivate *QDomNodePrivate::replaceChild(QDomNodePrivate *newChild, QDomNo
          n = n->next;
       }
 
-
       if (oldChild->next) {
          oldChild->next->prev = newChild->last;
       }
+
       if (oldChild->prev) {
          oldChild->prev->next = newChild->first;
       }
@@ -1804,15 +1789,15 @@ QDomNodePrivate *QDomNodePrivate::replaceChild(QDomNodePrivate *newChild, QDomNo
       }
 
       oldChild->setNoParent();
-      oldChild->next = 0;
-      oldChild->prev = 0;
+      oldChild->next = nullptr;
+      oldChild->prev = nullptr;
 
       // No need to increase the reference since QDomDocumentFragment
       // does not decrease the reference.
 
       // Remove the nodes from the fragment
-      newChild->first = 0;
-      newChild->last = 0;
+      newChild->first = nullptr;
+      newChild->last  = nullptr;
 
       // We are no longer interested in the old node
       if (oldChild) {
@@ -1851,8 +1836,8 @@ QDomNodePrivate *QDomNodePrivate::replaceChild(QDomNodePrivate *newChild, QDomNo
    }
 
    oldChild->setNoParent();
-   oldChild->next = 0;
-   oldChild->prev = 0;
+   oldChild->next = nullptr;
+   oldChild->prev = nullptr;
 
    // We are no longer interested in the old node
    if (oldChild) {
@@ -1866,7 +1851,7 @@ QDomNodePrivate *QDomNodePrivate::removeChild(QDomNodePrivate *oldChild)
 {
    // Error check
    if (oldChild->parent() != this) {
-      return 0;
+      return nullptr;
    }
 
    // "mark lists as dirty"
@@ -1877,13 +1862,14 @@ QDomNodePrivate *QDomNodePrivate::removeChild(QDomNodePrivate *oldChild)
 
    // Perhaps oldChild was just created with "createElement" or that. In this case
    // its parent is QDomDocument but it is not part of the documents child list.
-   if (oldChild->next == 0 && oldChild->prev == 0 && first != oldChild) {
-      return 0;
+   if (oldChild->next == nullptr && oldChild->prev == nullptr && first != oldChild) {
+      return nullptr;
    }
 
    if (oldChild->next) {
       oldChild->next->prev = oldChild->prev;
    }
+
    if (oldChild->prev) {
       oldChild->prev->next = oldChild->next;
    }
@@ -1896,8 +1882,8 @@ QDomNodePrivate *QDomNodePrivate::removeChild(QDomNodePrivate *oldChild)
    }
 
    oldChild->setNoParent();
-   oldChild->next = 0;
-   oldChild->prev = 0;
+   oldChild->next = nullptr;
+   oldChild->prev = nullptr;
 
    // We are no longer interested in the old node
    oldChild->ref.deref();
@@ -1908,16 +1894,18 @@ QDomNodePrivate *QDomNodePrivate::removeChild(QDomNodePrivate *oldChild)
 QDomNodePrivate *QDomNodePrivate::appendChild(QDomNodePrivate *newChild)
 {
    // No reference manipulation needed. Done in insertAfter.
-   return insertAfter(newChild, 0);
+   return insertAfter(newChild, nullptr);
 }
 
 QDomDocumentPrivate *QDomNodePrivate::ownerDocument()
 {
    QDomNodePrivate *p = this;
+
    while (p && !p->isDocument()) {
       if (!p->hasParent) {
          return (QDomDocumentPrivate *)p->ownerNode;
       }
+
       p = p->parent();
    }
 
@@ -1929,13 +1917,14 @@ QDomNodePrivate *QDomNodePrivate::cloneNode(bool deep)
    QDomNodePrivate *p = new QDomNodePrivate(this, deep);
    // We are not interested in this node
    p->ref.deref();
+
    return p;
 }
 
 static void qNormalizeNode(QDomNodePrivate *n)
 {
    QDomNodePrivate *p = n->first;
-   QDomTextPrivate *t = 0;
+   QDomTextPrivate *t = nullptr;
 
    while (p) {
       if (p->isText()) {
@@ -1948,25 +1937,23 @@ static void qNormalizeNode(QDomNodePrivate *n)
             t = (QDomTextPrivate *)p;
             p = p->next;
          }
+
       } else {
          p = p->next;
-         t = 0;
+         t = nullptr;
       }
    }
 }
+
 void QDomNodePrivate::normalize()
 {
-   // ### This one has moved from QDomElementPrivate to this position. It is
-   // not tested.
    qNormalizeNode(this);
 }
 
-/*! \internal
-  \a depth is used for indentation, it seems.
- */
 void QDomNodePrivate::save(QTextStream &s, int depth, int indent) const
 {
    const QDomNodePrivate *n = first;
+
    while (n) {
       n->save(s, depth, indent);
       n = n->next;
@@ -1975,7 +1962,7 @@ void QDomNodePrivate::save(QTextStream &s, int depth, int indent) const
 
 void QDomNodePrivate::setLocation(int lineNumber, int columnNumber)
 {
-   this->lineNumber = lineNumber;
+   this->lineNumber   = lineNumber;
    this->columnNumber = columnNumber;
 }
 
@@ -1989,84 +1976,51 @@ void QDomNodePrivate::setLocation(int lineNumber, int columnNumber)
 
 QDomNode::QDomNode()
 {
-   impl = 0;
+   impl = nullptr;
 }
 
 QDomNode::QDomNode(const QDomNode &n)
 {
    impl = n.impl;
+
    if (impl) {
       impl->ref.ref();
    }
 }
 
-/*!  \internal
-  Constructs a new node for the data \a n.
-*/
 QDomNode::QDomNode(QDomNodePrivate *n)
 {
    impl = n;
+
    if (impl) {
       impl->ref.ref();
    }
 }
 
-/*!
-    Assigns a copy of \a n to this DOM node.
-
-    The data of the copy is shared (shallow copy): modifying one node
-    will also change the other. If you want to make a deep copy, use
-    cloneNode().
-*/
 QDomNode &QDomNode::operator=(const QDomNode &n)
 {
    if (n.impl) {
       n.impl->ref.ref();
    }
+
    if (impl && !impl->ref.deref()) {
       delete impl;
    }
+
    impl = n.impl;
    return *this;
 }
 
-/*!
-    Returns true if \a n and this DOM node are equal; otherwise
-    returns false.
-
-    Any instance of QDomNode acts as a reference to an underlying data
-    structure in QDomDocument. The test for equality checks if the two
-    references point to the same underlying node. For example:
-
-    \snippet doc/src/snippets/code/src_xml_dom_qdom.cpp 2
-
-    The two nodes (QDomElement is a QDomNode subclass) both refer to
-    the document's root element, and \c {element1 == element2} will
-    return true. On the other hand:
-
-    \snippet doc/src/snippets/code/src_xml_dom_qdom.cpp 3
-
-    Even though both nodes are empty elements carrying the same name,
-    \c {element3 == element4} will return false because they refer to
-    two different nodes in the underlying data structure.
-*/
 bool QDomNode::operator== (const QDomNode &n) const
 {
    return (impl == n.impl);
 }
 
-/*!
-    Returns true if \a n and this DOM node are not equal; otherwise
-    returns false.
-*/
 bool QDomNode::operator!= (const QDomNode &n) const
 {
    return (impl != n.impl);
 }
 
-/*!
-    Destroys the object and frees its resources.
-*/
 QDomNode::~QDomNode()
 {
    if (impl && !impl->ref.deref()) {
@@ -2074,35 +2028,6 @@ QDomNode::~QDomNode()
    }
 }
 
-/*!
-    Returns the name of the node.
-
-    The meaning of the name depends on the subclass:
-
-    \table
-    \header \i Name \i Meaning
-    \row \i QDomAttr \i The name of the attribute
-    \row \i QDomCDATASection \i The string "#cdata-section"
-    \row \i QDomComment \i The string "#comment"
-    \row \i QDomDocument \i The string "#document"
-    \row \i QDomDocumentFragment \i The string "#document-fragment"
-    \row \i QDomDocumentType \i The name of the document type
-    \row \i QDomElement \i The tag name
-    \row \i QDomEntity \i The name of the entity
-    \row \i QDomEntityReference \i The name of the referenced entity
-    \row \i QDomNotation \i The name of the notation
-    \row \i QDomProcessingInstruction \i The target of the processing instruction
-    \row \i QDomText \i The string "#text"
-    \endtable
-
-    \bold{Note:} This function does not take the presence of namespaces into account
-    when processing the names of element and attribute nodes. As a result, the
-    returned name can contain any namespace prefix that may be present.
-    To obtain the node name of an element or attribute, use localName(); to
-    obtain the namespace prefix, use namespaceURI().
-
-    \sa nodeValue()
-*/
 QString QDomNode::nodeName() const
 {
    if (!impl) {
@@ -2112,27 +2037,10 @@ QString QDomNode::nodeName() const
    if (!IMPL->prefix.isEmpty()) {
       return IMPL->prefix + QLatin1Char(':') + IMPL->name;
    }
+
    return IMPL->name;
 }
 
-/*!
-    Returns the value of the node.
-
-    The meaning of the value depends on the subclass:
-    \table
-    \header \i Name \i Meaning
-    \row \i QDomAttr \i The attribute value
-    \row \i QDomCDATASection \i The content of the CDATA section
-    \row \i QDomComment \i The comment
-    \row \i QDomProcessingInstruction \i The data of the processing instruction
-    \row \i QDomText \i The text
-    \endtable
-
-    All the other subclasses do not have a node value and will return
-    an empty string.
-
-    \sa setNodeValue() nodeName()
-*/
 QString QDomNode::nodeValue() const
 {
    if (!impl) {
@@ -2141,11 +2049,6 @@ QString QDomNode::nodeValue() const
    return IMPL->value;
 }
 
-/*!
-    Sets the node's value to \a v.
-
-    \sa nodeValue()
-*/
 void QDomNode::setNodeValue(const QString &v)
 {
    if (!impl) {
@@ -2434,7 +2337,8 @@ bool QDomNode::hasChildNodes() const
    if (!impl) {
       return false;
    }
-   return IMPL->first != 0;
+
+   return IMPL->first != nullptr;
 }
 
 /*!
@@ -2443,49 +2347,39 @@ bool QDomNode::hasChildNodes() const
 */
 bool QDomNode::isNull() const
 {
-   return (impl == 0);
+   return (impl == nullptr);
 }
 
 void QDomNode::clear()
 {
-   if (impl && !impl->ref.deref()) {
+   if (impl && ! impl->ref.deref()) {
       delete impl;
    }
-   impl = 0;
+
+   impl = nullptr;
 }
 
 QDomNode QDomNode::namedItem(const QString &name) const
 {
-   if (!impl) {
+   if (! impl) {
       return QDomNode();
    }
    return QDomNode(impl->namedItem(name));
 }
 
-void QDomNode::save(QTextStream &str, int indent) const
+void QDomNode::save(QTextStream &stream, int indent, EncodingPolicy policy) const
 {
-   save(str, indent, QDomNode::EncodingFromDocument);
-}
-
-void QDomNode::save(QTextStream &str, int indent, EncodingPolicy encodingPolicy) const
-{
-   if (!impl) {
+   if (! impl) {
       return;
    }
 
    if (isDocument()) {
-      static_cast<const QDomDocumentPrivate *>(impl)->saveDocument(str, indent, encodingPolicy);
+      static_cast<const QDomDocumentPrivate *>(impl)->saveDocument(stream, indent, policy);
    } else {
-      IMPL->save(str, 1, indent);
+      IMPL->save(stream, 1, indent);
    }
 }
 
-/*!
-    \relates QDomNode
-
-    Writes the XML representation of the node \a node and all its
-    children to the stream \a str.
-*/
 QTextStream &operator<<(QTextStream &str, const QDomNode &node)
 {
    node.save(str, 1);
@@ -2493,15 +2387,6 @@ QTextStream &operator<<(QTextStream &str, const QDomNode &node)
    return str;
 }
 
-/*!
-    Returns true if the node is an attribute; otherwise returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomAttribute; you can get the QDomAttribute with
-    toAttribute().
-
-    \sa toAttr()
-*/
 bool QDomNode::isAttr() const
 {
    if (impl) {
@@ -2510,16 +2395,6 @@ bool QDomNode::isAttr() const
    return false;
 }
 
-/*!
-    Returns true if the node is a CDATA section; otherwise returns
-    false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomCDATASection; you can get the QDomCDATASection with
-    toCDATASection().
-
-    \sa toCDATASection()
-*/
 bool QDomNode::isCDATASection() const
 {
    if (impl) {
@@ -2528,16 +2403,6 @@ bool QDomNode::isCDATASection() const
    return false;
 }
 
-/*!
-    Returns true if the node is a document fragment; otherwise returns
-    false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomDocumentFragment; you can get the QDomDocumentFragment
-    with toDocumentFragment().
-
-    \sa toDocumentFragment()
-*/
 bool QDomNode::isDocumentFragment() const
 {
    if (impl) {
@@ -2546,14 +2411,6 @@ bool QDomNode::isDocumentFragment() const
    return false;
 }
 
-/*!
-    Returns true if the node is a document; otherwise returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomDocument; you can get the QDomDocument with toDocument().
-
-    \sa toDocument()
-*/
 bool QDomNode::isDocument() const
 {
    if (impl) {
@@ -2562,16 +2419,6 @@ bool QDomNode::isDocument() const
    return false;
 }
 
-/*!
-    Returns true if the node is a document type; otherwise returns
-    false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomDocumentType; you can get the QDomDocumentType with
-    toDocumentType().
-
-    \sa toDocumentType()
-*/
 bool QDomNode::isDocumentType() const
 {
    if (impl) {
@@ -2580,14 +2427,6 @@ bool QDomNode::isDocumentType() const
    return false;
 }
 
-/*!
-    Returns true if the node is an element; otherwise returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomElement; you can get the QDomElement with toElement().
-
-    \sa toElement()
-*/
 bool QDomNode::isElement() const
 {
    if (impl) {
@@ -2596,16 +2435,6 @@ bool QDomNode::isElement() const
    return false;
 }
 
-/*!
-    Returns true if the node is an entity reference; otherwise returns
-    false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomEntityReference; you can get the QDomEntityReference with
-    toEntityReference().
-
-    \sa toEntityReference()
-*/
 bool QDomNode::isEntityReference() const
 {
    if (impl) {
@@ -2614,14 +2443,6 @@ bool QDomNode::isEntityReference() const
    return false;
 }
 
-/*!
-    Returns true if the node is a text node; otherwise returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomText; you can get the QDomText with toText().
-
-    \sa toText()
-*/
 bool QDomNode::isText() const
 {
    if (impl) {
@@ -2630,14 +2451,6 @@ bool QDomNode::isText() const
    return false;
 }
 
-/*!
-    Returns true if the node is an entity; otherwise returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomEntity; you can get the QDomEntity with toEntity().
-
-    \sa toEntity()
-*/
 bool QDomNode::isEntity() const
 {
    if (impl) {
@@ -2646,14 +2459,6 @@ bool QDomNode::isEntity() const
    return false;
 }
 
-/*!
-    Returns true if the node is a notation; otherwise returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomNotation; you can get the QDomNotation with toNotation().
-
-    \sa toNotation()
-*/
 bool QDomNode::isNotation() const
 {
    if (impl) {
@@ -2662,16 +2467,6 @@ bool QDomNode::isNotation() const
    return false;
 }
 
-/*!
-    Returns true if the node is a processing instruction; otherwise
-    returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomProcessingInstruction; you can get the
-    QProcessingInstruction with toProcessingInstruction().
-
-    \sa toProcessingInstruction()
-*/
 bool QDomNode::isProcessingInstruction() const
 {
    if (impl) {
@@ -2680,16 +2475,6 @@ bool QDomNode::isProcessingInstruction() const
    return false;
 }
 
-/*!
-    Returns true if the node is a character data node; otherwise
-    returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomCharacterData; you can get the QDomCharacterData with
-    toCharacterData().
-
-    \sa toCharacterData()
-*/
 bool QDomNode::isCharacterData() const
 {
    if (impl) {
@@ -2698,14 +2483,6 @@ bool QDomNode::isCharacterData() const
    return false;
 }
 
-/*!
-    Returns true if the node is a comment; otherwise returns false.
-
-    If this function returns true, it does not imply that this object
-    is a QDomComment; you can get the QDomComment with toComment().
-
-    \sa toComment()
-*/
 bool QDomNode::isComment() const
 {
    if (impl) {
@@ -2715,14 +2492,6 @@ bool QDomNode::isComment() const
 }
 
 #undef IMPL
-
-/*!
-    Returns the first child element with tag name \a tagName if tagName is non-empty;
-    otherwise returns the first child element.  Returns a null element if no
-    such child exists.
-
-    \sa lastChildElement() previousSiblingElement() nextSiblingElement()
-*/
 
 QDomElement QDomNode::firstChildElement(const QString &tagName) const
 {
@@ -2748,9 +2517,9 @@ QDomElement QDomNode::lastChildElement(const QString &tagName) const
          }
       }
    }
+
    return QDomElement();
 }
-
 
 QDomElement QDomNode::nextSiblingElement(const QString &tagName) const
 {
@@ -2866,13 +2635,13 @@ QDomNodePrivate *QDomNamedNodeMapPrivate::namedItemNS(const QString &nsURI, cons
       }
    }
 
-   return 0;
+   return nullptr;
 }
 
 QDomNodePrivate *QDomNamedNodeMapPrivate::setNamedItem(QDomNodePrivate *arg)
 {
    if (readonly || !arg) {
-      return 0;
+      return nullptr;
    }
 
    if (appendToParent) {
@@ -2889,7 +2658,7 @@ QDomNodePrivate *QDomNamedNodeMapPrivate::setNamedItem(QDomNodePrivate *arg)
 QDomNodePrivate *QDomNamedNodeMapPrivate::setNamedItemNS(QDomNodePrivate *arg)
 {
    if (readonly || !arg) {
-      return 0;
+      return nullptr;
    }
 
    if (appendToParent) {
@@ -2913,12 +2682,12 @@ QDomNodePrivate *QDomNamedNodeMapPrivate::setNamedItemNS(QDomNodePrivate *arg)
 QDomNodePrivate *QDomNamedNodeMapPrivate::removeNamedItem(const QString &name)
 {
    if (readonly) {
-      return 0;
+      return nullptr;
    }
 
    QDomNodePrivate *p = namedItem(name);
-   if (p == 0) {
-      return 0;
+   if (p == nullptr) {
+      return nullptr;
    }
    if (appendToParent) {
       return parent->removeChild(p);
@@ -2933,7 +2702,7 @@ QDomNodePrivate *QDomNamedNodeMapPrivate::removeNamedItem(const QString &name)
 QDomNodePrivate *QDomNamedNodeMapPrivate::item(int index) const
 {
    if (index >= length()) {
-      return 0;
+      return nullptr;
    }
 
    return *(m_nodeMap.constBegin() + index);
@@ -2946,12 +2715,12 @@ int QDomNamedNodeMapPrivate::length() const
 
 bool QDomNamedNodeMapPrivate::contains(const QString &name) const
 {
-   return m_nodeMap.value(name) != 0;
+   return m_nodeMap.value(name) != nullptr;
 }
 
 bool QDomNamedNodeMapPrivate::containsNS(const QString &nsURI, const QString &localName) const
 {
-   return namedItemNS(nsURI, localName) != 0;
+   return namedItemNS(nsURI, localName) != nullptr;
 }
 
 /**************************************************************
@@ -2964,12 +2733,9 @@ bool QDomNamedNodeMapPrivate::containsNS(const QString &nsURI, const QString &lo
 
 QDomNamedNodeMap::QDomNamedNodeMap()
 {
-   impl = 0;
+   impl = nullptr;
 }
 
-/*!
-    Constructs a copy of \a n.
-*/
 QDomNamedNodeMap::QDomNamedNodeMap(const QDomNamedNodeMap &n)
 {
    impl = n.impl;
@@ -2986,9 +2752,6 @@ QDomNamedNodeMap::QDomNamedNodeMap(QDomNamedNodeMapPrivate *n)
    }
 }
 
-/*!
-    Assigns \a n to this named node map.
-*/
 QDomNamedNodeMap &QDomNamedNodeMap::operator=(const QDomNamedNodeMap &n)
 {
    if (n.impl) {
@@ -3029,7 +2792,6 @@ QDomNode QDomNamedNodeMap::namedItem(const QString &name) const
    return QDomNode(IMPL->namedItem(name));
 }
 
-
 QDomNode QDomNamedNodeMap::setNamedItem(const QDomNode &newNode)
 {
    if (!impl) {
@@ -3064,7 +2826,6 @@ QDomNode QDomNamedNodeMap::namedItemNS(const QString &nsURI, const QString &loca
    return QDomNode(IMPL->namedItemNS(nsURI, localName));
 }
 
-
 QDomNode QDomNamedNodeMap::setNamedItemNS(const QDomNode &newNode)
 {
    if (!impl) {
@@ -3096,33 +2857,6 @@ int QDomNamedNodeMap::length() const
    return IMPL->length();
 }
 
-/*!
-    \fn bool QDomNamedNodeMap::isEmpty() const
-
-    Returns true if the map is empty; otherwise returns false. This function is
-    provided for Qt API consistency.
-*/
-
-/*!
-    \fn int QDomNamedNodeMap::count() const
-
-    This function is provided for Qt API consistency. It is equivalent to length().
-*/
-
-/*!
-    \fn int QDomNamedNodeMap::size() const
-
-    This function is provided for Qt API consistency. It is equivalent to length().
-*/
-
-/*!
-    Returns true if the map contains a node called \a name; otherwise
-    returns false.
-
-    \bold{Note:} This function does not take the presence of namespaces into account.
-    Use namedItemNS() to test whether the map contains a node with a specific namespace
-    URI and name.
-*/
 bool QDomNamedNodeMap::contains(const QString &name) const
 {
    if (!impl) {
@@ -3274,7 +3008,7 @@ QDomNodePrivate *QDomDocumentTypePrivate::removeChild(QDomNodePrivate *oldChild)
 
 QDomNodePrivate *QDomDocumentTypePrivate::appendChild(QDomNodePrivate *newChild)
 {
-   return insertAfter(newChild, 0);
+   return insertAfter(newChild, nullptr);
 }
 
 static QString quotedValue(const QString &data)
@@ -3330,39 +3064,10 @@ void QDomDocumentTypePrivate::save(QTextStream &s, int, int indent) const
 
 #define IMPL ((QDomDocumentTypePrivate*)impl)
 
-/*!
-    \class QDomDocumentType
-    \reentrant
-    \brief The QDomDocumentType class is the representation of the DTD
-    in the document tree.
-
-    \inmodule QtXml
-    \ingroup xml-tools
-
-    The QDomDocumentType class allows read-only access to some of the
-    data structures in the DTD: it can return a map of all entities()
-    and notations(). In addition the function name() returns the name
-    of the document type as specified in the &lt;!DOCTYPE name&gt;
-    tag. This class also provides the publicId(), systemId() and
-    internalSubset() functions.
-
-    \sa QDomDocument
-*/
-
-/*!
-    Creates an empty QDomDocumentType object.
-*/
 QDomDocumentType::QDomDocumentType() : QDomNode()
 {
 }
 
-/*!
-    Constructs a copy of \a n.
-
-    The data of the copy is shared (shallow copy): modifying one node
-    will also change the other. If you want to make a deep copy, use
-    cloneNode().
-*/
 QDomDocumentType::QDomDocumentType(const QDomDocumentType &n)
    : QDomNode(n)
 {
@@ -3373,24 +3078,11 @@ QDomDocumentType::QDomDocumentType(QDomDocumentTypePrivate *n)
 {
 }
 
-/*!
-    Assigns \a n to this document type.
-
-    The data of the copy is shared (shallow copy): modifying one node
-    will also change the other. If you want to make a deep copy, use
-    cloneNode().
-*/
 QDomDocumentType &QDomDocumentType::operator= (const QDomDocumentType &n)
 {
    return (QDomDocumentType &) QDomNode::operator=(n);
 }
 
-/*!
-    Returns the name of the document type as specified in the
-    &lt;!DOCTYPE name&gt; tag.
-
-    \sa nodeName()
-*/
 QString QDomDocumentType::name() const
 {
    if (!impl) {
@@ -3399,9 +3091,6 @@ QString QDomDocumentType::name() const
    return IMPL->nodeName();
 }
 
-/*!
-    Returns a map of all entities described in the DTD.
-*/
 QDomNamedNodeMap QDomDocumentType::entities() const
 {
    if (!impl) {
@@ -3410,9 +3099,6 @@ QDomNamedNodeMap QDomDocumentType::entities() const
    return QDomNamedNodeMap(IMPL->entities);
 }
 
-/*!
-    Returns a map of all notations described in the DTD.
-*/
 QDomNamedNodeMap QDomDocumentType::notations() const
 {
    if (!impl) {
@@ -3421,12 +3107,6 @@ QDomNamedNodeMap QDomDocumentType::notations() const
    return QDomNamedNodeMap(IMPL->notations);
 }
 
-/*!
-    Returns the public identifier of the external DTD subset or
-    an empty string if there is no public identifier.
-
-    \sa systemId() internalSubset() QDomImplementation::createDocumentType()
-*/
 QString QDomDocumentType::publicId() const
 {
    if (!impl) {
@@ -3435,12 +3115,6 @@ QString QDomDocumentType::publicId() const
    return IMPL->publicId;
 }
 
-/*!
-    Returns the system identifier of the external DTD subset or
-    an empty string if there is no system identifier.
-
-    \sa publicId() internalSubset() QDomImplementation::createDocumentType()
-*/
 QString QDomDocumentType::systemId() const
 {
    if (!impl) {
@@ -3449,12 +3123,6 @@ QString QDomDocumentType::systemId() const
    return IMPL->systemId;
 }
 
-/*!
-    Returns the internal subset of the document type or an empty
-    string if there is no internal subset.
-
-    \sa publicId() systemId()
-*/
 QString QDomDocumentType::internalSubset() const
 {
    if (!impl) {
@@ -3462,20 +3130,6 @@ QString QDomDocumentType::internalSubset() const
    }
    return IMPL->internalSubset;
 }
-
-/*
-    Are these needed at all? The only difference when removing these
-    two methods in all subclasses is that we'd get a different type
-    for null nodes.
-*/
-
-/*!
-    \fn QDomNode::NodeType QDomDocumentType::nodeType() const
-
-    Returns \c DocumentTypeNode.
-
-    \sa isDocumentType() QDomNode::toDocumentType()
-*/
 
 #undef IMPL
 
@@ -3510,34 +3164,6 @@ QDomNodePrivate *QDomDocumentFragmentPrivate::cloneNode(bool deep)
  *
  **************************************************************/
 
-/*!
-    \class QDomDocumentFragment
-    \reentrant
-    \brief The QDomDocumentFragment class is a tree of QDomNodes which is not usually a complete QDomDocument.
-
-    \inmodule QtXml
-    \ingroup xml-tools
-
-    If you want to do complex tree operations it is useful to have a
-    lightweight class to store nodes and their relations.
-    QDomDocumentFragment stores a subtree of a document which does not
-    necessarily represent a well-formed XML document.
-
-    QDomDocumentFragment is also useful if you want to group several
-    nodes in a list and insert them all together as children of some
-    node. In these cases QDomDocumentFragment can be used as a
-    temporary container for this list of children.
-
-    The most important feature of QDomDocumentFragment is that it is
-    treated in a special way by QDomNode::insertAfter(),
-    QDomNode::insertBefore(), QDomNode::replaceChild() and
-    QDomNode::appendChild(): instead of inserting the fragment itself, all
-    the fragment's children are inserted.
-*/
-
-/*!
-    Constructs an empty document fragment.
-*/
 QDomDocumentFragment::QDomDocumentFragment()
 {
 }
@@ -3547,37 +3173,15 @@ QDomDocumentFragment::QDomDocumentFragment(QDomDocumentFragmentPrivate *n)
 {
 }
 
-/*!
-    Constructs a copy of \a x.
-
-    The data of the copy is shared (shallow copy): modifying one node
-    will also change the other. If you want to make a deep copy, use
-    cloneNode().
-*/
 QDomDocumentFragment::QDomDocumentFragment(const QDomDocumentFragment &x)
    : QDomNode(x)
 {
 }
 
-/*!
-    Assigns \a x to this DOM document fragment.
-
-    The data of the copy is shared (shallow copy): modifying one node
-    will also change the other. If you want to make a deep copy, use
-    cloneNode().
-*/
 QDomDocumentFragment &QDomDocumentFragment::operator= (const QDomDocumentFragment &x)
 {
    return (QDomDocumentFragment &) QDomNode::operator=(x);
 }
-
-/*!
-    \fn QDomNode::NodeType QDomDocumentFragment::nodeType() const
-
-    Returns \c DocumentFragment.
-
-    \sa isDocumentFragment() QDomNode::toDocumentFragment()
-*/
 
 /**************************************************************
  *
@@ -3644,34 +3248,6 @@ void QDomCharacterDataPrivate::appendData(const QString &arg)
 
 #define IMPL ((QDomCharacterDataPrivate*)impl)
 
-/*!
-    \class QDomCharacterData
-    \reentrant
-    \brief The QDomCharacterData class represents a generic string in the DOM.
-
-    \inmodule QtXml
-    \ingroup xml-tools
-
-    Character data as used in XML specifies a generic data string.
-    More specialized versions of this class are QDomText, QDomComment
-    and QDomCDATASection.
-
-    The data string is set with setData() and retrieved with data().
-    You can retrieve a portion of the data string using
-    substringData(). Extra data can be appended with appendData(), or
-    inserted with insertData(). Portions of the data string can be
-    deleted with deleteData() or replaced with replaceData(). The
-    length of the data string is returned by length().
-
-    The node type of the node containing this character data is
-    returned by nodeType().
-
-    \sa QDomText QDomComment QDomCDATASection
-*/
-
-/*!
-    Constructs an empty character data object.
-*/
 QDomCharacterData::QDomCharacterData()
 {
 }
@@ -3715,9 +3291,6 @@ int QDomCharacterData::length() const
    return 0;
 }
 
-/*!
-    Returns the substring of length \a count from position \a offset.
-*/
 QString QDomCharacterData::substringData(unsigned long offset, unsigned long count)
 {
    if (!impl) {
@@ -3726,9 +3299,6 @@ QString QDomCharacterData::substringData(unsigned long offset, unsigned long cou
    return IMPL->substringData(offset, count);
 }
 
-/*!
-    Appends the string \a arg to the stored string.
-*/
 void QDomCharacterData::appendData(const QString &arg)
 {
    if (impl) {
@@ -3736,9 +3306,6 @@ void QDomCharacterData::appendData(const QString &arg)
    }
 }
 
-/*!
-    Inserts the string \a arg into the stored string at position \a offset.
-*/
 void QDomCharacterData::insertData(unsigned long offset, const QString &arg)
 {
    if (impl) {
@@ -3746,9 +3313,6 @@ void QDomCharacterData::insertData(unsigned long offset, const QString &arg)
    }
 }
 
-/*!
-    Deletes a substring of length \a count from position \a offset.
-*/
 void QDomCharacterData::deleteData(unsigned long offset, unsigned long count)
 {
    if (impl) {
@@ -3756,10 +3320,6 @@ void QDomCharacterData::deleteData(unsigned long offset, unsigned long count)
    }
 }
 
-/*!
-    Replaces the substring of length \a count starting at position \a
-    offset with the string \a arg.
-*/
 void QDomCharacterData::replaceData(unsigned long offset, unsigned long count, const QString &arg)
 {
    if (impl) {
@@ -3767,11 +3327,6 @@ void QDomCharacterData::replaceData(unsigned long offset, unsigned long count, c
    }
 }
 
-/*!
-    Returns the type of node this object refers to (i.e. \c TextNode,
-    \c CDATASectionNode, \c CommentNode or \c CharacterDataNode). For
-    a \link isNull() null node\endlink, returns \c CharacterDataNode.
-*/
 QDomNode::NodeType QDomCharacterData::nodeType() const
 {
    if (!impl) {
@@ -3813,12 +3368,14 @@ QDomAttrPrivate::QDomAttrPrivate(QDomAttrPrivate *n, bool deep)
 void QDomAttrPrivate::setNodeValue(const QString &v)
 {
    value = v;
-   QDomTextPrivate *t = new QDomTextPrivate(0, this, v);
+   QDomTextPrivate *t = new QDomTextPrivate(nullptr, this, v);
+
    // keep the refcount balanced: appendChild() does a ref anyway.
    t->ref.deref();
    if (first) {
       delete removeChild(first);
    }
+
    appendChild(t);
 }
 
@@ -3835,28 +3392,15 @@ bool QDomAttrPrivate::specified() const
    return m_specified;
 }
 
-/* \internal
-  Encode & escape \a str. Yes, it makes no sense to return a QString,
-  but is so for legacy reasons.
-
-  Remember that content produced should be able to roundtrip with 2.11 End-of-Line Handling
-  and 3.3.3 Attribute-Value Normalization.
-
-  If \a performAVN is true, characters will be escaped to survive Attribute Value Normalization.
-  If \a encodeEOLs is true, characters will be escaped to survive End-of-Line Handling.
-*/
-static QString encodeText(const QString &str,
-                          QTextStream &s,
-                          const bool encodeQuotes = true,
-                          const bool performAVN = false,
-                          const bool encodeEOLs = false)
-{
+static QString encodeText(const QString &str, QTextStream &s, const bool encodeQuotes = true,
+            const bool performAVN = false, const bool encodeEOLs = false){
 #ifdef QT_NO_TEXTCODEC
    Q_UNUSED(s);
 #else
    const QTextCodec *const codec = s.codec();
    Q_ASSERT(codec);
 #endif
+
    QString retval(str);
    int len = retval.length();
    int i = 0;
@@ -3947,55 +3491,10 @@ void QDomAttrPrivate::save(QTextStream &s, int, int) const
 
 #define IMPL ((QDomAttrPrivate*)impl)
 
-/*!
-    \class QDomAttr
-    \reentrant
-    \brief The QDomAttr class represents one attribute of a QDomElement.
-
-    \inmodule QtXml
-    \ingroup xml-tools
-
-    For example, the following piece of XML produces an element with
-    no children, but two attributes:
-
-    \snippet doc/src/snippets/code/src_xml_dom_qdom.cpp 7
-
-    You can access the attributes of an element with code like this:
-
-    \snippet doc/src/snippets/code/src_xml_dom_qdom.cpp 8
-
-    This example also shows that changing an attribute received from
-    an element changes the attribute of the element. If you do not
-    want to change the value of the element's attribute you must
-    use cloneNode() to get an independent copy of the attribute.
-
-    QDomAttr can return the name() and value() of an attribute. An
-    attribute's value is set with setValue(). If specified() returns
-    true the value was set with setValue(). The node this
-    attribute is attached to (if any) is returned by ownerElement().
-
-    For further information about the Document Object Model see
-    \l{http://www.w3.org/TR/REC-DOM-Level-1/} and
-    \l{http://www.w3.org/TR/DOM-Level-2-Core/}.
-    For a more general introduction of the DOM implementation see the
-    QDomDocument documentation.
-*/
-
-
-/*!
-    Constructs an empty attribute.
-*/
 QDomAttr::QDomAttr()
 {
 }
 
-/*!
-    Constructs a copy of \a x.
-
-    The data of the copy is shared (shallow copy): modifying one node
-    will also change the other. If you want to make a deep copy, use
-    cloneNode().
-*/
 QDomAttr::QDomAttr(const QDomAttr &x)
    : QDomNode(x)
 {
@@ -4006,21 +3505,11 @@ QDomAttr::QDomAttr(QDomAttrPrivate *n)
 {
 }
 
-/*!
-    Assigns \a x to this DOM attribute.
-
-    The data of the copy is shared (shallow copy): modifying one node
-    will also change the other. If you want to make a deep copy, use
-    cloneNode().
-*/
 QDomAttr &QDomAttr::operator= (const QDomAttr &x)
 {
    return (QDomAttr &) QDomNode::operator=(x);
 }
 
-/*!
-    Returns the attribute's name.
-*/
 QString QDomAttr::name() const
 {
    if (!impl) {
@@ -4029,12 +3518,6 @@ QString QDomAttr::name() const
    return impl->nodeName();
 }
 
-/*!
-    Returns true if the attribute has been set by the user with setValue().
-    Returns false if the value hasn't been specified or set.
-
-    \sa setValue()
-*/
 bool QDomAttr::specified() const
 {
    if (!impl) {
@@ -4052,12 +3535,6 @@ QDomElement QDomAttr::ownerElement() const
    return QDomElement((QDomElementPrivate *)(impl->parent()));
 }
 
-/*!
-    Returns the value of the attribute or an empty string if the
-    attribute has not been specified.
-
-    \sa specified() setValue()
-*/
 QString QDomAttr::value() const
 {
    if (!impl) {
@@ -4066,11 +3543,6 @@ QString QDomAttr::value() const
    return impl->nodeValue();
 }
 
-/*!
-    Sets the attribute's value to \a v.
-
-    \sa value()
-*/
 void QDomAttr::setValue(const QString &v)
 {
    if (!impl) {
@@ -4080,11 +3552,6 @@ void QDomAttr::setValue(const QString &v)
    IMPL->m_specified = true;
 }
 
-/*!
-    \fn QDomNode::NodeType QDomAttr::nodeType() const
-
-    Returns \link QDomNode::NodeType AttributeNode\endlink.
-*/
 
 #undef IMPL
 
@@ -4220,7 +3687,8 @@ QDomAttrPrivate *QDomElementPrivate::setAttributeNode(QDomAttrPrivate *newAttr)
 
 QDomAttrPrivate *QDomElementPrivate::setAttributeNodeNS(QDomAttrPrivate *newAttr)
 {
-   QDomNodePrivate *n = 0;
+   QDomNodePrivate *n = nullptr;
+
    if (!newAttr->prefix.isEmpty()) {
       n = m_attr->namedItemNS(newAttr->namespaceURI, newAttr->name);
    }
@@ -4800,10 +4268,10 @@ QDomTextPrivate *QDomTextPrivate::splitText(int offset)
 {
    if (!parent()) {
       qWarning("QDomText::splitText  The node has no parent. So I can not split");
-      return 0;
+      return nullptr;
    }
 
-   QDomTextPrivate *t = new QDomTextPrivate(ownerDocument(), 0, value.mid(offset));
+   QDomTextPrivate *t = new QDomTextPrivate(ownerDocument(), nullptr, value.mid(offset));
    value.truncate(offset);
 
    parent()->insertAfter(t, this);
@@ -4931,6 +4399,7 @@ QDomNodePrivate *QDomCommentPrivate::cloneNode(bool deep)
    QDomNodePrivate *p = new QDomCommentPrivate(this, deep);
    // We are not interested in this node
    p->ref.deref();
+
    return p;
 }
 
@@ -5781,9 +5250,7 @@ void QDomProcessingInstruction::setData(const QString &d)
  **************************************************************/
 
 QDomDocumentPrivate::QDomDocumentPrivate()
-   : QDomNodePrivate(0),
-     impl(new QDomImplementationPrivate),
-     nodeListTime(1)
+   : QDomNodePrivate(nullptr), impl(new QDomImplementationPrivate), nodeListTime(1)
 {
    type = new QDomDocumentTypePrivate(this, this);
    type->ref.deref();
@@ -5792,9 +5259,7 @@ QDomDocumentPrivate::QDomDocumentPrivate()
 }
 
 QDomDocumentPrivate::QDomDocumentPrivate(const QString &aname)
-   : QDomNodePrivate(0),
-     impl(new QDomImplementationPrivate),
-     nodeListTime(1)
+   : QDomNodePrivate(nullptr), impl(new QDomImplementationPrivate), nodeListTime(1)
 {
    type = new QDomDocumentTypePrivate(this, this);
    type->ref.deref();
@@ -5804,12 +5269,11 @@ QDomDocumentPrivate::QDomDocumentPrivate(const QString &aname)
 }
 
 QDomDocumentPrivate::QDomDocumentPrivate(QDomDocumentTypePrivate *dt)
-   : QDomNodePrivate(0),
-     impl(new QDomImplementationPrivate),
-     nodeListTime(1)
+   : QDomNodePrivate(nullptr), impl(new QDomImplementationPrivate), nodeListTime(1)
 {
-   if (dt != 0) {
+   if (dt != nullptr) {
       type = dt;
+
    } else {
       type = new QDomDocumentTypePrivate(this, this);
       type->ref.deref();
@@ -5819,9 +5283,7 @@ QDomDocumentPrivate::QDomDocumentPrivate(QDomDocumentTypePrivate *dt)
 }
 
 QDomDocumentPrivate::QDomDocumentPrivate(QDomDocumentPrivate *n, bool deep)
-   : QDomNodePrivate(n, deep),
-     impl(n->impl->clone()),
-     nodeListTime(1)
+   : QDomNodePrivate(n, deep), impl(n->impl->clone()), nodeListTime(1)
 {
    type = static_cast<QDomDocumentTypePrivate *>(n->type->cloneNode());
    type->setParent(this);
@@ -5912,12 +5374,14 @@ QDomElementPrivate *QDomDocumentPrivate::createElement(const QString &tagName)
 {
    bool ok;
    QString fixedName = fixedXmlName(tagName, &ok);
-   if (!ok) {
-      return 0;
+
+   if (! ok) {
+      return nullptr;
    }
 
-   QDomElementPrivate *e = new QDomElementPrivate(this, 0, fixedName);
+   QDomElementPrivate *e = new QDomElementPrivate(this, nullptr, fixedName);
    e->ref.deref();
+
    return e;
 }
 
@@ -5925,19 +5389,22 @@ QDomElementPrivate *QDomDocumentPrivate::createElementNS(const QString &nsURI, c
 {
    bool ok;
    QString fixedName = fixedXmlName(qName, &ok, true);
-   if (!ok) {
-      return 0;
+
+   if ( !ok) {
+      return nullptr;
    }
 
-   QDomElementPrivate *e = new QDomElementPrivate(this, 0, nsURI, fixedName);
+   QDomElementPrivate *e = new QDomElementPrivate(this, nullptr, nsURI, fixedName);
    e->ref.deref();
+
    return e;
 }
 
 QDomDocumentFragmentPrivate *QDomDocumentPrivate::createDocumentFragment()
 {
-   QDomDocumentFragmentPrivate *f = new QDomDocumentFragmentPrivate(this, (QDomNodePrivate *)0);
+   QDomDocumentFragmentPrivate *f = new QDomDocumentFragmentPrivate(this, (QDomNodePrivate *) nullptr);
    f->ref.deref();
+
    return f;
 }
 
@@ -5945,12 +5412,14 @@ QDomTextPrivate *QDomDocumentPrivate::createTextNode(const QString &data)
 {
    bool ok;
    QString fixedData = fixedCharData(data, &ok);
-   if (!ok) {
-      return 0;
+
+   if (! ok) {
+      return nullptr;
    }
 
-   QDomTextPrivate *t = new QDomTextPrivate(this, 0, fixedData);
+   QDomTextPrivate *t = new QDomTextPrivate(this, nullptr, fixedData);
    t->ref.deref();
+
    return t;
 }
 
@@ -5958,12 +5427,14 @@ QDomCommentPrivate *QDomDocumentPrivate::createComment(const QString &data)
 {
    bool ok;
    QString fixedData = fixedComment(data, &ok);
-   if (!ok) {
-      return 0;
+
+   if (! ok) {
+      return nullptr;
    }
 
-   QDomCommentPrivate *c = new QDomCommentPrivate(this, 0, fixedData);
+   QDomCommentPrivate *c = new QDomCommentPrivate(this, nullptr, fixedData);
    c->ref.deref();
+
    return c;
 }
 
@@ -5971,11 +5442,12 @@ QDomCDATASectionPrivate *QDomDocumentPrivate::createCDATASection(const QString &
 {
    bool ok;
    QString fixedData = fixedCDataSection(data, &ok);
-   if (!ok) {
-      return 0;
+
+   if (! ok) {
+      return nullptr;
    }
 
-   QDomCDATASectionPrivate *c = new QDomCDATASectionPrivate(this, 0, fixedData);
+   QDomCDATASectionPrivate *c = new QDomCDATASectionPrivate(this, nullptr, fixedData);
    c->ref.deref();
    return c;
 }
@@ -5985,29 +5457,34 @@ QDomProcessingInstructionPrivate *QDomDocumentPrivate::createProcessingInstructi
 {
    bool ok;
    QString fixedData = fixedPIData(data, &ok);
+
    if (!ok) {
-      return 0;
-   }
-   // [17] PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
-   QString fixedTarget = fixedXmlName(target, &ok);
-   if (!ok) {
-      return 0;
+      return nullptr;
    }
 
-   QDomProcessingInstructionPrivate *p = new QDomProcessingInstructionPrivate(this, 0, fixedTarget, fixedData);
+   // [17] PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
+   QString fixedTarget = fixedXmlName(target, &ok);
+   if (! ok) {
+      return nullptr;
+   }
+
+   QDomProcessingInstructionPrivate *p = new QDomProcessingInstructionPrivate(this, nullptr, fixedTarget, fixedData);
    p->ref.deref();
+
    return p;
 }
 QDomAttrPrivate *QDomDocumentPrivate::createAttribute(const QString &aname)
 {
    bool ok;
    QString fixedName = fixedXmlName(aname, &ok);
-   if (!ok) {
-      return 0;
+
+   if (! ok) {
+      return nullptr;
    }
 
-   QDomAttrPrivate *a = new QDomAttrPrivate(this, 0, fixedName);
+   QDomAttrPrivate *a = new QDomAttrPrivate(this, nullptr, fixedName);
    a->ref.deref();
+
    return a;
 }
 
@@ -6015,12 +5492,14 @@ QDomAttrPrivate *QDomDocumentPrivate::createAttributeNS(const QString &nsURI, co
 {
    bool ok;
    QString fixedName = fixedXmlName(qName, &ok, true);
-   if (!ok) {
-      return 0;
+
+   if (! ok) {
+      return nullptr;
    }
 
-   QDomAttrPrivate *a = new QDomAttrPrivate(this, 0, nsURI, fixedName);
+   QDomAttrPrivate *a = new QDomAttrPrivate(this, nullptr, nsURI, fixedName);
    a->ref.deref();
+
    return a;
 }
 
@@ -6028,58 +5507,73 @@ QDomEntityReferencePrivate *QDomDocumentPrivate::createEntityReference(const QSt
 {
    bool ok;
    QString fixedName = fixedXmlName(aname, &ok);
-   if (!ok) {
-      return 0;
+
+   if (! ok) {
+      return nullptr;
    }
 
-   QDomEntityReferencePrivate *e = new QDomEntityReferencePrivate(this, 0, fixedName);
+   QDomEntityReferencePrivate *e = new QDomEntityReferencePrivate(this, nullptr, fixedName);
    e->ref.deref();
+
    return e;
 }
 
 QDomNodePrivate *QDomDocumentPrivate::importNode(const QDomNodePrivate *importedNode, bool deep)
 {
-   QDomNodePrivate *node = 0;
+   QDomNodePrivate *node = nullptr;
+
    switch (importedNode->nodeType()) {
       case QDomNode::AttributeNode:
          node = new QDomAttrPrivate((QDomAttrPrivate *)importedNode, true);
          break;
+
       case QDomNode::DocumentFragmentNode:
          node = new QDomDocumentFragmentPrivate((QDomDocumentFragmentPrivate *)importedNode, deep);
          break;
+
       case QDomNode::ElementNode:
          node = new QDomElementPrivate((QDomElementPrivate *)importedNode, deep);
          break;
+
       case QDomNode::EntityNode:
          node = new QDomEntityPrivate((QDomEntityPrivate *)importedNode, deep);
          break;
+
       case QDomNode::EntityReferenceNode:
          node = new QDomEntityReferencePrivate((QDomEntityReferencePrivate *)importedNode, false);
          break;
+
       case QDomNode::NotationNode:
          node = new QDomNotationPrivate((QDomNotationPrivate *)importedNode, deep);
          break;
+
       case QDomNode::ProcessingInstructionNode:
          node = new QDomProcessingInstructionPrivate((QDomProcessingInstructionPrivate *)importedNode, deep);
          break;
+
       case QDomNode::TextNode:
          node = new QDomTextPrivate((QDomTextPrivate *)importedNode, deep);
          break;
+
       case QDomNode::CDATASectionNode:
          node = new QDomCDATASectionPrivate((QDomCDATASectionPrivate *)importedNode, deep);
          break;
+
       case QDomNode::CommentNode:
          node = new QDomCommentPrivate((QDomCommentPrivate *)importedNode, deep);
          break;
+
       default:
          break;
    }
+
    if (node) {
       node->setOwnerDocument(this);
       // The QDomNode constructor increases the refcount, so deref first to
       // keep refcount balanced.
       node->ref.deref();
    }
+
    return node;
 }
 
@@ -6092,7 +5586,7 @@ void QDomDocumentPrivate::saveDocument(QTextStream &s, const int indent, QDomNod
 #ifndef QT_NO_TEXTCODEC
       const QDomNodePrivate *n = first;
 
-      QTextCodec *codec = 0;
+      QTextCodec *codec = nullptr;
 
       if (n && n->isProcessingInstruction() && n->nodeName() == QLatin1String("xml")) {
          // we have an XML declaration
@@ -6112,7 +5606,7 @@ void QDomDocumentPrivate::saveDocument(QTextStream &s, const int indent, QDomNod
          }
       }
 
-      if (!codec) {
+      if (! codec) {
          codec = QTextCodec::codecForName("UTF-8");
       }
 
@@ -6259,7 +5753,7 @@ void QDomDocumentPrivate::saveDocument(QTextStream &s, const int indent, QDomNod
 */
 QDomDocument::QDomDocument()
 {
-   impl = 0;
+   impl = nullptr;
 }
 
 /*!
@@ -6822,7 +6316,7 @@ QDomComment QDomNode::toComment() const
 
 QDomHandler::QDomHandler(QDomDocumentPrivate *adoc, bool namespaceProcessing)
    : errorLine(0), errorColumn(0), doc(adoc), node(adoc), cdata(false),
-     nsProcessing(namespaceProcessing), locator(0)
+     nsProcessing(namespaceProcessing), locator(nullptr)
 {
 }
 
@@ -6832,7 +6326,7 @@ QDomHandler::~QDomHandler()
 
 bool QDomHandler::endDocument()
 {
-   // ### is this really necessary? (rms)
+   // ### is this really necessary?
    if (node != doc) {
       return false;
    }
@@ -6898,17 +6392,21 @@ bool QDomHandler::characters(const QString  &ch)
    QScopedPointer<QDomNodePrivate> n;
    if (cdata) {
       n.reset(doc->createCDATASection(ch));
+
    } else if (!entityName.isEmpty()) {
-      QScopedPointer<QDomEntityPrivate> e(new QDomEntityPrivate(doc, 0, entityName,
+      QScopedPointer<QDomEntityPrivate> e(new QDomEntityPrivate(doc, nullptr, entityName,
                                           QString(), QString(), QString()));
+
       e->value = ch;
       e->ref.deref();
       doc->doctype()->appendChild(e.data());
       e.take();
       n.reset(doc->createEntityReference(entityName));
+
    } else {
       n.reset(doc->createTextNode(ch));
    }
+
    n->setLocation(locator->lineNumber(), locator->columnNumber());
    node->appendChild(n.data());
    n.take();
@@ -6987,11 +6485,13 @@ bool QDomHandler::comment(const QString &ch)
 bool QDomHandler::unparsedEntityDecl(const QString &name, const QString &publicId, const QString &systemId,
                                      const QString &notationName)
 {
-   QDomEntityPrivate *e = new QDomEntityPrivate(doc, 0, name,
+   QDomEntityPrivate *e = new QDomEntityPrivate(doc, nullptr, name,
          publicId, systemId, notationName);
+
    // keep the refcount balanced: appendChild() does a ref anyway.
    e->ref.deref();
    doc->doctype()->appendChild(e);
+
    return true;
 }
 
@@ -7002,10 +6502,12 @@ bool QDomHandler::externalEntityDecl(const QString &name, const QString &publicI
 
 bool QDomHandler::notationDecl(const QString &name, const QString &publicId, const QString &systemId)
 {
-   QDomNotationPrivate *n = new QDomNotationPrivate(doc, 0, name, publicId, systemId);
+   QDomNotationPrivate *n = new QDomNotationPrivate(doc, nullptr, name, publicId, systemId);
+
    // keep the refcount balanced: appendChild() does a ref anyway.
    n->ref.deref();
    doc->doctype()->appendChild(n);
+
    return true;
 }
 

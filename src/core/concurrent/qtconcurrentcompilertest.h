@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,31 +21,26 @@
 *
 ***********************************************************************/
 
-#ifndef QTCONCURRENTCOMPILERTEST_H
-#define QTCONCURRENTCOMPILERTEST_H
+#ifndef QTCONCURRENT_COMPILERTEST_H
+#define QTCONCURRENT_COMPILERTEST_H
 
-#include <QtCore/qglobal.h>
-
-QT_BEGIN_NAMESPACE
-
-#define QT_TYPENAME typename
+#include <qglobal.h>
 
 namespace QtPrivate {
 
 template<class T>
 class HasResultType
 {
-   typedef char Yes;
-   typedef void *No;
-   template<typename U> static Yes test(int, const typename U::result_type * = 0);
-   template<typename U> static No test(double);
+   template<typename U>
+   static char test(int, const typename U::result_type * = nullptr);
+
+   template<typename U>
+   static void * test(double);
 
  public:
-   enum { Value = (sizeof(test<T>(0)) == sizeof(Yes)) };
+   constexpr static bool Value = (sizeof(test<T>(0)) == sizeof(char));
 };
 
-}
-
-QT_END_NAMESPACE
+}  // namespace
 
 #endif

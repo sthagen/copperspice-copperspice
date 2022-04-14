@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,15 +25,13 @@
 #define QFILESYSTEMWATCHER_KQUEUE_P_H
 
 #include <qfilesystemwatcher_p.h>
-#include <QtCore/qhash.h>
-#include <QtCore/qmutex.h>
-#include <QtCore/qthread.h>
-#include <QtCore/qvector.h>
+#include <qhash.h>
+#include <qmutex.h>
+#include <qthread.h>
+#include <qvector.h>
 
 #ifndef QT_NO_FILESYSTEMWATCHER
 struct kevent;
-
-QT_BEGIN_NAMESPACE
 
 class QKqueueFileSystemWatcherEngine : public QFileSystemWatcherEngine
 {
@@ -62,7 +60,6 @@ class QKqueueFileSystemWatcherEngine : public QFileSystemWatcherEngine
    QHash<int, QString> idToPath;
 };
 
-QT_END_NAMESPACE
-
 #endif //QT_NO_FILESYSTEMWATCHER
-#endif // FILEWATCHER_KQUEUE_P_H
+
+#endif

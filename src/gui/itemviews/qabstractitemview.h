@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,10 @@
 #ifndef QABSTRACTITEMVIEW_H
 #define QABSTRACTITEMVIEW_H
 
-#include <QtGui/qabstractscrollarea.h>
-#include <QtCore/qabstractitemmodel.h>
-#include <QtGui/qitemselectionmodel.h>
-#include <QtGui/qabstractitemdelegate.h>
+#include <qabstractscrollarea.h>
+#include <qabstractitemmodel.h>
+#include <qitemselectionmodel.h>
+#include <qabstractitemdelegate.h>
 
 #ifndef QT_NO_ITEMVIEWS
 
@@ -99,19 +99,23 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
    GUI_CS_PROPERTY_WRITE(horizontalScrollMode, setHorizontalScrollMode)
 
  public:
-   enum SelectionMode {
-      NoSelection,
-      SingleSelection,
-      MultiSelection,
-      ExtendedSelection,
-      ContiguousSelection
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum SelectionMode {
+         NoSelection,
+         SingleSelection,
+         MultiSelection,
+         ExtendedSelection,
+         ContiguousSelection
+      };
+   )
 
-   enum SelectionBehavior {
-      SelectItems,
-      SelectRows,
-      SelectColumns
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum SelectionBehavior {
+         SelectItems,
+         SelectRows,
+         SelectColumns
+      };
+   )
 
    enum ScrollHint {
       EnsureVisible,
@@ -132,12 +136,18 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
 
    using EditTriggers = QFlags<EditTrigger>;
 
-   enum ScrollMode {
-      ScrollPerItem,
-      ScrollPerPixel
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum ScrollMode {
+         ScrollPerItem,
+         ScrollPerPixel
+      };
+   )
 
    explicit QAbstractItemView(QWidget *parent = nullptr);
+
+   QAbstractItemView(const QAbstractItemView &) = delete;
+   QAbstractItemView &operator=(const QAbstractItemView &) = delete;
+
    ~QAbstractItemView();
 
    virtual void setModel(QAbstractItemModel *model);
@@ -186,13 +196,15 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
    void setDragDropOverwriteMode(bool overwrite);
    bool dragDropOverwriteMode() const;
 
-   enum DragDropMode {
-      NoDragDrop,
-      DragOnly,
-      DropOnly,
-      DragDrop,
-      InternalMove
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum DragDropMode {
+         NoDragDrop,
+         DragOnly,
+         DropOnly,
+         DragDrop,
+         InternalMove
+      };
+   )
 
    void setDragDropMode(DragDropMode behavior);
    DragDropMode dragDropMode() const;
@@ -355,13 +367,13 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
 
    virtual bool isIndexHidden(const QModelIndex &index) const = 0;
 
-   virtual void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) = 0;
+   virtual void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags flags) = 0;
    virtual QRegion visualRegionForSelection(const QItemSelection &selection) const = 0;
    virtual QModelIndexList selectedIndexes() const;
 
    virtual bool edit(const QModelIndex &index, EditTrigger trigger, QEvent *event);
 
-   virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index, const QEvent *event = 0) const;
+   virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index, const QEvent *event = nullptr) const;
 
 #ifndef QT_NO_DRAGANDDROP
    virtual void startDrag(Qt::DropActions supportedActions);
@@ -424,7 +436,6 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
 
  private:
    Q_DECLARE_PRIVATE(QAbstractItemView)
-   Q_DISABLE_COPY(QAbstractItemView)
 
    GUI_CS_SLOT_1(Private, void _q_columnsAboutToBeRemoved(const QModelIndex &un_named_arg1, int un_named_arg2, int un_named_arg3))
    GUI_CS_SLOT_2(_q_columnsAboutToBeRemoved)
@@ -449,14 +460,9 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
                   const QModelIndex &un_named_arg4, int un_named_arg5))
    GUI_CS_SLOT_2(_q_rowsMoved)
 
-   GUI_CS_SLOT_1(Private, void _q_modelDestroyed())
-   GUI_CS_SLOT_2(_q_modelDestroyed)
-
-   GUI_CS_SLOT_1(Private, void _q_layoutChanged())
-   GUI_CS_SLOT_2(_q_layoutChanged)
-
-   GUI_CS_SLOT_1(Private, void _q_headerDataChanged())
-   GUI_CS_SLOT_2(_q_headerDataChanged)
+   void _q_modelDestroyed();
+   void _q_layoutChanged();
+   void _q_headerDataChanged();
 
 #ifndef QT_NO_GESTURES
    GUI_CS_SLOT_1(Private, void _q_scrollerStateChanged())
@@ -464,7 +470,7 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
 #endif
 
    friend class QTreeView;
-   friend class QTreeViewPrivate;       // needed to compile with MSVC
+   friend class QTreeViewPrivate;
    friend class QListModeViewBase;
    friend class QListViewPrivate;
 };
@@ -472,6 +478,5 @@ class Q_GUI_EXPORT QAbstractItemView : public QAbstractScrollArea
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAbstractItemView::EditTriggers)
 
 #endif // QT_NO_ITEMVIEWS
-
 
 #endif

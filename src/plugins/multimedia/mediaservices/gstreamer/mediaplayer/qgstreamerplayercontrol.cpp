@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,6 @@
 #include <qsocketnotifier.h>
 #include <qurl.h>
 #include <qdebug.h>
-
 #include <qgstreamerplayersession.h>
 
 #include <qmediaplaylistnavigator_p.h>
@@ -44,7 +43,7 @@
 QGstreamerPlayerControl::QGstreamerPlayerControl(QGstreamerPlayerSession *session, QObject *parent)
    : QMediaPlayerControl(parent), m_session(session), m_userRequestedState(QMediaPlayer::StoppedState)
    , m_currentState(QMediaPlayer::StoppedState), m_mediaStatus(QMediaPlayer::NoMedia), m_bufferProgress(-1)
-   , m_pendingSeekPosition(-1), m_setMediaPending(false), m_stream(0)
+   , m_pendingSeekPosition(-1), m_setMediaPending(false), m_stream(nullptr)
 {
    m_resources = QMediaResourcePolicy::createResourceSet<QMediaPlayerResourceSetInterface>();
    Q_ASSERT(m_resources);
@@ -367,9 +366,7 @@ void QGstreamerPlayerControl::setMedia(const QMediaContent &content, QIODevice *
       request = content.canonicalRequest();
    }
 
-#if !defined(HAVE_GST_APPSRC)
-   m_session->loadFromUri(request);
-#else
+#if defined(HAVE_GST_APPSRC)
    if (m_stream) {
       if (userStreamValid) {
          m_session->loadFromStream(request, m_stream);
@@ -388,6 +385,10 @@ void QGstreamerPlayerControl::setMedia(const QMediaContent &content, QIODevice *
    } else {
       m_session->loadFromUri(request);
    }
+
+#else
+   (void) userStreamValid;
+   m_session->loadFromUri(request);
 #endif
 
 #if defined(HAVE_GST_APPSRC)
@@ -395,8 +396,10 @@ void QGstreamerPlayerControl::setMedia(const QMediaContent &content, QIODevice *
 #else
    if (!request.url().isEmpty()) {
 #endif
+
       m_mediaStatus = QMediaPlayer::LoadingMedia;
       m_session->pause();
+
    } else {
       m_mediaStatus = QMediaPlayer::NoMedia;
       setBufferProgress(0);

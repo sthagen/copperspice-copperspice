@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,10 +37,12 @@ class QCupsPrintEnginePrivate;
 
 class QCupsPrintEngine : public QPdfPrintEngine
 {
-   Q_DECLARE_PRIVATE(QCupsPrintEngine)
-
  public:
    QCupsPrintEngine(QPrinter::PrinterMode m);
+
+   QCupsPrintEngine(const QCupsPrintEngine &) = delete;
+   QCupsPrintEngine &operator=(const QCupsPrintEngine &) = delete;
+
    virtual ~QCupsPrintEngine();
 
    // next two are a reimplementations of QPdfPrintEngine
@@ -48,22 +50,25 @@ class QCupsPrintEngine : public QPdfPrintEngine
    QVariant property(PrintEnginePropertyKey key) const override;
 
  private:
-   Q_DISABLE_COPY(QCupsPrintEngine)
+   Q_DECLARE_PRIVATE(QCupsPrintEngine)
+
 };
 
 class QCupsPrintEnginePrivate : public QPdfPrintEnginePrivate
 {
-   Q_DECLARE_PUBLIC(QCupsPrintEngine)
-
  public:
    QCupsPrintEnginePrivate(QPrinter::PrinterMode m);
+
+   QCupsPrintEnginePrivate(const QCupsPrintEnginePrivate &) = delete;
+   QCupsPrintEnginePrivate &operator=(const QCupsPrintEnginePrivate &) = delete;
+
    ~QCupsPrintEnginePrivate();
 
    bool openPrintDevice() override;
    void closePrintDevice() override;
 
  private:
-   Q_DISABLE_COPY(QCupsPrintEnginePrivate)
+   Q_DECLARE_PUBLIC(QCupsPrintEngine)
 
    void setupDefaultPrinter();
    void changePrinter(const QString &newPrinter);

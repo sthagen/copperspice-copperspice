@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,6 @@
 #define QAUDIODECODER_H
 
 #include <qmediaobject.h>
-#include <qmediaenumdebug.h>
 #include <qaudiobuffer.h>
 
 class QAudioDecoderPrivate;
@@ -64,6 +63,10 @@ class Q_MULTIMEDIA_EXPORT QAudioDecoder : public QMediaObject
    };
 
    explicit QAudioDecoder(QObject *parent = nullptr);
+
+   QAudioDecoder(const QAudioDecoder &) = delete;
+   QAudioDecoder &operator=(const QAudioDecoder &) = delete;
+
    ~QAudioDecoder();
 
    static QMultimedia::SupportEstimate hasSupport(const QString &mimeType, const QStringList &codecs = QStringList());
@@ -88,23 +91,27 @@ class Q_MULTIMEDIA_EXPORT QAudioDecoder : public QMediaObject
    qint64 position() const;
    qint64 duration() const;
 
-   bool bind(QObject *) override;
-   void unbind(QObject *) override;
+   bool bind(QObject *object) override;
+   void unbind(QObject *object) override;
 
    MULTI_CS_SLOT_1(Public, void start())
    MULTI_CS_SLOT_2(start)
+
    MULTI_CS_SLOT_1(Public, void stop())
    MULTI_CS_SLOT_2(stop)
 
-   MULTI_CS_SIGNAL_1(Public, void bufferAvailableChanged(bool un_named_arg1))
-   MULTI_CS_SIGNAL_2(bufferAvailableChanged, un_named_arg1)
+   MULTI_CS_SIGNAL_1(Public, void bufferAvailableChanged(bool available))
+   MULTI_CS_SIGNAL_2(bufferAvailableChanged, available)
+
    MULTI_CS_SIGNAL_1(Public, void bufferReady())
    MULTI_CS_SIGNAL_2(bufferReady)
+
    MULTI_CS_SIGNAL_1(Public, void finished())
    MULTI_CS_SIGNAL_2(finished)
 
-   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudioDecoder::State newState))
-   MULTI_CS_SIGNAL_2(stateChanged, newState)
+   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudioDecoder::State state))
+   MULTI_CS_SIGNAL_2(stateChanged, state)
+
    MULTI_CS_SIGNAL_1(Public, void formatChanged(const QAudioFormat &format))
    MULTI_CS_SIGNAL_2(formatChanged, format)
 
@@ -121,20 +128,13 @@ class Q_MULTIMEDIA_EXPORT QAudioDecoder : public QMediaObject
    MULTI_CS_SIGNAL_2(durationChanged, duration)
 
  private:
-   Q_DISABLE_COPY(QAudioDecoder)
    Q_DECLARE_PRIVATE(QAudioDecoder)
 
-   MULTI_CS_SLOT_1(Private, void _q_stateChanged(QAudioDecoder::State un_named_arg1))
+   MULTI_CS_SLOT_1(Private, void _q_stateChanged(QAudioDecoder::State state))
    MULTI_CS_SLOT_2(_q_stateChanged)
 
-   MULTI_CS_SLOT_1(Private, void _q_error(int un_named_arg1, const QString &un_named_arg2))
+   MULTI_CS_SLOT_1(Private, void _q_error(int error, const QString &errorString))
    MULTI_CS_SLOT_2(_q_error)
 };
-
-Q_DECLARE_METATYPE(QAudioDecoder::State)
-Q_DECLARE_METATYPE(QAudioDecoder::Error)
-
-Q_MEDIA_ENUM_DEBUG(QAudioDecoder, State)
-Q_MEDIA_ENUM_DEBUG(QAudioDecoder, Error)
 
 #endif

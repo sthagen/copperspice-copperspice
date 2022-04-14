@@ -1,13 +1,13 @@
 /***********************************************************************
 *
-* Copyright (c) 2017-2020 Barbara Geller
-* Copyright (c) 2017-2020 Ansel Sermersheim
-
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
+*
 * Copyright (c) 1998-2009 John Maddock
 *
-* This file is part of CsString.
+* This file is part of CopperSpice.
 *
-* CsString is free software, released under the BSD 2-Clause license.
+* CopperSpice is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
 *
 * CopperSpice is distributed in the hope that it will be useful,
@@ -28,6 +28,7 @@
 #define CS_PERL_MATCHER_COMMON_H
 
 #include <cassert>
+#include <limits>
 
 namespace cs_regex_ns {
 
@@ -45,9 +46,9 @@ void perl_matcher<BidiIterator, Allocator, traits>::construct_init(const basic_r
       throw ex;
    }
 
-   pstate        = 0;
+   pstate        = nullptr;
    m_match_flags = f;
-   estimate_max_state_count(static_cast<category *>(0));
+   estimate_max_state_count(static_cast<category *>(nullptr));
    expression_flag_type re_f = re.flags();
    icase = re_f & regex_constants::icase;
 
@@ -70,8 +71,8 @@ void perl_matcher<BidiIterator, Allocator, traits>::construct_init(const basic_r
       m_presult = &m_result;
    }
 
-   m_stack_base   = 0;
-   m_backup_state = 0;
+   m_stack_base   = nullptr;
+   m_backup_state = nullptr;
 
    // find the value to use for matching word boundaries:
    m_word_mask = re.get_data().m_word_mask;
@@ -528,8 +529,10 @@ bool perl_matcher<BidiIterator, Allocator, traits>::match_word_end()
          return false;   // next character is a word character
       }
    }
+
    pstate = pstate->next.p;
-   return true;      // if we fall through to here then we've succeeded
+
+   return true;      // getting here means we have succeeded
 }
 
 template <class BidiIterator, class Allocator, class traits>

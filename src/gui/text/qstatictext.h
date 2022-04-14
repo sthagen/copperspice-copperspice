@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,11 @@
 #ifndef QSTATICTEXT_H
 #define QSTATICTEXT_H
 
-#include <QtCore/qsize.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qmetatype.h>
-#include <QtGui/qtransform.h>
-#include <QtGui/qfont.h>
-#include <QtGui/qtextoption.h>
-
-
+#include <qsize.h>
+#include <qstring.h>
+#include <qtransform.h>
+#include <qfont.h>
+#include <qtextoption.h>
 
 class QStaticTextPrivate;
 
@@ -75,10 +72,10 @@ class Q_GUI_EXPORT QStaticText
    void setPerformanceHint(PerformanceHint performanceHint);
    PerformanceHint performanceHint() const;
 
-   bool operator==(const QStaticText &) const;
-   bool operator!=(const QStaticText &) const;
+   bool operator==(const QStaticText &other) const;
+   bool operator!=(const QStaticText &other) const;
 
-   QStaticText &operator=(const QStaticText &);
+   QStaticText &operator=(const QStaticText &other);
 
    QStaticText &operator=(QStaticText &&other) {
       swap(other);

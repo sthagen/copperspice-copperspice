@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -43,19 +43,19 @@ static quint32 constructModifierMask(quint32 accel_key)
    quint32 ret = 0;
    const bool dontSwap = qApp->testAttribute(Qt::AA_MacDontSwapCtrlAndMeta);
 
-   if ((accel_key & Qt::CTRL) == Qt::CTRL) {
+   if ((accel_key & Qt::ControlModifier) == Qt::ControlModifier) {
       ret |= (dontSwap ? NSEventModifierFlagControl : NSEventModifierFlagCommand);
    }
 
-   if ((accel_key & Qt::META) == Qt::META) {
+   if ((accel_key & Qt::MetaModifier) == Qt::MetaModifier) {
       ret |= (dontSwap ? NSEventModifierFlagCommand : NSEventModifierFlagControl);
    }
 
-   if ((accel_key & Qt::ALT) == Qt::ALT) {
+   if ((accel_key & Qt::AltModifier) == Qt::AltModifier) {
       ret |= NSEventModifierFlagOption;
    }
 
-   if ((accel_key & Qt::SHIFT) == Qt::SHIFT) {
+   if ((accel_key & Qt::ShiftModifier) == Qt::ShiftModifier) {
       ret |= NSEventModifierFlagShift;
    }
 
@@ -65,7 +65,7 @@ static quint32 constructModifierMask(quint32 accel_key)
 // return an autoreleased string given a QKeySequence (currently only looks at the first one).
 NSString *keySequenceToKeyEqivalent(const QKeySequence &accel)
 {
-   quint32 accel_key = (accel[0] & ~(Qt::MODIFIER_MASK | Qt::UNICODE_ACCEL));
+   quint32 accel_key = (accel[0] & ~(Qt::KeyboardModifierMask));
    QChar cocoa_key   = qt_mac_qtKey2CocoaKey(Qt::Key(accel_key));
 
    if (cocoa_key.isNull()) {
@@ -88,20 +88,10 @@ NSUInteger keySequenceModifierMask(const QKeySequence &accel)
    return constructModifierMask(accel[0]);
 }
 
-QCocoaMenuItem::QCocoaMenuItem() :
-   m_native(NULL),
-   m_itemView(nil),
-   m_menu(NULL),
-   m_role(NoRole),
-   m_tag(0),
-   m_iconSize(16),
-   m_textSynced(false),
-   m_isVisible(true),
-   m_enabled(true),
-   m_parentEnabled(true),
-   m_isSeparator(false),
-   m_checked(false),
-   m_merged(false)
+QCocoaMenuItem::QCocoaMenuItem()
+   : m_native(nullptr), m_itemView(nil), m_menu(nullptr), m_role(NoRole), m_tag(0), m_iconSize(16),
+     m_textSynced(false), m_isVisible(true), m_enabled(true), m_parentEnabled(true),
+     m_isSeparator(false), m_checked(false), m_merged(false)
 {
 }
 
@@ -110,7 +100,7 @@ QCocoaMenuItem::~QCocoaMenuItem()
    QMacAutoReleasePool pool;
 
    if (m_menu && m_menu->menuParent() == this) {
-      m_menu->setMenuParent(0);
+      m_menu->setMenuParent(nullptr);
    }
 
    if (m_merged) {
@@ -143,7 +133,7 @@ void QCocoaMenuItem::setMenu(QPlatformMenu *menu)
    }
 
    if (m_menu && m_menu->menuParent() == this) {
-      m_menu->setMenuParent(0);
+      m_menu->setMenuParent(nullptr);
 
       // Free the menu from its parent's influence
       m_menu->propagateEnabledState(true);
@@ -270,7 +260,7 @@ NSMenuItem *QCocoaMenuItem::sync()
          case TextHeuristicRole: {
             QObject *p = menuParent();
             int depth = 1;
-            QCocoaMenuBar *menubar = 0;
+            QCocoaMenuBar *menubar = nullptr;
 
             while (depth < 3 && p && !(menubar = qobject_cast<QCocoaMenuBar *>(p))) {
                ++depth;

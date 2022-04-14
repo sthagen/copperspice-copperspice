@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,14 +27,11 @@
 #include <qiodevice.h>
 #include <qstring.h>
 
-QT_BEGIN_NAMESPACE
-
 class QFileDevicePrivate;
 
 class Q_CORE_EXPORT QFileDevice : public QIODevice
 {
    CORE_CS_OBJECT(QFileDevice)
-   Q_DECLARE_PRIVATE(QFileDevice)
 
  public:
    enum FileError {
@@ -69,6 +66,9 @@ class Q_CORE_EXPORT QFileDevice : public QIODevice
    };
    using FileHandleFlags = QFlags<FileHandleFlag>;
 
+   QFileDevice(const QFileDevice &) = delete;
+   QFileDevice &operator=(const QFileDevice &) = delete;
+
    ~QFileDevice();
 
    FileError error() const;
@@ -81,13 +81,13 @@ class Q_CORE_EXPORT QFileDevice : public QIODevice
    virtual QString fileName() const;
 
    qint64 pos() const override;
-   bool seek(qint64 offset) override;
+   bool seek(qint64 pos) override;
    bool atEnd() const override;
    bool flush();
 
    qint64 size() const override;
 
-   virtual bool resize(qint64 sz);
+   virtual bool resize(qint64 size);
    virtual Permissions permissions() const;
    virtual bool setPermissions(Permissions permissionSpec);
 
@@ -104,16 +104,14 @@ class Q_CORE_EXPORT QFileDevice : public QIODevice
    explicit QFileDevice(QObject *parent);
    QFileDevice(QFileDevicePrivate &dd, QObject *parent = nullptr);
 
-   qint64 readData(char *data, qint64 maxlen) override;
-   qint64 writeData(const char *data, qint64 len) override;
-   qint64 readLineData(char *data, qint64 maxlen) override;
+   qint64 readData(char *data, qint64 maxSize) override;
+   qint64 writeData(const char *data, qint64 maxSize) override;
+   qint64 readLineData(char *data, qint64 maxSize) override;
 
  private:
-   Q_DISABLE_COPY(QFileDevice)
+   Q_DECLARE_PRIVATE(QFileDevice)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFileDevice::Permissions)
 
-QT_END_NAMESPACE
-
-#endif // QFILEDEVICE_H
+#endif

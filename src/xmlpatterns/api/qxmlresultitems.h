@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QXMLRESULTITEMS_H
 #define QXMLRESULTITEMS_H
 
-#include <QtCore/QString>
-#include <QtCore/QScopedPointer>
+#include <QString>
+#include <QScopedPointer>
 
 QT_BEGIN_NAMESPACE
 
@@ -46,8 +46,11 @@ class Q_XMLPATTERNS_EXPORT QXmlResultItems
  private:
    friend class QXmlQuery;
    Q_DECLARE_PRIVATE(QXmlResultItems)
+
+   QXmlResultItems(const QXmlResultItems &) = delete;
+   QXmlResultItems &operator=(const QXmlResultItems &) = delete;
+
    QScopedPointer<QXmlResultItemsPrivate> d_ptr;
-   Q_DISABLE_COPY(QXmlResultItems)
 };
 
 QT_END_NAMESPACE

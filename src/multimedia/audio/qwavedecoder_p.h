@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,7 +32,7 @@ class QWaveDecoder : public QIODevice
    MULTI_CS_OBJECT(QWaveDecoder)
 
  public:
-   explicit QWaveDecoder(QIODevice *source, QObject *parent = 0);
+   explicit QWaveDecoder(QIODevice *source, QObject *parent = nullptr);
    ~QWaveDecoder();
 
    QAudioFormat audioFormat() const;
@@ -73,6 +73,7 @@ class QWaveDecoder : public QIODevice
       chunk       descriptor;
       char        type[4];
    };
+
    struct WAVEHeader {
       chunk       descriptor;
       quint16     audioFormat;

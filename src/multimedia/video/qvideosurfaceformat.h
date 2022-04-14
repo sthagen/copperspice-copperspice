@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -56,13 +56,13 @@ class Q_MULTIMEDIA_EXPORT QVideoSurfaceFormat
    QVideoSurfaceFormat(const QSize &size, QVideoFrame::PixelFormat pixelFormat,
       QAbstractVideoBuffer::HandleType handleType = QAbstractVideoBuffer::NoHandle);
 
-   QVideoSurfaceFormat(const QVideoSurfaceFormat &format);
+   QVideoSurfaceFormat(const QVideoSurfaceFormat &other);
    ~QVideoSurfaceFormat();
 
-   QVideoSurfaceFormat &operator =(const QVideoSurfaceFormat &format);
+   QVideoSurfaceFormat &operator =(const QVideoSurfaceFormat &other);
 
-   bool operator ==(const QVideoSurfaceFormat &format) const;
-   bool operator !=(const QVideoSurfaceFormat &format) const;
+   bool operator ==(const QVideoSurfaceFormat &other) const;
+   bool operator !=(const QVideoSurfaceFormat &other) const;
 
    bool isValid() const;
 
@@ -87,7 +87,7 @@ class Q_MULTIMEDIA_EXPORT QVideoSurfaceFormat
 
    QSize pixelAspectRatio() const;
    void setPixelAspectRatio(const QSize &ratio);
-   void setPixelAspectRatio(int width, int height);
+   void setPixelAspectRatio(int horizontal, int vertical);
 
    YCbCrColorSpace yCbCrColorSpace() const;
    void setYCbCrColorSpace(YCbCrColorSpace colorSpace);
@@ -105,10 +105,6 @@ class Q_MULTIMEDIA_EXPORT QVideoSurfaceFormat
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, const QVideoSurfaceFormat &);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QVideoSurfaceFormat::Direction);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QVideoSurfaceFormat::YCbCrColorSpace);
-
-Q_DECLARE_METATYPE(QVideoSurfaceFormat)
-Q_DECLARE_METATYPE(QVideoSurfaceFormat::Direction)
-Q_DECLARE_METATYPE(QVideoSurfaceFormat::YCbCrColorSpace)
 
 #endif
 

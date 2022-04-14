@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,10 +31,14 @@ class QCache
 {
    struct Node {
       inline Node()
-         : keyPtr(0) {}
+         : keyPtr(0)
+      {
+      }
 
       inline Node(T *data, int cost)
-         : keyPtr(0), t(data), c(cost), p(0), n(0) {}
+         : keyPtr(nullptr), t(data), c(cost), p(nullptr), n(nullptr)
+      {
+      }
 
       const Key *keyPtr;
       T *t;
@@ -51,7 +55,7 @@ class QCache
    int mx;
    int total;
 
-   inline void unlink(Node &n) {
+   void unlink(Node &n) {
       if (n.p) {
          n.p->n = n.n;
       }
@@ -75,11 +79,11 @@ class QCache
       delete obj;
    }
 
-   inline T *relink(const Key &key) {
+   T *relink(const Key &key) {
       typename QHash<Key, Node>::iterator i = hash.find(key);
 
       if (typename QHash<Key, Node>::const_iterator(i) == hash.constEnd()) {
-         return 0;
+         return nullptr;
       }
 
       Node &n = *i;
@@ -95,7 +99,7 @@ class QCache
             l = n.p;
          }
 
-         n.p = 0;
+         n.p = nullptr;
          n.n = f;
          f->p = &n;
          f = &n;
@@ -103,37 +107,38 @@ class QCache
       return n.t;
    }
 
-   Q_DISABLE_COPY(QCache)
-
  public:
    inline explicit QCache(int maxCost = 100);
+
+   QCache(const QCache &) = delete;
+   QCache &operator=(const QCache &) = delete;
 
    inline ~QCache() {
       clear();
    }
 
-   inline int maxCost() const {
+   int maxCost() const {
       return mx;
    }
 
    void setMaxCost(int m);
-   inline int totalCost() const {
+   int totalCost() const {
       return total;
    }
 
-   inline int size() const {
+   int size() const {
       return hash.size();
    }
 
-   inline int count() const {
+   int count() const {
       return hash.size();
    }
 
-   inline bool isEmpty() const {
+   bool isEmpty() const {
       return hash.isEmpty();
    }
 
-   inline QList<Key> keys() const {
+   QList<Key> keys() const {
       return hash.keys();
    }
 
@@ -142,7 +147,7 @@ class QCache
    bool insert(const Key &key, T *object, int cost = 1);
    T *object(const Key &key) const;
 
-   inline bool contains(const Key &key) const {
+   bool contains(const Key &key) const {
       return hash.contains(key);
    }
 
@@ -157,8 +162,10 @@ class QCache
 };
 
 template <class Key, class T>
-inline QCache<Key, T>::QCache(int amaxCost)
-   : f(0), l(0), mx(amaxCost), total(0) {}
+inline QCache<Key, T>::QCache(int maxCost)
+   : f(nullptr), l(nullptr), mx(maxCost), total(0)
+{
+}
 
 template <class Key, class T>
 inline void QCache<Key, T>::clear()
@@ -169,7 +176,7 @@ inline void QCache<Key, T>::clear()
    }
 
    hash.clear();
-   l = 0;
+   l     = nullptr;
    total = 0;
 }
 
@@ -211,42 +218,47 @@ inline T *QCache<Key, T>::take(const Key &key)
    typename QHash<Key, Node>::iterator i = hash.find(key);
 
    if (i == hash.end()) {
-      return 0;
+      return nullptr;
    }
 
    Node &n = *i;
    T *t = n.t;
-   n.t = 0;
+   n.t = nullptr;
    unlink(n);
+
    return t;
 }
 
 template <class Key, class T>
-bool QCache<Key, T>::insert(const Key &akey, T *aobject, int acost)
+bool QCache<Key, T>::insert(const Key &key, T *object, int cost)
 {
-   remove(akey);
+   remove(key);
 
-   if (acost > mx) {
-      delete aobject;
+   if (cost > mx) {
+      delete object;
       return false;
    }
 
-   trim(mx - acost);
-   Node sn(aobject, acost);
+   trim(mx - cost);
+   Node sn(object, cost);
 
-   typename QHash<Key, Node>::iterator i = hash.insert(akey, sn);
-   total += acost;
+   typename QHash<Key, Node>::iterator i = hash.insert(key, sn);
+
+   total    += cost;
    Node *n   = &i.value();
    n->keyPtr = &i.key();
 
    if (f) {
       f->p = n;
    }
+
    n->n = f;
    f = n;
+
    if (!l) {
       l = f;
    }
+
    return true;
 }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,6 @@
 #define QVECTOR2D_H
 
 #include <qpoint.h>
-#include <qmetatype.h>
 
 class QVector3D;
 class QVector4D;
@@ -125,18 +124,20 @@ inline qreal QVector2D::x() const
 {
    return qreal(xp);
 }
+
 inline qreal QVector2D::y() const
 {
    return qreal(yp);
 }
 
-inline void QVector2D::setX(qreal aX)
+inline void QVector2D::setX(qreal x)
 {
-   xp = aX;
+   xp = x;
 }
-inline void QVector2D::setY(qreal aY)
+
+inline void QVector2D::setY(qreal y)
 {
-   yp = aY;
+   yp = y;
 }
 
 inline QVector2D &QVector2D::operator+=(const QVector2D &vector)

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,7 +35,7 @@ class QCocoaPrinterSupportPlugin : public QPlatformPrinterSupportPlugin
    CS_PLUGIN_KEY("printerdriver_cocoa")
 
  public:
-   QPlatformPrinterSupport *create(const QString &);
+   QPlatformPrinterSupport *create(const QString &) override;
 };
 
 CS_PLUGIN_REGISTER(QCocoaPrinterSupportPlugin)
@@ -43,7 +43,7 @@ CS_PLUGIN_REGISTER(QCocoaPrinterSupportPlugin)
 QPlatformPrinterSupport *QCocoaPrinterSupportPlugin::create(const QString &key)
 {
    if (key.compare(key, "printerdriver_cocoa", Qt::CaseInsensitive) != 0) {
-      return 0;
+      return nullptr;
    }
 
    QApplication *app = dynamic_cast<QApplication *>(QCoreApplication::instance());

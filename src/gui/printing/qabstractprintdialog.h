@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,7 +34,6 @@ class QPrinter;
 class Q_GUI_EXPORT QAbstractPrintDialog : public QDialog
 {
    GUI_CS_OBJECT(QAbstractPrintDialog)
-   Q_DECLARE_PRIVATE(QAbstractPrintDialog)
 
  public:
    // Keep in sync with QPrinter::PrintRange
@@ -60,6 +59,10 @@ class Q_GUI_EXPORT QAbstractPrintDialog : public QDialog
 
 #ifndef QT_NO_PRINTDIALOG
    explicit QAbstractPrintDialog(QPrinter *printer, QWidget *parent = nullptr);
+
+   QAbstractPrintDialog(const QAbstractPrintDialog &) = delete;
+   QAbstractPrintDialog &operator=(const QAbstractPrintDialog &) = delete;
+
    ~QAbstractPrintDialog();
 
    int exec() override = 0;
@@ -89,7 +92,7 @@ class Q_GUI_EXPORT QAbstractPrintDialog : public QDialog
    QAbstractPrintDialog(QAbstractPrintDialogPrivate &ptr, QPrinter *printer, QWidget *parent = nullptr);
 
  private:
-   Q_DISABLE_COPY(QAbstractPrintDialog)
+   Q_DECLARE_PRIVATE(QAbstractPrintDialog)
 
 #endif // QT_NO_PRINTDIALOG
 };

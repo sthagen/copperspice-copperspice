@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,10 +36,9 @@ class QPlatformCursor;
 
 class Q_GUI_EXPORT QPlatformCursorImage
 {
-
  public:
-   QPlatformCursorImage(const uchar *data, const uchar *mask, int width, int height, int hotX, int hotY) {
-      set(data, mask, width, height, hotX, hotY);
+   QPlatformCursorImage(const uchar *data, const uchar *mask, int width, int height, int hotSpot_x, int hotSpot_y) {
+      set(data, mask, width, height, hotSpot_x, hotSpot_y);
    }
 
    QImage *image() {
@@ -47,17 +46,17 @@ class Q_GUI_EXPORT QPlatformCursorImage
    }
 
    QPoint hotspot() const {
-      return hot;
+      return m_hotSpot;
    }
 
-   void set(const uchar *data, const uchar *mask, int width, int height, int hotX, int hotY);
-   void set(const QImage &image, int hx, int hy);
-   void set(Qt::CursorShape);
+   void set(const uchar *data, const uchar *mask, int width, int height, int hotSpot_x, int hotSpot_y);
+   void set(const QImage &image, int hotSpot_x, int hotSpot_y);
+   void set(Qt::CursorShape cursorId);
 
  private:
    static void createSystemCursor(int id);
    QImage cursorImage;
-   QPoint hot;
+   QPoint m_hotSpot;
 };
 
 class QPlatformCursorPrivate
@@ -68,7 +67,6 @@ class QPlatformCursorPrivate
 
 class Q_GUI_EXPORT QPlatformCursor : public QObject
 {
-
  public:
    QPlatformCursor();
 

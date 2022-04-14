@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,7 @@
 #define QBUTTONGROUP_H
 
 #include <qobject.h>
-#include <QScopedPointer>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_BUTTONGROUP
 
@@ -42,9 +42,13 @@ class Q_GUI_EXPORT QButtonGroup : public QObject
 
  public:
    explicit QButtonGroup(QObject *parent = nullptr);
+
+   QButtonGroup(const QButtonGroup &) = delete;
+   QButtonGroup &operator=(const QButtonGroup &) = delete;
+
    ~QButtonGroup();
 
-   void setExclusive(bool);
+   void setExclusive(bool enable);
    bool exclusive() const;
 
    void addButton(QAbstractButton *button, int id = -1);
@@ -60,36 +64,34 @@ class Q_GUI_EXPORT QButtonGroup : public QObject
    int id(QAbstractButton *button) const;
    int checkedId() const;
 
-   GUI_CS_SIGNAL_1(Public, void buttonClicked(QAbstractButton *un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(buttonClicked, (QAbstractButton *), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void buttonClicked(QAbstractButton *button))
+   GUI_CS_SIGNAL_OVERLOAD(buttonClicked, (QAbstractButton *), button)
 
-   GUI_CS_SIGNAL_1(Public, void buttonClicked(int un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(buttonClicked, (int), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void buttonClicked(int id))
+   GUI_CS_SIGNAL_OVERLOAD(buttonClicked, (int), id)
 
-   GUI_CS_SIGNAL_1(Public, void buttonPressed(QAbstractButton *un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(buttonPressed, (QAbstractButton *), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void buttonPressed(QAbstractButton *button))
+   GUI_CS_SIGNAL_OVERLOAD(buttonPressed, (QAbstractButton *), button)
 
-   GUI_CS_SIGNAL_1(Public, void buttonPressed(int un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(buttonPressed, (int), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void buttonPressed(int id))
+   GUI_CS_SIGNAL_OVERLOAD(buttonPressed, (int), id)
 
-   GUI_CS_SIGNAL_1(Public, void buttonReleased(QAbstractButton *un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(buttonReleased, (QAbstractButton *), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void buttonReleased(QAbstractButton *button))
+   GUI_CS_SIGNAL_OVERLOAD(buttonReleased, (QAbstractButton *), button)
 
-   GUI_CS_SIGNAL_1(Public, void buttonReleased(int un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(buttonReleased, (int), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void buttonReleased(int id))
+   GUI_CS_SIGNAL_OVERLOAD(buttonReleased, (int), id)
 
-   GUI_CS_SIGNAL_1(Public, void buttonToggled(QAbstractButton *un_named_arg1, bool un_named_arg2))
-   GUI_CS_SIGNAL_OVERLOAD(buttonToggled, (QAbstractButton *, bool), un_named_arg1, un_named_arg2)
+   GUI_CS_SIGNAL_1(Public, void buttonToggled(QAbstractButton *button, bool enable))
+   GUI_CS_SIGNAL_OVERLOAD(buttonToggled, (QAbstractButton *, bool), button, enable)
 
-   GUI_CS_SIGNAL_1(Public, void buttonToggled(int un_named_arg1, bool un_named_arg2))
-   GUI_CS_SIGNAL_OVERLOAD(buttonToggled, (int, bool), un_named_arg1, un_named_arg2)
-
+   GUI_CS_SIGNAL_1(Public, void buttonToggled(int id, bool enable))
+   GUI_CS_SIGNAL_OVERLOAD(buttonToggled, (int, bool), id, enable)
 
  protected:
    QScopedPointer<QButtonGroupPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QButtonGroup)
    Q_DECLARE_PRIVATE(QButtonGroup)
 
    friend class QAbstractButton;
@@ -98,4 +100,4 @@ class Q_GUI_EXPORT QButtonGroup : public QObject
 
 #endif // QT_NO_BUTTONGROUP
 
-#endif // QBUTTONGROUP_H
+#endif

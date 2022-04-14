@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,10 @@
 #ifndef QMEDIASERVICEPROVIDER_H
 #define QMEDIASERVICEPROVIDER_H
 
+#include <qmediaservice_provider_plugin.h>
+#include <qmultimedia.h>
 #include <qobject.h>
 #include <qshareddata.h>
-#include <qmultimedia.h>
-#include <qmediaservice_provider_plugin.h>
 
 class QMediaService;
 
@@ -42,7 +42,7 @@ class Q_MULTIMEDIA_EXPORT QMediaServiceProvider : public QObject
    virtual QMediaServiceProviderHint::Features supportedFeatures(const QMediaService *service) const;
 
    virtual QMultimedia::SupportEstimate hasSupport(const QString &serviceType,
-      const QString &mimeType, const QStringList &codecs, int flags = 0) const;
+         const QString &mimeType, const QStringList &codecs, int flags = 0) const;
 
    virtual QStringList supportedMimeTypes(const QString &serviceType, int flags = 0) const;
 
@@ -50,8 +50,8 @@ class Q_MULTIMEDIA_EXPORT QMediaServiceProvider : public QObject
    virtual QList<QString> devices(const QString &serviceType) const;
    virtual QString deviceDescription(const QString &serviceType, const QString &device);
 
-   // emerald   virtual QCamera::Position cameraPosition(const QString &device) const;
-   // emerald   virtual int cameraOrientation(const QString &device) const;
+   virtual QCamera::Position cameraPosition(const QString &device) const;
+   virtual int cameraOrientation(const QString &device) const;
 
    static QMediaServiceProvider *defaultServiceProvider();
    static void setDefaultServiceProvider(QMediaServiceProvider *provider);

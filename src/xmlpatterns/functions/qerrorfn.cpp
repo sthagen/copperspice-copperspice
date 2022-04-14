@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -42,11 +42,12 @@ Item ErrorFN::evaluateSingleton(const DynamicContext::Ptr &context) const
                         ReportContext::FOER0000, this);
          return Item();
       }
+
       case 3:
-      /* Fallthrough, we don't use the 'error object' param. */
       case 2:
          msg = m_operands.at(1)->evaluateSingleton(context).stringValue();
-      /* Fall through. */
+        [[fallthrough]];
+
       case 1: {
          const QNameValue::Ptr qName(m_operands.first()->evaluateSingleton(context).as<QNameValue>());
 
@@ -58,6 +59,7 @@ Item ErrorFN::evaluateSingleton(const DynamicContext::Ptr &context) const
 
          return Item();
       }
+
       default: {
          Q_ASSERT_X(false, Q_FUNC_INFO, "Invalid number of arguments passed to fn:error.");
          return Item();

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -191,10 +191,10 @@ bool QLibraryHandle::load_sys()
 #ifdef Q_OS_DARWIN
    if (!pHnd) {
       QByteArray utf8Bundle = fileName.toUtf8();
-      QCFType<CFURLRef> bundleUrl = CFURLCreateFromFileSystemRepresentation(NULL,
+      QCFType<CFURLRef> bundleUrl = CFURLCreateFromFileSystemRepresentation(nullptr,
             reinterpret_cast<const UInt8 *>(utf8Bundle.data()), utf8Bundle.length(), true);
 
-      QCFType<CFBundleRef> bundle = CFBundleCreate(NULL, bundleUrl);
+      QCFType<CFBundleRef> bundle = CFBundleCreate(nullptr, bundleUrl);
 
       if (bundle) {
          QCFType<CFURLRef> url = CFBundleCopyExecutableURL(bundle);
@@ -216,7 +216,7 @@ bool QLibraryHandle::load_sys()
    } else {
       errorString = QLibrary::tr("Unable to load library %1: %2").formatArg(fileName).formatArg(qdlerror());
    }
-   return (pHnd != 0);
+   return (pHnd != nullptr);
 }
 
 bool QLibraryHandle::unload_sys()
@@ -259,7 +259,6 @@ void *QLibraryHandle::resolve_sys(const QString &symbol)
 
    if (! address) {
       errorString = QLibrary::tr("Can not resolve symbol \"%1\" in %2:%3").formatArg(symbol).formatArg(fileName).formatArg(qdlerror());
-
    } else {
       errorString.clear();
    }

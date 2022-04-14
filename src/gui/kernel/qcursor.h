@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,9 +25,9 @@
 #define QCURSOR_H
 
 #include <qpoint.h>
+#include <qvariant.h>
 #include <qwindowdefs.h>
 
-class QVariant;
 class QScreen;
 
 #ifdef QT_NO_CURSOR
@@ -67,7 +67,7 @@ class Q_GUI_EXPORT QCursor
    QCursor(Qt::CursorShape shape);
    QCursor(const QBitmap &bitmap, const QBitmap &mask, int hotX = -1, int hotY = -1);
    QCursor(const QPixmap &pixmap, int hotX = -1, int hotY = -1);
-   QCursor(const QCursor &cursor);
+   QCursor(const QCursor &other);
 
    QCursor(QCursor &&other) : d(other.d) {
       other.d = nullptr;
@@ -105,17 +105,26 @@ class Q_GUI_EXPORT QCursor
    inline static void setPos(QScreen *screen, const QPoint &p) {
       setPos(screen, p.x(), p.y());
    }
+
  private:
    QCursorData *d;
 
 };
 
-
 Q_GUI_EXPORT QDataStream &operator<<(QDataStream &outS, const QCursor &cursor);
 Q_GUI_EXPORT QDataStream &operator>>(QDataStream &inS, QCursor &cursor);
 
+template<>
+inline bool CustomType_T<QCursor>::compare(const CustomType &other) const {
+   auto ptr = dynamic_cast<const CustomType_T<QCursor>*>(&other);
+
+   if (ptr != nullptr) {
+      return m_value.shape() == (ptr->m_value).shape();
+   }
+
+   return false;
+}
+
 #endif // QT_NO_CURSOR
-
-
 
 #endif

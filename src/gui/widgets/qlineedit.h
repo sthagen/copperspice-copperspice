@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,10 @@
 #ifndef QLINEEDIT_H
 #define QLINEEDIT_H
 
-#include <QtGui/qframe.h>
-#include <QtGui/qtextcursor.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qmargins.h>
-
+#include <qframe.h>
+#include <qtextcursor.h>
+#include <qstring.h>
+#include <qmargins.h>
 
 #ifndef QT_NO_LINEEDIT
 
@@ -107,10 +106,21 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
       TrailingPosition
    };
 
-   enum EchoMode { Normal, NoEcho, Password, PasswordEchoOnEdit };
+   GUI_CS_REGISTER_ENUM(
+      enum EchoMode {
+         Normal,
+         NoEcho,
+         Password,
+         PasswordEchoOnEdit
+      };
+   )
 
    explicit QLineEdit(QWidget *parent = nullptr);
-   explicit QLineEdit(const QString &, QWidget *parent = nullptr);
+   explicit QLineEdit(const QString &contents, QWidget *parent = nullptr);
+
+   QLineEdit(const QLineEdit &) = delete;
+   QLineEdit &operator=(const QLineEdit &) = delete;
+
    ~QLineEdit();
 
    QString text() const;
@@ -136,7 +146,7 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
    void setReadOnly(bool);
 
 #ifndef QT_NO_VALIDATOR
-   void setValidator(const QValidator *);
+   void setValidator(const QValidator *validator);
    const QValidator *validator() const;
 #endif
 
@@ -167,7 +177,7 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
    bool isModified() const;
    void setModified(bool);
 
-   void setSelection(int, int);
+   void setSelection(int start, int length);
    bool hasSelectedText() const;
    QString selectedText() const;
    int selectionStart() const;
@@ -175,7 +185,7 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
    bool isUndoAvailable() const;
    bool isRedoAvailable() const;
 
-   void setDragEnabled(bool b);
+   void setDragEnabled(bool enable);
    bool dragEnabled() const;
 
    void setCursorMoveStyle(Qt::CursorMoveStyle style);
@@ -195,14 +205,13 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
    QAction *addAction(const QIcon &icon, ActionPosition position);
 
    void deselect();
-   void insert(const QString &);
+   void insert(const QString &newText);
 
 #ifndef QT_NO_CONTEXTMENU
    QMenu *createStandardContextMenu();
 #endif
 
-
-   GUI_CS_SLOT_1(Public, void setText(const QString &un_named_arg1))
+   GUI_CS_SLOT_1(Public, void setText(const QString &str))
    GUI_CS_SLOT_2(setText)
 
    GUI_CS_SLOT_1(Public, void clear())
@@ -228,14 +237,14 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
    GUI_CS_SLOT_2(paste)
 #endif
 
-   GUI_CS_SIGNAL_1(Public, void textChanged(const QString &un_named_arg1))
-   GUI_CS_SIGNAL_2(textChanged, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void textChanged(const QString &str))
+   GUI_CS_SIGNAL_2(textChanged, str)
 
-   GUI_CS_SIGNAL_1(Public, void textEdited(const QString &un_named_arg1))
-   GUI_CS_SIGNAL_2(textEdited, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void textEdited(const QString &str))
+   GUI_CS_SIGNAL_2(textEdited, str)
 
-   GUI_CS_SIGNAL_1(Public, void cursorPositionChanged(int un_named_arg1, int un_named_arg2))
-   GUI_CS_SIGNAL_2(cursorPositionChanged, un_named_arg1, un_named_arg2)
+   GUI_CS_SIGNAL_1(Public, void cursorPositionChanged(int oldValue, int newValue))
+   GUI_CS_SIGNAL_2(cursorPositionChanged, oldValue, newValue)
 
    GUI_CS_SIGNAL_1(Public, void returnPressed())
    GUI_CS_SIGNAL_2(returnPressed)
@@ -247,32 +256,32 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
    GUI_CS_SIGNAL_2(selectionChanged)
 
    QVariant inputMethodQuery(Qt::InputMethodQuery) const override;
-   bool event(QEvent *) override;
+   bool event(QEvent *event) override;
 
  protected:
-   void mousePressEvent(QMouseEvent *) override;
-   void mouseMoveEvent(QMouseEvent *) override;
-   void mouseReleaseEvent(QMouseEvent *) override;
-   void mouseDoubleClickEvent(QMouseEvent *) override;
-   void keyPressEvent(QKeyEvent *) override;
-   void focusInEvent(QFocusEvent *) override;
-   void focusOutEvent(QFocusEvent *) override;
-   void paintEvent(QPaintEvent *) override;
+   void mousePressEvent(QMouseEvent *event) override;
+   void mouseMoveEvent(QMouseEvent *event) override;
+   void mouseReleaseEvent(QMouseEvent *event) override;
+   void mouseDoubleClickEvent(QMouseEvent *event) override;
+   void keyPressEvent(QKeyEvent *event) override;
+   void focusInEvent(QFocusEvent *event) override;
+   void focusOutEvent(QFocusEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
 
 #ifndef QT_NO_DRAGANDDROP
-   void dragEnterEvent(QDragEnterEvent *) override;
-   void dragMoveEvent(QDragMoveEvent *e) override;
-   void dragLeaveEvent(QDragLeaveEvent *e) override;
-   void dropEvent(QDropEvent *) override;
+   void dragEnterEvent(QDragEnterEvent *event) override;
+   void dragMoveEvent(QDragMoveEvent *event) override;
+   void dragLeaveEvent(QDragLeaveEvent *event) override;
+   void dropEvent(QDropEvent *event) override;
 #endif
 
-   void changeEvent(QEvent *) override;
+   void changeEvent(QEvent *event) override;
 
 #ifndef QT_NO_CONTEXTMENU
-   void contextMenuEvent(QContextMenuEvent *) override;
+   void contextMenuEvent(QContextMenuEvent *event) override;
 #endif
 
-   void inputMethodEvent(QInputMethodEvent *) override;
+   void inputMethodEvent(QInputMethodEvent *event) override;
    void initStyleOption(QStyleOptionFrame *option) const;
 
  protected:
@@ -286,7 +295,6 @@ class Q_GUI_EXPORT QLineEdit : public QWidget
    friend class QDateTimeEdit;
 #endif
 
-   Q_DISABLE_COPY(QLineEdit)
    Q_DECLARE_PRIVATE(QLineEdit)
 
    GUI_CS_SLOT_1(Private, void _q_handleWindowActivate())

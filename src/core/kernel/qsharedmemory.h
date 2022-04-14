@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QSHAREDMEMORY_H
 #define QSHAREDMEMORY_H
 
-#include <QtCore/qobject.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_SHAREDMEMORY
 
@@ -58,6 +56,10 @@ class Q_CORE_EXPORT QSharedMemory : public QObject
 
    QSharedMemory(QObject *parent = nullptr);
    QSharedMemory(const QString &key, QObject *parent = nullptr);
+
+   QSharedMemory(const QSharedMemory &) = delete;
+   QSharedMemory &operator=(const QSharedMemory &) = delete;
+
    ~QSharedMemory();
 
    void setKey(const QString &key);
@@ -86,15 +88,9 @@ class Q_CORE_EXPORT QSharedMemory : public QObject
 
  protected:
    QScopedPointer<QSharedMemoryPrivate> d_ptr;
-
- private:
-   Q_DISABLE_COPY(QSharedMemory)
-
 };
 
 #endif // QT_NO_SHAREDMEMORY
 
-QT_END_NAMESPACE
-
-#endif // QSHAREDMEMORY_H
+#endif
 

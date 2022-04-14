@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,11 +23,7 @@
 
 //#define QPROCESS_DEBUG
 
-#include <ctype.h>
-#include <errno.h>
-
 #include <qprocess.h>
-#include <qprocess_p.h>
 
 #include <qcoreapplication.h>
 #include <qbytearray.h>
@@ -38,11 +34,16 @@
 #include <qstring.h>
 #include <qtimer.h>
 
+#include <qprocess_p.h>
+
 #ifdef Q_OS_WIN
 #include <qwineventnotifier.h>
 #else
 #include <qcore_unix_p.h>
 #endif
+
+#include <ctype.h>
+#include <errno.h>
 
 #if defined QPROCESS_DEBUG
 static QByteArray qt_prettyDebug(const char *data, int len, int maxSize)
@@ -160,7 +161,7 @@ void QProcessEnvironmentPrivate::insert(const QProcessEnvironmentPrivate &other)
 
 
 QProcessEnvironment::QProcessEnvironment()
-   : d(0)
+   : d(nullptr)
 {
 }
 
@@ -315,12 +316,6 @@ QStringList QProcessEnvironment::toStringList() const
    return d->toList();
 }
 
-/*!
-    \since 4.8
-
-    Returns a list containing all the variable names in this QProcessEnvironment
-    object.
-*/
 QStringList QProcessEnvironment::keys() const
 {
    if (!d) {
@@ -330,13 +325,6 @@ QStringList QProcessEnvironment::keys() const
    return d->keys();
 }
 
-/*!
-    \overload
-    \since 4.8
-
-    Inserts the contents of \a e in this QProcessEnvironment object. Variables in
-    this object that also exist in \a e will be overwritten.
-*/
 void QProcessEnvironment::insert(const QProcessEnvironment &e)
 {
    if (!e.d) {
@@ -354,18 +342,18 @@ void QProcessPrivate::Channel::clear()
       case PipeSource:
          Q_ASSERT(process);
          process->stdinChannel.type = Normal;
-         process->stdinChannel.process = 0;
+         process->stdinChannel.process = nullptr;
          break;
       case PipeSink:
          Q_ASSERT(process);
          process->stdoutChannel.type = Normal;
-         process->stdoutChannel.process = 0;
+         process->stdoutChannel.process = nullptr;
          break;
    }
 
    type = Normal;
    file.clear();
-   process = 0;
+   process = nullptr;
 }
 
 /*! \internal
@@ -377,26 +365,32 @@ QProcessPrivate::QProcessPrivate()
    inputChannelMode = QProcess::ManagedInputChannel;
    processError = QProcess::UnknownError;
    processState = QProcess::NotRunning;
+
+#ifdef Q_OS_WIN
+   pid = nullptr;
+#else
    pid = 0;
+#endif
+
    sequenceNumber = 0;
-   exitCode = 0;
+   exitCode   = 0;
    exitStatus = QProcess::NormalExit;
-   startupSocketNotifier = 0;
-   deathNotifier = 0;
+   startupSocketNotifier = nullptr;
+   deathNotifier = nullptr;
 
    childStartedPipe[0] = INVALID_Q_PIPE;
    childStartedPipe[1] = INVALID_Q_PIPE;
 
-   forkfd = -1;
+   forkfd   = -1;
    exitCode = 0;
-   crashed = false;
-   dying = false;
-   emittedReadyRead = false;
+   crashed  = false;
+   dying    = false;
+   emittedReadyRead    = false;
    emittedBytesWritten = false;
 
 #ifdef Q_OS_WIN
-   stdinWriteTrigger = 0;
-   processFinishedNotifier = 0;
+   stdinWriteTrigger = nullptr;
+   processFinishedNotifier = nullptr;
 #endif
 
 }
@@ -425,47 +419,52 @@ void QProcessPrivate::cleanup()
       CloseHandle(pid->hThread);
       CloseHandle(pid->hProcess);
       delete pid;
-      pid = 0;
+      pid = nullptr;
    }
 
    if (stdinWriteTrigger) {
       delete stdinWriteTrigger;
-      stdinWriteTrigger = 0;
+      stdinWriteTrigger = nullptr;
    }
 
    if (processFinishedNotifier) {
       delete processFinishedNotifier;
-      processFinishedNotifier = 0;
+      processFinishedNotifier = nullptr;
    }
 #endif
 
+#ifdef Q_OS_WIN
+   pid = nullptr;
+#else
    pid = 0;
+#endif
+
    sequenceNumber = 0;
    dying = false;
 
    if (stdoutChannel.notifier) {
       delete  stdoutChannel.notifier;
-      stdoutChannel.notifier = 0;
+      stdoutChannel.notifier = nullptr;
    }
 
    if (stderrChannel.notifier) {
       delete stderrChannel.notifier;
-      stderrChannel.notifier = 0;
+      stderrChannel.notifier = nullptr;
    }
 
    if (stdinChannel.notifier) {
       delete stdinChannel.notifier;
-      stdinChannel.notifier = 0;
+      stdinChannel.notifier = nullptr;
    }
 
    if (startupSocketNotifier) {
       delete startupSocketNotifier;
-      startupSocketNotifier = 0;
+      startupSocketNotifier = nullptr;
    }
 
    if (deathNotifier) {
       delete deathNotifier;
-      deathNotifier = 0;
+      deathNotifier = nullptr;
    }
 
    closeChannel(&stdoutChannel);
@@ -797,7 +796,7 @@ void QProcessPrivate::closeWriteChannel()
 
    if (stdinChannel.notifier) {
       delete stdinChannel.notifier;
-      stdinChannel.notifier = 0;
+      stdinChannel.notifier = nullptr;
    }
 
 #ifdef Q_OS_WIN
@@ -1517,10 +1516,12 @@ QByteArray QProcess::readAllStandardError()
 void QProcess::start(const QString &program, const QStringList &arguments, OpenMode mode)
 {
    Q_D(QProcess);
+
    if (d->processState != NotRunning) {
       qWarning("QProcess::start: Process is already running");
       return;
    }
+
    if (program.isEmpty()) {
       d->setErrorAndEmit(QProcess::FailedToStart, tr("No program defined"));
       return;

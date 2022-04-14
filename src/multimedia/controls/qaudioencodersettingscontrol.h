@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -46,13 +46,13 @@ public:
     virtual QList<int> supportedSampleRates(const QAudioEncoderSettings &settings, bool *continuous = nullptr) const = 0;
 
     virtual QAudioEncoderSettings audioSettings() const = 0;
-    virtual void setAudioSettings(const QAudioEncoderSettings&) = 0;
+    virtual void setAudioSettings(const QAudioEncoderSettings &settings) = 0;
 
 protected:
     explicit QAudioEncoderSettingsControl(QObject *parent = nullptr);
 };
 
-#define QAudioEncoderSettingsControl_iid "com.copperpsice.CS.audioEncoderSettingsControl/1.0"
+#define QAudioEncoderSettingsControl_iid "com.copperspice.CS.audioEncoderSettingsControl/1.0"
 CS_DECLARE_INTERFACE(QAudioEncoderSettingsControl, QAudioEncoderSettingsControl_iid)
 
 #endif

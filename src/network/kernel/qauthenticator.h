@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QAUTHENTICATOR_H
 #define QAUTHENTICATOR_H
 
-#include <QtCore/qstring.h>
-#include <QtCore/qvariant.h>
-
-QT_BEGIN_NAMESPACE
+#include <qstring.h>
+#include <qvariant.h>
 
 class QAuthenticatorPrivate;
 class QUrl;
@@ -66,7 +64,5 @@ class Q_NETWORK_EXPORT QAuthenticator
    friend class QAuthenticatorPrivate;
    QAuthenticatorPrivate *d;
 };
-
-QT_END_NAMESPACE
 
 #endif

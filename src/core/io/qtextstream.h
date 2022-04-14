@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,8 +35,6 @@
 #ifdef Status
 #error qtextstream.h must be included before any header file that defines Status
 #endif
-
-QT_BEGIN_NAMESPACE
 
 class QTextCodec;
 class QTextDecoder;
@@ -95,6 +93,10 @@ class Q_CORE_EXPORT QTextStream
    explicit QTextStream(QString *string, QIODevice::OpenMode openMode = QIODevice::ReadWrite);
    explicit QTextStream(QByteArray *array, QIODevice::OpenMode openMode = QIODevice::ReadWrite);
    explicit QTextStream(const QByteArray &array, QIODevice::OpenMode openMode = QIODevice::ReadOnly);
+
+   QTextStream(const QTextStream &) = delete;
+   QTextStream &operator=(const QTextStream &) = delete;
+
    virtual ~QTextStream();
 
 #ifndef QT_NO_TEXTCODEC
@@ -169,7 +171,7 @@ class Q_CORE_EXPORT QTextStream
    QTextStream &operator>>(quint64 &i);
    QTextStream &operator>>(float &f);
    QTextStream &operator>>(double &f);
-   QTextStream &operator>>(QString &s);
+   QTextStream &operator>>(QString &str);
    QTextStream &operator>>(QByteArray &array);
 
    QTextStream &operator<<(bool b);
@@ -186,22 +188,20 @@ class Q_CORE_EXPORT QTextStream
    QTextStream &operator<<(float f);
    QTextStream &operator<<(double f);
 
-   QTextStream &operator<<(const QString &s);
-   QTextStream &operator<<(const QStringView &s);
+   QTextStream &operator<<(const QString &str);
+   QTextStream &operator<<(const QStringView &str);
    QTextStream &operator<<(const QByteArray &array);
 
    QTextStream &operator<<(const void *ptr);
 
-   QTextStream &operator<<(const char *s) {
-      return *this << QString::fromLatin1(s);
+   QTextStream &operator<<(const char *str) {
+      return *this << QString::fromLatin1(str);
    }
 
  protected:
    QScopedPointer<QTextStreamPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QTextStream)
-
    friend class QDebugStateSaverPrivate;
    friend class QDebug;
 };
@@ -220,11 +220,11 @@ class Q_CORE_EXPORT QTextStreamManipulator
 {
  public:
    QTextStreamManipulator(QTSMFI m, int a)
-      : mf(m), mc(0), arg(a)
+      : mf(m), mc(nullptr), arg(a)
    { }
 
    QTextStreamManipulator(QTSMFC m, QChar c)
-      : mf(0), mc(m), arg(-1), ch(c)
+      : mf(nullptr), mc(m), arg(-1), ch(c)
    { }
 
    void exec(QTextStream &s) {
@@ -309,6 +309,4 @@ inline QTextStreamManipulator qSetRealNumberPrecision(int precision)
    return QTextStreamManipulator(func, precision);
 }
 
-
-
-#endif // QTEXTSTREAM_H
+#endif

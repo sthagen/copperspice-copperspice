@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,9 @@
 #ifndef QFIXED_P_H
 #define QFIXED_P_H
 
-#include <QtCore/qdebug.h>
-#include <QtCore/qpoint.h>
-#include <QtCore/qsize.h>
-
+#include <qdebug.h>
+#include <qpoint.h>
+#include <qsize.h>
 
 struct QFixed {
  public:
@@ -415,7 +414,6 @@ inline bool operator>(int i, const QFixed &f)
    return (i << 6) > f.value();
 }
 
-
 inline QDebug &operator<<(QDebug &dbg, const QFixed &f)
 {
    return dbg << f.toReal();
@@ -425,10 +423,10 @@ struct QFixedPoint {
    QFixed x;
    QFixed y;
 
-   QFixedPoint()
-   {}
+   QFixedPoint() = default;
 
-   QFixedPoint(const QFixed &_x, const QFixed &_y) : x(_x), y(_y)
+   QFixedPoint(const QFixed &_x, const QFixed &_y)
+      : x(_x), y(_y)
    {}
 
    QPointF toPointF() const {

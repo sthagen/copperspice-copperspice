@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QPAINTENGINE_PIC_P_H
 #define QPAINTENGINE_PIC_P_H
 
-#include <QtGui/qpaintengine.h>
+#include <qpaintengine.h>
 
 #ifndef QT_NO_PICTURE
-
-
 
 class QPicturePaintEnginePrivate;
 class QBuffer;
@@ -39,6 +37,10 @@ class QPicturePaintEngine : public QPaintEngine
 
  public:
    QPicturePaintEngine();
+
+   QPicturePaintEngine(const QPicturePaintEngine &) = delete;
+   QPicturePaintEngine &operator=(const QPicturePaintEngine &) = delete;
+
    ~QPicturePaintEngine();
 
    bool begin(QPaintDevice *pdev) override;
@@ -79,13 +81,9 @@ class QPicturePaintEngine : public QPaintEngine
    QPicturePaintEngine(QPaintEnginePrivate &dptr);
 
  private:
-   Q_DISABLE_COPY(QPicturePaintEngine)
-
    void writeCmdLength(int pos, const QRectF &r, bool corr);
 };
 
-
-
 #endif // QT_NO_PICTURE
 
-#endif // QPAINTENGINE_PIC_P_H
+#endif

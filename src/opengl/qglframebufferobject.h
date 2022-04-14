@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QGLFRAMEBUFFEROBJECT_H
 #define QGLFRAMEBUFFEROBJECT_H
 
-#include <QtOpenGL/qgl.h>
-#include <QtGui/qpaintdevice.h>
+#include <qgl.h>
+#include <qpaintdevice.h>
 
 class QGLFramebufferObjectPrivate;
 class QGLFramebufferObjectFormat;
@@ -33,8 +33,6 @@ class QGLFramebufferObjectFormatPrivate;
 
 class Q_OPENGL_EXPORT QGLFramebufferObject : public QPaintDevice
 {
-   Q_DECLARE_PRIVATE(QGLFramebufferObject)
-
  public:
    enum Attachment {
       NoAttachment,
@@ -52,6 +50,9 @@ class Q_OPENGL_EXPORT QGLFramebufferObject : public QPaintDevice
 
    QGLFramebufferObject(const QSize &size, const QGLFramebufferObjectFormat &format);
    QGLFramebufferObject(int width, int height, const QGLFramebufferObjectFormat &format);
+
+   QGLFramebufferObject(const QGLFramebufferObject &) = delete;
+   QGLFramebufferObject &operator=(const QGLFramebufferObject &) = delete;
 
    virtual ~QGLFramebufferObject();
 
@@ -74,8 +75,8 @@ class Q_OPENGL_EXPORT QGLFramebufferObject : public QPaintDevice
 
    static bool hasOpenGLFramebufferObjects();
 
-   void drawTexture(const QRectF &target, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
-   void drawTexture(const QPointF &point, GLuint textureId, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QRectF &target, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
+   void drawTexture(const QPointF &point, GLuint texture_id, GLenum textureTarget = GL_TEXTURE_2D);
 
    static bool hasOpenGLFramebufferBlit();
    static void blitFramebuffer(QGLFramebufferObject *target, const QRect &targetRect,
@@ -90,7 +91,8 @@ class Q_OPENGL_EXPORT QGLFramebufferObject : public QPaintDevice
    }
 
  private:
-   Q_DISABLE_COPY(QGLFramebufferObject)
+   Q_DECLARE_PRIVATE(QGLFramebufferObject)
+
    QScopedPointer<QGLFramebufferObjectPrivate> d_ptr;
    friend class QGLPaintDevice;
    friend class QGLFBOGLPaintDevice;
@@ -98,11 +100,11 @@ class Q_OPENGL_EXPORT QGLFramebufferObject : public QPaintDevice
 
 class Q_OPENGL_EXPORT QGLFramebufferObjectFormat
 {
-
  public:
    QGLFramebufferObjectFormat();
    QGLFramebufferObjectFormat(const QGLFramebufferObjectFormat &other);
    QGLFramebufferObjectFormat &operator=(const QGLFramebufferObjectFormat &other);
+
    ~QGLFramebufferObjectFormat();
 
    void setSamples(int samples);
@@ -120,7 +122,6 @@ class Q_OPENGL_EXPORT QGLFramebufferObjectFormat
    void setInternalTextureFormat(GLenum internalTextureFormat);
    GLenum internalTextureFormat() const;
 
-
    bool operator==(const QGLFramebufferObjectFormat &other) const;
    bool operator!=(const QGLFramebufferObjectFormat &other) const;
 
@@ -129,6 +130,5 @@ class Q_OPENGL_EXPORT QGLFramebufferObjectFormat
 
    void detach();
 };
-
 
 #endif

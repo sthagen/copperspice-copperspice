@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -193,7 +193,9 @@ class QScrollTimer : public QAbstractAnimation
 
  protected:
    void updateCurrentTime(int currentTime) override {
-      if (!ignoreUpdate) {
+      (void) currentTime;
+
+      if (! ignoreUpdate) {
          if (++skip >= d->frameRateSkip()) {
             skip = 0;
             d->timerTick();
@@ -208,72 +210,22 @@ class QScrollTimer : public QAbstractAnimation
 };
 #endif // QT_NO_ANIMATION
 
-/*!
-    \class QScroller
-    \brief The QScroller class enables kinetic scrolling for any scrolling widget or graphics item.
-    \since 5.0
-
-    \inmodule QtWidgets
-
-    With kinetic scrolling, the user can push the widget in a given
-    direction and it will continue to scroll in this direction until it is
-    stopped either by the user or by friction.  Aspects of inertia, friction
-    and other physical concepts can be changed in order to fine-tune an
-    intuitive user experience.
-
-    The QScroller object is the object that stores the current position and
-    scrolling speed and takes care of updates.
-    QScroller can be triggered by a flick gesture
-
-    \code
-        QWidget *w = ...;
-        QScroller::grabGesture(w, QScroller::LeftMouseButtonGesture);
-    \endcode
-
-    or directly like this:
-
-    \code
-        QWidget *w = ...;
-        QScroller *scroller = QScroller::scroller(w);
-        scroller->scrollTo(QPointF(100, 100));
-    \endcode
-
-    The scrolled QObjects receive a QScrollPrepareEvent whenever the scroller needs to
-    update its geometry information and a QScrollEvent whenever the content of the object should
-    actually be scrolled.
-
-    The scroller uses the global QAbstractAnimation timer to generate its QScrollEvents. This
-    can be changed with QScrollerProperties::FrameRate on a per-QScroller basis.
-
-    Several examples in the \c scroller examples directory show how QScroller,
-    QScrollEvent and the scroller gesture can be used.
-
-    Even though this kinetic scroller has a large number of settings available via
-    QScrollerProperties, we recommend that you leave them all at their default, platform optimized
-    values. Before changing them you can experiment with the \c plot example in
-    the \c scroller examples directory.
-
-    \sa QScrollEvent, QScrollPrepareEvent, QScrollerProperties
-*/
-
 typedef QMap<QObject *, QScroller *> ScrollerHash;
 typedef QSet<QScroller *> ScrollerSet;
 
 Q_GLOBAL_STATIC(ScrollerHash, qt_allScrollers)
 Q_GLOBAL_STATIC(ScrollerSet, qt_activeScrollers)
 
-
 bool QScroller::hasScroller(QObject *target)
 {
    return (qt_allScrollers()->value(target));
 }
 
-
 QScroller *QScroller::scroller(QObject *target)
 {
    if (!target) {
       qWarning("QScroller::scroller() was called with a null target.");
-      return 0;
+      return nullptr;
    }
 
    if (qt_allScrollers()->contains(target)) {
@@ -282,49 +234,26 @@ QScroller *QScroller::scroller(QObject *target)
 
    QScroller *s = new QScroller(target);
    qt_allScrollers()->insert(target, s);
+
    return s;
 }
-
 
 const QScroller *QScroller::scroller(const QObject *target)
 {
    return scroller(const_cast<QObject *>(target));
 }
 
-/*!
-    Returns an application wide list of currently active QScroller objects.
-    Active QScroller objects are in a state() that is not QScroller::Inactive.
-    This function is useful when writing your own gesture recognizer.
-*/
 QList<QScroller *> QScroller::activeScrollers()
 {
    return qt_activeScrollers()->toList();
 }
 
-/*!
-    Returns the target object of this scroller.
-    \sa hasScroller(), scroller()
- */
 QObject *QScroller::target() const
 {
    Q_D(const QScroller);
    return d->target;
 }
 
-/*!
-    \fn QScroller::scrollerPropertiesChanged(const QScrollerProperties &newProperties);
-
-    QScroller emits this signal whenever its scroller properties change.
-    \a newProperties are the new scroller properties.
-
-    \sa scrollerProperties
-*/
-
-
-/*! \property QScroller::scrollerProperties
-    \brief The scroller properties of this scroller.
-    The properties are used by the QScroller to determine its scrolling behavior.
-*/
 QScrollerProperties QScroller::scrollerProperties() const
 {
    Q_D(const QScroller);
@@ -346,27 +275,6 @@ void QScroller::setScrollerProperties(const QScrollerProperties &sp)
 
 #ifndef QT_NO_GESTURES
 
-/*!
-    Registers a custom scroll gesture recognizer, grabs it for the \a
-    target and returns the resulting gesture type.  If \a scrollGestureType is
-    set to TouchGesture the gesture triggers on touch events. If it is set to
-    one of LeftMouseButtonGesture, RightMouseButtonGesture or
-    MiddleMouseButtonGesture it triggers on mouse events of the
-    corresponding button.
-
-    Only one scroll gesture can be active on a single object at the same
-    time. If you call this function twice on the same object, it will
-    ungrab the existing gesture before grabbing the new one.
-
-    \note To avoid unwanted side-effects, mouse events are consumed while
-    the gesture is triggered. Since the initial mouse press event is
-    not consumed, the gesture sends a fake mouse release event
-    at the global position \c{(INT_MIN, INT_MIN)}. This ensures that
-    internal states of the widget that received the original mouse press
-    are consistent.
-
-    \sa ungrabGesture(), grabbedGesture()
-*/
 Qt::GestureType QScroller::grabGesture(QObject *target, ScrollerGestureType scrollGestureType)
 {
    // ensure that a scroller for target is created
@@ -417,12 +325,6 @@ Qt::GestureType QScroller::grabGesture(QObject *target, ScrollerGestureType scro
    return sp->recognizerType;
 }
 
-/*!
-    Returns the gesture type currently grabbed for the \a target or 0 if no
-    gesture is grabbed.
-
-    \sa grabGesture(), ungrabGesture()
-*/
 Qt::GestureType QScroller::grabbedGesture(QObject *target)
 {
    QScroller *s = scroller(target);
@@ -433,12 +335,6 @@ Qt::GestureType QScroller::grabbedGesture(QObject *target)
    }
 }
 
-/*!
-    Ungrabs the gesture for the \a target.
-    Does nothing if no gesture is grabbed.
-
-    \sa grabGesture(), grabbedGesture()
-*/
 void QScroller::ungrabGesture(QObject *target)
 {
    QScroller *s = scroller(target);
@@ -462,7 +358,7 @@ void QScroller::ungrabGesture(QObject *target)
 
    QGestureRecognizer::unregisterRecognizer(sp->recognizerType);
    // do not delete the recognizer. The QGestureManager is doing this.
-   sp->recognizer = 0;
+   sp->recognizer = nullptr;
 }
 
 #endif // QT_NO_GESTURES
@@ -487,7 +383,7 @@ QScroller::~QScroller()
 #ifndef QT_NO_GESTURES
    QGestureRecognizer::unregisterRecognizer(d->recognizerType);
    // do not delete the recognizer. The QGestureManager is doing this.
-   d->recognizer = 0;
+   d->recognizer = nullptr;
 #endif
    qt_allScrollers()->remove(d->target);
    qt_activeScrollers()->remove(this);
@@ -495,30 +391,12 @@ QScroller::~QScroller()
    delete d_ptr;
 }
 
-
-/*!
-    \fn QScroller::stateChanged(QScroller::State newState);
-
-    QScroller emits this signal whenever the state changes. \a newState is the new State.
-
-    \sa state
-*/
-
-/*!
-    \property QScroller::state
-    \brief the state of the scroller
-
-    \sa QScroller::State
-*/
 QScroller::State QScroller::state() const
 {
    Q_D(const QScroller);
    return d->state;
 }
 
-/*!
-    Stops the scroller and resets its state back to Inactive.
-*/
 void QScroller::stop()
 {
    Q_D(QScroller);
@@ -540,15 +418,6 @@ void QScroller::stop()
    }
 }
 
-/*!
-    Returns the pixel per meter metric for the scrolled widget.
-
-    The value is reported for both the x and y axis separately by using a QPointF.
-
-    \note Please note that this value should be physically correct. The actual DPI settings
-    that Qt returns for the display may be reported wrongly on purpose by the underlying
-    windowing system, for example on \macos.
-*/
 QPointF QScroller::pixelPerMeter() const
 {
    Q_D(const QScroller);
@@ -557,10 +426,12 @@ QPointF QScroller::pixelPerMeter() const
 #ifndef QT_NO_GRAPHICSVIEW
    if (QGraphicsObject *go = qobject_cast<QGraphicsObject *>(d->target)) {
       QTransform viewtr;
+
       //TODO: the first view isn't really correct - maybe use an additional field in the prepare event?
       if (go->scene() && !go->scene()->views().isEmpty()) {
          viewtr = go->scene()->views().first()->viewportTransform();
       }
+
       QTransform tr = go->deviceTransform(viewtr);
       if (tr.isScaling()) {
          QPointF p0 = tr.map(QPointF(0, 0));
@@ -570,18 +441,11 @@ QPointF QScroller::pixelPerMeter() const
          ppm.ry() /= QLineF(p0, py).length();
       }
    }
-#endif // QT_NO_GRAPHICSVIEW
+#endif
+
    return ppm;
 }
 
-/*!
-    Returns the current scrolling velocity in meter per second when the state is Scrolling or Dragging.
-    Returns a zero velocity otherwise.
-
-    The velocity is reported for both the x and y axis separately by using a QPointF.
-
-    \sa pixelPerMeter()
-*/
 QPointF QScroller::velocity() const
 {
    Q_D(const QScroller);
@@ -590,6 +454,7 @@ QPointF QScroller::velocity() const
    switch (state()) {
       case Dragging:
          return d->releaseVelocity;
+
       case Scrolling: {
          QPointF vel;
          qint64 now = d->monotonicTimer.elapsed();
@@ -597,65 +462,42 @@ QPointF QScroller::velocity() const
          if (!d->xSegments.isEmpty()) {
             const QScrollerPrivate::ScrollSegment &s = d->xSegments.head();
             qreal progress = qreal(now - s.startTime) / qreal(s.deltaTime);
-            qreal v = qSign(s.deltaPos) * qreal(s.deltaTime) / qreal(1000) * sp->decelerationFactor * qreal(0.5) * differentialForProgress(s.curve,
-                  progress);
+            qreal v = qSign(s.deltaPos) * qreal(s.deltaTime) / qreal(1000) * sp->decelerationFactor
+                  * qreal(0.5) * differentialForProgress(s.curve, progress);
             vel.setX(v);
          }
 
          if (!d->ySegments.isEmpty()) {
             const QScrollerPrivate::ScrollSegment &s = d->ySegments.head();
             qreal progress = qreal(now - s.startTime) / qreal(s.deltaTime);
-            qreal v = qSign(s.deltaPos) * qreal(s.deltaTime) / qreal(1000) * sp->decelerationFactor * qreal(0.5) * differentialForProgress(s.curve,
-                  progress);
+
+            qreal v = qSign(s.deltaPos) * qreal(s.deltaTime) / qreal(1000) * sp->decelerationFactor
+                  * qreal(0.5) * differentialForProgress(s.curve, progress);
+
             vel.setY(v);
          }
+
          return vel;
       }
+
       default:
          return QPointF(0, 0);
    }
 }
 
-/*!
-    Returns the estimated final position for the current scroll movement.
-    Returns the current position if the scroller state is not Scrolling.
-    The result is undefined when the scroller state is Inactive.
-
-    The target position is in pixel.
-
-    \sa pixelPerMeter(), scrollTo()
-*/
 QPointF QScroller::finalPosition() const
 {
    Q_D(const QScroller);
-   return QPointF(d->scrollingSegmentsEndPos(Qt::Horizontal),
-         d->scrollingSegmentsEndPos(Qt::Vertical));
+
+   return QPointF(d->scrollingSegmentsEndPos(Qt::Horizontal), d->scrollingSegmentsEndPos(Qt::Vertical));
 }
 
-/*!
-    Starts scrolling the widget so that point \a pos is at the top-left position in
-    the viewport.
-
-    The behaviour when scrolling outside the valid scroll area is undefined.
-    In this case the scroller might or might not overshoot.
-
-    The scrolling speed will be calculated so that the given position will
-    be reached after a platform-defined time span.
-
-    \a pos is given in viewport coordinates.
-
-    \sa ensureVisible()
-*/
 void QScroller::scrollTo(const QPointF &pos)
 {
    // we could make this adjustable via QScrollerProperties
    scrollTo(pos, 300);
 }
 
-/*! \overload
-
-    This version will reach its destination position in \a scrollTime milliseconds.
-*/
 void QScroller::scrollTo(const QPointF &pos, int scrollTime)
 {
    Q_D(QScroller);
@@ -701,31 +543,12 @@ void QScroller::scrollTo(const QPointF &pos, int scrollTime)
    d->setState(scrollTime ? Scrolling : Inactive);
 }
 
-/*!
-    Starts scrolling so that the rectangle \a rect is visible inside the
-    viewport with additional margins specified in pixels by \a xmargin and \a ymargin around
-    the rect.
-
-    In cases where it is not possible to fit the rect plus margins inside the viewport the contents
-    are scrolled so that as much as possible is visible from \a rect.
-
-    The scrolling speed is calculated so that the given position is reached after a platform-defined
-    time span.
-
-    This function performs the actual scrolling by calling scrollTo().
-
-    \sa scrollTo()
-*/
 void QScroller::ensureVisible(const QRectF &rect, qreal xmargin, qreal ymargin)
 {
    // we could make this adjustable via QScrollerProperties
    ensureVisible(rect, xmargin, ymargin, 1000);
 }
 
-/*! \overload
-
-    This version will reach its destination position in \a scrollTime milliseconds.
-*/
 void QScroller::ensureVisible(const QRectF &rect, qreal xmargin, qreal ymargin, int scrollTime)
 {
    Q_D(QScroller);
@@ -799,24 +622,12 @@ void QScroller::ensureVisible(const QRectF &rect, qreal xmargin, qreal ymargin, 
    scrollTo(newPos, scrollTime);
 }
 
-/*! This function resends the QScrollPrepareEvent.
-    Calling resendPrepareEvent triggers a QScrollPrepareEvent from the scroller.
-    This allows the receiver to re-set content position and content size while
-    scrolling.
-    Calling this function while in the Inactive state is useless as the prepare event
-    is sent again before scrolling starts.
- */
 void QScroller::resendPrepareEvent()
 {
    Q_D(QScroller);
    d->prepareScrolling(d->pressPosition);
 }
 
-/*! Set the snap positions for the horizontal axis to a list of \a positions.
-    This overwrites all previously set snap positions and also a previously
-    set snapping interval.
-    Snapping can be deactivated by setting an empty list of positions.
- */
 void QScroller::setSnapPositionsX(const QList<qreal> &positions)
 {
    Q_D(QScroller);
@@ -826,13 +637,6 @@ void QScroller::setSnapPositionsX(const QList<qreal> &positions)
    d->recalcScrollingSegments();
 }
 
-/*! Set the snap positions for the horizontal axis to regular spaced intervals.
-    The first snap position is at \a first. The next at \a first + \a interval.
-    This can be used to implement a list header.
-    This overwrites all previously set snap positions and also a previously
-    set snapping interval.
-    Snapping can be deactivated by setting an interval of 0.0
- */
 void QScroller::setSnapPositionsX(qreal first, qreal interval)
 {
    Q_D(QScroller);
@@ -843,11 +647,6 @@ void QScroller::setSnapPositionsX(qreal first, qreal interval)
    d->recalcScrollingSegments();
 }
 
-/*! Set the snap positions for the vertical axis to a list of \a positions.
-    This overwrites all previously set snap positions and also a previously
-    set snapping interval.
-    Snapping can be deactivated by setting an empty list of positions.
- */
 void QScroller::setSnapPositionsY(const QList<qreal> &positions)
 {
    Q_D(QScroller);
@@ -857,12 +656,6 @@ void QScroller::setSnapPositionsY(const QList<qreal> &positions)
    d->recalcScrollingSegments();
 }
 
-/*! Set the snap positions for the vertical axis to regular spaced intervals.
-    The first snap position is at \a first. The next at \a first + \a interval.
-    This overwrites all previously set snap positions and also a previously
-    set snapping interval.
-    Snapping can be deactivated by setting an interval of 0.0
- */
 void QScroller::setSnapPositionsY(qreal first, qreal interval)
 {
    Q_D(QScroller);
@@ -873,35 +666,28 @@ void QScroller::setSnapPositionsY(qreal first, qreal interval)
    d->recalcScrollingSegments();
 }
 
-
-
-// -------------- private ------------
-
 QScrollerPrivate::QScrollerPrivate(QScroller *q, QObject *_target)
    : target(_target)
+
 #ifndef QT_NO_GESTURES
-   , recognizer(0)
-   , recognizerType(Qt::CustomGesture)
+     , recognizer(nullptr), recognizerType(Qt::CustomGesture)
 #endif
-   , state(QScroller::Inactive)
-   , firstScroll(true)
-   , pressTimestamp(0)
-   , lastTimestamp(0)
-   , snapFirstX(-1.0)
-   , snapIntervalX(0.0)
-   , snapFirstY(-1.0)
-   , snapIntervalY(0.0)
+
+   , state(QScroller::Inactive), firstScroll(true), pressTimestamp(0), lastTimestamp(0), snapFirstX(-1.0),
+     snapIntervalX(0.0), snapFirstY(-1.0), snapIntervalY(0.0)
+
 #ifndef QT_NO_ANIMATION
    , scrollTimer(new QScrollTimer(this))
 #endif
+
    , q_ptr(q)
 {
-   connect(target, SIGNAL(destroyed(QObject *)), this, SLOT(targetDestroyed()));
+   connect(target, &QObject::destroyed, this, &QScrollerPrivate::targetDestroyed);
 }
 
 void QScrollerPrivate::init()
 {
-   setDpiFromWidget(0);
+   setDpiFromWidget(nullptr);
    monotonicTimer.start();
 }
 
@@ -915,12 +701,16 @@ const char *QScrollerPrivate::stateName(QScroller::State state)
    switch (state) {
       case QScroller::Inactive:
          return "inactive";
+
       case QScroller::Pressed:
          return "pressed";
+
       case QScroller::Dragging:
          return "dragging";
+
       case QScroller::Scrolling:
          return "scrolling";
+
       default:
          return "(invalid)";
    }
@@ -975,24 +765,13 @@ void QScrollerPrivate::timerTick()
 #endif
 }
 
-/*!
-    This function is used by gesture recognizers to inform the scroller about a new input event.
-    The scroller changes its internal state() according to the input event and its attached
-    scroller properties. The scroller doesn't distinguish between the kind of input device the
-    event came from. Therefore the event needs to be split into the \a input type, a \a position and a
-    milli-second \a timestamp.  The \a position needs to be in the target's coordinate system.
-
-    The return value is \c true if the event should be consumed by the calling filter or \c false
-    if the event should be forwarded to the control.
-
-    \note Using grabGesture() should be sufficient for most use cases.
-*/
 bool QScroller::handleInput(Input input, const QPointF &position, qint64 timestamp)
 {
    Q_D(QScroller);
 
-   qScrollerDebug() << "QScroller::handleInput(" << input << ", " << d->stateName(d->state) << ", " << position << ", " << timestamp <<
-      ')';
+   qScrollerDebug() << "QScroller::handleInput(" << input << ", " << d->stateName(d->state) << ", "
+                    << position << ", " << timestamp << ')';
+
    struct statechange {
       State state;
       Input input;
@@ -1016,75 +795,26 @@ bool QScroller::handleInput(Input input, const QPointF &position, qint64 timesta
          return (d->*sc->handler)(position - d->overshootPosition, timestamp);
       }
    }
+
    return false;
 }
 
-#if !defined(Q_DEAD_CODE_FROM_QT4_MAC)
-// the Mac version is implemented in qscroller_mac.mm
-
-QPointF QScrollerPrivate::realDpi(int screen)
-{
-#  if defined(Q_DEAD_CODE_FROM_QT4_X11) && !defined(QT_NO_XRANDR)
-   if (X11 && X11->use_xrandr && X11->ptrXRRSizes && X11->ptrXRRRootToScreen) {
-      int nsizes = 0;
-      // QDesktopWidget is based on Xinerama screens, which do not always
-      // correspond to RandR screens: NVidia's TwinView e.g.  will show up
-      // as 2 screens in QDesktopWidget, but libXRandR will only see 1 screen.
-      // (although with the combined size of the Xinerama screens).
-      // Additionally, libXrandr will simply crash when calling XRRSizes
-      // for (the non-existent) screen 1 in this scenario.
-      Window root =  RootWindow(X11->display, screen == -1 ? X11->defaultScreen : screen);
-      int randrscreen = (root != XNone) ? X11->ptrXRRRootToScreen(X11->display, root) : -1;
-
-      XRRScreenSize *sizes = X11->ptrXRRSizes(X11->display, randrscreen == -1 ? 0 : randrscreen, &nsizes);
-      if (nsizes > 0 && sizes && sizes->width && sizes->height && sizes->mwidth && sizes->mheight) {
-         qScrollerDebug() << "XRandR DPI:" << QPointF(qreal(25.4) * qreal(sizes->width) / qreal(sizes->mwidth),
-               qreal(25.4) * qreal(sizes->height) / qreal(sizes->mheight));
-         return QPointF(qreal(25.4) * qreal(sizes->width) / qreal(sizes->mwidth),
-               qreal(25.4) * qreal(sizes->height) / qreal(sizes->mheight));
-      }
-   }
-#  endif
-
-   QWidget *w = QApplication::desktop()->screen(screen);
-   return QPointF(w->physicalDpiX(), w->physicalDpiY());
-}
-
-#endif // !Q_DEAD_CODE_FROM_QT4_MAC
-
-
-/*! \internal
-    Returns the resolution of the used screen.
-*/
 QPointF QScrollerPrivate::dpi() const
 {
    return pixelPerMeter * qreal(0.0254);
 }
 
-/*! \internal
-    Sets the resolution used for scrolling.
-    This resolution is only used by the kinetic scroller. If you change this
-    then the scroller will behave quite different as a lot of the values are
-    given in physical distances (millimeter).
-*/
 void QScrollerPrivate::setDpi(const QPointF &dpi)
 {
    pixelPerMeter = dpi / qreal(0.0254);
 }
 
-/*! \internal
-    Sets the dpi used for scrolling to the value of the widget.
-*/
 void QScrollerPrivate::setDpiFromWidget(QWidget *widget)
 {
-   QDesktopWidget *dw = QApplication::desktop();
-   setDpi(realDpi(widget ? dw->screenNumber(widget) : dw->primaryScreen()));
+   const QScreen *tmp = QApplication::screens().at(QApplication::desktop()->screenNumber(widget));
+   setDpi(QPointF(tmp->physicalDotsPerInchX(), tmp->physicalDotsPerInchY()));
 }
 
-/*! \internal
-    Updates the velocity during dragging.
-    Sets releaseVelocity.
-*/
 void QScrollerPrivate::updateVelocity(const QPointF &deltaPixelRaw, qint64 deltaTime)
 {
    if (deltaTime <= 0) {
@@ -1092,7 +822,9 @@ void QScrollerPrivate::updateVelocity(const QPointF &deltaPixelRaw, qint64 delta
    }
 
    Q_Q(QScroller);
+
    QPointF ppm = q->pixelPerMeter();
+
    const QScrollerPropertiesPrivate *sp = properties.d.data();
    QPointF deltaPixel = deltaPixelRaw;
 
@@ -1256,9 +988,10 @@ bool QScrollerPrivate::scrollingSegmentsValid(Qt::Orientation orientation)
 /*! \internal
    Creates the sections needed to scroll to the specific \a endPos to the segments queue.
 */
-void QScrollerPrivate::createScrollToSegments(qreal v, qreal deltaTime, qreal endPos, Qt::Orientation orientation, ScrollType type)
+void QScrollerPrivate::createScrollToSegments(qreal v, qreal deltaTime, qreal endPos,
+               Qt::Orientation orientation, ScrollType type)
 {
-   Q_UNUSED(v);
+   (void) v;
 
    if (orientation == Qt::Horizontal) {
       xSegments.clear();

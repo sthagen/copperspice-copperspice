@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -63,7 +63,8 @@ class DerivedIntegerDetails<TypeByte>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -82,7 +83,8 @@ class DerivedIntegerDetails<TypeInt>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -107,7 +109,8 @@ class DerivedIntegerDetails<TypeLong>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -126,7 +129,8 @@ class DerivedIntegerDetails<TypeNegativeInteger>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -145,7 +149,8 @@ class DerivedIntegerDetails<TypeNonNegativeInteger>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -164,7 +169,8 @@ class DerivedIntegerDetails<TypeNonPositiveInteger>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -183,7 +189,8 @@ class DerivedIntegerDetails<TypePositiveInteger>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -202,7 +209,8 @@ class DerivedIntegerDetails<TypeShort>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -221,7 +229,8 @@ class DerivedIntegerDetails<TypeUnsignedByte>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -240,7 +249,8 @@ class DerivedIntegerDetails<TypeUnsignedInt>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -259,7 +269,8 @@ class DerivedIntegerDetails<TypeUnsignedLong>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<>
@@ -278,7 +289,8 @@ class DerivedIntegerDetails<TypeUnsignedShort>
     */
    DerivedIntegerDetails() {}
 
-   Q_DISABLE_COPY(DerivedIntegerDetails)
+   DerivedIntegerDetails(const DerivedIntegerDetails &) = delete;
+   DerivedIntegerDetails &operator=(const DerivedIntegerDetails &) = delete;
 };
 
 template<TypeOfDerivedInteger DerivedType>
@@ -507,7 +519,6 @@ class DerivedInteger : public Numeric
 
    bool isSigned() const override {
       switch (DerivedType) {
-         /* Fallthrough all these. */
          case TypeByte:
          case TypeInt:
          case TypeLong:
@@ -517,7 +528,7 @@ class DerivedInteger : public Numeric
          case TypePositiveInteger:
          case TypeShort:
             return true;
-         /* Fallthrough all these. */
+
          case TypeUnsignedByte:
          case TypeUnsignedInt:
          case TypeUnsignedLong:

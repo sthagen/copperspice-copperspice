@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QDIRMODEL_H
 #define QDIRMODEL_H
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtCore/qdir.h>
-#include <QtGui/qfileiconprovider.h>
-
-
+#include <qabstractitemmodel.h>
+#include <qdir.h>
+#include <qfileiconprovider.h>
 
 #ifndef QT_NO_DIRMODEL
 
@@ -40,8 +38,10 @@ class Q_GUI_EXPORT QDirModel : public QAbstractItemModel
 
    GUI_CS_PROPERTY_READ(resolveSymlinks, resolveSymlinks)
    GUI_CS_PROPERTY_WRITE(resolveSymlinks, setResolveSymlinks)
+
    GUI_CS_PROPERTY_READ(readOnly, isReadOnly)
    GUI_CS_PROPERTY_WRITE(readOnly, setReadOnly)
+
    GUI_CS_PROPERTY_READ(lazyChildCount, lazyChildCount)
    GUI_CS_PROPERTY_WRITE(lazyChildCount, setLazyChildCount)
 
@@ -55,6 +55,10 @@ class Q_GUI_EXPORT QDirModel : public QAbstractItemModel
    QDirModel(const QStringList &nameFilters, QDir::Filters filters,
       QDir::SortFlags sort, QObject *parent = nullptr);
    explicit QDirModel(QObject *parent = nullptr);
+
+   QDirModel(const QDirModel &) = delete;
+   QDirModel &operator=(const QDirModel &) = delete;
+
    ~QDirModel();
 
    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -68,15 +72,17 @@ class Q_GUI_EXPORT QDirModel : public QAbstractItemModel
 
    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-   bool hasChildren(const QModelIndex &index = QModelIndex()) const override;
+   bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
    QStringList mimeTypes() const override;
    QMimeData *mimeData(const QModelIndexList &indexes) const override;
+
    bool dropMimeData(const QMimeData *data, Qt::DropAction action,
       int row, int column, const QModelIndex &parent) override;
+
    Qt::DropActions supportedDropActions() const override;
 
    // QDirModel specific API
@@ -125,13 +131,11 @@ class Q_GUI_EXPORT QDirModel : public QAbstractItemModel
 
  private:
    Q_DECLARE_PRIVATE(QDirModel)
-   Q_DISABLE_COPY(QDirModel)
 
    GUI_CS_SLOT_1(Private, void _q_refresh())
    GUI_CS_SLOT_2(_q_refresh)
 };
 
 #endif // QT_NO_DIRMODEL
-
 
 #endif // QDIRMODEL_H

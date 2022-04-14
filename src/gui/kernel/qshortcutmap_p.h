@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QSHORTCUTMAP_P_H
 #define QSHORTCUTMAP_P_H
 
-#include <QtGui/qkeysequence.h>
-#include <QtCore/qvector.h>
-#include <QtCore/qscopedpointer.h>
+#include <qkeysequence.h>
+#include <qvector.h>
+#include <qscopedpointer.h>
 
 
 
@@ -55,7 +55,7 @@ class Q_GUI_EXPORT QShortcutMap
 
    QKeySequence::SequenceMatch state();
 
-   bool tryShortcut(QKeyEvent *e);
+   bool tryShortcut(QKeyEvent *event);
    bool hasShortcutForKeySequence(const QKeySequence &seq) const;
 
  private:

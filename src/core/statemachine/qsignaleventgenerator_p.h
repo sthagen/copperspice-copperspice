@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qobject.h>
 
-QT_BEGIN_NAMESPACE
-
 class QStateMachine;
 
 class QSignalEventGenerator : public QObject
@@ -37,14 +35,12 @@ class QSignalEventGenerator : public QObject
  public:
    QSignalEventGenerator(QStateMachine *parent);
 
+   QSignalEventGenerator(const QSignalEventGenerator &) = delete;
+   QSignalEventGenerator &operator=(const QSignalEventGenerator &) = delete;
+
    // emerald (on hold, statemachine)
    CORE_CS_SLOT_1(Public, void execute())     // const TeaCupAbstract &data))
    CORE_CS_SLOT_2(execute)
-
- private:
-   Q_DISABLE_COPY(QSignalEventGenerator)
 };
-
-QT_END_NAMESPACE
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,12 +39,8 @@
 
 
 QSvgTinyDocument::QSvgTinyDocument()
-   : QSvgStructureNode(0)
-   , m_widthPercent(false)
-   , m_heightPercent(false)
-   , m_animated(false)
-   , m_animationDuration(0)
-   , m_fps(30)
+   : QSvgStructureNode(nullptr), m_widthPercent(false), m_heightPercent(false)
+   , m_animated(false), m_animationDuration(0), m_fps(30)
 {
 }
 
@@ -75,17 +71,18 @@ QByteArray qt_inflateGZipDataFrom(QIODevice *device)
 
    // Initialize zlib stream struct
    z_stream zlibStream;
-   zlibStream.next_in = Z_NULL;
-   zlibStream.avail_in = 0;
+   zlibStream.next_in   = nullptr;
+   zlibStream.avail_in  = 0;
    zlibStream.avail_out = 0;
-   zlibStream.zalloc = Z_NULL;
-   zlibStream.zfree = Z_NULL;
-   zlibStream.opaque = Z_NULL;
+   zlibStream.zalloc    = nullptr;
+   zlibStream.zfree     = nullptr;
+   zlibStream.opaque    = nullptr;
 
    // Adding 16 to the window size gives us gzip decoding
    if (inflateInit2(&zlibStream, MAX_WBITS + 16) != Z_OK) {
-      qWarning("Cannot initialize zlib, because: %s",
-               (zlibStream.msg != NULL ? zlibStream.msg : "Unknown error"));
+      qWarning("Unable to initialize zlib, because: %s",
+               (zlibStream.msg != nullptr ? zlibStream.msg : "Unknown error"));
+
       return QByteArray();
    }
 
@@ -119,7 +116,7 @@ QByteArray qt_inflateGZipDataFrom(QIODevice *device)
             case Z_MEM_ERROR: {
                inflateEnd(&zlibStream);
                qWarning("Error while inflating gzip file: %s",
-                        (zlibStream.msg != NULL ? zlibStream.msg : "Unknown error"));
+                        (zlibStream.msg != nullptr ? zlibStream.msg : "Unknown error"));
                destination.chop(zlibStream.avail_out);
                return destination;
             }
@@ -149,10 +146,11 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QString &fileName)
 {
    QFile file(fileName);
 
-   if (!file.open(QFile::ReadOnly)) {
-      qWarning("Cannot open file '%s', because: %s",
-               qPrintable(fileName), qPrintable(file.errorString()));
-      return 0;
+   if (! file.open(QFile::ReadOnly)) {
+      qWarning("Unable to open file '%s', because: %s",
+               csPrintable(fileName), csPrintable(file.errorString()));
+
+      return nullptr;
    }
 
 #ifndef QT_NO_COMPRESS
@@ -162,7 +160,7 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QString &fileName)
    }
 #endif
 
-   QSvgTinyDocument *doc = 0;
+   QSvgTinyDocument *doc = nullptr;
    QSvgHandler handler(&file);
 
    if (handler.ok()) {
@@ -170,8 +168,9 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QString &fileName)
       doc->m_animationDuration = handler.animationDuration();
    } else {
       qWarning("Cannot read file '%s', because: %s (line %d)",
-               qPrintable(fileName), qPrintable(handler.errorString()), handler.lineNumber());
+               csPrintable(fileName), csPrintable(handler.errorString()), handler.lineNumber());
    }
+
    return doc;
 }
 
@@ -187,11 +186,13 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QByteArray &contents)
 
    QSvgHandler handler(contents);
 
-   QSvgTinyDocument *doc = 0;
+   QSvgTinyDocument *doc = nullptr;
+
    if (handler.ok()) {
       doc = handler.document();
       doc->m_animationDuration = handler.animationDuration();
    }
+
    return doc;
 }
 
@@ -199,11 +200,13 @@ QSvgTinyDocument *QSvgTinyDocument::load(QXmlStreamReader *contents)
 {
    QSvgHandler handler(contents);
 
-   QSvgTinyDocument *doc = 0;
+   QSvgTinyDocument *doc = nullptr;
+
    if (handler.ok()) {
       doc = handler.document();
       doc->m_animationDuration = handler.animationDuration();
    }
+
    return doc;
 }
 
@@ -228,14 +231,17 @@ void QSvgTinyDocument::draw(QPainter *p, const QRectF &bounds)
    p->setBrush(Qt::black);
    p->setRenderHint(QPainter::Antialiasing);
    p->setRenderHint(QPainter::SmoothPixmapTransform);
+
    QList<QSvgNode *>::iterator itr = m_renderers.begin();
    applyStyle(p, m_states);
 
    while (itr != m_renderers.end()) {
       QSvgNode *node = *itr;
+
       if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode)) {
          node->draw(p, m_states);
       }
+
       ++itr;
    }
 
@@ -249,9 +255,10 @@ void QSvgTinyDocument::draw(QPainter *p, const QString &id, const QRectF &bounds
    QSvgNode *node = scopeNode(id);
 
    if (!node) {
-      qDebug("Couldn't find node %s. Skipping rendering.", qPrintable(id));
+      qDebug("Unable to find node %s, skipping rendering.", csPrintable(id));
       return;
    }
+
    if (m_time.isNull()) {
       m_time.start();
    }
@@ -406,13 +413,11 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
 
    if (source != target && !source.isNull()) {
       QTransform transform;
-      transform.scale(target.width() / source.width(),
-                      target.height() / source.height());
+      transform.scale(target.width() / source.width(), target.height() / source.height());
+
       QRectF c2 = transform.mapRect(source);
-      p->translate(target.x() - c2.x(),
-                   target.y() - c2.y());
-      p->scale(target.width() / source.width(),
-               target.height() / source.height());
+      p->translate(target.x() - c2.x(), target.y() - c2.y());
+      p->scale(target.width() / source.width(), target.height() / source.height());
    }
 }
 
@@ -430,7 +435,7 @@ bool QSvgTinyDocument::elementExists(const QString &id) const
 {
    QSvgNode *node = scopeNode(id);
 
-   return (node != 0);
+   return (node != nullptr);
 }
 
 QMatrix QSvgTinyDocument::matrixForElement(const QString &id) const
@@ -438,7 +443,7 @@ QMatrix QSvgTinyDocument::matrixForElement(const QString &id) const
    QSvgNode *node = scopeNode(id);
 
    if (!node) {
-      qDebug("Couldn't find node %s. Skipping rendering.", qPrintable(id));
+      qDebug("Unable to find node %s, skipping rendering.", csPrintable(id));
       return QMatrix();
    }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,36 +24,41 @@
 #ifndef QSIGNALTRANSITION_H
 #define QSIGNALTRANSITION_H
 
-#include <QtCore/qabstracttransition.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstracttransition.h>
 
 #ifndef QT_NO_STATEMACHINE
+
+class QSignalTransitionPrivate;
 
 class Q_CORE_EXPORT QSignalTransition : public QAbstractTransition
 {
    CORE_CS_OBJECT(QSignalTransition)
 
-   CORE_CS_PROPERTY_READ(senderObject,  senderObject)
-   CORE_CS_PROPERTY_WRITE(senderObject, setSenderObject)
+   CORE_CS_PROPERTY_READ(senderObject,   senderObject)
+   CORE_CS_PROPERTY_WRITE(senderObject,  setSenderObject)
+   CORE_CS_PROPERTY_NOTIFY(senderObject, senderObjectChanged)
 
  public:
-   QSignalTransition(QState *sourceState = 0);
+   QSignalTransition(QState *sourceState = nullptr);
 
    template<class SignalClass, class ...SignalArgs>
-   QSignalTransition(QObject *sender, void (SignalClass::*signal)(SignalArgs...), QState *sourceState = 0);
+   QSignalTransition(QObject *sender, void (SignalClass::*signal)(SignalArgs...), QState *sourceState = nullptr);
+
+   QSignalTransition(const QSignalTransition &) = delete;
+   QSignalTransition &operator=(const QSignalTransition &) = delete;
 
    ~QSignalTransition();
 
-   QObject *senderObject() const;
-   void setSenderObject(QObject *sender);
+   const QObject *senderObject() const;
+   void setSenderObject(const QObject *sender);
 
    CsSignal::Internal::BentoAbstract *get_signalBento() const;
 
    void unregister();
    void maybeRegister();
 
-   virtual void callOnTransition(QEvent *e);
+   CORE_CS_SIGNAL_1(Public, void senderObjectChanged())
+   CORE_CS_SIGNAL_2(senderObjectChanged)
 
  protected:
    bool eventTest(QEvent *event) override;
@@ -61,9 +66,9 @@ class Q_CORE_EXPORT QSignalTransition : public QAbstractTransition
    bool event(QEvent *e) override;
 
  private:
-   Q_DISABLE_COPY(QSignalTransition)
+   Q_DECLARE_PRIVATE(QSignalTransition)
 
-   QObject *m_sender;
+   const QObject *m_sender;
    QScopedPointer<CsSignal::Internal::BentoAbstract> m_signalBento;
 };
 
@@ -78,8 +83,32 @@ QSignalTransition::QSignalTransition(QObject *sender, void (SignalClass::*signal
    m_signalBento.reset(new CSBento<void (SignalClass::*)(SignalArgs...)> {signal});
 }
 
-#endif //QT_NO_STATEMACHINE
+template<class SignalClass, class ...SignalArgs>
+QSignalTransition *QState::addTransition(QObject *sender, void (SignalClass::*signal)(SignalArgs...),
+      QAbstractState *target)
+{
+   if (! sender) {
+      qWarning("QState::addTransition: No sender was specified");
+      return nullptr;
+   }
 
-QT_END_NAMESPACE
+   if (! signal) {
+      qWarning("QState::addTransition: No signal was specified");
+      return nullptr;
+   }
+
+   if (! target) {
+      qWarning("QState::addTransition: No target was specified");
+      return nullptr;
+   }
+
+   QSignalTransition *trans = new QSignalTransition(sender, signal);
+   trans->setTargetState(target);
+   addTransition(trans);
+
+   return trans;
+}
+
+#endif // QT_NO_STATEMACHINE
 
 #endif

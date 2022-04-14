@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,7 +45,7 @@ class Q_GUI_EXPORT QBasicDrag : public QPlatformDrag, public QObject
 
    virtual Qt::DropAction drag(QDrag *drag) override;
 
-   virtual bool eventFilter(QObject *o, QEvent *e) override;
+   virtual bool eventFilter(QObject *object, QEvent *event) override;
 
  protected:
    QBasicDrag();

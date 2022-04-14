@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,8 +37,6 @@
 
 #include <qstyleoption.h>
 
-
-
 class QMovableTabWidget : public QWidget
 {
  public:
@@ -51,6 +49,7 @@ class QMovableTabWidget : public QWidget
  private:
    QPixmap m_pixmap;
 };
+
 class QTabBarPrivate  : public QWidgetPrivate
 {
    Q_DECLARE_PUBLIC(QTabBar)
@@ -58,12 +57,11 @@ class QTabBarPrivate  : public QWidgetPrivate
  public:
    QTabBarPrivate()
       : currentIndex(-1), pressedIndex(-1), shape(QTabBar::RoundedNorth), layoutDirty(false),
-        drawBase(true), scrollOffset(0), elideModeSetByUser(false), useScrollButtonsSetByUser(false), expanding(true),
-        closeButtonOnTabs(false),
+        drawBase(true), scrollOffset(0), elideModeSetByUser(false), useScrollButtonsSetByUser(false),
+        expanding(true), closeButtonOnTabs(false),
         selectionBehaviorOnRemove(QTabBar::SelectRightTab), paintWithOffsets(true), movable(false),
         dragInProgress(false), documentMode(false), autoHide(false), changeCurrentOnDrag(false),
-        switchTabCurrentIndex(-1), switchTabTimerId(0), movingTab(0)
-
+        switchTabCurrentIndex(-1), switchTabTimerId(0), movingTab(nullptr)
    {}
 
    int currentIndex;
@@ -75,10 +73,11 @@ class QTabBarPrivate  : public QWidgetPrivate
 
    struct Tab : public QEnableSharedFromThis<Tab> {
       Tab(const QIcon &ico, const QString &txt)
-         : enabled(true), shortcutId(0), text(txt), icon(ico), leftWidget(0), rightWidget(0), lastTab(-1), dragOffset(0)
+         : enabled(true), shortcutId(0), text(txt), icon(ico), leftWidget(nullptr), rightWidget(nullptr),
+           lastTab(-1), dragOffset(0)
 
 #ifndef QT_NO_ANIMATION
-         , animation(0)
+         , animation(nullptr)
 #endif
       {}
 
@@ -170,7 +169,7 @@ class QTabBarPrivate  : public QWidgetPrivate
 
    inline bool isAnimated() const {
       Q_Q(const QTabBar);
-      return q->style()->styleHint(QStyle::SH_Widget_Animate, 0, q);
+      return q->style()->styleHint(QStyle::SH_Widget_Animate, nullptr, q);
    }
 
    bool validIndex(int index) const {
@@ -222,7 +221,6 @@ class QTabBarPrivate  : public QWidgetPrivate
 
    QMovableTabWidget *movingTab;
 
-
    // shared by tabwidget and qtabbar
    static void initStyleBaseOption(QStyleOptionTabBarBase *optTabBase, QTabBar *tabbar, QSize size) {
       QStyleOptionTab tabOverlap;
@@ -231,7 +229,7 @@ class QTabBarPrivate  : public QWidgetPrivate
       int overlap = tabbar->style()->pixelMetric(QStyle::PM_TabBarBaseOverlap, &tabOverlap, tabbar);
       QWidget *theParent = tabbar->parentWidget();
 
-      optTabBase->init(tabbar);
+      optTabBase->initFrom(tabbar);
       optTabBase->shape = tabbar->shape();
       optTabBase->documentMode = tabbar->documentMode();
 

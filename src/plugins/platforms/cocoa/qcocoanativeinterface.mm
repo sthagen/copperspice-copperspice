@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,6 +22,8 @@
 ***********************************************************************/
 
 #include <qcocoanativeinterface.h>
+
+#include <qcocoaprintersupport.h>
 #include <qcocoawindow.h>
 #include <qcocoamenu.h>
 #include <qcocoamenubar.h>
@@ -29,29 +31,23 @@
 #include <qcocoaapplication.h>
 #include <qcocoaintegration.h>
 #include <qcocoaeventdispatcher.h>
-
+#include <qapplication.h>
+#include <qdebug.h>
 #include <qbytearray.h>
 #include <qwindow.h>
 #include <qpixmap.h>
 #include <qplatform_window.h>
+#include <qplatform_printersupport.h>
 #include <qsurfaceformat.h>
+#include <platformheaders/qcocoawindowfunctions.h>
+
+#include <qprintengine_mac_p.h>
 
 #ifndef QT_NO_OPENGL
 #include <qplatform_openglcontext.h>
 #include <qopenglcontext.h>
 #include <qcocoaglcontext.h>
 #endif
-
-#include <qapplication.h>
-#include <qdebug.h>
-
-#ifndef QT_NO_WIDGETS
-#include <qcocoaprintersupport.h>
-#include <qprintengine_mac_p.h>
-#include <qplatform_printersupport.h>
-#endif
-
-#include <platformheaders/qcocoawindowfunctions.h>
 
 #include <Cocoa/Cocoa.h>
 
@@ -62,36 +58,41 @@ QCocoaNativeInterface::QCocoaNativeInterface()
 #ifndef QT_NO_OPENGL
 void *QCocoaNativeInterface::nativeResourceForContext(const QByteArray &resourceString, QOpenGLContext *context)
 {
-   if (!context) {
-      return 0;
+   if (! context) {
+      return nullptr;
    }
+
    if (resourceString.toLower() == "nsopenglcontext") {
       return nsOpenGLContextForContext(context);
    }
+
    if (resourceString.toLower() == "cglcontextobj") {
       return cglContextForContext(context);
    }
 
-   return 0;
+   return nullptr;
 }
 #endif
 
 void *QCocoaNativeInterface::nativeResourceForWindow(const QByteArray &resourceString, QWindow *window)
 {
-   if (!window->handle()) {
-      return 0;
+   if (! window->handle()) {
+      return nullptr;
    }
 
    if (resourceString == "nsview") {
       return static_cast<QCocoaWindow *>(window->handle())->m_contentView;
+
 #ifndef QT_NO_OPENGL
    } else if (resourceString == "nsopenglcontext") {
       return static_cast<QCocoaWindow *>(window->handle())->currentContext()->nsOpenGLContext();
 #endif
+
    } else if (resourceString == "nswindow") {
       return static_cast<QCocoaWindow *>(window->handle())->m_nsWindow;
    }
-   return 0;
+
+   return nullptr;
 }
 
 QPlatformNativeInterface::FP_Integration QCocoaNativeInterface::nativeResourceFunctionForIntegration(const QByteArray &resource)
@@ -164,7 +165,7 @@ QPlatformNativeInterface::FP_Integration QCocoaNativeInterface::nativeResourceFu
       return FP_Integration(QCocoaNativeInterface::testContentBorderPosition);
    }
 
-   return 0;
+   return nullptr;
 }
 
 void QCocoaNativeInterface::beep()
@@ -194,14 +195,16 @@ QPixmap QCocoaNativeInterface::defaultBackgroundPixmapForQWizard()
    const int ExpectedImageWidth = 242;
    const int ExpectedImageHeight = 414;
 
-   if (LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("com.apple.KeyboardSetupAssistant"), 0, 0, &url) == noErr) {
+   if (LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("com.apple.KeyboardSetupAssistant"), nullptr, nullptr, &url) == noErr) {
       QCFType<CFBundleRef> bundle = CFBundleCreate(kCFAllocatorDefault, url);
 
       if (bundle) {
-         url = CFBundleCopyResourceURL(bundle, CFSTR("Background"), CFSTR("png"), 0);
+         url = CFBundleCopyResourceURL(bundle, CFSTR("Background"), CFSTR("png"), nullptr);
+
          if (url) {
-            QCFType<CGImageSourceRef> imageSource = CGImageSourceCreateWithURL(url, 0);
-            QCFType<CGImageRef> image = CGImageSourceCreateImageAtIndex(imageSource, 0, 0);
+            QCFType<CGImageSourceRef> imageSource = CGImageSourceCreateWithURL(url, nullptr);
+            QCFType<CGImageRef> image = CGImageSourceCreateImageAtIndex(imageSource, 0, nullptr);
+
             if (image) {
                int width = CGImageGetWidth(image);
                int height = CGImageGetHeight(image);
@@ -234,7 +237,7 @@ void *QCocoaNativeInterface::cglContextForContext(QOpenGLContext *context)
       return [nsOpenGLContext CGLContextObj];
    }
 
-   return 0;
+   return nullptr;
 }
 
 void *QCocoaNativeInterface::nsOpenGLContextForContext(QOpenGLContext *context)
@@ -247,7 +250,7 @@ void *QCocoaNativeInterface::nsOpenGLContextForContext(QOpenGLContext *context)
       }
    }
 
-   return 0;
+   return nullptr;
 }
 #endif
 

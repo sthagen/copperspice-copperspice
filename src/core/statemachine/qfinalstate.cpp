@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 
 #include <qabstractstate_p.h>
 
-QT_BEGIN_NAMESPACE
-
 class QFinalStatePrivate : public QAbstractStatePrivate
 {
    Q_DECLARE_PUBLIC(QFinalState)
@@ -42,45 +40,28 @@ QFinalStatePrivate::QFinalStatePrivate()
 {
 }
 
-/*!
-  Constructs a new QFinalState object with the given \a parent state.
-*/
 QFinalState::QFinalState(QState *parent)
    : QAbstractState(*new QFinalStatePrivate, parent)
 {
 }
 
-/*!
-  Destroys this final state.
-*/
 QFinalState::~QFinalState()
 {
 }
 
-/*!
-  \reimp
-*/
 void QFinalState::onEntry(QEvent *event)
 {
    Q_UNUSED(event);
 }
 
-/*!
-  \reimp
-*/
 void QFinalState::onExit(QEvent *event)
 {
    Q_UNUSED(event);
 }
 
-/*!
-  \reimp
-*/
 bool QFinalState::event(QEvent *e)
 {
    return QAbstractState::event(e);
 }
 
-QT_END_NAMESPACE
-
-#endif //QT_NO_STATEMACHINE
+#endif

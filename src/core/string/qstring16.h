@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -219,16 +219,25 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
       using reverse_iterator       = CsString::CsStringReverseIterator<iterator>;
       using const_reverse_iterator = CsString::CsStringReverseIterator<const_iterator>;
 
-      QString16() {};
+      QString16() = default;
+
+      QString16(const char16_t *data)
+         : CsString::CsString_utf16(data)
+      {
+      }
+
       QString16(const QString16 &other) = default;
       QString16(QString16 &&other) = default;
+
+      QString16(std::nullptr_t) = delete;
 
       QString16(QChar32 c);
       QString16(size_type numOfChars, QChar32 c);
 
       QString16(QChar32::SpecialCharacter c)
          : QString16(QChar32(c))
-      { }
+      {
+      }
 
       QString16(const QChar32 *data, size_type numOfChars = -1)  {
 
@@ -249,7 +258,8 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
 
       QString16(const_iterator begin, const_iterator end)
          : CsString::CsString_utf16(begin, end)
-      { }
+      {
+      }
 
       // for an array of chars
       template <int N>
@@ -354,6 +364,10 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
 
       const char16_t *constData() const {
          return reinterpret_cast<const char16_t *>(CsString::CsString_utf16::constData());
+      }
+
+      bool contains(char ch, Qt::CaseSensitivity cs = Qt::CaseSensitive) const {
+         return contains(QChar32(ch), cs);
       }
 
       bool contains(QChar32 c, Qt::CaseSensitivity cs = Qt::CaseSensitive) const;
@@ -588,7 +602,7 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
 
       [[nodiscard]] QString16 left(size_type numOfChars) const;
       [[nodiscard]] QStringView16 leftView(size_type numOfChars) const;
-      [[nodiscard]] QString16 leftJustified(size_type width, QChar32 fill = UCHAR(' '), bool trunc = false) const;
+      [[nodiscard]] QString16 leftJustified(size_type width, QChar32 fill = UCHAR(' '), bool truncate = false) const;
 
       size_type length() const {
          return CsString::CsString_utf16::size();
@@ -721,9 +735,9 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
          return CsString::CsString_utf16::resize(numOfChars, c);
       }
 
-      [[nodiscard]] QString16 right(size_type numOfChars) const;
-      [[nodiscard]] QStringView16 rightView(size_type numOfChars) const;
-      [[nodiscard]] QString16 rightJustified(size_type width, QChar32 fill = UCHAR(' '), bool trunc = false) const;
+      [[nodiscard]] QString16 right(size_type count) const;
+      [[nodiscard]] QStringView16 rightView(size_type count) const;
+      [[nodiscard]] QString16 rightJustified(size_type width, QChar32 fill = UCHAR(' '), bool truncate = false) const;
 
       [[nodiscard]] QString16 simplified() const &;
       [[nodiscard]] QString16 simplified() &&;
@@ -781,32 +795,32 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
       static QString16 fromUtf8(const char *str, size_type numOfChars = -1);
 
       static QString16 fromUtf16(const char16_t *str, size_type numOfChars = -1);
-      static QString16 fromUtf16(const QString16 &str);
+      static QString16 fromUtf8(const QString8 &str);
 
       static QString16 fromStdWString(const std::wstring &str, size_type numOfChars = -1);
       static QString16 fromStdString(const std::string &str, size_type numOfChars = -1);
 
       // wrappers
       template <typename SP = QStringParser, typename ...Ts>
-      QString16 formatArg(Ts&&... args) const
+      [[nodiscard]] QString16 formatArg(Ts &&... args) const
       {
          return SP::template formatArg<QString16>(*this, std::forward<Ts>(args)...);
       }
 
       template <typename SP = QStringParser, typename ...Ts>
-      QString16 formatArgs(Ts... args) const
+      [[nodiscard]] QString16 formatArgs(Ts &&... args) const
       {
-         return SP::template formatArgs<QString16>(*this, args...);
+         return SP::template formatArgs<QString16>(*this, std::forward<Ts>(args)...);
       }
 
       template <typename V, typename SP = QStringParser>
-      static QString16 number(V value, int base  = 10)
+      [[nodiscard]] static QString16 number(V value, int base  = 10)
       {
          return SP::template number<QString16>(value, base);
       }
 
       template <typename SP = QStringParser>
-      static QString16 number(double value, char format = 'g', int precision = 6)
+      [[nodiscard]] static QString16 number(double value, char format = 'g', int precision = 6)
       {
          return SP::template number<QString16>(value, format, precision);
       }
@@ -914,6 +928,23 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
          return CsString::CsString_utf16::crend();
       }
 
+      // storage iterators
+      const_storage_iterator storage_begin() const {
+         return CsString::CsString_utf16::storage_begin();
+      }
+
+      const_storage_iterator storage_end() const {
+         return CsString::CsString_utf16::storage_end();
+      }
+
+      const_storage_reverse_iterator storage_rbegin() const {
+         return CsString::CsString_utf16::storage_rbegin();
+      }
+
+      const_storage_reverse_iterator storage_rend() const {
+         return CsString::CsString_utf16::storage_rend();
+      }
+
       // operators
       QString16 &operator=(const QString16 &other) = default;
       QString16 &operator=(QString16 && other) = default;
@@ -974,46 +1005,56 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
       }
 };
 
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QString16 &);
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QString16 &);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QString16 &str);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QString16 &str);
 
 // free functions, comparisons for string literals
-inline bool operator==(const QString16 &str1, const QString16 &str2)
-{
-   return (static_cast<CsString::CsString_utf16>(str1) == static_cast<CsString::CsString_utf16>(str2));
-}
-
-// for an array of chars
 template <int N>
-inline bool operator==(const char (&cStr)[N], const QString16 &str)
+inline bool operator==(QStringView16 str1, const char16_t (&str2)[N])
 {
-   return (static_cast<CsString::CsString_utf16>(str) == cStr);
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1);
 }
 
-// for an array of chars
 template <int N>
-inline bool operator==(const QString16 &str, const char (&cStr)[N])
+inline bool operator==(const char16_t (& str1)[N], QStringView16 str2)
 {
-   return (static_cast<CsString::CsString_utf16>(str) == cStr);
+   return std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end());
 }
 
-inline bool operator!=(const QString16 &str1, const QString16 &str2)
-{
-   return ! (str1 == str2);
-}
-
-// for an array of chars
 template <int N>
-inline bool operator!=(const char (&cStr)[N], const QString16 &str)
+inline bool operator==(QString16 str1, const char16_t (& str2)[N])
 {
-   return ! (str == cStr);
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1);
 }
 
-// for an array of chars
 template <int N>
-inline bool operator!=(const QString16 &str, const char (&cStr)[N])
+inline bool operator==(const char16_t (& str1)[N], QString16 str2)
 {
-   return ! (str == cStr);
+   return std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end());
+}
+
+template <int N>
+inline bool operator!=(QStringView16 str1, const char16_t (&str2)[N])
+{
+   return ! std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1);
+}
+
+template <int N>
+inline bool operator!=(const char16_t (& str1)[N], QStringView16 str2)
+{
+   return ! std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end());
+}
+
+template <int N>
+inline bool operator!=(QString16 str1, const char16_t (& str2)[N])
+{
+   return ! std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1);
+}
+
+template <int N>
+inline bool operator!=(const char16_t (& str1)[N], QString16 str2)
+{
+   return ! std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end());
 }
 
 inline QString16 operator+(const QString16 &str1, const QString16 &str2)
@@ -1023,7 +1064,7 @@ inline QString16 operator+(const QString16 &str1, const QString16 &str2)
    return t;
 }
 
-inline QString16 &&operator+(QString16 &&str1, const QString16 &str2)
+inline QString16 operator+(QString16 &&str1, const QString16 &str2)
 {
    str1 += str2;
    return std::move(str1);
@@ -1049,7 +1090,7 @@ inline QString16 operator+(const QString16 &str, QChar32 c)
    return t;
 }
 
-inline QString16 &&operator+(QString16 &&str, QChar32 c)
+inline QString16 operator+(QString16 &&str, QChar32 c)
 {
    str += c;
    return std::move(str);
@@ -1057,27 +1098,27 @@ inline QString16 &&operator+(QString16 &&str, QChar32 c)
 
 // for an array of chars
 template <int N>
-inline const QString16 operator+(const char (&cStr)[N], const QString16 &str)
+inline const QString16 operator+(const char (&cString)[N], const QString16 &str)
 {
    QString16 t(str);
-   t.prepend(cStr);
+   t.prepend(cString);
    return t;
 }
 
 // for an array of chars
 template <int N>
-inline const QString16 operator+(const QString16 &str, const char (&cStr)[N])
+inline const QString16 operator+(const QString16 &str, const char (&cString)[N])
 {
    QString16 t(str);
-   t += cStr;
+   t += cString;
    return t;
 }
 
 // for an array of chars
 template <int N>
-inline QString16 &&operator+(QString16 &&str, const char (&cStr)[N])
+inline QString16 operator+(QString16 &&str, const char (&cString)[N])
 {
-   str += cStr;
+   str += cString;
    return std::move(str);
 }
 
@@ -1088,16 +1129,16 @@ inline bool operator<(const QString16 &str1, const QString16 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator<(const char (&cStr)[N], const QString16 &str)
+inline bool operator<(const char (&cString)[N], const QString16 &str)
 {
-   return ! (static_cast<CsString::CsString_utf16>(str) >= cStr);
+   return (QString16(cString) < str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator<(const QString16 &str, const char (&cStr)[N])
+inline bool operator<(const QString16 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString_utf16>(str) < cStr);
+   return (str < QString16(cString));
 }
 
 inline bool operator<=(const QString16 &str1, const QString16 &str2)
@@ -1107,16 +1148,16 @@ inline bool operator<=(const QString16 &str1, const QString16 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator<=(const char (&cStr)[N], const QString16 &str)
+inline bool operator<=(const char (&cString)[N], const QString16 &str)
 {
-   return ! (static_cast<CsString::CsString_utf16>(str) > cStr);
+   return (QString16(cString) <= str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator<=(const QString16 &str, const char (&cStr)[N])
+inline bool operator<=(const QString16 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString_utf16>(str) <= cStr);
+   return (str <= QString16(cString));
 }
 
 inline bool operator>(const QString16 &str1, const QString16 &str2)
@@ -1126,16 +1167,16 @@ inline bool operator>(const QString16 &str1, const QString16 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator>(const char (&cStr)[N], const QString16 &str)
+inline bool operator>(const char (&cString)[N], const QString16 &str)
 {
-   return ! (static_cast<CsString::CsString_utf16>(str) <= cStr);
+   return (QString16(cString) > str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator>(const QString16 &str, const char (&cStr)[N])
+inline bool operator>(const QString16 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString_utf16>(str) > cStr);
+   return (str > QString16(cString));
 }
 
 inline bool operator>=(const QString16 &str1, const QString16 &str2)
@@ -1145,16 +1186,16 @@ inline bool operator>=(const QString16 &str1, const QString16 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator>=(const char (&cStr)[N], const QString16 &str)
+inline bool operator>=(const char (&cString)[N], const QString16 &str)
 {
-   return ! (static_cast<CsString::CsString_utf16>(str) < cStr);
+   return (QString16(cString) >= str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator>=(const QString16 &str, const char (&cStr)[N])
+inline bool operator>=(const QString16 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString_utf16>(str) >= cStr);
+   return (str >= QString16(cString));
 }
 
 inline void swap(QString16 &a, QString16 &b) {

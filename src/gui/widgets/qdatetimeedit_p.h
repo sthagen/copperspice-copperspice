@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,13 @@
 #ifndef QDATETIMEEDIT_P_H
 #define QDATETIMEEDIT_P_H
 
-#include <QtGui/qcombobox.h>
-#include <QtGui/qcalendarwidget.h>
-#include <QtGui/qspinbox.h>
-#include <QtGui/qtoolbutton.h>
-#include <QtGui/qmenu.h>
-#include <QtGui/qlabel.h>
-#include <QtGui/qdatetimeedit.h>
+#include <qcombobox.h>
+#include <qcalendarwidget.h>
+#include <qspinbox.h>
+#include <qtoolbutton.h>
+#include <qmenu.h>
+#include <qlabel.h>
+#include <qdatetimeedit.h>
 #include <qabstractspinbox_p.h>
 #include <qdebug.h>
 
@@ -117,7 +117,7 @@ class QDateTimeEditPrivate : public QAbstractSpinBoxPrivate, public QDateTimePar
    static QDateTimeEdit::Sections convertSections(QDateTimeParser::Sections s);
    static QDateTimeEdit::Section convertToPublic(QDateTimeParser::Section s);
 
-   void initCalendarPopup(QCalendarWidget *cw = 0);
+   void initCalendarPopup(QCalendarWidget *cw = nullptr);
    void positionCalendarPopup();
 
    QDateTimeEdit::Sections sections;

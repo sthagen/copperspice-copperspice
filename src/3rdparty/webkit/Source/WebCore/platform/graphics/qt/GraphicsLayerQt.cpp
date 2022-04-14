@@ -29,22 +29,22 @@
 #include "RefCounted.h"
 #include "TranslateTransformOperation.h"
 #include "UnitBezier.h"
-#include <QtCore/qabstractanimation.h>
-#include <QtCore/qdatetime.h>
-#include <QtCore/qdebug.h>
-#include <QtCore/qmetaobject.h>
-#include <QtCore/qset.h>
-#include <QtCore/qtimer.h>
-#include <QtGui/qcolor.h>
-#include <QtGui/qgraphicseffect.h>
-#include <QtGui/qgraphicsitem.h>
-#include <QtGui/qgraphicsscene.h>
-#include <QtGui/qgraphicsview.h>
-#include <QtGui/qgraphicswidget.h>
-#include <QtGui/qpainter.h>
-#include <QtGui/qpixmap.h>
-#include <QtGui/qpixmapcache.h>
-#include <QtGui/qstyleoption.h>
+#include <qabstractanimation.h>
+#include <qdatetime.h>
+#include <qdebug.h>
+#include <qmetaobject.h>
+#include <qset.h>
+#include <qtimer.h>
+#include <qcolor.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsitem.h>
+#include <qgraphicsscene.h>
+#include <qgraphicsview.h>
+#include <qgraphicswidget.h>
+#include <qpainter.h>
+#include <qpixmap.h>
+#include <qpixmapcache.h>
+#include <qstyleoption.h>
 
 #if ENABLE(TILED_BACKING_STORE)
 #include "TiledBackingStore.h"
@@ -1174,8 +1174,10 @@ void GraphicsLayerQt::setDrawsContent(bool value)
 */
 void GraphicsLayerQt::setBackgroundColor(const Color& value)
 {
-    if (value == m_impl->m_pendingContent.backgroundColor)
+    if (QColor(value) == m_impl->m_pendingContent.backgroundColor) {
         return;
+    }
+
     m_impl->m_pendingContent.backgroundColor = value;
     GraphicsLayer::setBackgroundColor(value);
     m_impl->notifyChange(GraphicsLayerQtImpl::BackgroundColorChange);

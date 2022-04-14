@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QMIMEDATA_H
 #define QMIMEDATA_H
 
-#include <QtCore/qvariant.h>
-#include <QtCore/qobject.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qvariant.h>
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 class QUrl;
 class QMimeDataPrivate;
@@ -39,6 +37,10 @@ class Q_CORE_EXPORT QMimeData : public QObject
 
  public:
    QMimeData();
+
+   QMimeData(const QMimeData &) = delete;
+   QMimeData &operator=(const QMimeData &) = delete;
+
    ~QMimeData();
 
    QList<QUrl> urls() const;
@@ -61,25 +63,21 @@ class Q_CORE_EXPORT QMimeData : public QObject
    void setColorData(const QVariant &color);
    bool hasColor() const;
 
-   QByteArray data(const QString &mimetype) const;
-   void setData(const QString &mimetype, const QByteArray &data);
-   void removeFormat(const QString &mimetype);
+   QByteArray data(const QString &mimeType) const;
+   void setData(const QString &mimeType, const QByteArray &data);
+   void removeFormat(const QString &mimeType);
 
-   virtual bool hasFormat(const QString &mimetype) const;
+   virtual bool hasFormat(const QString &mimeType) const;
    virtual QStringList formats() const;
 
    void clear();
 
  protected:
-   virtual QVariant retrieveData(const QString &mimetype, QVariant::Type preferredType) const;
+   virtual QVariant retrieveData(const QString &mimeType, QVariant::Type preferredType) const;
    QScopedPointer<QMimeDataPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QMimeData)
-   Q_DECLARE_PRIVATE(QMimeData) 
-
+   Q_DECLARE_PRIVATE(QMimeData)
 };
 
-QT_END_NAMESPACE
-
-#endif // QMIMEDATA_H
+#endif

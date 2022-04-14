@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,10 @@
 #include <qhash.h>
 
 struct QTextObjectHandler {
-   QTextObjectHandler() : iface(0) {}
+   QTextObjectHandler() : iface(nullptr)
+   {
+   }
+
    QTextObjectInterface *iface;
    QPointer<QObject> component;
 };
@@ -40,13 +43,16 @@ class QAbstractTextDocumentLayoutPrivate
    Q_DECLARE_PUBLIC(QAbstractTextDocumentLayout)
 
    inline QAbstractTextDocumentLayoutPrivate()
-      : paintDevice(0) {}
+      : paintDevice(nullptr)
+   {
+   }
 
    virtual ~QAbstractTextDocumentLayoutPrivate();
 
    inline void setDocument(QTextDocument *doc) {
-      document = doc;
-      docPrivate = 0;
+      document   = doc;
+      docPrivate = nullptr;
+
       if (doc) {
          docPrivate = doc->docHandle();
       }

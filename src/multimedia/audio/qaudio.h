@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,13 +26,16 @@
 
 #include <qmultimedia.h>
 #include <qglobal.h>
-#include <qmetatype.h>
 #include <qstring.h>
 
 namespace QAudio {
+
 enum Error { NoError, OpenError, IOError, UnderrunError, FatalError };
+
 enum State { ActiveState, SuspendedState, StoppedState, IdleState };
+
 enum Mode  { AudioInput, AudioOutput };
+
 enum Role {
    UnknownRole,
    MusicRole,
@@ -51,9 +54,5 @@ Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug dbg, QAudio::Error error);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug dbg, QAudio::State state);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug dbg, QAudio::Mode mode);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug dbg, QAudio::Role role);
-Q_DECLARE_METATYPE(QAudio::Error)
-Q_DECLARE_METATYPE(QAudio::State)
-Q_DECLARE_METATYPE(QAudio::Mode)
-Q_DECLARE_METATYPE(QAudio::Role)
 
 #endif

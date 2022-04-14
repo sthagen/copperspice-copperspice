@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #define QSCRIPTCLASSOBJECT_P_H
 
 #include "qscriptobject_p.h"
-
-QT_BEGIN_NAMESPACE
 
 class QScriptClass;
 
@@ -79,12 +77,10 @@ inline QScriptClass *ClassObjectDelegate::scriptClass() const
 
 inline void ClassObjectDelegate::setScriptClass(QScriptClass *scriptClass)
 {
-   Q_ASSERT(scriptClass != 0);
+   Q_ASSERT(scriptClass != nullptr);
    m_scriptClass = scriptClass;
 }
 
 } // namespace QScript
-
-QT_END_NAMESPACE
 
 #endif

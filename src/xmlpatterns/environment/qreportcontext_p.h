@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -2356,7 +2356,8 @@ class ReportContext : public QSharedData
    static inline QString finalizeDescription(const QString &desc);
    QSourceLocation lookupSourceLocation(const SourceLocationReflection *const ref) const;
 
-   Q_DISABLE_COPY(ReportContext)
+   ReportContext(const ReportContext &) = delete;
+   ReportContext &operator=(const ReportContext &) = delete;
 };
 
 /**

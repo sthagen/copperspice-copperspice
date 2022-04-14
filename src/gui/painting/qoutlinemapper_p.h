@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,12 @@
 #ifndef QOUTLINEMAPPER_P_H
 #define QOUTLINEMAPPER_P_H
 
-#include <QtCore/qrect.h>
-#include <QtGui/qtransform.h>
-#include <QtGui/qpainterpath.h>
+#include <qrect.h>
+#include <qtransform.h>
+#include <qpainterpath.h>
+#include <qvector.h>
 
 #include <qrasterdefs_p.h>
-#include <qdatabuffer_p.h>
 #include <qpaintengineex_p.h>
 
 // This limitations comes from qgrayraster.c. Any higher and
@@ -51,13 +51,9 @@ Q_GUI_EXPORT bool qt_scaleForTransform(const QTransform &transform, qreal *scale
 class QOutlineMapper
 {
  public:
-   QOutlineMapper() :
-      m_element_types(0),
-      m_elements(0),
-      m_points(0),
-      m_tags(0),
-      m_contours(0),
-      m_in_clip_elements(false) {
+   QOutlineMapper()
+      : m_in_clip_elements(false)
+   {
    }
 
    //  Sets up the matrix to be used for conversion. This also
@@ -82,12 +78,14 @@ class QOutlineMapper
 #ifdef QT_DEBUG_CONVERT
       printf("QOutlineMapper::beginOutline() rule=%d\n", fillRule);
 #endif
+
       m_valid = true;
-      m_elements.reset();
-      m_element_types.reset();
-      m_points.reset();
-      m_tags.reset();
-      m_contours.reset();
+      m_elements.clear();
+      m_element_types.clear();
+      m_points.clear();
+      m_tags.clear();
+      m_contours.clear();
+
       m_outline.flags = fillRule == Qt::WindingFill
          ? QT_FT_OUTLINE_NONE
          : QT_FT_OUTLINE_EVEN_ODD_FILL;
@@ -100,28 +98,30 @@ class QOutlineMapper
 
    void convertElements(const QPointF *points, const QPainterPath::ElementType *types, int count);
 
-   inline void moveTo(const QPointF &pt) {
+   void moveTo(const QPointF &pt) {
 #ifdef QT_DEBUG_CONVERT
       printf("QOutlineMapper::moveTo() (%f, %f)\n", pt.x(), pt.y());
 #endif
+
       closeSubpath();
       m_subpath_start = m_elements.size();
       m_elements << pt;
       m_element_types << QPainterPath::MoveToElement;
    }
 
-   inline void lineTo(const QPointF &pt) {
+   void lineTo(const QPointF &pt) {
 #ifdef QT_DEBUG_CONVERT
       printf("QOutlineMapper::lineTo() (%f, %f)\n", pt.x(), pt.y());
 #endif
-      m_elements.add(pt);
+      m_elements.append(pt);
       m_element_types << QPainterPath::LineToElement;
    }
 
    void curveTo(const QPointF &cp1, const QPointF &cp2, const QPointF &ep);
 
-   inline void closeSubpath() {
+   void closeSubpath() {
       int element_count = m_elements.size();
+
       if (element_count > 0) {
          if (m_elements.at(element_count - 1) != m_elements.at(m_subpath_start)) {
 #ifdef QT_DEBUG_CONVERT
@@ -147,25 +147,31 @@ class QOutlineMapper
       if (m_valid) {
          return &m_outline;
       }
-      return 0;
+
+      return nullptr;
    }
 
    QT_FT_Outline *convertPath(const QPainterPath &path);
    QT_FT_Outline *convertPath(const QVectorPath &path);
 
-   inline QPainterPath::ElementType *elementTypes() const {
-      return m_element_types.size() == 0 ? 0 : m_element_types.data();
+   inline const QPainterPath::ElementType *elementTypes() const {
+
+      if (m_element_types.size() == 0) {
+         return nullptr;
+      } else {
+         return m_element_types.data();
+      }
    }
 
-   QDataBuffer<QPainterPath::ElementType> m_element_types;
-   QDataBuffer<QPointF> m_elements;
+   QVector<QPainterPath::ElementType> m_element_types;
+   QVector<QPointF> m_elements;
 
-   QDataBuffer<QT_FT_Vector> m_points;
-   QDataBuffer<char> m_tags;
-   QDataBuffer<int> m_contours;
+   QVector<QT_FT_Vector> m_points;
+   QVector<char> m_tags;
+   QVector<int> m_contours;
 
    QRect m_clip_rect;
-   QRectF controlPointRect; // only valid after endOutline()
+   QRectF controlPointRect;          // only valid after endOutline()
 
    QT_FT_Outline m_outline;
    uint m_txop;

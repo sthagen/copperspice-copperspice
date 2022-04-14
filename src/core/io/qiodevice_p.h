@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,7 +40,7 @@ class QIODevicePrivateLinearBuffer
 {
  public:
    QIODevicePrivateLinearBuffer(int)
-      : len(0), first(0), buf(0), capacity(0) {
+      : len(0), first(nullptr), buf(nullptr), capacity(0) {
    }
 
    ~QIODevicePrivateLinearBuffer() {
@@ -249,6 +249,8 @@ class Q_CORE_EXPORT QIODevicePrivate
 
    virtual qint64 peek(char *data, qint64 maxSize);
    virtual QByteArray peek(qint64 maxSize);
+
+   bool check_readable() const;
 
  protected:
    QIODevice *q_ptr;

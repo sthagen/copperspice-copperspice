@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -46,21 +46,15 @@ class QPrinterPrivate
 
  public:
    QPrinterPrivate(QPrinter *printer)
-      : printEngine(0),
-        paintEngine(0),
-        realPrintEngine(0),
-        realPaintEngine(0),
+      : printEngine(nullptr), paintEngine(nullptr), realPrintEngine(nullptr), realPaintEngine(nullptr),
 #ifndef QT_NO_PRINTPREVIEWWIDGET
-        previewEngine(0),
+        previewEngine(nullptr),
 #endif
-        q_ptr(printer),
-        printRange(QPrinter::AllPages),
-        use_default_engine(true),
+        q_ptr(printer), printRange(QPrinter::AllPages), use_default_engine(true),
         validPrinter(false) {
    }
 
    ~QPrinterPrivate() {
-
    }
 
    void init(const QPrinterInfo &printer, QPrinter::PrinterMode mode);

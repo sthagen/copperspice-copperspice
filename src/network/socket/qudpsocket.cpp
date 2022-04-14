@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,15 +28,13 @@
 #include <qnetworkinterface.h>
 #include <qabstractsocket_p.h>
 
-
-
 #ifndef QT_NO_UDPSOCKET
 
 #define QT_CHECK_BOUND(function, a) do { \
     if (!isValid()) { \
         qWarning(function" called on a QUdpSocket when not in QUdpSocket::BoundState"); \
         return (a); \
-    } } while (0)
+    } } while (false)
 
 class QUdpSocketPrivate : public QAbstractSocketPrivate
 {
@@ -222,6 +220,6 @@ qint64 QUdpSocket::readDatagram(char *data, qint64 maxSize, QHostAddress *addres
 
    return readBytes;
 }
+
 #endif // QT_NO_UDPSOCKET
 
-QT_END_NAMESPACE

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,6 @@
 #define QSCROLLERPROPERTIES_H
 
 #include <qscopedpointer.h>
-#include <qmetatype.h>
 #include <qvariant.h>
 
 class QScroller;
@@ -35,17 +34,6 @@ class QScrollerPropertiesPrivate;
 class Q_GUI_EXPORT QScrollerProperties
 {
  public:
-   QScrollerProperties();
-   QScrollerProperties(const QScrollerProperties &sp);
-   QScrollerProperties &operator=(const QScrollerProperties &sp);
-   virtual ~QScrollerProperties();
-
-   bool operator==(const QScrollerProperties &sp) const;
-   bool operator!=(const QScrollerProperties &sp) const;
-
-   static void setDefaultScrollerProperties(const QScrollerProperties &sp);
-   static void unsetDefaultScrollerProperties();
-
    enum OvershootPolicy {
       OvershootWhenScrollable,
       OvershootAlwaysOff,
@@ -90,6 +78,19 @@ class Q_GUI_EXPORT QScrollerProperties
       ScrollMetricCount
    };
 
+   QScrollerProperties();
+   QScrollerProperties(const QScrollerProperties &sp);
+
+   virtual ~QScrollerProperties();
+
+   QScrollerProperties &operator=(const QScrollerProperties &other);
+
+   bool operator==(const QScrollerProperties &other) const;
+   bool operator!=(const QScrollerProperties &other) const;
+
+   static void setDefaultScrollerProperties(const QScrollerProperties &sp);
+   static void unsetDefaultScrollerProperties();
+
    QVariant scrollMetric(ScrollMetric metric) const;
    void setScrollMetric(ScrollMetric metric, const QVariant &value);
 
@@ -104,7 +105,6 @@ class Q_GUI_EXPORT QScrollerProperties
    friend class QScrollerPrivate;
 };
 
-Q_DECLARE_METATYPE(QScrollerProperties::OvershootPolicy)
-Q_DECLARE_METATYPE(QScrollerProperties::FrameRates)
+CS_DECLARE_METATYPE(QScrollerProperties)
 
-#endif // QSCROLLERPROPERTIES_H
+#endif

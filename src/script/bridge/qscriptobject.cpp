@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,10 +29,8 @@ ASSERT_CLASS_FITS_IN_CELL(QT_PREPEND_NAMESPACE(QScriptObject));
 ASSERT_CLASS_FITS_IN_CELL(QT_PREPEND_NAMESPACE(QScriptObjectPrototype));
 }
 
-QT_BEGIN_NAMESPACE
-
 // masquerading as JSC::JSObject
-const JSC::ClassInfo QScriptObject::info = { "Object", 0, 0, 0 };
+const JSC::ClassInfo QScriptObject::info = { "Object", nullptr, nullptr, nullptr };
 
 QScriptObject::Data::~Data()
 {
@@ -40,7 +38,7 @@ QScriptObject::Data::~Data()
 }
 
 QScriptObject::QScriptObject(WTF::PassRefPtr<JSC::Structure> sid)
-   : JSC::JSObject(sid), d(0)
+   : JSC::JSObject(sid), d(nullptr)
 {
 }
 
@@ -234,5 +232,3 @@ bool QScriptObjectDelegate::compareToObject(QScriptObject *object, JSC::ExecStat
 {
    return object->JSC::JSObject::compareToObject(exec, o);
 }
-
-QT_END_NAMESPACE

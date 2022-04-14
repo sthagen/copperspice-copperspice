@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -152,8 +152,8 @@ QString AbstractFloat<isDouble>::stringValue() const
        */
       int sign;
       int decimalPoint;
-      char *result = 0;
-      static_cast<void>(qdtoa(m_value, -1, 0, &decimalPoint, &sign, 0, &result));
+      char *result = nullptr;
+      static_cast<void>(qdtoa(m_value, -1, 0, &decimalPoint, &sign, nullptr, &result));
 
       /* If the copy constructor is used instead of QString::operator=(),
        * it doesn't compile. I have no idea why. */

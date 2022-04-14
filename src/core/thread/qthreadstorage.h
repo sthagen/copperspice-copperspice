@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qglobal.h>
 
-QT_BEGIN_NAMESPACE
-
 class Q_CORE_EXPORT QThreadStorageData
 {
  public:
@@ -44,72 +42,66 @@ class Q_CORE_EXPORT QThreadStorageData
 
 // pointer specialization
 template <typename T>
-inline
-T *&qThreadStorage_localData(QThreadStorageData &d, T **)
+inline T *&qThreadStorage_localData(QThreadStorageData &d, T **)
 {
    void **v = d.get();
-   if (!v) {
-      v = d.set(0);
+
+   if (! v) {
+      v = d.set(nullptr);
    }
    return *(reinterpret_cast<T **>(v));
 }
 
 template <typename T>
-inline
-T *qThreadStorage_localData_const(const QThreadStorageData &d, T **)
+inline T *qThreadStorage_localData_const(const QThreadStorageData &d, T **)
 {
    void **v = d.get();
-   return v ? *(reinterpret_cast<T **>(v)) : 0;
+
+   return v ? *(reinterpret_cast<T **>(v)) : nullptr;
 }
 
 template <typename T>
-inline
-void qThreadStorage_setLocalData(QThreadStorageData &d, T **t)
+inline void qThreadStorage_setLocalData(QThreadStorageData &d, T **t)
 {
    (void) d.set(*t);
 }
 
 template <typename T>
-inline
-void qThreadStorage_deleteData(void *d, T **)
+inline void qThreadStorage_deleteData(void *d, T **)
 {
    delete static_cast<T *>(d);
 }
 
 // value-based specialization
 template <typename T>
-inline
-T &qThreadStorage_localData(QThreadStorageData &d, T *)
+inline T &qThreadStorage_localData(QThreadStorageData &d, T *)
 {
    void **v = d.get();
    if (!v) {
       v = d.set(new T());
    }
+
    return *(reinterpret_cast<T *>(*v));
 }
 
 template <typename T>
-inline
-T qThreadStorage_localData_const(const QThreadStorageData &d, T *)
+inline T qThreadStorage_localData_const(const QThreadStorageData &d, T *)
 {
    void **v = d.get();
    return v ? *(reinterpret_cast<T *>(*v)) : T();
 }
 
 template <typename T>
-inline
-void qThreadStorage_setLocalData(QThreadStorageData &d, T *t)
+inline void qThreadStorage_setLocalData(QThreadStorageData &d, T *t)
 {
    (void) d.set(new T(*t));
 }
 
 template <typename T>
-inline
-void qThreadStorage_deleteData(void *d, T *)
+inline void qThreadStorage_deleteData(void *d, T *)
 {
    delete static_cast<T *>(d);
 }
-
 
 template <class T>
 class QThreadStorage
@@ -117,32 +109,33 @@ class QThreadStorage
  private:
    QThreadStorageData d;
 
-   Q_DISABLE_COPY(QThreadStorage)
-
    static inline void deleteData(void *x) {
-      qThreadStorage_deleteData(x, reinterpret_cast<T *>(0));
+      qThreadStorage_deleteData(x, static_cast<T *>(nullptr));
    }
 
  public:
    inline QThreadStorage() : d(deleteData) { }
+
+   QThreadStorage(const QThreadStorage &) = delete;
+   QThreadStorage &operator=(const QThreadStorage &) = delete;
+
    inline ~QThreadStorage() { }
 
    inline bool hasLocalData() const {
-      return d.get() != 0;
+      return d.get() != nullptr;
    }
 
    inline T &localData() {
-      return qThreadStorage_localData(d, reinterpret_cast<T *>(0));
-   }
-   inline T localData() const {
-      return qThreadStorage_localData_const(d, reinterpret_cast<T *>(0));
+      return qThreadStorage_localData(d, static_cast<T *>(nullptr));
    }
 
-   inline void setLocalData(T t) {
-      qThreadStorage_setLocalData(d, &t);
+   inline T localData() const {
+      return qThreadStorage_localData_const(d, static_cast<T *>(nullptr));
+   }
+
+   inline void setLocalData(T data) {
+      qThreadStorage_setLocalData(d, &data);
    }
 };
 
-QT_END_NAMESPACE
-
-#endif // QTHREADSTORAGE_H
+#endif

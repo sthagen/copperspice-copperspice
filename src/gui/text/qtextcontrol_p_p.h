@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,14 @@
 #ifndef QTEXTCONTROL_P_P_H
 #define QTEXTCONTROL_P_P_H
 
-#include <QtGui/qtextdocumentfragment.h>
-#include <QtGui/qscrollbar.h>
-#include <QtGui/qtextcursor.h>
-#include <QtGui/qtextformat.h>
-#include <QtGui/qmenu.h>
-#include <QtGui/qabstracttextdocumentlayout.h>
-#include <QtCore/qbasictimer.h>
-#include <QtCore/qpointer.h>
-
-
+#include <qtextdocumentfragment.h>
+#include <qscrollbar.h>
+#include <qtextcursor.h>
+#include <qtextformat.h>
+#include <qmenu.h>
+#include <qabstracttextdocumentlayout.h>
+#include <qbasictimer.h>
+#include <qpointer.h>
 
 class QMimeData;
 class QAbstractScrollArea;
@@ -59,8 +57,8 @@ class QTextControlPrivate
 
    void createAutoBulletList();
 
-   void init(Qt::TextFormat format = Qt::RichText, const QString &text = QString(), QTextDocument *document = 0);
-   void setContent(Qt::TextFormat format = Qt::RichText, const QString &text = QString(), QTextDocument *document = 0);
+   void init(Qt::TextFormat format = Qt::RichText, const QString &text = QString(), QTextDocument *document = nullptr);
+   void setContent(Qt::TextFormat format = Qt::RichText, const QString &text = QString(), QTextDocument *document = nullptr);
    void startDrag();
 
    void paste(const QMimeData *source);

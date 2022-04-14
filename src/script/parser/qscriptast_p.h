@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,13 @@
 #ifndef QSCRIPTAST_P_H
 #define QSCRIPTAST_P_H
 
-#include <QtCore/QString>
-#include "qscriptastvisitor_p.h"
-
-QT_BEGIN_NAMESPACE
+#include <qstring.h>
+#include <qscriptastvisitor_p.h>
 
 class QScriptNameIdImpl;
 
-namespace QSOperator { // ### rename
+// consider renaming
+namespace QSOperator {
 
 enum Op {
    Add,
@@ -325,18 +324,20 @@ class RegExpLiteral: public ExpressionNode
 class ArrayLiteral: public ExpressionNode
 {
  public:
-   ArrayLiteral(Elision *e):
-      elements (0), elision (e) {
+   ArrayLiteral(Elision *e)
+      : elements (nullptr), elision (e)
+   {
       kind = Kind_ArrayLiteral;
    }
 
-   ArrayLiteral(ElementList *elts):
-      elements (elts), elision (0) {
+   ArrayLiteral(ElementList *elts)
+      : elements (elts), elision (nullptr) {
       kind = Kind_ArrayLiteral;
    }
 
-   ArrayLiteral(ElementList *elts, Elision *e):
-      elements (elts), elision (e) {
+   ArrayLiteral(ElementList *elts, Elision *e)
+      : elements (elts), elision (e)
+   {
       kind = Kind_ArrayLiteral;
    }
 
@@ -352,13 +353,15 @@ class ArrayLiteral: public ExpressionNode
 class ObjectLiteral: public ExpressionNode
 {
  public:
-   ObjectLiteral():
-      properties (0) {
+   ObjectLiteral()
+      : properties (nullptr)
+   {
       kind = Kind_ObjectLiteral;
    }
 
-   ObjectLiteral(PropertyNameAndValueList *plist):
-      properties (plist) {
+   ObjectLiteral(PropertyNameAndValueList *plist)
+      : properties (plist)
+   {
       kind = Kind_ObjectLiteral;
    }
 
@@ -373,13 +376,15 @@ class ObjectLiteral: public ExpressionNode
 class ElementList: public Node
 {
  public:
-   ElementList(Elision *e, ExpressionNode *expr):
-      elision (e), expression (expr), next (this) {
+   ElementList(Elision *e, ExpressionNode *expr)
+      : elision (e), expression (expr), next (this)
+   {
       kind = Kind_ElementList;
    }
 
-   ElementList(ElementList *previous, Elision *e, ExpressionNode *expr):
-      elision (e), expression (expr) {
+   ElementList(ElementList *previous, Elision *e, ExpressionNode *expr)
+      : elision (e), expression (expr)
+   {
       kind = Kind_ElementList;
       next = previous->next;
       previous->next = this;
@@ -389,7 +394,7 @@ class ElementList: public Node
 
    inline ElementList *finish () {
       ElementList *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -421,7 +426,7 @@ class Elision: public Node
 
    inline Elision *finish () {
       Elision *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -450,7 +455,7 @@ class PropertyNameAndValueList: public Node
 
    inline PropertyNameAndValueList *finish () {
       PropertyNameAndValueList *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -620,7 +625,7 @@ class ArgumentList: public Node
 
    inline ArgumentList *finish () {
       ArgumentList *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -896,7 +901,7 @@ class StatementList: public Node
 
    inline StatementList *finish () {
       StatementList *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -960,10 +965,12 @@ class VariableDeclarationList: public Node
 
    inline VariableDeclarationList *finish (bool readOnly) {
       VariableDeclarationList *front = next;
-      next = 0;
+      next = nullptr;
+
       if (readOnly) {
          VariableDeclarationList *vdl;
-         for (vdl = front; vdl != 0; vdl = vdl->next) {
+
+         for (vdl = front; vdl != nullptr; vdl = vdl->next) {
             vdl->declaration->readOnly = true;
          }
       }
@@ -1005,8 +1012,9 @@ class ExpressionStatement: public Statement
 class IfStatement: public Statement
 {
  public:
-   IfStatement(ExpressionNode *e, Statement *t, Statement *f = 0):
-      expression (e), ok (t), ko (f) {
+   IfStatement(ExpressionNode *e, Statement *t, Statement *f = nullptr)
+      : expression (e), ok (t), ko (f)
+   {
       kind = Kind_IfStatement;
    }
 
@@ -1023,8 +1031,9 @@ class IfStatement: public Statement
 class DoWhileStatement: public Statement
 {
  public:
-   DoWhileStatement(Statement *stmt, ExpressionNode *e):
-      statement (stmt), expression (e) {
+   DoWhileStatement(Statement *stmt, ExpressionNode *e)
+      : statement (stmt), expression (e)
+   {
       kind = Kind_DoWhileStatement;
    }
 
@@ -1131,7 +1140,7 @@ class LocalForEachStatement: public Statement
 class ContinueStatement: public Statement
 {
  public:
-   ContinueStatement(QScriptNameIdImpl *l = 0):
+   ContinueStatement(QScriptNameIdImpl *l = nullptr):
       label (l) {
       kind = Kind_ContinueStatement;
    }
@@ -1147,7 +1156,7 @@ class ContinueStatement: public Statement
 class BreakStatement: public Statement
 {
  public:
-   BreakStatement(QScriptNameIdImpl *l = 0):
+   BreakStatement(QScriptNameIdImpl *l = nullptr):
       label (l) {
       kind = Kind_BreakStatement;
    }
@@ -1213,7 +1222,7 @@ class SwitchStatement: public Statement
 class CaseBlock: public Node
 {
  public:
-   CaseBlock(CaseClauses *c, DefaultClause *d = 0, CaseClauses *r = 0):
+   CaseBlock(CaseClauses *c, DefaultClause *d = nullptr, CaseClauses *r = nullptr):
       clauses (c), defaultClause (d), moreClauses (r) {
       kind = Kind_CaseBlock;
    }
@@ -1249,7 +1258,7 @@ class CaseClauses: public Node
 
    inline CaseClauses *finish () {
       CaseClauses *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -1327,18 +1336,19 @@ class ThrowStatement: public Statement
 class TryStatement: public Statement
 {
  public:
-   TryStatement(Statement *stmt, Catch *c, Finally *f):
-      statement (stmt), catchExpression (c), finallyExpression (f) {
+   TryStatement(Statement *stmt, Catch *c, Finally *f)
+      : statement (stmt), catchExpression (c), finallyExpression (f)
+   {
       kind = Kind_TryStatement;
    }
 
-   TryStatement(Statement *stmt, Finally *f):
-      statement (stmt), catchExpression (0), finallyExpression (f) {
+   TryStatement(Statement *stmt, Finally *f)
+      : statement (stmt), catchExpression (nullptr), finallyExpression (f) {
       kind = Kind_TryStatement;
    }
 
-   TryStatement(Statement *stmt, Catch *c):
-      statement (stmt), catchExpression (c), finallyExpression (0) {
+   TryStatement(Statement *stmt, Catch *c)
+      : statement (stmt), catchExpression (c), finallyExpression (nullptr) {
       kind = Kind_TryStatement;
    }
 
@@ -1437,7 +1447,7 @@ class FormalParameterList: public Node
 
    inline FormalParameterList *finish () {
       FormalParameterList *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -1499,7 +1509,7 @@ class SourceElements: public Node
 
    inline SourceElements *finish () {
       SourceElements *front = next;
-      next = 0;
+      next = nullptr;
       return front;
    }
 
@@ -1564,7 +1574,5 @@ class DebuggerStatement: public Statement
 
 }
 } // namespace AST
-
-QT_END_NAMESPACE
 
 #endif

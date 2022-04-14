@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QDATETIMEEDIT_H
 #define QDATETIMEEDIT_H
 
-#include <QtCore/qdatetime.h>
-#include <QtCore/qvariant.h>
-#include <QtGui/qabstractspinbox.h>
+#include <qdatetime.h>
+#include <qvariant.h>
+#include <qabstractspinbox.h>
 
 #ifndef QT_NO_DATETIMEEDIT
 
@@ -45,64 +45,84 @@ class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
    GUI_CS_PROPERTY_WRITE(dateTime, setDateTime)
    GUI_CS_PROPERTY_NOTIFY(dateTime, dateTimeChanged)
    GUI_CS_PROPERTY_USER(dateTime, true)
+
    GUI_CS_PROPERTY_READ(date, date)
    GUI_CS_PROPERTY_WRITE(date, setDate)
    GUI_CS_PROPERTY_NOTIFY(date, dateChanged)
+
    GUI_CS_PROPERTY_READ(time, time)
    GUI_CS_PROPERTY_WRITE(time, setTime)
    GUI_CS_PROPERTY_NOTIFY(time, timeChanged)
+
    GUI_CS_PROPERTY_READ(maximumDateTime, maximumDateTime)
    GUI_CS_PROPERTY_WRITE(maximumDateTime, setMaximumDateTime)
    GUI_CS_PROPERTY_RESET(maximumDateTime, clearMaximumDateTime)
+
    GUI_CS_PROPERTY_READ(minimumDateTime, minimumDateTime)
    GUI_CS_PROPERTY_WRITE(minimumDateTime, setMinimumDateTime)
    GUI_CS_PROPERTY_RESET(minimumDateTime, clearMinimumDateTime)
+
    GUI_CS_PROPERTY_READ(maximumDate, maximumDate)
    GUI_CS_PROPERTY_WRITE(maximumDate, setMaximumDate)
    GUI_CS_PROPERTY_RESET(maximumDate, clearMaximumDate)
+
    GUI_CS_PROPERTY_READ(minimumDate, minimumDate)
    GUI_CS_PROPERTY_WRITE(minimumDate, setMinimumDate)
    GUI_CS_PROPERTY_RESET(minimumDate, clearMinimumDate)
+
    GUI_CS_PROPERTY_READ(maximumTime, maximumTime)
    GUI_CS_PROPERTY_WRITE(maximumTime, setMaximumTime)
    GUI_CS_PROPERTY_RESET(maximumTime, clearMaximumTime)
+
    GUI_CS_PROPERTY_READ(minimumTime, minimumTime)
    GUI_CS_PROPERTY_WRITE(minimumTime, setMinimumTime)
    GUI_CS_PROPERTY_RESET(minimumTime, clearMinimumTime)
+
    GUI_CS_PROPERTY_READ(currentSection, currentSection)
    GUI_CS_PROPERTY_WRITE(currentSection, setCurrentSection)
+
    GUI_CS_PROPERTY_READ(displayedSections, displayedSections)
+
    GUI_CS_PROPERTY_READ(displayFormat, displayFormat)
    GUI_CS_PROPERTY_WRITE(displayFormat, setDisplayFormat)
+
    GUI_CS_PROPERTY_READ(calendarPopup, calendarPopup)
    GUI_CS_PROPERTY_WRITE(calendarPopup, setCalendarPopup)
+
    GUI_CS_PROPERTY_READ(currentSectionIndex, currentSectionIndex)
    GUI_CS_PROPERTY_WRITE(currentSectionIndex, setCurrentSectionIndex)
+
    GUI_CS_PROPERTY_READ(sectionCount, sectionCount)
+
    GUI_CS_PROPERTY_READ(timeSpec, timeSpec)
    GUI_CS_PROPERTY_WRITE(timeSpec, setTimeSpec)
 
  public:
-   enum Section {
-      NoSection = 0x0000,
-      AmPmSection = 0x0001,
-      MSecSection = 0x0002,
-      SecondSection = 0x0004,
-      MinuteSection = 0x0008,
-      HourSection   = 0x0010,
-      DaySection    = 0x0100,
-      MonthSection  = 0x0200,
-      YearSection   = 0x0400,
-      TimeSections_Mask = AmPmSection | MSecSection | SecondSection | MinuteSection | HourSection,
-      DateSections_Mask = DaySection | MonthSection | YearSection
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum Section {
+         NoSection     = 0x0000,
+         AmPmSection   = 0x0001,
+         MSecSection   = 0x0002,
+         SecondSection = 0x0004,
+         MinuteSection = 0x0008,
+         HourSection   = 0x0010,
+         DaySection    = 0x0100,
+         MonthSection  = 0x0200,
+         YearSection   = 0x0400,
+         TimeSections_Mask = AmPmSection | MSecSection | SecondSection | MinuteSection | HourSection,
+         DateSections_Mask = DaySection | MonthSection | YearSection
+      };
+   )
 
    using Sections = QFlags<Section>;
 
    explicit QDateTimeEdit(QWidget *parent = nullptr);
-   explicit QDateTimeEdit(const QDateTime &dt, QWidget *parent = nullptr);
-   explicit QDateTimeEdit(const QDate &d, QWidget *parent = nullptr);
-   explicit QDateTimeEdit(const QTime &t, QWidget *parent = nullptr);
+   explicit QDateTimeEdit(const QDateTime &datetime, QWidget *parent = nullptr);
+   explicit QDateTimeEdit(const QDate &date, QWidget *parent = nullptr);
+   explicit QDateTimeEdit(const QTime &time, QWidget *parent = nullptr);
+
+   QDateTimeEdit(const QDateTimeEdit &) = delete;
+   QDateTimeEdit &operator=(const QDateTimeEdit &) = delete;
 
    ~QDateTimeEdit();
 
@@ -173,19 +193,21 @@ class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
 
    bool event(QEvent *event) override;
 
-   GUI_CS_SIGNAL_1(Public, void dateTimeChanged(const QDateTime &date))
-   GUI_CS_SIGNAL_2(dateTimeChanged, date)
+   GUI_CS_SIGNAL_1(Public, void dateTimeChanged(const QDateTime &datetime))
+   GUI_CS_SIGNAL_2(dateTimeChanged, datetime)
 
-   GUI_CS_SIGNAL_1(Public, void timeChanged(const QTime &date))
-   GUI_CS_SIGNAL_2(timeChanged, date)
+   GUI_CS_SIGNAL_1(Public, void timeChanged(const QTime &time))
+   GUI_CS_SIGNAL_2(timeChanged, time)
 
    GUI_CS_SIGNAL_1(Public, void dateChanged(const QDate &date))
    GUI_CS_SIGNAL_2(dateChanged, date)
 
-   GUI_CS_SLOT_1(Public, void setDateTime(const QDateTime &dateTime))
+   GUI_CS_SLOT_1(Public, void setDateTime(const QDateTime &datetime))
    GUI_CS_SLOT_2(setDateTime)
+
    GUI_CS_SLOT_1(Public, void setDate(const QDate &date))
    GUI_CS_SLOT_2(setDate)
+
    GUI_CS_SLOT_1(Public, void setTime(const QTime &time))
    GUI_CS_SLOT_2(setTime)
 
@@ -202,7 +224,7 @@ class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
    void fixup(QString &input) const override;
 
    virtual QDateTime dateTimeFromText(const QString &text) const;
-   virtual QString textFromDateTime(const QDateTime &dt) const;
+   virtual QString textFromDateTime(const QDateTime &datetime) const;
 
    StepEnabled stepEnabled() const override;
    void mousePressEvent(QMouseEvent *event) override;
@@ -213,7 +235,6 @@ class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
 
  private:
    Q_DECLARE_PRIVATE(QDateTimeEdit)
-   Q_DISABLE_COPY(QDateTimeEdit)
 
    GUI_CS_SLOT_1(Private, void _q_resetButton())
    GUI_CS_SLOT_2(_q_resetButton)
@@ -222,7 +243,6 @@ class Q_GUI_EXPORT QDateTimeEdit : public QAbstractSpinBox
 class Q_GUI_EXPORT QTimeEdit : public QDateTimeEdit
 {
    GUI_CS_OBJECT(QTimeEdit)
-
 
    GUI_CS_PROPERTY_READ(time, time)
    GUI_CS_PROPERTY_WRITE(time, setTime)
@@ -242,8 +262,8 @@ class Q_GUI_EXPORT QDateEdit : public QDateTimeEdit
 {
    GUI_CS_OBJECT(QDateEdit)
 
-   GUI_CS_PROPERTY_READ(data, date)
-   GUI_CS_PROPERTY_WRITE(data, setDate)
+   GUI_CS_PROPERTY_READ(date, date)
+   GUI_CS_PROPERTY_WRITE(date, setDate)
    GUI_CS_PROPERTY_NOTIFY(date, userDateChanged)
    GUI_CS_PROPERTY_USER(date, true)
 
@@ -251,6 +271,7 @@ class Q_GUI_EXPORT QDateEdit : public QDateTimeEdit
    explicit QDateEdit(QWidget *parent = nullptr);
    explicit QDateEdit(const QDate &date, QWidget *parent = nullptr);
    ~QDateEdit();
+
    GUI_CS_SIGNAL_1(Public, void userDateChanged(const QDate &date))
    GUI_CS_SIGNAL_2(userDateChanged, date)
 };
@@ -259,6 +280,4 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QDateTimeEdit::Sections)
 
 #endif // QT_NO_DATETIMEEDIT
 
-
-
-#endif // QDATETIMEEDIT_H
+#endif

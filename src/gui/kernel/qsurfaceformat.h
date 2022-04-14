@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,7 +39,7 @@ class Q_GUI_EXPORT QSurfaceFormat
       DeprecatedFunctions      = 0x0004,
       ResetNotification        = 0x0008
    };
-   Q_DECLARE_FLAGS(FormatOptions, FormatOption)
+   using FormatOptions = QFlags<FormatOption>;
 
    enum SwapBehavior {
       DefaultSwapBehavior,
@@ -52,7 +52,7 @@ class Q_GUI_EXPORT QSurfaceFormat
       DefaultRenderableType = 0x0,
       OpenGL                = 0x1,
       OpenGLES              = 0x2,
-      OpenVG                = 0x4
+      OpenVG                = 0x4      // not documented
    };
 
    enum OpenGLContextProfile {
@@ -124,14 +124,14 @@ class Q_GUI_EXPORT QSurfaceFormat
 
    void detach();
 
-   friend Q_GUI_EXPORT bool operator==(const QSurfaceFormat &, const QSurfaceFormat &);
-   friend Q_GUI_EXPORT bool operator!=(const QSurfaceFormat &, const QSurfaceFormat &);
+   friend Q_GUI_EXPORT bool operator==(const QSurfaceFormat &a, const QSurfaceFormat &b);
+   friend Q_GUI_EXPORT bool operator!=(const QSurfaceFormat &a, const QSurfaceFormat &b);
 
    friend Q_GUI_EXPORT QDebug operator<<(QDebug, const QSurfaceFormat &);
 };
 
-Q_GUI_EXPORT bool operator==(const QSurfaceFormat &, const QSurfaceFormat &);
-Q_GUI_EXPORT bool operator!=(const QSurfaceFormat &, const QSurfaceFormat &);
+Q_GUI_EXPORT bool operator==(const QSurfaceFormat &a, const QSurfaceFormat &b);
+Q_GUI_EXPORT bool operator!=(const QSurfaceFormat &a, const QSurfaceFormat &b);
 
 Q_GUI_EXPORT QDebug operator<<(QDebug, const QSurfaceFormat &);
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,15 +24,15 @@
 #ifndef QPOLYGONCLIPPER_P_H
 #define QPOLYGONCLIPPER_P_H
 
-#include <qdatabuffer_p.h>
+#include <qvector.h>
 
 /* based on sutherland-hodgman line-by-line clipping, as described in
    Computer Graphics and Principles */
 template <typename InType, typename OutType, typename CastType> class QPolygonClipper
 {
  public:
-   QPolygonClipper() :
-      buffer1(0), buffer2(0) {
+   QPolygonClipper()
+   {
       x1 = y1 = x2 = y2 = 0;
    }
 
@@ -94,12 +94,13 @@ template <typename InType, typename OutType, typename CastType> class QPolygonCl
       buffer1.reset();
       buffer2.reset();
 
-      QDataBuffer<OutType> *source = &buffer1;
-      QDataBuffer<OutType> *clipped = &buffer2;
+      QVector<OutType> *source  = &buffer1;
+      QVector<OutType> *clipped = &buffer2;
 
       // Gather some info since we are iterating through the points anyway..
       bool doLeft = false, doRight = false, doTop = false, doBottom = false;
       OutType ot;
+
       for (int i = 0; i < inCount; ++i) {
          ot = inPoints[i];
          clipped->add(ot);
@@ -117,7 +118,8 @@ template <typename InType, typename OutType, typename CastType> class QPolygonCl
       }
 
       if (doLeft && clipped->size() > 1) {
-         QDataBuffer<OutType> *tmp = source;
+         QVector<OutType> *tmp = source;
+
          source = clipped;
          clipped = tmp;
          clipped->reset();
@@ -151,7 +153,8 @@ template <typename InType, typename OutType, typename CastType> class QPolygonCl
       }
 
       if (doRight && clipped->size() > 1) {
-         QDataBuffer<OutType> *tmp = source;
+         QVector<OutType> *tmp = source;
+
          source = clipped;
          clipped = tmp;
          clipped->reset();
@@ -187,7 +190,8 @@ template <typename InType, typename OutType, typename CastType> class QPolygonCl
       }
 
       if (doTop && clipped->size() > 1) {
-         QDataBuffer<OutType> *tmp = source;
+         QVector<OutType> *tmp = source;
+
          source = clipped;
          clipped = tmp;
          clipped->reset();
@@ -222,7 +226,8 @@ template <typename InType, typename OutType, typename CastType> class QPolygonCl
       }
 
       if (doBottom && clipped->size() > 1) {
-         QDataBuffer<OutType> *tmp = source;
+         QVector<OutType> *tmp = source;
+
          source = clipped;
          clipped = tmp;
          clipped->reset();
@@ -268,9 +273,13 @@ template <typename InType, typename OutType, typename CastType> class QPolygonCl
    }
 
  private:
-   int x1, x2, y1, y2;
-   QDataBuffer<OutType> buffer1;
-   QDataBuffer<OutType> buffer2;
+   int x1;
+   int x2;
+   int y1;
+   int y2;
+
+   QVector<OutType> buffer1;
+   QVector<OutType> buffer2;
 };
 
 #endif // QPOLYGONCLIPPER_P_H

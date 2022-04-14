@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -231,7 +231,7 @@ QLocalSocket *QLocalServer::nextPendingConnection()
 {
    Q_D(QLocalServer);
    if (d->pendingConnections.isEmpty()) {
-      return 0;
+      return nullptr;
    }
    QLocalSocket *nextSocket = d->pendingConnections.dequeue();
 

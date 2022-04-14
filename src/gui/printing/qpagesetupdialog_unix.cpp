@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,9 +26,6 @@
 
 #ifndef QT_NO_PRINTDIALOG
 
-#include <qpagesetupdialog_unix_p.h>
-#include <qprintdevice_p.h>
-#include <qcups_p.h>
 #include <qpainter.h>
 #include <qprintdialog.h>
 #include <qdialogbuttonbox.h>
@@ -38,6 +35,9 @@
 #include <ui_qpagesetupwidget.h>
 
 #include <qprinter_p.h>
+#include <qpagesetupdialog_unix_p.h>
+#include <qprintdevice_p.h>
+#include <qcups_p.h>
 
 // Disabled until we have support for papersources on unix
 // #define PSD_ENABLE_PAPERSOURCE
@@ -197,15 +197,11 @@ void QUnixPageSetupDialogPrivate::init()
 }
 
 QPageSetupWidget::QPageSetupWidget(QWidget *parent)
-   : QWidget(parent),
-     m_pagePreview(0),
-     m_printer(0),
+   : QWidget(parent), m_pagePreview(nullptr), m_printer(nullptr),
      m_outputFormat(QPrinter::OutputFormat::PdfFormat),
-     m_units(QPageSize::Unit::Point),
-     m_blockSignals(false)
+     m_units(QPageSize::Unit::Point), m_blockSignals(false)
 {
    m_ui.setupUi(this);
-
 
    QVBoxLayout *lay = new QVBoxLayout(m_ui.preview);
    m_ui.preview->setLayout(lay);
@@ -406,10 +402,12 @@ void QPageSetupWidget::updateWidget()
       case QPageSize::Unit::Cicero:
          suffix = tr("CC");
          break;
+
+      case QPageSize::Unit::DevicePixel:
+         break;
    }
 
    m_ui.unitCombo->setCurrentIndex(m_ui.unitCombo->findData(QVariant::fromValue(m_units)));
-
    m_ui.pageSizeCombo->setCurrentIndex(m_ui.pageSizeCombo->findData(QVariant::fromValue(m_pageLayout.pageSize().id())));
 
    QMarginsF min;
@@ -607,7 +605,7 @@ QPageSetupDialog::QPageSetupDialog(QPrinter *printer, QWidget *parent)
 }
 
 QPageSetupDialog::QPageSetupDialog(QWidget *parent)
-   : QDialog(*(new QUnixPageSetupDialogPrivate(0)), parent)
+   : QDialog(*(new QUnixPageSetupDialogPrivate(nullptr)), parent)
 {
    Q_D(QPageSetupDialog);
    setWindowTitle(QCoreApplication::translate("QPrintPreviewDialog", "Page Setup"));
@@ -622,6 +620,7 @@ int QPageSetupDialog::exec()
    if (ret == Accepted) {
       static_cast <QUnixPageSetupDialogPrivate *>(d)->widget->setupPrinter();
    }
+
    return ret;
 }
 

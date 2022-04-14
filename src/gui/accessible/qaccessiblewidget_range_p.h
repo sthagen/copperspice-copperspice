@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qaccessiblewidget.h>
 
-QT_BEGIN_NAMESPACE
-
 #ifndef QT_NO_ACCESSIBILITY
 
 class QAbstractSpinBox;
@@ -40,11 +38,9 @@ class QDial;
 class QAccessibleLineEdit;
 
 #ifndef QT_NO_SPINBOX
-class QAccessibleAbstractSpinBox:
-   public QAccessibleWidget,
-   public QAccessibleValueInterface,
-   public QAccessibleTextInterface,
-   public QAccessibleEditableTextInterface
+
+class QAccessibleAbstractSpinBox : public QAccessibleWidget, public QAccessibleValueInterface,
+            public QAccessibleTextInterface, public QAccessibleEditableTextInterface
 {
  public:
    explicit QAccessibleAbstractSpinBox(QWidget *w);
@@ -68,6 +64,7 @@ class QAccessibleAbstractSpinBox:
    int selectionCount() const override;
    int offsetAtPoint(const QPoint &point) const override;
    void selection(int selectionIndex, int *startOffset, int *endOffset) const override;
+
    QString text(int startOffset, int endOffset) const override;
    QString textBeforeOffset (int offset, QAccessible::TextBoundaryType boundaryType,
       int *endOffset, int *startOffset) const override;
@@ -89,6 +86,7 @@ class QAccessibleAbstractSpinBox:
  protected:
    QAbstractSpinBox *abstractSpinBox() const;
    QAccessibleInterface *lineEditIface() const;
+
  private:
    mutable QAccessibleLineEdit *lineEdit;
 };
@@ -110,6 +108,7 @@ class QAccessibleDoubleSpinBox : public QAccessibleAbstractSpinBox
    QString text(QAccessible::Text t) const override;
 
    using QAccessibleAbstractSpinBox::text;
+
  protected:
    QDoubleSpinBox *doubleSpinBox() const;
 };
@@ -142,7 +141,7 @@ class QAccessibleScrollBar : public QAccessibleAbstractSlider
  protected:
    QScrollBar *scrollBar() const;
 };
-#endif // QT_NO_SCROLLBAR
+#endif
 
 #ifndef QT_NO_SLIDER
 class QAccessibleSlider : public QAccessibleAbstractSlider
@@ -154,7 +153,7 @@ class QAccessibleSlider : public QAccessibleAbstractSlider
  protected:
    QSlider *slider() const;
 };
-#endif // QT_NO_SLIDER
+#endif
 
 #ifndef QT_NO_DIAL
 class QAccessibleDial : public QAccessibleAbstractSlider
@@ -167,10 +166,8 @@ class QAccessibleDial : public QAccessibleAbstractSlider
  protected:
    QDial *dial() const;
 };
-#endif // QT_NO_DIAL
+#endif
 
 #endif // QT_NO_ACCESSIBILITY
 
-QT_END_NAMESPACE
-
-#endif // RANGECONTROLS_H
+#endif

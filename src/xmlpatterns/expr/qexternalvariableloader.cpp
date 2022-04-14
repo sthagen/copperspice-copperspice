@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,22 +27,20 @@
 
 #include "qexternalvariableloader_p.h"
 
-QT_BEGIN_NAMESPACE
-
 using namespace QPatternist;
 
 ExternalVariableLoader::~ExternalVariableLoader()
 {
 }
 
-
 SequenceType::Ptr ExternalVariableLoader::announceExternalVariable(const QXmlName name,
       const SequenceType::Ptr &declaredType)
 {
    Q_ASSERT(!name.isNull());
    Q_ASSERT(declaredType);
-   Q_UNUSED(name); /* Needed when compiling in release mode. */
-   Q_UNUSED(declaredType); /* Needed when compiling in release mode. */
+
+   (void) name;
+   (void) declaredType;
 
    return SequenceType::Ptr();
 }
@@ -74,4 +72,3 @@ bool ExternalVariableLoader::evaluateEBV(const QXmlName name,
    return Boolean::evaluateEBV(evaluateSequence(name, context), context);
 }
 
-QT_END_NAMESPACE

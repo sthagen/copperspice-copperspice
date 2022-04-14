@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -106,14 +106,19 @@ class Q_CORE_EXPORT QWindowsPipeWriter : public QObject
     void notified(DWORD errorCode, DWORD numberOfBytesWritten);
     bool waitForNotification(int timeout);
     void emitPendingBytesWrittenValue();
+
     class Overlapped : public OVERLAPPED
     {
-        Q_DISABLE_COPY(Overlapped)
-    public:
+      public:
         explicit Overlapped(QWindowsPipeWriter *pipeWriter);
+
+        Overlapped(const Overlapped &) = delete;
+        Overlapped &operator=(const Overlapped &) = delete;
+
         void clear();
         QWindowsPipeWriter *pipeWriter;
     };
+
     HANDLE handle;
     Overlapped overlapped;
     QByteArray buffer;

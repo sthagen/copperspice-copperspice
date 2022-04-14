@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,6 @@
 #include <qrgba64_p.h>
 
 #include <math.h>
-
-
 
 #define toF26Dot6(x) ((int)((x)*64.))
 
@@ -187,30 +185,38 @@ static StrokeLine strokeLine(int strokeSelection)
       case Aliased|Solid|RegularDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLine)<drawPixel, NoDasher>;
          break;
+
       case Aliased|Solid|FastDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLine)<drawPixelARGB32Opaque, NoDasher>;
          break;
+
       case Aliased|Dashed|RegularDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLine)<drawPixel, Dasher>;
          break;
+
       case Aliased|Dashed|FastDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLine)<drawPixelARGB32Opaque, Dasher>;
          break;
+
       case AntiAliased|Solid|RegularDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLineAA)<drawPixel, NoDasher>;
          break;
+
       case AntiAliased|Solid|FastDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLineAA)<drawPixelARGB32, NoDasher>;
          break;
+
       case AntiAliased|Dashed|RegularDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLineAA)<drawPixel, Dasher>;
          break;
+
       case AntiAliased|Dashed|FastDraw:
          stroke = &QT_PREPEND_NAMESPACE(drawLineAA)<drawPixelARGB32, Dasher>;
          break;
+
       default:
          Q_ASSERT(false);
-         stroke = 0;
+         stroke = nullptr;
    }
    return stroke;
 }
@@ -224,11 +230,10 @@ void QCosmeticStroker::setup()
    }
 
    int strokeSelection = 0;
-   if (blend == state->penData.unclipped_blend
-      && state->penData.type == QSpanData::Solid
-      && (state->penData.rasterBuffer->format == QImage::Format_ARGB32_Premultiplied
-         || state->penData.rasterBuffer->format == QImage::Format_RGB32)
-      && state->compositionMode() == QPainter::CompositionMode_SourceOver) {
+   if (blend == state->penData.unclipped_blend && state->penData.type == QSpanData::Solid
+            && (state->penData.rasterBuffer->format == QImage::Format_ARGB32_Premultiplied
+            || state->penData.rasterBuffer->format == QImage::Format_RGB32)
+            && state->compositionMode() == QPainter::CompositionMode_SourceOver) {
       strokeSelection |= FastDraw;
    }
 
@@ -239,32 +244,38 @@ void QCosmeticStroker::setup()
    const QVector<qreal> &penPattern = state->lastPen.dashPattern();
    if (penPattern.isEmpty()) {
       Q_ASSERT(!pattern && !reversePattern);
-      pattern = 0;
-      reversePattern = 0;
-      patternLength = 0;
-      patternSize = 0;
+      pattern        = nullptr;
+      reversePattern = nullptr;
+      patternLength  = 0;
+      patternSize    = 0;
+
    } else {
       pattern = (int *)malloc(penPattern.size() * sizeof(int));
       reversePattern = (int *)malloc(penPattern.size() * sizeof(int));
-      patternSize = penPattern.size();
+      patternSize    = penPattern.size();
 
       patternLength = 0;
+
       for (int i = 0; i < patternSize; ++i) {
-         patternLength += (int) qMax(1., penPattern.at(i) * 64.);
+         patternLength += (int) qMax(1.0, penPattern.at(i) * 64.0);
          pattern[i] = patternLength;
       }
+
       patternLength = 0;
+
       for (int i = 0; i < patternSize; ++i) {
-         patternLength += (int) qMax(1., penPattern.at(patternSize - 1 - i) * 64.);
+         patternLength += (int) qMax(1.0, penPattern.at(patternSize - 1 - i) * 64.0);
          reversePattern[i] = patternLength;
       }
+
       strokeSelection |= Dashed;
-      //        qDebug() << "setup: size=" << patternSize << "length=" << patternLength/64.;
+      // qDebug() << "setup: size=" << patternSize << "length=" << patternLength/64.;
    }
 
    stroke = strokeLine(strokeSelection);
 
    qreal width = state->lastPen.widthF();
+
    if (width == 0) {
       opacity = 256;
    } else if (qt_pen_is_cosmetic(state->lastPen, state->renderHints))  {
@@ -272,6 +283,7 @@ void QCosmeticStroker::setup()
    } else {
       opacity = (int) 256 * width * state->txscale;
    }
+
    opacity = qBound(0, opacity, 256);
 
    drawCaps = state->lastPen.capStyle() != Qt::FlatCap;
@@ -376,26 +388,28 @@ void QCosmeticStroker::drawLine(const QPointF &p1, const QPointF &p2)
    current_span = 0;
 }
 
-void QCosmeticStroker::drawPoints(const QPoint *points, int num)
+void QCosmeticStroker::drawPoints(const QPoint *pointPtr, int pointCount)
 {
-   const QPoint *end = points + num;
-   while (points < end) {
-      QPointF p = QPointF(*points) * state->matrix;
+   const QPoint *end = pointPtr + pointCount;
+
+   while (pointPtr < end) {
+      QPointF p = QPointF(*pointPtr) * state->matrix;
       drawPixel(this, qRound(p.x()), qRound(p.y()), 255);
-      ++points;
+      ++pointPtr;
    }
 
    blend(current_span, spans, &state->penData);
    current_span = 0;
 }
 
-void QCosmeticStroker::drawPoints(const QPointF *points, int num)
+void QCosmeticStroker::drawPoints(const QPointF *pointPtr, int pointCount)
 {
-   const QPointF *end = points + num;
-   while (points < end) {
-      QPointF p = (*points) * state->matrix;
+   const QPointF *end = pointPtr + pointCount;
+
+   while (pointPtr < end) {
+      QPointF p = (*pointPtr) * state->matrix;
       drawPixel(this, qRound(p.x()), qRound(p.y()), 255);
-      ++points;
+      ++pointPtr;
    }
 
    blend(current_span, spans, &state->penData);
@@ -495,8 +509,7 @@ void QCosmeticStroker::calculateLastPoint(qreal rx1, qreal ry1, qreal rx2, qreal
 }
 
 static inline const QPainterPath::ElementType *subPath(const QPainterPath::ElementType *t,
-   const QPainterPath::ElementType *end,
-   const qreal *points, bool *closed)
+      const QPainterPath::ElementType *end, const qreal *points, bool *closed)
 {
    const QPainterPath::ElementType *start = t;
    ++t;
@@ -588,9 +601,12 @@ void QCosmeticStroker::drawPath(const QVectorPath &path)
             caps = NoCaps;
          }
       }
-   } else { // !type, simple polygon
+
+   } else {
+      // !type, simple polygon
       QPointF p = QPointF(points[0], points[1]) * state->matrix;
       QPointF movedTo = p;
+
       patternOffset = state->lastPen.dashOffset() * 64;
       lastPixel.x = INT_MIN;
       lastPixel.y = INT_MIN;
@@ -600,6 +616,7 @@ void QCosmeticStroker::drawPath(const QVectorPath &path)
       // handle closed path case
       bool closed = path.hasImplicitClose() || (points[0] == end[-2] && points[1] == end[-1]);
       int caps = (!closed & drawCaps) ? CapBegin : NoCaps;
+
       if (closed) {
          QPointF p2 = QPointF(end[-2], end[-1]) * state->matrix;
          calculateLastPoint(p2.x(), p2.y(), p.x(), p.y());

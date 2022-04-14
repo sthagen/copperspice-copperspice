@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,20 +34,21 @@
 #include <arpa/nameser_compat.h>
 #include <resolv.h>
 
-#if defined(__GNU_LIBRARY__) && !defined(__UCLIBC__)
+#if defined(__GNU_LIBRARY__) && ! defined(__UCLIBC__)
 #  include <gnu/lib-names.h>
 #endif
 
-QT_BEGIN_NAMESPACE
-
 typedef int (*dn_expand_proto)(const unsigned char *, const unsigned char *, const unsigned char *, char *, int);
-static dn_expand_proto local_dn_expand = 0;
+static dn_expand_proto local_dn_expand = nullptr;
+
 typedef void (*res_nclose_proto)(res_state);
-static res_nclose_proto local_res_nclose = 0;
+static res_nclose_proto local_res_nclose = nullptr;
+
 typedef int (*res_ninit_proto)(res_state);
-static res_ninit_proto local_res_ninit = 0;
+static res_ninit_proto local_res_ninit = nullptr;
+
 typedef int (*res_nquery_proto)(res_state, const char *, int, int, unsigned char *, int);
-static res_nquery_proto local_res_nquery = 0;
+static res_nquery_proto local_res_nquery = nullptr;
 
 // Custom deleter to close resolver state.
 
@@ -110,7 +111,8 @@ void QDnsLookupRunnable::query(const int requestType, const QByteArray &requestN
    static std::atomic<bool> triedResolve(false);
 
    if (! triedResolve.load()) {
-      QMutexLocker locker(QMutexPool::globalInstanceGet(&local_res_ninit));
+      QRecursiveMutexLocker locker(QMutexPool::globalInstanceGet(&local_res_ninit));
+
       if (!triedResolve.load()) {
          resolveLibraryInternal();
          triedResolve.store(true);

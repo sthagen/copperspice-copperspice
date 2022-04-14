@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -59,7 +59,7 @@ class QLibraryHandle
    void setLoadHints(QLibrary::LoadHints lh);
 
    static QLibraryHandle *findOrLoad(const QString &fileName, const QString &version = QString(),
-                  QLibrary::LoadHints loadHints = 0);
+                  QLibrary::LoadHints loadHints = Qt::EmptyFlag);
 
    static QStringList suffixes_sys(const QString &fullVersion);
    static QStringList prefixes_sys();

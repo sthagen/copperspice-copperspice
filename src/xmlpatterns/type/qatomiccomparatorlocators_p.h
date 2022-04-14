@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #define QAtomicComparatorLocators_P_H
 
 #include <qatomiccomparatorlocator_p.h>
-
-QT_BEGIN_NAMESPACE
 
 namespace QPatternist {
 
@@ -76,7 +74,7 @@ class DecimalComparatorLocator : public AtomicComparatorLocator
 class IntegerComparatorLocator : public AtomicComparatorLocator
 {
    using AtomicComparatorLocator::visit;
-  
+
    AtomicTypeVisitorResult::Ptr visit(const DoubleType *,
          const qint16 op, const SourceLocationReflection *const) const override;
    AtomicTypeVisitorResult::Ptr visit(const FloatType *,
@@ -246,7 +244,5 @@ class YearMonthDurationComparatorLocator : public AtomicComparatorLocator
          const qint16 op, const SourceLocationReflection *const) const override;
 };
 }
-
-QT_END_NAMESPACE
 
 #endif

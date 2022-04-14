@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,15 +32,14 @@
 
 #include <qopengl.h>
 #include <qopenglcontext.h>
-#include <QMatrix4x4>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLContext>
-#include <QOpenGLFunctions>
+#include <qmatrix4x4.h>
+#include <qopengl_shaderprogram.h>
+#include <qopenglcontext.h>
+#include <qopenglfunctions.h>
 
 #ifndef QT_NO_OPENGL
-#include <qopengltextureblitter_p.h>
+#include <qopengl_textureblitter_p.h>
 #endif
-
 
 #ifndef GL_TEXTURE_BASE_LEVEL
 #define GL_TEXTURE_BASE_LEVEL             0x813C
@@ -68,8 +67,7 @@ class QPlatformBackingStorePrivate
    QPlatformBackingStorePrivate(QWindow *w)
       : window(w)
 #ifndef QT_NO_OPENGL
-      , textureId(0)
-      , blitter(0)
+      , textureId(0), blitter(nullptr)
 #endif
    {
    }
@@ -338,11 +336,13 @@ void QPlatformBackingStore::composeAndFlush(QWindow *window, const QRegion &regi
          origin = QOpenGLTextureBlitter::OriginBottomLeft;
       }
       textureId = d_ptr->textureId;
+
    } else {
-      TextureFlags flags = 0;
+      TextureFlags flags = Qt::EmptyFlag;
       textureId = toTexture(deviceRegion(region, window, offset), &d_ptr->textureSize, &flags);
       d_ptr->needsSwizzle = (flags & TextureSwizzle) != 0;
       d_ptr->premultiplied = (flags & TexturePremultiplied) != 0;
+
       if (flags & TextureFlip) {
          origin = QOpenGLTextureBlitter::OriginBottomLeft;
       }
@@ -402,7 +402,7 @@ GLuint QPlatformBackingStore::toTexture(const QRegion &dirtyRegion, QSize *textu
    GLuint pixelType = GL_UNSIGNED_BYTE;
 
    bool needsConversion = false;
-   *flags = 0;
+   *flags = Qt::EmptyFlag;
 
    switch (image.format()) {
       case QImage::Format_ARGB32_Premultiplied:

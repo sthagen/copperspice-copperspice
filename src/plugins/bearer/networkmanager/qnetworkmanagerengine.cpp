@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,7 @@
 #include <qnetworkconfiguration_p.h>
 #include <qnetworksession.h>
 
-#include <QtCore/qdebug.h>
+#include <qdebug.h>
 
 #include <QtDBus>
 #include <QDBusConnection>
@@ -386,7 +386,7 @@ void QNetworkManagerEngine::newConnection(const QDBusObjectPath &path,
     QMutexLocker locker(&mutex);
 
     if (!settings)
-        settings = qobject_cast<QNetworkManagerSettings *>(sender());
+        settings = dynamic_cast<QNetworkManagerSettings *>(sender());
 
     if (!settings)
         return;
@@ -432,7 +432,7 @@ void QNetworkManagerEngine::removeConnection(const QString &path)
     Q_UNUSED(path)
 
     QNetworkManagerSettingsConnection *connection =
-        qobject_cast<QNetworkManagerSettingsConnection *>(sender());
+        dynamic_cast<QNetworkManagerSettingsConnection *>(sender());
     if (!connection)
         return;
 
@@ -454,7 +454,7 @@ void QNetworkManagerEngine::updateConnection(const QNmSettingsMap &settings)
     QMutexLocker locker(&mutex);
 
     QNetworkManagerSettingsConnection *connection =
-        qobject_cast<QNetworkManagerSettingsConnection *>(sender());
+        dynamic_cast<QNetworkManagerSettingsConnection *>(sender());
     if (!connection)
         return;
 
@@ -650,7 +650,7 @@ void QNetworkManagerEngine::updateAccessPoint(const QMap<QString, QVariant> &map
     Q_UNUSED(map)
 
     QNetworkManagerInterfaceAccessPoint *accessPoint =
-        qobject_cast<QNetworkManagerInterfaceAccessPoint *>(sender());
+        dynamic_cast<QNetworkManagerInterfaceAccessPoint *>(sender());
     if (!accessPoint)
         return;
 

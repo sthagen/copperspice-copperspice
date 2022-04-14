@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,7 @@ struct Q_GUI_EXPORT QImageData {        // internal image data
 
    static QImageData *create(const QSize &size, QImage::Format format);
    static QImageData *create(uchar *data, int w, int h,  int bpl, QImage::Format format, bool readOnly,
-      QImageCleanupFunction cleanupFunction = 0, void *cleanupInfo = 0);
+      QImageCleanupFunction cleanupFunction = nullptr, void *cleanupInfo = nullptr);
 
    QAtomicInt ref;
 

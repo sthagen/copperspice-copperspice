@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,6 +24,7 @@
 #ifndef QREADWRITELOCK_H
 #define QREADWRITELOCK_H
 
+#include <qglobal.h>
 #include <qassert.h>
 
 struct QReadWriteLockPrivate;
@@ -34,6 +35,10 @@ class Q_CORE_EXPORT QReadWriteLock
    enum RecursionMode { NonRecursive, Recursive };
 
    explicit QReadWriteLock(RecursionMode recursionMode = NonRecursive);
+
+   QReadWriteLock(const QReadWriteLock &) = delete;
+   QReadWriteLock &operator=(const QReadWriteLock &) = delete;
+
    ~QReadWriteLock();
 
    void lockForRead();
@@ -47,7 +52,6 @@ class Q_CORE_EXPORT QReadWriteLock
    void unlock();
 
  private:
-   Q_DISABLE_COPY(QReadWriteLock)
    QReadWriteLockPrivate *d;
 
    friend class QWaitCondition;
@@ -57,6 +61,9 @@ class Q_CORE_EXPORT QReadLocker
 {
  public:
    inline QReadLocker(QReadWriteLock *readWriteLock);
+
+   QReadLocker(const QReadLocker &) = delete;
+   QReadLocker &operator=(const QReadLocker &) = delete;
 
    inline ~QReadLocker() {
       unlock();
@@ -85,15 +92,13 @@ class Q_CORE_EXPORT QReadLocker
    }
 
  private:
-   Q_DISABLE_COPY(QReadLocker)
    quintptr q_val;
 };
 
-inline QReadLocker::QReadLocker(QReadWriteLock *areadWriteLock)
-   : q_val(reinterpret_cast<quintptr>(areadWriteLock))
+inline QReadLocker::QReadLocker(QReadWriteLock *readWriteLock)
+   : q_val(reinterpret_cast<quintptr>(readWriteLock))
 {
-   Q_ASSERT_X((q_val & quintptr(1u)) == quintptr(0),
-              "QReadLocker", "QReadWriteLock pointer is misaligned");
+   Q_ASSERT_X((q_val & quintptr(1u)) == quintptr(0), "QReadLocker", "QReadWriteLock pointer is misaligned");
    relock();
 }
 
@@ -101,6 +106,9 @@ class Q_CORE_EXPORT QWriteLocker
 {
  public:
    inline QWriteLocker(QReadWriteLock *readWriteLock);
+
+   QWriteLocker(const QWriteLocker &) = delete;
+   QWriteLocker &operator=(const QWriteLocker &) = delete;
 
    inline ~QWriteLocker() {
       unlock();
@@ -128,17 +136,14 @@ class Q_CORE_EXPORT QWriteLocker
       return reinterpret_cast<QReadWriteLock *>(q_val & ~quintptr(1u));
    }
 
-
  private:
-   Q_DISABLE_COPY(QWriteLocker)
    quintptr q_val;
 };
 
-inline QWriteLocker::QWriteLocker(QReadWriteLock *areadWriteLock)
-   : q_val(reinterpret_cast<quintptr>(areadWriteLock))
+inline QWriteLocker::QWriteLocker(QReadWriteLock *readWriteLock)
+   : q_val(reinterpret_cast<quintptr>(readWriteLock))
 {
-   Q_ASSERT_X((q_val & quintptr(1u)) == quintptr(0),
-              "QWriteLocker", "QReadWriteLock pointer is misaligned");
+   Q_ASSERT_X((q_val & quintptr(1u)) == quintptr(0), "QWriteLocker", "QReadWriteLock pointer is misaligned");
    relock();
 }
 

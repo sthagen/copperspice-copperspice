@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,15 +24,15 @@
 #ifndef QTCONCURRENTITERATEKERNEL_H
 #define QTCONCURRENTITERATEKERNEL_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qatomic.h>
-#include <QtCore/qtconcurrentmedian.h>
-#include <QtCore/qtconcurrentthreadengine.h>
+#include <qglobal.h>
+#include <qatomic.h>
+#include <qtconcurrentmedian.h>
+#include <qtconcurrentthreadengine.h>
+
 #include <iterator>
 
-QT_BEGIN_NAMESPACE
-
 namespace QtConcurrent {
+
 using std::advance;
 
 /*
@@ -50,6 +50,7 @@ class Q_CORE_EXPORT BlockSizeManager
    void timeBeforeUser();
    void timeAfterUser();
    int blockSize();
+
  private:
    inline bool blockSizeMaxed() {
       return (m_blockSize >= maxBlockSize);
@@ -105,8 +106,9 @@ class ResultReporter<void>
    inline ResultReporter(ThreadEngine<void> *) { }
    inline void reserveSpace(int) { };
    inline void reportResults(int) { };
+
    inline void *getPointer() {
-      return 0;
+      return nullptr;
    }
 };
 
@@ -124,7 +126,6 @@ inline bool selectIteration(std::random_access_iterator_tag)
 {
    return true; // for
 }
-
 
 template <typename Iterator, typename T>
 class IterateKernel : public ThreadEngine<T>
@@ -237,7 +238,9 @@ class IterateKernel : public ThreadEngine<T>
    }
 
    ThreadFunctionResult whileThreadFunction() {
-      if (iteratorThreads.testAndSetAcquire(0, 1) == false) {
+      int expected = 0;
+
+      if (iteratorThreads.compareExchange(expected, 1, std::memory_order_acquire) == false) {
          return ThreadFinished;
       }
 
@@ -250,8 +253,11 @@ class IterateKernel : public ThreadEngine<T>
          // on input iterators. (prev is dereferenced inside user.runIteration())
          Iterator prev = current;
          ++current;
+
          int index = currentIndex.fetchAndAddRelaxed(1);
-         iteratorThreads.testAndSetRelease(1, 0);
+
+         expected = 1;
+         iteratorThreads.compareExchange(expected, 0, std::memory_order_release);
 
          this->waitForResume(); // (only waits if the qfuture is paused.)
 
@@ -268,7 +274,8 @@ class IterateKernel : public ThreadEngine<T>
             return ThrottleThread;
          }
 
-         if (iteratorThreads.testAndSetAcquire(0, 1) == false) {
+         expected = 0;
+         if (iteratorThreads.compareExchange(expected, 1, std::memory_order_acquire) == false) {
             return ThreadFinished;
          }
       }
@@ -291,7 +298,5 @@ class IterateKernel : public ThreadEngine<T>
 };
 
 } // namespace QtConcurrent
-
-QT_END_NAMESPACE
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,11 +32,10 @@
 #include <qtooltip.h>
 #include <qwhatsthis.h>
 #include <qwidget.h>
-#include <qdebug.h>
 #include <qmath.h>
-#include <QRubberBand>
-#include <QFocusFrame>
-#include <QMenu>
+#include <qrubberband.h>
+#include <qfocusframe.h>
+#include <qmenu.h>
 
 #include <qwidget_p.h>
 
@@ -142,7 +141,7 @@ QString qt_accHotKey(const QString &text)
    int ampIndex = qt_accAmpIndex(text);
 
    if (ampIndex != -1) {
-      return QKeySequence(Qt::ALT).toString(QKeySequence::NativeText) + text.at(ampIndex + 1);
+      return QKeySequence(Qt::AltModifier).toString(QKeySequence::NativeText) + text.at(ampIndex + 1);
    }
 
    return QString();
@@ -153,11 +152,13 @@ class QAccessibleWidgetPrivate
  public:
    QAccessibleWidgetPrivate()
       : role(QAccessible::Client)
-   {}
+   {
+   }
 
    QAccessible::Role role;
    QString name;
-   QStringList primarySignals;
+
+   QList<QMetaMethod> primarySignals;
 };
 
 QAccessibleWidget::QAccessibleWidget(QWidget *w, QAccessible::Role role, const QString &name)
@@ -171,16 +172,19 @@ QAccessibleWidget::QAccessibleWidget(QWidget *w, QAccessible::Role role, const Q
 
 bool QAccessibleWidget::isValid() const
 {
-   if (!object() || static_cast<QWidget *>(object())->d_func()->data.in_destructor) {
+   if (! object() || static_cast<QWidget *>(object())->d_func()->data.in_destructor) {
       return false;
    }
    return QAccessibleObject::isValid();
 }
+
 QWindow *QAccessibleWidget::window() const
 {
    const QWidget *w = widget();
    Q_ASSERT(w);
+
    QWindow *result = w->windowHandle();
+
    if (!result) {
       if (const QWidget *nativeParent = w->nativeParentWidget()) {
          result = nativeParent->windowHandle();
@@ -189,18 +193,15 @@ QWindow *QAccessibleWidget::window() const
    return result;
 }
 
-
 QAccessibleWidget::~QAccessibleWidget()
 {
    delete d;
 }
 
-
 QWidget *QAccessibleWidget::widget() const
 {
    return qobject_cast<QWidget *>(object());
 }
-
 
 QObject *QAccessibleWidget::parentObject() const
 {
@@ -212,18 +213,16 @@ QObject *QAccessibleWidget::parentObject() const
    return w->parent();
 }
 
-
 QRect QAccessibleWidget::rect() const
 {
    QWidget *w = widget();
-   if (!w->isVisible()) {
+   if (! w->isVisible()) {
       return QRect();
    }
    QPoint wpos = w->mapToGlobal(QPoint(0, 0));
 
    return QRect(wpos.x(), wpos.y(), w->width(), w->height());
 }
-
 
 class QACConnectionObject : public QObject
 {
@@ -232,8 +231,8 @@ class QACConnectionObject : public QObject
       return CSInternalSender::isSender(this, receiver, signal);
    }
 
-   QObjectList receiverList(const QString &signal) const {
-      return CSInternalSender::receiverList(this, signal);
+   QObjectList receiverList(const QMetaMethod &signalMetaMethod) const {
+      return CSInternalSender::receiverList(this, signalMetaMethod);
    }
 
    QObjectList senderList() const {
@@ -243,14 +242,27 @@ class QACConnectionObject : public QObject
 
 void QAccessibleWidget::addControllingSignal(const QString &signal)
 {
-   QString s = QMetaObject::normalizedSignature(signal);
+   QString signalName = QMetaObject::normalizedSignature(signal);
+   int index = object()->metaObject()->indexOfSignal(signalName);
 
-   if (object()->metaObject()->indexOfSignal(s) < 0) {
-      qWarning("QAccessibleWidget::addControllingSignal(): Signal %s unknown in %s", csPrintable(s),
+   if (index < 0) {
+      qWarning("QAccessibleWidget::addControllingSignal(): Signal %s unknown in %s", csPrintable(signalName),
                   csPrintable(object()->metaObject()->className()));
-   }
 
-   d->primarySignals << s;
+   } else {
+      const QMetaMethod &signalMetaMethod = object()->metaObject()->method(index);
+
+      if (signalMetaMethod.isValid()) {
+         d->primarySignals.append(signalMetaMethod);
+      }
+   }
+}
+
+void QAccessibleWidget::addControllingSignal(const QMetaMethod &signalMetaMethod)
+{
+   if (signalMetaMethod.isValid()) {
+      d->primarySignals.append(signalMetaMethod);
+   }
 }
 
 static inline bool isAncestor(const QObject *obj, const QObject *child)
@@ -266,57 +278,70 @@ static inline bool isAncestor(const QObject *obj, const QObject *child)
    return false;
 }
 
-QVector<QPair<QAccessibleInterface *, QAccessible::Relation>> QAccessibleWidget::relations(QAccessible::Relation
-      match /*= QAccessible::AllRelations*/) const
+QVector<QPair<QAccessibleInterface *, QAccessible::Relation>> QAccessibleWidget::relations(QAccessible::Relation match ) const
 {
-   QVector<QPair<QAccessibleInterface *, QAccessible::Relation>> rels;
+   QVector<QPair<QAccessibleInterface *, QAccessible::Relation>> retval;
+
    if (match & QAccessible::Label) {
       const QAccessible::Relation rel = QAccessible::Label;
+
       if (QWidget *parent = widget()->parentWidget()) {
+
 #ifndef QT_NO_SHORTCUT
-         // first check for all siblings that are labels to us
-         // ideally we would go through all objects and check, but that
-         // will be too expensive
+         // first check for all siblings that are labels to us ideally
+         // we would go through all objects and check, but that will be too expensive
+
          const QList<QWidget *> kids = childWidgets(parent);
-         for (int i = 0; i < kids.count(); ++i) {
-            if (QLabel *labelSibling = qobject_cast<QLabel *>(kids.at(i))) {
-               if (labelSibling->buddy() == widget()) {
-                  QAccessibleInterface *iface = QAccessible::queryAccessibleInterface(labelSibling);
-                  rels.append(qMakePair(iface, rel));
-               }
+
+         for (auto item : kids) {
+            QLabel *labelSibling = qobject_cast<QLabel *>(item);
+
+            if (labelSibling != nullptr && labelSibling->buddy() == widget()) {
+               QAccessibleInterface *iface = QAccessible::queryAccessibleInterface(labelSibling);
+               retval.append(qMakePair(iface, rel));
             }
          }
 #endif
+
 #ifndef QT_NO_GROUPBOX
          QGroupBox *groupbox = qobject_cast<QGroupBox *>(parent);
-         if (groupbox && !groupbox->title().isEmpty()) {
+
+         if (groupbox != nullptr && ! groupbox->title().isEmpty()) {
             QAccessibleInterface *iface = QAccessible::queryAccessibleInterface(groupbox);
-            rels.append(qMakePair(iface, rel));
+            retval.append(qMakePair(iface, rel));
          }
 #endif
       }
    }
 
    if (match & QAccessible::Controlled) {
-      QObjectList allReceivers;
-      QACConnectionObject *connectionObject = (QACConnectionObject *)object();
-      for (int sig = 0; sig < d->primarySignals.count(); ++sig) {
-         const QObjectList receivers = connectionObject->receiverList(d->primarySignals.at(sig).toLatin1());
-         allReceivers += receivers;
+      QList<QObject *> allReceivers;
+
+      QACConnectionObject *connectionObject = dynamic_cast<QACConnectionObject *>(object());
+
+      if (connectionObject == nullptr) {
+         return retval;
       }
 
-      allReceivers.removeAll(object());  //### The object might connect to itself internally
+      for (const auto &item : d->primarySignals) {
+         const QList<QObject *> receivers = connectionObject->receiverList(item);
+         allReceivers.append(receivers);
+      }
 
-      for (int i = 0; i < allReceivers.count(); ++i) {
+      // object might connect to itself internally, ignore these
+      allReceivers.removeAll(object());
+
+      for (auto item : allReceivers) {
          const QAccessible::Relation rel = QAccessible::Controlled;
-         QAccessibleInterface *iface = QAccessible::queryAccessibleInterface(allReceivers.at(i));
+         QAccessibleInterface *iface = QAccessible::queryAccessibleInterface(item);
+
          if (iface) {
-            rels.append(qMakePair(iface, rel));
+            retval.append(qMakePair(iface, rel));
          }
       }
    }
 
-   return rels;
+   return retval;
 }
 
 QAccessibleInterface *QAccessibleWidget::parent() const
@@ -332,7 +357,7 @@ QAccessibleInterface *QAccessibleWidget::child(int index) const
    if (index >= 0 && index < childList.size()) {
       return QAccessible::queryAccessibleInterface(childList.at(index));
    }
-   return 0;
+   return nullptr;
 }
 
 /*! \reimp */
@@ -344,13 +369,13 @@ QAccessibleInterface *QAccessibleWidget::focusChild() const
 
    QWidget *fw = widget()->focusWidget();
    if (!fw) {
-      return 0;
+      return nullptr;
    }
 
    if (isAncestor(widget(), fw) || fw == widget()) {
       return QAccessible::queryAccessibleInterface(fw);
    }
-   return 0;
+   return nullptr;
 }
 
 int QAccessibleWidget::childCount() const
@@ -370,7 +395,7 @@ int QAccessibleWidget::indexOfChild(const QAccessibleInterface *child) const
 }
 
 // from qwidget.cpp
-extern QString qt_setWindowTitle_helperHelper(const QString &, const QWidget *);
+extern QString cs_internal_parseWindowTitle(const QString &, const QWidget *);
 
 QString QAccessibleWidget::text(QAccessible::Text t) const
 {
@@ -380,14 +405,17 @@ QString QAccessibleWidget::text(QAccessible::Text t) const
       case QAccessible::Name:
          if (!d->name.isEmpty()) {
             str = d->name;
+
          } else if (!widget()->accessibleName().isEmpty()) {
             str = widget()->accessibleName();
+
          } else if (widget()->isWindow()) {
             if (widget()->isMinimized()) {
-               str = qt_setWindowTitle_helperHelper(widget()->windowIconText(), widget());
+               str = cs_internal_parseWindowTitle(widget()->windowIconText(), widget());
             } else {
-               str = qt_setWindowTitle_helperHelper(widget()->windowTitle(), widget());
+               str = cs_internal_parseWindowTitle(widget()->windowTitle(), widget());
             }
+
          } else {
             str = qt_accStripAmp(buddyString(widget()));
          }
@@ -499,7 +527,7 @@ void *QAccessibleWidget::interface_cast(QAccessible::InterfaceType t)
       return static_cast<QAccessibleActionInterface *>(this);
    }
 
-   return 0;
+   return nullptr;
 }
 
 #endif //QT_NO_ACCESSIBILITY

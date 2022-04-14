@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QLISTWIDGET_P_H
 #define QLISTWIDGET_P_H
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtGui/qabstractitemview.h>
-#include <QtGui/qlistwidget.h>
+#include <qabstractitemmodel.h>
+#include <qabstractitemview.h>
+#include <qlistwidget.h>
 #include <qitemdelegate.h>
 #include <qlistview_p.h>
 #include <qwidgetitemdata_p.h>

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,14 +27,12 @@
 
 #include "qgenericdynamiccontext_p.h"
 
-QT_BEGIN_NAMESPACE
-
 using namespace QPatternist;
 
 GenericDynamicContext::GenericDynamicContext(const NamePool::Ptr &np,
       QAbstractMessageHandler *const errHandler, const LocationHash &locations)
    : m_messageHandler(errHandler), m_currentDateTime(QDateTime::currentDateTime().toTimeSpec(Qt::UTC)),
-      m_outputReceiver(0), m_namePool(np), m_locations(locations), m_uriResolver(0)
+      m_outputReceiver(nullptr), m_namePool(np), m_locations(locations), m_uriResolver(nullptr)
 {
    Q_ASSERT(m_messageHandler);
    Q_ASSERT(m_namePool);
@@ -181,4 +179,3 @@ QExplicitlySharedDataPointer<TemplateMode> GenericDynamicContext::currentTemplat
    return QExplicitlySharedDataPointer<TemplateMode>();
 }
 
-QT_END_NAMESPACE

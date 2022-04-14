@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,7 +38,6 @@ class QDateTime;
 
 class QMetaObject;
 
-typedef QList<QScriptValue> QScriptValueList;
 using qsreal = double;
 
 class QScriptValuePrivate;
@@ -81,12 +80,13 @@ class Q_SCRIPT_EXPORT QScriptValue
  public:
    QScriptValue();
    QScriptValue(const QScriptValue &other);
-   QScriptValue(QScriptEngine *engine, SpecialValue val);
-   QScriptValue(QScriptEngine *engine, bool val);
-   QScriptValue(QScriptEngine *engine, int val);
-   QScriptValue(QScriptEngine *engine, uint val);
-   QScriptValue(QScriptEngine *engine, qsreal val);
-   QScriptValue(QScriptEngine *engine, const QString &val);
+
+   QScriptValue(QScriptEngine *engine, SpecialValue value);
+   QScriptValue(QScriptEngine *engine, bool value);
+   QScriptValue(QScriptEngine *engine, int value);
+   QScriptValue(QScriptEngine *engine, uint value);
+   QScriptValue(QScriptEngine *engine, qsreal value);
+   QScriptValue(QScriptEngine *engine, const QString &value);
 
    QScriptValue(SpecialValue value);
    QScriptValue(bool value);
@@ -182,6 +182,8 @@ class Q_SCRIPT_EXPORT QScriptValue
 
    qint64 objectId() const;
 
+   bool operator==(const QScriptValue &other) const;
+
  private:
    // force compile error, prevent QScriptValue(bool) to be called
    QScriptValue(void *);
@@ -200,5 +202,7 @@ class Q_SCRIPT_EXPORT QScriptValue
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QScriptValue::ResolveFlags)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QScriptValue::PropertyFlags)
+
+CS_DECLARE_METATYPE(QScriptValue)
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,18 +27,29 @@
 #include <qglobal.h>
 #ifndef QT_NO_TEXTODFWRITER
 
-#include <QtCore/qdatetime.h>
-#include <QtCore/qfile.h>
-#include <QtCore/qstring.h>
+#include <qdatetime.h>
+#include <qfile.h>
+#include <qstring.h>
 
 class QZipReaderPrivate;
 
 class Q_GUI_EXPORT QZipReader
 {
  public:
-   explicit QZipReader(const QString &fileName, QIODevice::OpenMode mode = QIODevice::ReadOnly );
+   enum Status {
+      NoError,
+      FileReadError,
+      FileOpenError,
+      FilePermissionsError,
+      FileError
+   };
 
+   explicit QZipReader(const QString &fileName, QIODevice::OpenMode mode = QIODevice::ReadOnly );
    explicit QZipReader(QIODevice *device);
+
+   QZipReader(const QZipReader &) = delete;
+   QZipReader &operator=(const QZipReader &) = delete;
+
    ~QZipReader();
 
    QIODevice *device() const;
@@ -49,8 +60,8 @@ class Q_GUI_EXPORT QZipReader
    struct FileInfo {
       FileInfo()
          : isDir(false), isFile(false), isSymLink(false), crc(0), size(0)
-      {}
-
+      {
+      }
 
       bool isValid() const {
          return isDir || isFile || isSymLink;
@@ -74,22 +85,13 @@ class Q_GUI_EXPORT QZipReader
    QByteArray fileData(const QString &fileName) const;
    bool extractAll(const QString &destinationDir) const;
 
-   enum Status {
-      NoError,
-      FileReadError,
-      FileOpenError,
-      FilePermissionsError,
-      FileError
-   };
-
    Status status() const;
-
    void close();
 
  private:
    QZipReaderPrivate *d;
-   Q_DISABLE_COPY(QZipReader)
 };
 
 #endif // QT_NO_TEXTODFWRITER
-#endif // QZIPREADER_H
+
+#endif

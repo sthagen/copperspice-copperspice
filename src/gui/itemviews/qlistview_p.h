@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,8 +33,6 @@
 
 #ifndef QT_NO_LISTVIEW
 
-
-
 class QListView;
 class QListViewPrivate;
 
@@ -46,15 +44,13 @@ class QListViewItem
 
  public:
    inline QListViewItem()
-      : x(-1), y(-1), w(0), h(0), indexHint(-1), visited(0xffff) {}
-
-   inline QListViewItem(const QListViewItem &other)
-      : x(other.x), y(other.y), w(other.w), h(other.h),
-        indexHint(other.indexHint), visited(other.visited) {}
+      : x(-1), y(-1), w(0), h(0), indexHint(-1), visited(0xffff)
+   { }
 
    inline QListViewItem(QRect r, int i)
       : x(r.x()), y(r.y()), w(qMin(r.width(), SHRT_MAX)), h(qMin(r.height(), SHRT_MAX)),
-        indexHint(i), visited(0xffff) {}
+        indexHint(i), visited(0xffff)
+   { }
 
    inline bool operator==(const QListViewItem &other) const {
       return (x == other.x && y == other.y && w == other.w && h == other.h && indexHint == other.indexHint);
@@ -98,8 +94,10 @@ class QListViewItem
       return QRect(x, y, w, h);
    }
 
-   int x, y;
-   short w, h;
+   int x;
+   int y;
+   short w;
+   short h;
    mutable int indexHint;
    uint visited;
 };
@@ -273,7 +271,10 @@ class QListModeViewBase : public QCommonListViewBase
 class QIconModeViewBase : public QCommonListViewBase
 {
  public:
-   QIconModeViewBase(QListView *q, QListViewPrivate *d) : QCommonListViewBase(q, d), interSectingVector(0) {}
+   QIconModeViewBase(QListView *q, QListViewPrivate *d)
+      : QCommonListViewBase(q, d), interSectingVector(nullptr)
+   {
+   }
 
    QBspTree tree;
    QVector<QListViewItem> items;

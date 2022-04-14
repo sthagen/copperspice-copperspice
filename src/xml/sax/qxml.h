@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,12 @@
 #ifndef XML_QXML_H
 #define XML_QXML_H
 
-#include <QtCore/qtextstream.h>
-#include <QtCore/qfile.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qstringlist.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qscopedpointer.h>
+#include <qtextstream.h>
+#include <qfile.h>
+#include <qstring.h>
+#include <qstringlist.h>
+#include <qlist.h>
+#include <qscopedpointer.h>
 
 class QXmlNamespaceSupport;
 class QXmlAttributes;
@@ -65,16 +65,21 @@ class Q_XML_EXPORT QXmlNamespaceSupport
 {
  public:
    QXmlNamespaceSupport();
+
+   QXmlNamespaceSupport(const QXmlNamespaceSupport &) = delete;
+   QXmlNamespaceSupport &operator=(const QXmlNamespaceSupport &) = delete;
+
    ~QXmlNamespaceSupport();
 
-   void setPrefix(const QString &, const QString &);
+   void setPrefix(const QString &prefix, const QString &uri);
 
-   QString prefix(const QString &) const;
-   QString uri(const QString &) const;
-   void splitName(const QString &, QString &, QString &) const;
-   void processName(const QString &, bool, QString &, QString &) const;
+   QString prefix(const QString &uri) const;
+   QString uri(const QString &prefix) const;
+
+   void splitName(const QString &qname, QString &prefix, QString &localname) const;
+   void processName(const QString &qname, bool isAttribute, QString &nsuri, QString &localname) const;
    QStringList prefixes() const;
-   QStringList prefixes(const QString &) const;
+   QStringList prefixes(const QString &uri) const;
 
    void pushContext();
    void popContext();
@@ -84,9 +89,7 @@ class Q_XML_EXPORT QXmlNamespaceSupport
    QXmlNamespaceSupportPrivate *d;
 
    friend class QXmlSimpleReaderPrivate;
-   Q_DISABLE_COPY(QXmlNamespaceSupport)
 };
-
 
 //
 // SAX Attributes
@@ -119,25 +122,22 @@ class Q_XML_EXPORT QXmlAttributes
    struct Attribute {
       QString qname, uri, localname, value;
    };
+
    typedef QList<Attribute> AttributeList;
    AttributeList attList;
 
    QXmlAttributesPrivate *d;
 };
 
-//
-// SAX Input Source
-//
-
 class Q_XML_EXPORT QXmlInputSource
 {
  public:
    QXmlInputSource();
-   QXmlInputSource(QIODevice *dev);
+   QXmlInputSource(QIODevice *device);
    virtual ~QXmlInputSource();
 
-   virtual void setData(const QString &dat);
-   virtual void setData(const QByteArray &dat);
+   virtual void setData(const QString &data);
+   virtual void setData(const QByteArray &data);
    virtual void fetchData();
    virtual QString data() const;
    virtual QChar next();
@@ -153,10 +153,6 @@ class Q_XML_EXPORT QXmlInputSource
    void init();
    QXmlInputSourcePrivate *d;
 };
-
-//
-// SAX Exception Classes
-//
 
 class Q_XML_EXPORT QXmlParseException
 {
@@ -176,19 +172,14 @@ class Q_XML_EXPORT QXmlParseException
    QScopedPointer<QXmlParseExceptionPrivate> d;
 };
 
-
-//
-// XML Reader
-//
-
 class Q_XML_EXPORT QXmlReader
 {
  public:
    virtual ~QXmlReader() {}
-   virtual bool feature(const QString &name, bool *ok = 0) const = 0;
+   virtual bool feature(const QString &name, bool *ok = nullptr) const = 0;
    virtual void setFeature(const QString &name, bool value) = 0;
    virtual bool hasFeature(const QString &name) const = 0;
-   virtual void *property(const QString &name, bool *ok = 0) const = 0;
+   virtual void *property(const QString &name, bool *ok = nullptr) const = 0;
    virtual void setProperty(const QString &name, void *value) = 0;
    virtual bool hasProperty(const QString &name) const = 0;
    virtual void setEntityResolver(QXmlEntityResolver *handler) = 0;
@@ -211,13 +202,17 @@ class Q_XML_EXPORT QXmlSimpleReader : public QXmlReader
 {
  public:
    QXmlSimpleReader();
+
+   QXmlSimpleReader(const QXmlSimpleReader &) = delete;
+   QXmlSimpleReader &operator=(const QXmlSimpleReader &) = delete;
+
    virtual ~QXmlSimpleReader();
 
-   bool feature(const QString &name, bool *ok = 0) const override;
-   void setFeature(const QString &name, bool value) override;
+   bool feature(const QString &name, bool *ok = nullptr) const override;
+   void setFeature(const QString &name, bool enable) override;
    bool hasFeature(const QString &name) const override;
 
-   void *property(const QString &name, bool *ok = 0) const override;
+   void *property(const QString &name, bool *ok = nullptr) const override;
    void setProperty(const QString &name, void *value) override;
    bool hasProperty(const QString &name) const override;
 
@@ -240,7 +235,6 @@ class Q_XML_EXPORT QXmlSimpleReader : public QXmlReader
    virtual bool parseContinue();
 
  private:
-   Q_DISABLE_COPY(QXmlSimpleReader)
    Q_DECLARE_PRIVATE(QXmlSimpleReader)
    QScopedPointer<QXmlSimpleReaderPrivate> d_ptr;
 
@@ -310,7 +304,7 @@ class Q_XML_EXPORT QXmlEntityResolver
 {
  public:
    virtual ~QXmlEntityResolver() {}
-   virtual bool resolveEntity(const QString &publicId, const QString &systemId, QXmlInputSource *&ret) = 0;
+   virtual bool resolveEntity(const QString &publicId, const QString &systemId, QXmlInputSource *&inputSource) = 0;
    virtual QString errorString() const = 0;
 };
 
@@ -334,9 +328,11 @@ class Q_XML_EXPORT QXmlDeclHandler
    virtual ~QXmlDeclHandler() {}
    virtual bool attributeDecl(const QString &eName, const QString &aName, const QString &type, const QString &valueDefault,
                               const QString &value) = 0;
+
    virtual bool internalEntityDecl(const QString &name, const QString &value) = 0;
    virtual bool externalEntityDecl(const QString &name, const QString &publicId, const QString &systemId) = 0;
    virtual QString errorString() const = 0;
+
    // ### Qt5/Conform to SAX by adding elementDecl
 };
 
@@ -345,8 +341,16 @@ class Q_XML_EXPORT QXmlDefaultHandler : public QXmlContentHandler, public QXmlEr
    public QXmlEntityResolver, public QXmlLexicalHandler, public QXmlDeclHandler
 {
  public:
-   QXmlDefaultHandler() { }
-   virtual ~QXmlDefaultHandler() { }
+   QXmlDefaultHandler()
+   {
+   }
+
+   QXmlDefaultHandler(const QXmlDefaultHandler &) = delete;
+   QXmlDefaultHandler &operator=(const QXmlDefaultHandler &) = delete;
+
+   virtual ~QXmlDefaultHandler()
+   {
+   }
 
    void setDocumentLocator(QXmlLocator *locator) override;
    bool startDocument() override;
@@ -369,7 +373,7 @@ class Q_XML_EXPORT QXmlDefaultHandler : public QXmlContentHandler, public QXmlEr
    bool unparsedEntityDecl(const QString &name, const QString &publicId, const QString &systemId,
                            const QString &notationName) override;
 
-   bool resolveEntity(const QString &publicId, const QString &systemId, QXmlInputSource *&ret) override;
+   bool resolveEntity(const QString &publicId, const QString &systemId, QXmlInputSource *&inputSource) override;
 
    bool startDTD(const QString &name, const QString &publicId, const QString &systemId) override;
    bool endDTD() override;
@@ -389,10 +393,7 @@ class Q_XML_EXPORT QXmlDefaultHandler : public QXmlContentHandler, public QXmlEr
 
  private:
    QXmlDefaultHandlerPrivate *d;
-   Q_DISABLE_COPY(QXmlDefaultHandler)
 };
-
-// inlines
 
 inline int QXmlAttributes::count() const
 {

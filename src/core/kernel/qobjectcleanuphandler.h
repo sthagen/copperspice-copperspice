@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QOBJECTCLEANUPHANDLER_H
 #define QOBJECTCLEANUPHANDLER_H
 
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
+#include <qobject.h>
 
 class Q_CORE_EXPORT QObjectCleanupHandler : public QObject
 {
@@ -41,14 +39,11 @@ class Q_CORE_EXPORT QObjectCleanupHandler : public QObject
    bool isEmpty() const;
    void clear();
 
-   // ### move into d pointer
    QObjectList cleanupObjects;
 
  private :
    CORE_CS_SLOT_1(Private, void objectDestroyed(QObject *un_named_arg1))
    CORE_CS_SLOT_2(objectDestroyed)
 };
-
-QT_END_NAMESPACE
 
 #endif 

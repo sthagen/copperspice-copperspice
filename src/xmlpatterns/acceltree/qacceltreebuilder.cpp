@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -185,7 +185,7 @@ void AccelTreeBuilder<FromDocument>::attribute(const QXmlName &name, QStringView
 
          /* If we're building from an XML Document(e.g, we're fed from QXmlStreamReader, we raise FODC0002,
           * otherwise XQDY0091. */
-         m_context->error(QtXmlPatterns::tr("An %1-attribute must have a valid %2 as value, which %3 isn't.")
+         m_context->error(QtXmlPatterns::tr("An %1-attribute must have a valid %2 as value, which %3 is not.")
                   .formatArgs(formatKeyword("xml:id"),
                   formatType(m_namePool, BuiltinTypes::xsNCName), formatData(value.toString())),
                   FromDocument ? ReportContext::FODC0002 : ReportContext::XQDY0091, this);
@@ -343,7 +343,7 @@ void AccelTreeBuilder<FromDocument>::endDocument()
 template <bool FromDocument>
 void AccelTreeBuilder<FromDocument>::atomicValue(const QVariant &value)
 {
-   Q_UNUSED(value);
+   (void) value;
    // TODO
 }
 
@@ -360,7 +360,7 @@ QAbstractXmlNodeModel::Ptr AccelTreeBuilder<FromDocument>::builtDocument()
 template <bool FromDocument>
 NodeBuilder::Ptr AccelTreeBuilder<FromDocument>::create(const QUrl &baseURI) const
 {
-   Q_UNUSED(baseURI);
+   (void) baseURI;
    return NodeBuilder::Ptr(new AccelTreeBuilder(QUrl(), baseURI, m_namePool, m_context));
 }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,30 +27,30 @@
 #include <qdialog_p.h>
 #include <qprintdialog.h>
 
-#include <QtGui/qaction.h>
-#include <QtGui/qboxlayout.h>
-#include <QtGui/qcombobox.h>
-#include <QtGui/qlabel.h>
-#include <QtGui/qlineedit.h>
-#include <QtGui/qpagesetupdialog.h>
-#include <QtGui/qprinter.h>
-#include <QtGui/qstyle.h>
-#include <QtGui/qtoolbutton.h>
-#include <QtGui/qvalidator.h>
-#include <QtGui/qfiledialog.h>
-#include <QtGui/qmainwindow.h>
-#include <QtGui/qtoolbar.h>
-#include <QtGui/qformlayout.h>
-#include <QtCore/QCoreApplication>
-
-
+#include <qaction.h>
+#include <qboxlayout.h>
+#include <qcombobox.h>
+#include <qlabel.h>
+#include <qlineedit.h>
+#include <qpagesetupdialog.h>
+#include <qprinter.h>
+#include <qstyle.h>
+#include <qtoolbutton.h>
+#include <qvalidator.h>
+#include <qfiledialog.h>
+#include <qmainwindow.h>
+#include <qtoolbar.h>
+#include <qformlayout.h>
+#include <QCoreApplication>
 
 #ifndef QT_NO_PRINTPREVIEWDIALOG
 
 class QPrintPreviewMainWindow : public QMainWindow
 {
  public:
-   QPrintPreviewMainWindow(QWidget *parent) : QMainWindow(parent) {}
+   QPrintPreviewMainWindow(QWidget *parent)
+      : QMainWindow(parent)
+   {}
 
    QMenu *createPopupMenu() override {
       return nullptr;
@@ -131,7 +131,9 @@ class QPrintPreviewDialogPrivate : public QDialogPrivate
 
  public:
    QPrintPreviewDialogPrivate()
-      : printDialog(0), ownPrinter(false), initialized(false) {}
+      : printDialog(nullptr), ownPrinter(false), initialized(false)
+   {
+   }
 
    // private slots
    void _q_fit(QAction *action);
@@ -145,7 +147,7 @@ class QPrintPreviewDialogPrivate : public QDialogPrivate
    void _q_previewChanged();
    void _q_zoomFactorChanged();
 
-   void init(QPrinter *printer = 0);
+   void init(QPrinter *printer = nullptr);
    void populateScene();
    void layoutPages();
    void setupActions();
@@ -654,8 +656,8 @@ QPrintPreviewDialog::QPrintPreviewDialog(QPrinter *printer, QWidget *parent, Qt:
    d->init(printer);
 }
 
-QPrintPreviewDialog::QPrintPreviewDialog(QWidget *parent, Qt::WindowFlags f)
-   : QDialog(*new QPrintPreviewDialogPrivate, parent, f)
+QPrintPreviewDialog::QPrintPreviewDialog(QWidget *parent, Qt::WindowFlags flags)
+   : QDialog(*new QPrintPreviewDialogPrivate, parent, flags)
 {
    Q_D(QPrintPreviewDialog);
    d->init();
@@ -694,7 +696,7 @@ void QPrintPreviewDialog::done(int result)
 
    if (d->receiverToDisconnectOnClose) {
       disconnect(this, SIGNAL(finished(int)), d->receiverToDisconnectOnClose, d->memberToDisconnectOnClose);
-      d->receiverToDisconnectOnClose = 0;
+      d->receiverToDisconnectOnClose = nullptr;
    }
 
    d->memberToDisconnectOnClose.clear();

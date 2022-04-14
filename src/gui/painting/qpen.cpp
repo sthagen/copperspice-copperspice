@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,6 +29,7 @@
 #include <qdebug.h>
 
 typedef QPenPrivate QPenData;
+
 // internal
 inline QPenPrivate::QPenPrivate(const QBrush &_brush, qreal _width, Qt::PenStyle penStyle,
    Qt::PenCapStyle _capStyle, Qt::PenJoinStyle _joinStyle, bool _defaultWidth)
@@ -57,31 +58,28 @@ class QPenDataHolder
       if (!pen->ref.deref()) {
          delete pen;
       }
-      pen = 0;
+
+      pen = nullptr;
    }
 };
 
+static QPenDataHolder *defaultPenInstance()
+{
+   static QPenDataHolder retval(Qt::black, 1, Qt::SolidLine, qpen_default_cap, qpen_default_join);
+   return &retval;
+}
 
-Q_GLOBAL_STATIC_WITH_ARGS(QPenDataHolder, defaultPenInstance,
-   (Qt::black, 1, Qt::SolidLine, qpen_default_cap, qpen_default_join))
-Q_GLOBAL_STATIC_WITH_ARGS(QPenDataHolder, nullPenInstance,
-   (Qt::black, 1, Qt::NoPen, qpen_default_cap, qpen_default_join))
-
-/*!
-    Constructs a default black solid line pen with 0 width.
-*/
+static QPenDataHolder *nullPenInstance()
+{
+   static QPenDataHolder retval(Qt::black, 1, Qt::NoPen, qpen_default_cap, qpen_default_join);
+   return &retval;
+}
 
 QPen::QPen()
 {
    d = defaultPenInstance()->pen;
    d->ref.ref();
 }
-
-/*!
-    Constructs a black pen with 0 width and the given \a style.
-
-    \sa setStyle()
-*/
 
 QPen::QPen(Qt::PenStyle style)
 {

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,13 +29,6 @@
 
 #ifndef QT_NO_ANIMATION
 
-QT_BEGIN_NAMESPACE
-
-
-/*!
-    Constructs a QAnimationGroup.
-    \a parent is passed to QObject's constructor.
-*/
 QAnimationGroup::QAnimationGroup(QObject *parent)
    : QAbstractAnimation(*new QAnimationGroupPrivate, parent)
 {
@@ -69,7 +62,7 @@ QAbstractAnimation *QAnimationGroup::animationAt(int index) const
 
    if (index < 0 || index >= d->animations.size()) {
       qWarning("QAnimationGroup::animationAt: index is out of bounds");
-      return 0;
+      return nullptr;
    }
 
    return d->animations.at(index);
@@ -177,15 +170,19 @@ QAbstractAnimation *QAnimationGroup::takeAnimation(int index)
    Q_D(QAnimationGroup);
    if (index < 0 || index >= d->animations.size()) {
       qWarning("QAnimationGroup::takeAnimation: no animation at index %d", index);
-      return 0;
+      return nullptr;
    }
+
    QAbstractAnimation *animation = d->animations.at(index);
-   QAbstractAnimationPrivate::get(animation)->group = 0;
+   QAbstractAnimationPrivate::get(animation)->group = nullptr;
+
    // ### removing from list before doing setParent to avoid inifinite recursion
    // in ChildRemoved event
+
    d->animations.removeAt(index);
-   animation->setParent(0);
+   animation->setParent(nullptr);
    d->animationRemoved(index, animation);
+
    return animation;
 }
 
@@ -227,17 +224,15 @@ bool QAnimationGroup::event(QEvent *event)
    return QAbstractAnimation::event(event);
 }
 
-
 void QAnimationGroupPrivate::animationRemoved(int index, QAbstractAnimation *)
 {
    Q_Q(QAnimationGroup);
-   Q_UNUSED(index);
+   (void) index;
+
    if (animations.isEmpty()) {
       currentTime = 0;
       q->stop();
    }
 }
-
-QT_END_NAMESPACE
 
 #endif //QT_NO_ANIMATION

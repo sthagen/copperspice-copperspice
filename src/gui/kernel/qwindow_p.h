@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -44,12 +44,12 @@ class Q_GUI_EXPORT QWindowPrivate
    };
 
    QWindowPrivate()
-      : surfaceType(QWindow::RasterSurface), windowFlags(Qt::Window), parentWindow(0), platformWindow(0)
+      : surfaceType(QWindow::RasterSurface), m_flags(Qt::Window), parentWindow(nullptr), platformWindow(nullptr)
       , visible(false), visibilityOnDestroy(false), exposed(false), windowState(Qt::WindowNoState)
       , visibility(QWindow::Hidden), resizeEventPending(true), receivedExpose(false), positionPolicy(WindowFrameExclusive)
       , positionAutomatic(true), contentOrientation(Qt::PrimaryOrientation), opacity(qreal(1.0))
       , minimumSize(0, 0), maximumSize(QWINDOWSIZE_MAX, QWINDOWSIZE_MAX), modality(Qt::NonModal)
-      , blockedByModalWindow(false), updateRequestPending(false), updateTimer(0), transientParent(0), topLevelScreen(0)
+      , blockedByModalWindow(false), updateRequestPending(false), updateTimer(0), transientParent(nullptr), topLevelScreen(nullptr)
 
 #ifndef QT_NO_CURSOR
       , cursor(Qt::ArrowCursor)
@@ -105,7 +105,7 @@ class Q_GUI_EXPORT QWindowPrivate
    virtual QRectF closestAcceptableGeometry(const QRectF &rect) const;
 
    bool isPopup() const {
-      return (windowFlags & Qt::WindowType_Mask) == Qt::Popup;
+      return (m_flags & Qt::WindowType_Mask) == Qt::Popup;
    }
 
    static QWindowPrivate *get(QWindow *window) {
@@ -113,7 +113,7 @@ class Q_GUI_EXPORT QWindowPrivate
    }
 
    QWindow::SurfaceType surfaceType;
-   Qt::WindowFlags windowFlags;
+   Qt::WindowFlags m_flags;
    QWindow *parentWindow;
    QPlatformWindow *platformWindow;
    bool visible;

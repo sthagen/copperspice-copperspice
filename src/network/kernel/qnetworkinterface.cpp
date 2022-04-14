@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,11 @@
 
 #ifndef QT_NO_NETWORKINTERFACE
 
-QT_BEGIN_NAMESPACE
+QNetworkInterfaceManager *cs_Manager()
+{
+   static QNetworkInterfaceManager retval;
+   return &retval;
+}
 
 static QList<QNetworkInterfacePrivate *> postProcess(QList<QNetworkInterfacePrivate *> list)
 {
@@ -62,8 +66,6 @@ static QList<QNetworkInterfacePrivate *> postProcess(QList<QNetworkInterfacePriv
 
    return list;
 }
-
-Q_GLOBAL_STATIC(QNetworkInterfaceManager, manager)
 
 QNetworkInterfaceManager::QNetworkInterfaceManager()
 {
@@ -367,7 +369,7 @@ void QNetworkAddressEntry::setBroadcast(const QHostAddress &newBroadcast)
     Constructs an empty network interface object.
 */
 QNetworkInterface::QNetworkInterface()
-   : d(0)
+   : d(nullptr)
 {
 }
 
@@ -455,7 +457,7 @@ QString QNetworkInterface::humanReadableName() const
 */
 QNetworkInterface::InterfaceFlags QNetworkInterface::flags() const
 {
-   return d ? d->flags : InterfaceFlags(0);
+   return d ? d->flags : InterfaceFlags(Qt::EmptyFlag);
 }
 
 /*!
@@ -495,7 +497,8 @@ QList<QNetworkAddressEntry> QNetworkInterface::addressEntries() const
 QNetworkInterface QNetworkInterface::interfaceFromName(const QString &name)
 {
    QNetworkInterface result;
-   result.d = manager()->interfaceFromName(name);
+   result.d = cs_Manager()->interfaceFromName(name);
+
    return result;
 }
 
@@ -512,7 +515,8 @@ QNetworkInterface QNetworkInterface::interfaceFromName(const QString &name)
 QNetworkInterface QNetworkInterface::interfaceFromIndex(int index)
 {
    QNetworkInterface result;
-   result.d = manager()->interfaceFromIndex(index);
+   result.d = cs_Manager()->interfaceFromIndex(index);
+
    return result;
 }
 
@@ -522,7 +526,7 @@ QNetworkInterface QNetworkInterface::interfaceFromIndex(int index)
 */
 QList<QNetworkInterface> QNetworkInterface::allInterfaces()
 {
-   QList<QSharedDataPointer<QNetworkInterfacePrivate> > privs = manager()->allInterfaces();
+   QList<QSharedDataPointer<QNetworkInterfacePrivate> > privs = cs_Manager()->allInterfaces();
    QList<QNetworkInterface> result;
 
    for (const QSharedDataPointer<QNetworkInterfacePrivate> &p : privs) {
@@ -542,11 +546,11 @@ QList<QNetworkInterface> QNetworkInterface::allInterfaces()
 */
 QList<QHostAddress> QNetworkInterface::allAddresses()
 {
-   QList<QSharedDataPointer<QNetworkInterfacePrivate> > privs = manager()->allInterfaces();
+   QList<QSharedDataPointer<QNetworkInterfacePrivate> > privs = cs_Manager()->allInterfaces();
    QList<QHostAddress> result;
 
    for (const QSharedDataPointer<QNetworkInterfacePrivate> &p : privs) {
-      for  (const QNetworkAddressEntry &entry : p->addressEntries) {
+      for (const QNetworkAddressEntry &entry : p->addressEntries) {
          result += entry.ip();
       }
    }
@@ -590,6 +594,7 @@ static inline QDebug operator<<(QDebug debug, const QNetworkAddressEntry &entry)
    }
 
    debug << ')';
+
    return debug;
 }
 
@@ -608,7 +613,5 @@ QDebug operator<<(QDebug debug, const QNetworkInterface &networkInterface)
 
    return debug;
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_NETWORKINTERFACE

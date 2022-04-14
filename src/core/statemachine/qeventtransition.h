@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QEVENTTRANSITION_H
 #define QEVENTTRANSITION_H
 
-#include <QtCore/qabstracttransition.h>
-#include <QtCore/qcoreevent.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstracttransition.h>
+#include <qcoreevent.h>
 
 #ifndef QT_NO_STATEMACHINE
 
@@ -37,14 +35,19 @@ class Q_CORE_EXPORT QEventTransition : public QAbstractTransition
 {
    CORE_CS_OBJECT(QEventTransition)
 
-   CORE_CS_PROPERTY_READ(eventSource, eventSource)
+   CORE_CS_PROPERTY_READ(eventSource,  eventSource)
    CORE_CS_PROPERTY_WRITE(eventSource, setEventSource)
-   CORE_CS_PROPERTY_READ(eventType, eventType)
+
+   CORE_CS_PROPERTY_READ(eventType,  eventType)
    CORE_CS_PROPERTY_WRITE(eventType, setEventType)
 
  public:
-   QEventTransition(QState *sourceState = 0);
-   QEventTransition(QObject *object, QEvent::Type type, QState *sourceState = 0);
+   QEventTransition(QState *sourceState = nullptr);
+   QEventTransition(QObject *object, QEvent::Type type, QState *sourceState = nullptr);
+
+   QEventTransition(const QEventTransition &) = delete;
+   QEventTransition &operator=(const QEventTransition &) = delete;
+
    ~QEventTransition();
 
    QObject *eventSource() const;
@@ -57,18 +60,16 @@ class Q_CORE_EXPORT QEventTransition : public QAbstractTransition
    bool eventTest(QEvent *event) override;
    void onTransition(QEvent *event) override;
 
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
 
    QEventTransition(QEventTransitionPrivate &dd, QState *parent);
    QEventTransition(QEventTransitionPrivate &dd, QObject *object, QEvent::Type type, QState *parent);
 
  private:
-   Q_DISABLE_COPY(QEventTransition)
    Q_DECLARE_PRIVATE(QEventTransition)
 };
 
 #endif //QT_NO_STATEMACHINE
 
-QT_END_NAMESPACE
 
 #endif

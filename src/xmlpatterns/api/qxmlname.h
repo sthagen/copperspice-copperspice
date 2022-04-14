@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,11 @@
 #ifndef QXMLNAME_H
 #define QXMLNAME_H
 
-#include <QtCore/QString>
-#include <QtCore/QMetaType>
+#include <qstring.h>
 
 class QXmlName;
 class QXmlNamePool;
+
 Q_XMLPATTERNS_EXPORT uint qHash(const QXmlName &name);
 
 class Q_XMLPATTERNS_EXPORT QXmlName
@@ -53,38 +53,35 @@ class Q_XMLPATTERNS_EXPORT QXmlName
    };
 
  public:
-
    typedef qint16 NamespaceCode;
    typedef NamespaceCode PrefixCode;
    typedef NamespaceCode LocalNameCode;
 
    QXmlName();
 
-   QXmlName(QXmlNamePool &namePool,
-            const QString &localName,
-            const QString &namespaceURI = QString(),
+   QXmlName(QXmlNamePool &namePool, const QString &localName, const QString &namespaceURI = QString(),
             const QString &prefix = QString());
 
-   QString namespaceUri(const QXmlNamePool &query) const;
-   QString prefix(const QXmlNamePool &query) const;
-   QString localName(const QXmlNamePool &query) const;
-   QString toClarkName(const QXmlNamePool &query) const;
+   QString namespaceUri(const QXmlNamePool &namePool) const;
+   QString prefix(const QXmlNamePool &namePool) const;
+   QString localName(const QXmlNamePool &namePool) const;
+   QString toClarkName(const QXmlNamePool &namePool) const;
+
    bool operator==(const QXmlName &other) const;
    bool operator!=(const QXmlName &other) const;
    QXmlName &operator=(const QXmlName &other);
    bool isNull() const;
+
    static bool isNCName(const QString &candidate);
-   static QXmlName fromClarkName(const QString &clarkName,
-                                 const QXmlNamePool &namePool);
+   static QXmlName fromClarkName(const QString &clarkName, const QXmlNamePool &namePool);
 
    /* The members below are internal, not part of the public API, and
     * unsupported. Using them leads to undefined behavior. */
    typedef qint64 Code;
 
-   inline QXmlName(const NamespaceCode uri,
-                   const LocalNameCode ln,
-                   const PrefixCode p = 0);
-   /* The implementation for these functions are in utils/qnamepool_p.h. */
+   inline QXmlName(const NamespaceCode uri, const LocalNameCode ln, const PrefixCode p = 0);
+
+   /* implementations are in utils/qnamepool_p.h. */
    inline LocalNameCode localName() const;
    inline PrefixCode prefix() const;
    inline bool hasPrefix() const;
@@ -96,15 +93,17 @@ class Q_XMLPATTERNS_EXPORT QXmlName
    inline void setLocalName(const LocalNameCode c);
    inline Code code() const;
 
-   friend Q_XMLPATTERNS_EXPORT uint qHash(const QXmlName &);
+   friend Q_XMLPATTERNS_EXPORT uint qHash(const QXmlName &name);
 
  private:
-   inline QXmlName(const int c) : m_qNameCode(c) {
+   inline QXmlName(const int c)
+      : m_qNameCode(c)
+   {
    }
 
    Code m_qNameCode;
 };
 
-Q_DECLARE_METATYPE(QXmlName) /* This macro must appear after QT_END_NAMESPACE. */
+CS_DECLARE_METATYPE(QXmlName)
 
 #endif

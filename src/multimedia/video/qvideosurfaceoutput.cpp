@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,10 +27,7 @@
 #include <qmediaservice.h>
 #include <qvideorenderercontrol.h>
 
-/*!
- * \class QVideoSurfaceOutput
- * \internal
- */
+// internal
 QVideoSurfaceOutput::QVideoSurfaceOutput(QObject *parent)
    :  QObject(parent)
 {
@@ -39,7 +36,7 @@ QVideoSurfaceOutput::QVideoSurfaceOutput(QObject *parent)
 QVideoSurfaceOutput::~QVideoSurfaceOutput()
 {
    if (m_control) {
-      m_control.data()->setSurface(0);
+      m_control.data()->setSurface(nullptr);
       m_service.data()->releaseControl(m_control.data());
    }
 }
@@ -61,17 +58,19 @@ void QVideoSurfaceOutput::setVideoSurface(QAbstractVideoSurface *surface)
 bool QVideoSurfaceOutput::setMediaObject(QMediaObject *object)
 {
    if (m_control) {
-      m_control.data()->setSurface(0);
+      m_control.data()->setSurface(nullptr);
       m_service.data()->releaseControl(m_control.data());
    }
+
    m_control.clear();
    m_service.clear();
    m_object.clear();
 
    if (object) {
       if (QMediaService *service = object->service()) {
+
          if (QMediaControl *control = service->requestControl(QVideoRendererControl_iid)) {
-            if ((m_control = qobject_cast<QVideoRendererControl *>(control))) {
+            if ((m_control = dynamic_cast<QVideoRendererControl *>(control))) {
                m_service = service;
                m_object = object;
                m_control.data()->setSurface(m_surface.data());
@@ -82,5 +81,6 @@ bool QVideoSurfaceOutput::setMediaObject(QMediaObject *object)
          }
       }
    }
+
    return false;
 }

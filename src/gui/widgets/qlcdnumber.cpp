@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,7 +36,7 @@ class QLCDNumberPrivate : public QFramePrivate
  public:
    void init();
    void internalSetString(const QString &s);
-   void drawString(const QString &s, QPainter &, QBitArray * = 0, bool = true);
+   void drawString(const QString &s, QPainter &, QBitArray * = nullptr, bool = true);
    //void drawString(const QString &, QPainter &, QBitArray * = 0) const;
    void drawDigit(const QPoint &, QPainter &, int, char, char = ' ');
    void drawSegment(const QPoint &, char, QPainter &, int, bool = false);
@@ -137,7 +137,7 @@ static QString double2string(double num, int base, int ndigits, bool *oflow)
          }
          return s;
       }
-      s = int2string((int)num, base, ndigits, 0);
+      s = int2string((int)num, base, ndigits, nullptr);
 
    } else {                                    // decimal base
       int nd = ndigits;
@@ -570,7 +570,7 @@ void QLCDNumber::paintEvent(QPaintEvent *)
    if (d->smallPoint) {
       d->drawString(d->digitStr, p, &d->points, false);
    } else {
-      d->drawString(d->digitStr, p, 0, false);
+      d->drawString(d->digitStr, p, nullptr, false);
    }
 }
 

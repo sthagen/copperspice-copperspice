@@ -20,11 +20,11 @@
 #ifndef QWEBELEMENT_H
 #define QWEBELEMENT_H
 
-#include <QtCore/qstring.h>
-#include <QtCore/qstringlist.h>
-#include <QtCore/qrect.h>
-#include <QtCore/qvariant.h>
-#include <QtCore/qshareddata.h>
+#include <qstring.h>
+#include <qstringlist.h>
+#include <qrect.h>
+#include <qvariant.h>
+#include <qshareddata.h>
 
 #include "qwebkitglobal.h"
 namespace WebCore {
@@ -280,10 +280,11 @@ public:
 
     inline iterator begin() { return iterator(this, 0); }
     inline iterator end()  { return iterator(this, count()); }
+
 private:
     QExplicitlySharedDataPointer<QWebElementCollectionPrivate> d;
 };
 
-Q_DECLARE_METATYPE(QWebElement)
+CS_DECLARE_METATYPE(QWebElement)
 
-#endif // QWEBELEMENT_H
+#endif

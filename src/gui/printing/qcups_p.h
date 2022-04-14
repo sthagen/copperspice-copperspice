@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -107,12 +107,6 @@ class Q_GUI_EXPORT QCUPSSupport
 
    static void setPageRange(QPrinter *printer, int pageFrom, int pageTo);
 };
-
-Q_DECLARE_METATYPE(QCUPSSupport::JobHoldUntil)
-Q_DECLARE_METATYPE(QCUPSSupport::BannerPage)
-Q_DECLARE_METATYPE(QCUPSSupport::PageSet)
-Q_DECLARE_METATYPE(QCUPSSupport::PagesPerSheetLayout)
-Q_DECLARE_METATYPE(QCUPSSupport::PagesPerSheet)
 
 #endif // QT_NO_CUPS
 

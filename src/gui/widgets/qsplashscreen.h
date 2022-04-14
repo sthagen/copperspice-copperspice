@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 #include <qpixmap.h>
 #include <qwidget.h>
 
-
-
 #ifndef QT_NO_SPLASHSCREEN
 class QSplashScreenPrivate;
 
@@ -37,13 +35,17 @@ class Q_GUI_EXPORT QSplashScreen : public QWidget
    GUI_CS_OBJECT(QSplashScreen)
 
  public:
-   explicit QSplashScreen(const QPixmap &pixmap = QPixmap(), Qt::WindowFlags f = 0);
-   QSplashScreen(QWidget *parent, const QPixmap &pixmap = QPixmap(), Qt::WindowFlags f = 0);
+   explicit QSplashScreen(const QPixmap &pixmap = QPixmap(), Qt::WindowFlags flags = Qt::EmptyFlag);
+   QSplashScreen(QWidget *parent, const QPixmap &pixmap = QPixmap(), Qt::WindowFlags flags = Qt::EmptyFlag);
+
+   QSplashScreen(const QSplashScreen &) = delete;
+   QSplashScreen &operator=(const QSplashScreen &) = delete;
+
    virtual ~QSplashScreen();
 
    void setPixmap(const QPixmap &pixmap);
    const QPixmap pixmap() const;
-   void finish(QWidget *w);
+   void finish(QWidget *widget);
    void repaint();
    QString message() const;
 
@@ -58,16 +60,14 @@ class Q_GUI_EXPORT QSplashScreen : public QWidget
    GUI_CS_SIGNAL_2(messageChanged, message)
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
    virtual void drawContents(QPainter *painter);
-   void mousePressEvent(QMouseEvent *) override;
+   void mousePressEvent(QMouseEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QSplashScreen)
    Q_DECLARE_PRIVATE(QSplashScreen)
 };
 
 #endif // QT_NO_SPLASHSCREEN
 
-
-#endif // QSPLASHSCREEN_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,9 +27,8 @@
 
 #include <qsvgrenderer.h>
 #include <qpainter.h>
+
 #include <qwidget_p.h>
-
-
 
 class QSvgWidgetPrivate : public QWidgetPrivate
 {
@@ -40,25 +39,21 @@ class QSvgWidgetPrivate : public QWidgetPrivate
 };
 
 QSvgWidget::QSvgWidget(QWidget *parent)
-   : QWidget(*new QSvgWidgetPrivate, parent, 0)
+   : QWidget(*new QSvgWidgetPrivate, parent, Qt::EmptyFlag)
 {
    d_func()->renderer = new QSvgRenderer(this);
-   QObject::connect(d_func()->renderer, SIGNAL(repaintNeeded()),
-                    this, SLOT(update()));
+   QObject::connect(d_func()->renderer, SIGNAL(repaintNeeded()), this, SLOT(update()));
 }
 
-
 QSvgWidget::QSvgWidget(const QString &file, QWidget *parent)
-   : QWidget(*new QSvgWidgetPrivate, parent, 0)
+   : QWidget(*new QSvgWidgetPrivate, parent, Qt::EmptyFlag)
 {
    d_func()->renderer = new QSvgRenderer(file, this);
-   QObject::connect(d_func()->renderer, SIGNAL(repaintNeeded()),
-                    this, SLOT(update()));
+   QObject::connect(d_func()->renderer, SIGNAL(repaintNeeded()), this, SLOT(update()));
 }
 
 QSvgWidget::~QSvgWidget()
 {
-
 }
 
 QSvgRenderer *QSvgWidget::renderer() const
@@ -67,13 +62,10 @@ QSvgRenderer *QSvgWidget::renderer() const
    return d->renderer;
 }
 
-
-/*!
-    \reimp
-*/
 QSize QSvgWidget::sizeHint() const
 {
    Q_D(const QSvgWidget);
+
    if (d->renderer->isValid()) {
       return d->renderer->defaultSize();
    } else {
@@ -81,10 +73,6 @@ QSize QSvgWidget::sizeHint() const
    }
 }
 
-
-/*!
-    \reimp
-*/
 void QSvgWidget::paintEvent(QPaintEvent *)
 {
    Q_D(QSvgWidget);
@@ -92,18 +80,12 @@ void QSvgWidget::paintEvent(QPaintEvent *)
    d->renderer->render(&p);
 }
 
-/*!
-    Loads the contents of the specified SVG \a file and updates the widget.
-*/
 void QSvgWidget::load(const QString &file)
 {
    Q_D(const QSvgWidget);
    d->renderer->load(file);
 }
 
-/*!
-    Loads the specified SVG format \a contents and updates the widget.
-*/
 void QSvgWidget::load(const QByteArray &contents)
 {
    Q_D(const QSvgWidget);

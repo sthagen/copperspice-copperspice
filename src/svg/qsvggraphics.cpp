@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -238,14 +238,10 @@ void QSvgRect::draw(QPainter *p, QSvgExtraStates &states)
    revertStyle(p, states);
 }
 
-QSvgTspan *const QSvgText::LINEBREAK = 0;
+QSvgTspan *const QSvgText::LINEBREAK = nullptr;
 
 QSvgText::QSvgText(QSvgNode *parent, const QPointF &coord)
-   : QSvgNode(parent)
-   , m_coord(coord)
-   , m_type(TEXT)
-   , m_size(0, 0)
-   , m_mode(Default)
+   : QSvgNode(parent), m_coord(coord), m_type(TEXT), m_size(0, 0), m_mode(Default)
 {
 }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,8 +21,9 @@
 *
 ***********************************************************************/
 
-#include <qplatformdefs.h>
 #include <qfilesystemengine_p.h>
+
+#include <qplatformdefs.h>
 #include <qfsfileengine.h>
 #include <qfile.h>
 #include <qfileinfo.h>
@@ -54,19 +55,21 @@ extern "C" NSString *NSTemporaryDirectory();
 
 static inline bool hasResourcePropertyFlag(const QFileSystemMetaData &data, const QFileSystemEntry &entry, CFStringRef key)
 {
-   QCFString path = CFStringCreateWithFileSystemRepresentation(0, entry.nativeFilePath().constData());
+   QCFString path = CFStringCreateWithFileSystemRepresentation(nullptr, entry.nativeFilePath().constData());
 
-   if (! path) {
+   if (path.toCFStringRef() == nullptr) {
       return false;
    }
 
-   QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(0, path, kCFURLPOSIXPathStyle, data.hasFlags(QFileSystemMetaData::DirectoryType));
+   QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(nullptr, path.toCFStringRef(), kCFURLPOSIXPathStyle,
+               data.hasFlags(QFileSystemMetaData::DirectoryType));
+
    if (! url) {
       return false;
    }
 
    CFBooleanRef value;
-   if (CFURLCopyResourcePropertyForKey(url, key, &value, NULL)) {
+   if (CFURLCopyResourcePropertyForKey(url, key, &value, nullptr)) {
       if (value == kCFBooleanTrue) {
          return true;
       }
@@ -87,7 +90,7 @@ static bool isPackage(const QFileSystemMetaData &data, const QFileSystemEntry &e
    if (suffix.length() > 0) {
       // First step: is the extension known ?
       QCFType<CFStringRef> extensionRef = QCFString::toCFStringRef(suffix);
-      QCFType<CFStringRef> uniformTypeIdentifier = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, extensionRef, NULL);
+      QCFType<CFStringRef> uniformTypeIdentifier = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, extensionRef, nullptr);
 
       if (UTTypeConformsTo(uniformTypeIdentifier, kUTTypeBundle)) {
          return true;
@@ -95,7 +98,7 @@ static bool isPackage(const QFileSystemMetaData &data, const QFileSystemEntry &e
 
       // Second step: check if an application knows the package type
       QCFType<CFStringRef> path = QCFString::toCFStringRef(entry.filePath());
-      QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(0, path, kCFURLPOSIXPathStyle, true);
+      QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(nullptr, path, kCFURLPOSIXPathStyle, true);
 
       UInt32 type, creator;
       // Well created packages have the PkgInfo file
@@ -105,7 +108,7 @@ static bool isPackage(const QFileSystemMetaData &data, const QFileSystemEntry &e
 
       // Find if an application other than Finder claims to know how to handle the package
       QCFType<CFURLRef> application;
-      application = LSCopyDefaultApplicationURLForURL(url, kLSRolesEditor | kLSRolesViewer | kLSRolesViewer, NULL);
+      application = LSCopyDefaultApplicationURLForURL(url, kLSRolesEditor | kLSRolesViewer | kLSRolesViewer, nullptr);
 
       if (application) {
          QCFType<CFBundleRef> bundle = CFBundleCreate(kCFAllocatorDefault, application);
@@ -123,8 +126,6 @@ static bool isPackage(const QFileSystemMetaData &data, const QFileSystemEntry &e
 }
 #endif  // Q_OS_DARWIN
 
-
-
 //static
 QFileSystemEntry QFileSystemEngine::getLinkTarget(const QFileSystemEntry &link, QFileSystemMetaData &data)
 {
@@ -136,7 +137,7 @@ QFileSystemEntry QFileSystemEngine::getLinkTarget(const QFileSystemEntry &link, 
    int len  = -1;
    int size = PATH_CHUNK_SIZE;
 
-   while (1) {
+   while (true) {
       s = (char *) ::realloc(s, size);
       Q_CHECK_PTR(s);
       len = ::readlink(link.nativeFilePath().constData(), s, size);
@@ -197,41 +198,42 @@ QFileSystemEntry QFileSystemEngine::getLinkTarget(const QFileSystemEntry &link, 
 
 #if defined(Q_OS_DARWIN)
    {
-      QCFString path = CFStringCreateWithFileSystemRepresentation(0,
+      QCFString path = CFStringCreateWithFileSystemRepresentation(nullptr,
                   QFile::encodeName(QDir::cleanPath(link.filePath())).data());
 
-      if (! path) {
+      if (path.toCFStringRef() == nullptr) {
          return QFileSystemEntry();
       }
 
-      QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(0, path, kCFURLPOSIXPathStyle,
+      QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(nullptr, path.toCFStringRef(), kCFURLPOSIXPathStyle,
                   data.hasFlags(QFileSystemMetaData::DirectoryType));
+
       if (! url) {
          return QFileSystemEntry();
       }
 
-      QCFType<CFDataRef> bookmarkData = CFURLCreateBookmarkDataFromFile(0, url, NULL);
+      QCFType<CFDataRef> bookmarkData = CFURLCreateBookmarkDataFromFile(nullptr, url, nullptr);
       if (! bookmarkData) {
          return QFileSystemEntry();
       }
 
-      QCFType<CFURLRef> resolvedUrl = CFURLCreateByResolvingBookmarkData(0, bookmarkData,
+      QCFType<CFURLRef> resolvedUrl = CFURLCreateByResolvingBookmarkData(nullptr, bookmarkData,
                   (CFURLBookmarkResolutionOptions)(kCFBookmarkResolutionWithoutUIMask
-                  | kCFBookmarkResolutionWithoutMountingMask), NULL, NULL, NULL, NULL);
+                  | kCFBookmarkResolutionWithoutMountingMask), nullptr, nullptr, nullptr, nullptr);
 
       if (! resolvedUrl) {
          return QFileSystemEntry();
       }
 
       QCFString cfstr(CFURLCopyFileSystemPath(resolvedUrl, kCFURLPOSIXPathStyle));
-      if (!cfstr) {
+      if (cfstr.toCFStringRef() != nullptr) {
          return QFileSystemEntry();
       }
 
-      return QFileSystemEntry(QCFString::toQString(cfstr));
+      return QFileSystemEntry(cfstr.toQString());
    }
-
 #endif
+
    return QFileSystemEntry();
 }
 
@@ -247,17 +249,17 @@ QFileSystemEntry QFileSystemEngine::canonicalName(const QFileSystemEntry &entry,
     Q_UNUSED(data);
     return QFileSystemEntry(slowCanonicalized(absoluteName(entry).filePath()));
 #else
-    char *ret = 0;
+    char *ret = nullptr;
 
 #ifdef Q_OS_DARWIN
 
     ret = (char*)malloc(PATH_MAX + 1);
 
-    if (ret && realpath(entry.nativeFilePath().constData(), (char*)ret) == 0) {
+    if (ret && realpath(entry.nativeFilePath().constData(), (char*)ret) == nullptr) {
         const int savedErrno = errno; // errno is checked below, and free() might change it
         free(ret);
         errno = savedErrno;
-        ret = 0;
+        ret = nullptr;
     }
 
 #elif defined(Q_OS_ANDROID)
@@ -324,18 +326,19 @@ QFileSystemEntry QFileSystemEngine::absoluteName(const QFileSystemEntry &entry)
       return entry;
    }
 
-   QByteArray orig = entry.nativeFilePath();
-   QByteArray result;
+   QString orig = entry.nativeFilePath();
+   QString result;
 
-   if (orig.isEmpty() || !orig.startsWith('/')) {
+   if (orig.isEmpty() || ! orig.startsWith('/')) {
       QFileSystemEntry cur(currentPath());
       result = cur.nativeFilePath();
    }
 
-   if (! orig.isEmpty() && !(orig.length() == 1 && orig[0] == '.')) {
+   if (! orig.isEmpty() && ! (orig.length() == 1 && orig[0] == '.')) {
       if (!result.isEmpty() && ! result.endsWith('/')) {
          result.append('/');
       }
+
       result.append(orig);
    }
 
@@ -389,7 +392,7 @@ QString QFileSystemEngine::resolveUserName(uint userId)
    QVarLengthArray<char, 1024> buf(size_max);
 #endif
 
-   struct passwd *pw = 0;
+   struct passwd *pw = nullptr;
 
 #if defined(_POSIX_THREAD_SAFE_FUNCTIONS) && ! defined(Q_OS_OPENBSD)
    struct passwd entry;
@@ -416,7 +419,7 @@ QString QFileSystemEngine::resolveGroupName(uint groupId)
    QVarLengthArray<char, 1024> buf(size_max);
 #endif
 
-   struct group *gr = 0;
+   struct group *gr = nullptr;
 
 #if defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(Q_OS_OPENBSD)
    size_max = sysconf(_SC_GETGR_R_SIZE_MAX);
@@ -447,11 +450,12 @@ QString QFileSystemEngine::resolveGroupName(uint groupId)
 }
 
 #ifdef Q_OS_DARWIN
-//static
+
 QString QFileSystemEngine::bundleName(const QFileSystemEntry &entry)
 {
-   QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(0, QCFString(entry.filePath()),
+   QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(nullptr, QCFString(entry.filePath()).toCFStringRef(),
                            kCFURLPOSIXPathStyle, true);
+
    if (QCFType<CFDictionaryRef> dict = CFBundleCopyInfoDictionaryForURL(url)) {
       if (CFTypeRef name = (CFTypeRef)CFDictionaryGetValue(dict, kCFBundleNameKey)) {
          if (CFGetTypeID(name) == CFStringGetTypeID()) {
@@ -492,27 +496,23 @@ bool QFileSystemEngine::fillMetaData(const QFileSystemEntry &entry, QFileSystemM
 
    data.entryFlags &= ~what;
 
-   const char *nativeFilePath;
-   int nativeFilePathLength;
-   {
-      const QByteArray &path = entry.nativeFilePath();
-      nativeFilePath = path.constData();
-      nativeFilePathLength = path.size();
-      Q_UNUSED(nativeFilePathLength);
-   }
+   QString nativeFilePath = entry.nativeFilePath();
 
-   bool entryExists = true; // innocent until proven otherwise
+   bool entryExists = true;
 
    QT_STATBUF statBuffer;
    bool statBufferValid = false;
+
    if (what & QFileSystemMetaData::LinkType) {
-      if (QT_LSTAT(nativeFilePath, &statBuffer) == 0) {
+      if (QT_LSTAT(nativeFilePath.constData(), &statBuffer) == 0) {
+
          if (S_ISLNK(statBuffer.st_mode)) {
             data.entryFlags |= QFileSystemMetaData::LinkType;
          } else {
             statBufferValid = true;
             data.entryFlags &= ~QFileSystemMetaData::PosixStatFlags;
          }
+
       } else {
          entryExists = false;
       }
@@ -522,7 +522,7 @@ bool QFileSystemEngine::fillMetaData(const QFileSystemEntry &entry, QFileSystemM
 
    if (statBufferValid || (what & QFileSystemMetaData::PosixStatFlags)) {
       if (entryExists && ! statBufferValid) {
-         statBufferValid = (QT_STAT(nativeFilePath, &statBuffer) == 0);
+         statBufferValid = (QT_STAT(nativeFilePath.constData(), &statBuffer) == 0);
       }
 
       if (statBufferValid) {
@@ -557,17 +557,17 @@ bool QFileSystemEngine::fillMetaData(const QFileSystemEntry &entry, QFileSystemM
 
       if (entryExists) {
          if (what & QFileSystemMetaData::UserReadPermission) {
-            if (QT_ACCESS(nativeFilePath, R_OK) == 0) {
+            if (QT_ACCESS(nativeFilePath.constData(), R_OK) == 0) {
                data.entryFlags |= QFileSystemMetaData::UserReadPermission;
             }
          }
          if (what & QFileSystemMetaData::UserWritePermission) {
-            if (QT_ACCESS(nativeFilePath, W_OK) == 0) {
+            if (QT_ACCESS(nativeFilePath.constData(), W_OK) == 0) {
                data.entryFlags |= QFileSystemMetaData::UserWritePermission;
             }
          }
          if (what & QFileSystemMetaData::UserExecutePermission) {
-            if (QT_ACCESS(nativeFilePath, X_OK) == 0) {
+            if (QT_ACCESS(nativeFilePath.constData(), X_OK) == 0) {
                data.entryFlags |= QFileSystemMetaData::UserExecutePermission;
             }
          }
@@ -766,31 +766,38 @@ bool QFileSystemEngine::setPermissions(const QFileSystemEntry &entry, QFile::Per
                                        QSystemError &error, QFileSystemMetaData *data)
 {
    mode_t mode = 0;
-    if (permissions & (QFile::ReadOwner | QFile::ReadUser))
-        mode |= S_IRUSR;
+   if (permissions & (QFile::ReadOwner | QFile::ReadUser)) {
+      mode |= S_IRUSR;
+   }
 
-    if (permissions & (QFile::WriteOwner | QFile::WriteUser))
-        mode |= S_IWUSR;
+   if (permissions & (QFile::WriteOwner | QFile::WriteUser)) {
+      mode |= S_IWUSR;
+   }
 
-    if (permissions & (QFile::ExeOwner | QFile::ExeUser))
-        mode |= S_IXUSR;
-
+   if (permissions & (QFile::ExeOwner | QFile::ExeUser)) {
+      mode |= S_IXUSR;
+   }
 
    if (permissions & QFile::ReadGroup) {
       mode |= S_IRGRP;
    }
+
    if (permissions & QFile::WriteGroup) {
       mode |= S_IWGRP;
    }
+
    if (permissions & QFile::ExeGroup) {
       mode |= S_IXGRP;
    }
+
    if (permissions & QFile::ReadOther) {
       mode |= S_IROTH;
    }
+
    if (permissions & QFile::WriteOther) {
       mode |= S_IWOTH;
    }
+
    if (permissions & QFile::ExeOther) {
       mode |= S_IXOTH;
    }

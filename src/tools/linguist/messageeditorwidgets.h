@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,16 @@
 #ifndef MESSAGEEDITORWIDGETS_H
 #define MESSAGEEDITORWIDGETS_H
 
-#include <QIcon>
-#include <QImage>
-#include <QLabel>
-#include <QMap>
-#include <QTextEdit>
-#include <QUrl>
-#include <QWidget>
-#include <qstringfwd.h>
+class MessageHighlighter;
 
-QT_BEGIN_NAMESPACE
+#include <qicon.h>
+#include <qimage.h>
+#include <qlabel.h>
+#include <qmap.h>
+#include <qtextedit.h>
+#include <qurl.h>
+#include <qwidget.h>
+#include <qstringfwd.h>
 
 class QAbstractButton;
 class QAction;
@@ -43,105 +43,113 @@ class QMenu;
 class QSizeF;
 class QVariant;
 
-class MessageHighlighter;
+// Automatically adapt height to document contents
 
-/*
-  Automatically adapt height to document contents
- */
 class ExpandingTextEdit : public QTextEdit
 {
-   Q_OBJECT
+   CS_OBJECT(ExpandingTextEdit)
 
  public:
    ExpandingTextEdit(QWidget *parent = nullptr);
    QSize sizeHint() const;
    QSize minimumSizeHint() const;
 
- private slots:
-   void updateHeight(const QSizeF &documentSize);
-   void reallyEnsureCursorVisible();
-
  private:
    int m_minimumHeight;
+
+   CS_SLOT_1(Private, void updateHeight(const QSizeF & documentSize))
+   CS_SLOT_2(updateHeight)
+
+   CS_SLOT_1(Private, void reallyEnsureCursorVisible())
+   CS_SLOT_2(reallyEnsureCursorVisible)
 };
 
-/*
-  Format markup & control characters
-*/
 class FormatTextEdit : public ExpandingTextEdit
 {
-   Q_OBJECT
+   CS_OBJECT(FormatTextEdit)
+
  public:
    FormatTextEdit(QWidget *parent = nullptr);
    ~FormatTextEdit();
+
    void setEditable(bool editable);
 
- signals:
-   void editorDestroyed();
+   CS_SIGNAL_1(Public, void editorDestroyed())
+   CS_SIGNAL_2(editorDestroyed)
 
- public slots:
-   void setPlainText(const QString &text, bool userAction);
+   CS_SLOT_1(Public, void setPlainText(const QString & text,bool userAction))
+   CS_SLOT_2(setPlainText)
+
+   CS_SLOT_1(Public, void setVisualizeWhitespace(bool value))
+   CS_SLOT_2(setVisualizeWhitespace)
 
  private:
    MessageHighlighter *m_highlighter;
 };
 
-/*
-  Displays text field & associated label
-*/
 class FormWidget : public QWidget
 {
-   Q_OBJECT
+   CS_OBJECT(FormWidget)
+
  public:
    FormWidget(const QString &label, bool isEditable, QWidget *parent = nullptr);
+
    void setLabel(const QString &label) {
       m_label->setText(label);
    }
+
    void setTranslation(const QString &text, bool userAction = false);
    void clearTranslation() {
       setTranslation(QString(), false);
    }
+
    QString getTranslation() {
       return m_editor->toPlainText();
    }
+
    void setEditingEnabled(bool enable);
    void setHideWhenEmpty(bool optional) {
       m_hideWhenEmpty = optional;
    }
+
    FormatTextEdit *getEditor() {
       return m_editor;
    }
 
- signals:
-   void textChanged(QTextEdit *);
-   void selectionChanged(QTextEdit *);
-   void cursorPositionChanged();
+   CS_SIGNAL_1(Public, void textChanged(QTextEdit *un_named_arg1))
+   CS_SIGNAL_2(textChanged, un_named_arg1)
 
- private slots:
-   void slotSelectionChanged();
-   void slotTextChanged();
+   CS_SIGNAL_1(Public, void selectionChanged(QTextEdit *un_named_arg1))
+   CS_SIGNAL_2(selectionChanged, un_named_arg1)
+
+   CS_SIGNAL_1(Public, void cursorPositionChanged())
+   CS_SIGNAL_2(cursorPositionChanged)
 
  private:
    QLabel *m_label;
    FormatTextEdit *m_editor;
    bool m_hideWhenEmpty;
+
+   // slots
+   void slotSelectionChanged();
+   void slotTextChanged();
 };
 
-/*
-  Displays text fields & associated label
-*/
 class FormMultiWidget : public QWidget
 {
-   Q_OBJECT
+   CS_OBJECT(FormMultiWidget)
+
  public:
    FormMultiWidget(const QString &label, QWidget *parent = nullptr);
    void setLabel(const QString &label) {
       m_label->setText(label);
    }
+
    void setTranslation(const QString &text, bool userAction = false);
    void clearTranslation() {
       setTranslation(QString(), false);
    }
+
    QString getTranslation() const;
    void setEditingEnabled(bool enable);
    void setMultiEnabled(bool enable);
@@ -152,27 +160,31 @@ class FormMultiWidget : public QWidget
       return m_editors;
    }
 
- signals:
-   void editorCreated(QTextEdit *);
-   void textChanged(QTextEdit *);
-   void selectionChanged(QTextEdit *);
-   void cursorPositionChanged();
+   CS_SIGNAL_1(Public, void editorCreated(QTextEdit * un_named_arg1))
+   CS_SIGNAL_2(editorCreated,un_named_arg1)
+
+   CS_SIGNAL_1(Public, void textChanged(QTextEdit * un_named_arg1))
+   CS_SIGNAL_2(textChanged,un_named_arg1)
+
+   CS_SIGNAL_1(Public, void selectionChanged(QTextEdit * un_named_arg1))
+   CS_SIGNAL_2(selectionChanged,un_named_arg1)
+
+   CS_SIGNAL_1(Public, void cursorPositionChanged())
+   CS_SIGNAL_2(cursorPositionChanged)
 
  protected:
    bool eventFilter(QObject *watched, QEvent *event);
 
- private slots:
-   void slotTextChanged();
-   void slotSelectionChanged();
-   void minusButtonClicked();
-   void plusButtonClicked();
-
  private:
    void addEditor(int idx);
    void updateLayout();
-   QAbstractButton *makeButton(const QIcon &icon, const char *slot);
+   QAbstractButton *makeButton(const QIcon &icon, const QString &slotMethod);
    void insertEditor(int idx);
    void deleteEditor(int idx);
+
+   // slots
+   void slotSelectionChanged();
+   void slotTextChanged();
 
    QLabel *m_label;
    QList<FormatTextEdit *> m_editors;
@@ -181,8 +193,12 @@ class FormMultiWidget : public QWidget
    bool m_hideWhenEmpty;
    bool m_multiEnabled;
    QIcon m_plusIcon, m_minusIcon;
+
+   CS_SLOT_1(Private, void minusButtonClicked())
+   CS_SLOT_2(minusButtonClicked)
+
+   CS_SLOT_1(Private, void plusButtonClicked())
+   CS_SLOT_2(plusButtonClicked)
 };
 
-QT_END_NAMESPACE
-
-#endif // MESSAGEEDITORWIDGETS_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -114,10 +114,10 @@ void QLineControl::copy(QClipboard::Mode mode) const
    QString t = selectedText();
 
    if (! t.isEmpty() && m_echoMode == QLineEdit::Normal) {
-      disconnect(QApplication::clipboard(), SIGNAL(selectionChanged()), this, nullptr);
+      disconnect(QApplication::clipboard(), &QClipboard::selectionChanged, this, nullptr);
 
       QApplication::clipboard()->setText(t, mode);
-      connect(QApplication::clipboard(), SIGNAL(selectionChanged()), this, SLOT(_q_clipboardChanged()));
+      connect(QApplication::clipboard(), &QClipboard::selectionChanged, this, &QLineControl::_q_clipboardChanged);
    }
 }
 
@@ -125,8 +125,8 @@ void QLineControl::paste(QClipboard::Mode clipboardMode)
 {
    QString clip = QApplication::clipboard()->text(clipboardMode);
 
-   if (!clip.isEmpty() || hasSelectedText()) {
-      separate(); //make it a separate undo/redo command
+   if (! clip.isEmpty() || hasSelectedText()) {
+      separate();    // make it a separate undo/redo command
       insert(clip);
       separate();
    }
@@ -493,6 +493,7 @@ void QLineControl::processInputMethodEvent(QInputMethodEvent *event)
          cursorPositionChanged = true;
       }
    }
+
 #ifndef QT_NO_IM
    setPreeditArea(m_cursor, event->preeditString());
 #endif
@@ -509,8 +510,9 @@ void QLineControl::processInputMethodEvent(QInputMethodEvent *event)
       if (a.type == QInputMethodEvent::Cursor) {
          m_preeditCursor = a.start;
          m_hideCursor = !a.length;
+
       } else if (a.type == QInputMethodEvent::TextFormat) {
-         QTextCharFormat f = qvariant_cast<QTextFormat>(a.value).toCharFormat();
+         QTextCharFormat f = (a.value).value<QTextFormat>().toCharFormat();
 
          if (f.isValid()) {
             QTextLayout::FormatRange o;
@@ -590,13 +592,6 @@ void QLineControl::draw(QPainter *painter, const QPoint &offset, const QRect &cl
    }
 }
 
-/*!
-    \internal
-
-    Sets the selection to cover the word at the given cursor position.
-    The word boundaries are defined by the behavior of QTextLayout::SkipWords
-    cursor mode.
-*/
 void QLineControl::selectWordAtPos(int cursor)
 {
    int next = cursor + 1;
@@ -615,20 +610,9 @@ void QLineControl::selectWordAtPos(int cursor)
    moveCursor(end, true);
 }
 
-/*!
-    \internal
-
-    Completes a change to the line control text.  If the change is not valid
-    will undo the line control state back to the given \a validateFromState.
-
-    If \a edited is true and the change is valid, will emit textEdited() in
-    addition to textChanged().  Otherwise only emits textChanged() on a valid
-    change.
-
-    The \a update value is currently unused.
-*/
 bool QLineControl::finishChange(int validateFromState, bool update, bool edited)
 {
+   (void) update;
 
    if (m_textDirty) {
       // do validation
@@ -909,7 +893,7 @@ void QLineControl::parseInputMask(const QString &maskFields)
    if (maskFields.isEmpty() || delimiter == 0) {
       if (m_maskData) {
          delete [] m_maskData;
-         m_maskData = 0;
+         m_maskData  = nullptr;
          m_maxLength = 32767;
          internalSetText(QString(), -1, false);
       }
@@ -958,12 +942,16 @@ void QLineControl::parseInputMask(const QString &maskFields)
          m_maskData[index].caseMode = m;
          index++;
          escape = false;
+
       } else if (c == QLatin1Char('<')) {
          m = MaskInputData::Lower;
+
       } else if (c == QLatin1Char('>')) {
          m = MaskInputData::Upper;
+
       } else if (c == QLatin1Char('!')) {
          m = MaskInputData::NoCaseMode;
+
       } else if (c != QLatin1Char('{') && c != QLatin1Char('}') && c != QLatin1Char('[') && c != QLatin1Char(']')) {
          switch (c.unicode()) {
             case 'A':
@@ -983,14 +971,17 @@ void QLineControl::parseInputMask(const QString &maskFields)
             case 'b':
                s = false;
                break;
+
             case '\\':
                escape = true;
+               [[fallthrough]];
+
             default:
                s = true;
                break;
          }
 
-         if (!escape) {
+         if (! escape) {
             m_maskData[index].maskChar = c;
             m_maskData[index].separator = s;
             m_maskData[index].caseMode = m;
@@ -1720,7 +1711,7 @@ void QLineControl::processKeyEvent(QKeyEvent *event)
          QClipboard::Mode mode = QClipboard::Clipboard;
 
          if (m_keyboardScheme == QPlatformTheme::X11KeyboardScheme
-            && event->modifiers() == (Qt::CTRL | Qt::SHIFT)
+            && event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)
             && event->key() == Qt::Key_Insert) {
             mode = QClipboard::Selection;
          }

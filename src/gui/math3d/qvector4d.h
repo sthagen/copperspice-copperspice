@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,6 @@
 #define QVECTOR4D_H
 
 #include <qpoint.h>
-#include <qmetatype.h>
 #include <qvariant.h>
 
 class QMatrix4x4;
@@ -161,21 +160,24 @@ inline qreal QVector4D::w() const
    return qreal(wp);
 }
 
-inline void QVector4D::setX(qreal aX)
+inline void QVector4D::setX(qreal x)
 {
-   xp = aX;
+   xp = x;
 }
-inline void QVector4D::setY(qreal aY)
+
+inline void QVector4D::setY(qreal y)
 {
-   yp = aY;
+   yp = y;
 }
-inline void QVector4D::setZ(qreal aZ)
+
+inline void QVector4D::setZ(qreal z)
 {
-   zp = aZ;
+   zp = z;
 }
-inline void QVector4D::setW(qreal aW)
+
+inline void QVector4D::setW(qreal w)
 {
-   wp = aW;
+   wp = w;
 }
 
 inline QVector4D &QVector4D::operator+=(const QVector4D &vector)
@@ -184,6 +186,7 @@ inline QVector4D &QVector4D::operator+=(const QVector4D &vector)
    yp += vector.yp;
    zp += vector.zp;
    wp += vector.wp;
+
    return *this;
 }
 

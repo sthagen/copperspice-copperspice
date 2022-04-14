@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,18 +24,14 @@
 #ifndef DIRECTSHOWIOSOURCE_H
 #define DIRECTSHOWIOSOURCE_H
 
-#include "directshowglobal.h"
-#include "directshowioreader.h"
-#include "directshowmediatype.h"
-#include "directshowmediatypelist.h"
-
 #include <qfile.h>
 
-class DirectShowIOSource
-   : public DirectShowMediaTypeList
-   , public IBaseFilter
-   , public IAMFilterMiscFlags
-   , public IPin
+#include <directshowioreader.h>
+#include <directshowmediatype.h>
+#include <directshowmediatypelist.h>
+#include <dsplayer_global.h>
+
+class DirectShowIOSource : public DirectShowMediaTypeList , public IBaseFilter, public IAMFilterMiscFlags, public IPin
 {
  public:
    DirectShowIOSource(DirectShowEventLoop *loop);

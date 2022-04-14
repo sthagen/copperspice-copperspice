@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,6 @@
 #include <qcontainerfwd.h>
 #include <qcryptographichash.h>
 #include <qdatetime.h>
-#include <qmetatype.h>
 #include <qnamespace.h>
 #include <qregularexpression.h>
 #include <qsharedpointer.h>
@@ -97,10 +96,12 @@ public:
    QByteArray version() const;
    QByteArray serialNumber() const;
    QByteArray digest(QCryptographicHash::Algorithm algorithm = QCryptographicHash::Md5) const;
+
    QStringList issuerInfo(SubjectInfo info) const;
    QStringList issuerInfo(const QByteArray &attribute) const;
-   QStringList subjectInfo(SubjectInfo info) const;
+   QStringList subjectInfo(SubjectInfo subject) const;
    QStringList subjectInfo(const QByteArray &attribute) const;
+
    QList<QByteArray> subjectInfoAttributes() const;
    QList<QByteArray> issuerInfoAttributes() const;
 
@@ -122,7 +123,7 @@ public:
    static QList<QSslCertificate> fromData(const QByteArray &data, QSsl::EncodingFormat format = QSsl::Pem);
 
    static QList<QSslError> verify(const QList<QSslCertificate> &certificateChain, const QString &hostName = QString());
-   static bool importPkcs12(QIODevice *device, QSslKey *key, QSslCertificate *cert,
+   static bool importPkcs12(QIODevice *device, QSslKey *key, QSslCertificate *certificate,
                   QList<QSslCertificate> *caCertificates = nullptr, const QByteArray &passPhrase = QByteArray());
 
    Qt::HANDLE handle() const;
@@ -137,8 +138,6 @@ private:
 
 Q_NETWORK_EXPORT QDebug operator<<(QDebug debug, const QSslCertificate &certificate);
 Q_NETWORK_EXPORT QDebug operator<<(QDebug debug, QSslCertificate::SubjectInfo info);
-
-Q_DECLARE_METATYPE(QSslCertificate)
 
 #endif
 

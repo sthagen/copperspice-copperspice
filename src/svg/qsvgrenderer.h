@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -91,13 +91,13 @@ class Q_SVG_EXPORT QSvgRenderer : public QObject
    SVG_CS_SLOT_1(Public, bool load(QXmlStreamReader *contents))
    SVG_CS_SLOT_OVERLOAD_BOOL(load, (QXmlStreamReader *))
 
-   SVG_CS_SLOT_1(Public, void render(QPainter *p))
+   SVG_CS_SLOT_1(Public, void render(QPainter *painter))
    SVG_CS_SLOT_OVERLOAD(render, (QPainter *))
 
-   SVG_CS_SLOT_1(Public, void render(QPainter *p, const QRectF &bounds))
+   SVG_CS_SLOT_1(Public, void render(QPainter *painter, const QRectF &bounds))
    SVG_CS_SLOT_OVERLOAD(render, (QPainter *, const QRectF &))
 
-   SVG_CS_SLOT_1(Public, void render(QPainter *p, const QString &elementId, const QRectF &bounds = QRectF()))
+   SVG_CS_SLOT_1(Public, void render(QPainter *painter, const QString &elementId, const QRectF &bounds = QRectF()))
    SVG_CS_SLOT_OVERLOAD(render, (QPainter *, const QString &, const QRectF &))
 
    SVG_CS_SIGNAL_1(Public, void repaintNeeded())

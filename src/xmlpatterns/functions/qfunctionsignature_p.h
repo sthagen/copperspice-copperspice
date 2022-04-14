@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -127,7 +127,8 @@ class FunctionSignature : public CallTargetDescription
    Expression::ID id() const;
 
  private:
-   Q_DISABLE_COPY(FunctionSignature)
+   FunctionSignature(const FunctionSignature &) = delete;
+   FunctionSignature &operator=(const FunctionSignature &) = delete;
 
    const Arity                     m_minArgs;
    const Arity                     m_maxArgs;

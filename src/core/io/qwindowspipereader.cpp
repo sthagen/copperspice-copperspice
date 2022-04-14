@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -55,7 +55,7 @@ QWindowsPipeReader::QWindowsPipeReader(QObject *parent)
 bool qt_cancelIo(HANDLE handle, OVERLAPPED *overlapped)
 {
    typedef BOOL (WINAPI * PtrCancelIoEx)(HANDLE, LPOVERLAPPED);
-   static PtrCancelIoEx ptrCancelIoEx = 0;
+   static PtrCancelIoEx ptrCancelIoEx = nullptr;
    if (!ptrCancelIoEx) {
       HMODULE kernel32 = GetModuleHandleA("kernel32");
       if (kernel32) {
@@ -175,15 +175,18 @@ void QWindowsPipeReader::notified(DWORD errorCode, DWORD numberOfBytesRead)
          // pipe and the message didn't fit into the pipe's system
          // buffer. We will read the remaining data in the next call.
          break;
+
       case ERROR_BROKEN_PIPE:
       case ERROR_PIPE_NOT_CONNECTED:
          pipeBroken = true;
          break;
+
       case ERROR_OPERATION_ABORTED:
          if (stopped) {
             break;
          }
-      // fall through
+         [[fallthrough]];
+
       default:
          emit winError(errorCode, QLatin1String("QWindowsPipeReader::notified"));
          pipeBroken = true;
@@ -276,7 +279,7 @@ void QWindowsPipeReader::readFileCompleted(DWORD errorCode, DWORD numberOfBytesT
 DWORD QWindowsPipeReader::checkPipeState()
 {
    DWORD bytes;
-   if (PeekNamedPipe(handle, NULL, 0, NULL, &bytes, NULL)) {
+   if (PeekNamedPipe(handle, nullptr, 0, nullptr, &bytes, nullptr)) {
       return bytes;
    } else {
       if (!pipeBroken) {

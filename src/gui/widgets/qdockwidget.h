@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QDOCKWIDGET_H
 #define QDOCKWIDGET_H
 
-#include <QtGui/qwidget.h>
+#include <qwidget.h>
 
 
 #ifndef QT_NO_DOCKWIDGET
@@ -56,26 +56,28 @@ class Q_GUI_EXPORT QDockWidget : public QWidget
    GUI_CS_PROPERTY_DESIGNABLE(windowTitle, true)
 
  public:
-   explicit QDockWidget(const QString &title, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
-   explicit QDockWidget(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+   enum DockWidgetFeature {
+      DockWidgetClosable         = 0x01,
+      DockWidgetMovable          = 0x02,
+      DockWidgetFloatable        = 0x04,
+      DockWidgetVerticalTitleBar = 0x08,
+      DockWidgetFeatureMask      = 0x0f,
+      AllDockWidgetFeatures      = DockWidgetClosable | DockWidgetMovable | DockWidgetFloatable, // ### remove in 5.0
+      NoDockWidgetFeatures       = 0x00,
+      Reserved                   = 0xff
+   };
+   using DockWidgetFeatures = QFlags<DockWidgetFeature>;
+
+   explicit QDockWidget(const QString &title, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+   explicit QDockWidget(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
+   QDockWidget(const QDockWidget &) = delete;
+   QDockWidget &operator=(const QDockWidget &) = delete;
+
    ~QDockWidget();
 
    QWidget *widget() const;
    void setWidget(QWidget *widget);
-
-   enum DockWidgetFeature {
-      DockWidgetClosable    = 0x01,
-      DockWidgetMovable     = 0x02,
-      DockWidgetFloatable   = 0x04,
-      DockWidgetVerticalTitleBar = 0x08,
-
-      DockWidgetFeatureMask = 0x0f,
-      AllDockWidgetFeatures = DockWidgetClosable | DockWidgetMovable | DockWidgetFloatable, // ### remove in 5.0
-      NoDockWidgetFeatures  = 0x00,
-
-      Reserved              = 0xff
-   };
-   using DockWidgetFeatures = QFlags<DockWidgetFeature>;
 
    void setFeatures(DockWidgetFeatures features);
    DockWidgetFeatures features() const;
@@ -123,7 +125,6 @@ class Q_GUI_EXPORT QDockWidget : public QWidget
 
  private:
    Q_DECLARE_PRIVATE(QDockWidget)
-   Q_DISABLE_COPY(QDockWidget)
 
    GUI_CS_SLOT_1(Private, void _q_toggleView(bool un_named_arg1))
    GUI_CS_SLOT_2(_q_toggleView)

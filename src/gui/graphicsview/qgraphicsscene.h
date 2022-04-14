@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,20 +24,20 @@
 #ifndef QGRAPHICSSCENE_H
 #define QGRAPHICSSCENE_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qpoint.h>
-#include <QtCore/qrect.h>
-#include <QtGui/qbrush.h>
-#include <QtGui/qfont.h>
-#include <QtGui/qtransform.h>
-#include <QtGui/qmatrix.h>
-#include <QtGui/qpen.h>
-#include <QScopedPointer>
-
+#include <qobject.h>
+#include <qbrush.h>
+#include <qcontainerfwd.h>
+#include <qfont.h>
+#include <qmatrix.h>
+#include <qpalette.h>
+#include <qpen.h>
+#include <qpoint.h>
+#include <qrect.h>
+#include <qscopedpointer.h>
+#include <qtransform.h>
 
 #if ! defined(QT_NO_GRAPHICSVIEW)
 
-template<typename T> class QList;
 class QFocusEvent;
 class QFont;
 class QFontMetrics;
@@ -127,19 +127,24 @@ class Q_GUI_EXPORT QGraphicsScene : public QObject
    QGraphicsScene(QObject *parent = nullptr);
    QGraphicsScene(const QRectF &sceneRect, QObject *parent = nullptr);
    QGraphicsScene(qreal x, qreal y, qreal width, qreal height, QObject *parent = nullptr);
+
+   QGraphicsScene(const QGraphicsScene &) = delete;
+   QGraphicsScene &operator=(const QGraphicsScene &) = delete;
+
    virtual ~QGraphicsScene();
 
    QRectF sceneRect() const;
-   inline qreal width() const {
+
+   qreal width() const {
       return sceneRect().width();
    }
 
-   inline qreal height() const {
+   qreal height() const {
       return sceneRect().height();
    }
 
    void setSceneRect(const QRectF &rect);
-   inline void setSceneRect(qreal x, qreal y, qreal w, qreal h) {
+   void setSceneRect(qreal x, qreal y, qreal w, qreal h) {
       setSceneRect(QRectF(x, y, w, h));
    }
 
@@ -174,14 +179,12 @@ class Q_GUI_EXPORT QGraphicsScene : public QObject
 
    QGraphicsItem *itemAt(const QPointF &pos, const QTransform &deviceTransform) const;
 
-
-
-   inline QList<QGraphicsItem *> items(qreal x, qreal y, qreal w, qreal h, Qt::ItemSelectionMode mode, Qt::SortOrder order,
+   QList<QGraphicsItem *> items(qreal x, qreal y, qreal w, qreal h, Qt::ItemSelectionMode mode, Qt::SortOrder order,
       const QTransform &deviceTransform = QTransform()) const {
       return items(QRectF(x, y, w, h), mode, order, deviceTransform);
    }
 
-   inline QGraphicsItem *itemAt(qreal x, qreal y, const QTransform &deviceTransform) const {
+   QGraphicsItem *itemAt(qreal x, qreal y, const QTransform &deviceTransform) const {
       return itemAt(QPointF(x, y), deviceTransform);
    }
 
@@ -189,11 +192,9 @@ class Q_GUI_EXPORT QGraphicsScene : public QObject
    QPainterPath selectionArea() const;
 
    void setSelectionArea(const QPainterPath &path, const QTransform &deviceTransform);
-   void setSelectionArea(const QPainterPath &path, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape,
-      const QTransform &deviceTransform = QTransform());
-   void setSelectionArea(const QPainterPath &path, Qt::ItemSelectionOperation selectionOperation,
+
+   void setSelectionArea(const QPainterPath &path, Qt::ItemSelectionOperation selectionOperation = Qt::ReplaceSelection,
       Qt::ItemSelectionMode mode = Qt::IntersectsItemShape, const QTransform &deviceTransform = QTransform());
-   // ### merge the last 2 functions and add a default: Qt::ItemSelectionOperation selectionOperation = Qt::ReplaceSelection
 
    QGraphicsItemGroup *createItemGroup(const QList<QGraphicsItem *> &items);
    void destroyItemGroup(QGraphicsItemGroup *group);
@@ -207,17 +208,17 @@ class Q_GUI_EXPORT QGraphicsScene : public QObject
    QGraphicsRectItem *addRect(const QRectF &rect, const QPen &pen = QPen(), const QBrush &brush = QBrush());
    QGraphicsTextItem *addText(const QString &text, const QFont &font = QFont());
    QGraphicsSimpleTextItem *addSimpleText(const QString &text, const QFont &font = QFont());
-   QGraphicsProxyWidget *addWidget(QWidget *widget, Qt::WindowFlags wFlags = Qt::WindowFlags());
+   QGraphicsProxyWidget *addWidget(QWidget *widget, Qt::WindowFlags flags = Qt::EmptyFlag);
 
-   inline QGraphicsEllipseItem *addEllipse(qreal x, qreal y, qreal w, qreal h, const QPen &pen = QPen(), const QBrush &brush = QBrush()) {
+   QGraphicsEllipseItem *addEllipse(qreal x, qreal y, qreal w, qreal h, const QPen &pen = QPen(), const QBrush &brush = QBrush()) {
       return addEllipse(QRectF(x, y, w, h), pen, brush);
    }
 
-   inline QGraphicsLineItem *addLine(qreal x1, qreal y1, qreal x2, qreal y2, const QPen &pen = QPen()) {
+   QGraphicsLineItem *addLine(qreal x1, qreal y1, qreal x2, qreal y2, const QPen &pen = QPen()) {
       return addLine(QLineF(x1, y1, x2, y2), pen);
    }
 
-   inline QGraphicsRectItem *addRect(qreal x, qreal y, qreal w, qreal h, const QPen &pen = QPen(),
+   QGraphicsRectItem *addRect(qreal x, qreal y, qreal w, qreal h, const QPen &pen = QPen(),
       const QBrush &brush = QBrush()) {
       return addRect(QRectF(x, y, w, h), pen, brush);
    }
@@ -248,6 +249,7 @@ class Q_GUI_EXPORT QGraphicsScene : public QObject
    inline void update(qreal x, qreal y, qreal w, qreal h) {
       update(QRectF(x, y, w, h));
    }
+
    inline void invalidate(qreal x, qreal y, qreal w, qreal h, SceneLayers layers = AllLayers) {
       invalidate(QRectF(x, y, w, h), layers);
    }
@@ -323,7 +325,7 @@ class Q_GUI_EXPORT QGraphicsScene : public QObject
    virtual void drawBackground(QPainter *painter, const QRectF &rect);
    virtual void drawForeground(QPainter *painter, const QRectF &rect);
    virtual void drawItems(QPainter *painter, int numItems, QGraphicsItem *items[],
-      const QStyleOptionGraphicsItem options[], QWidget *widget = 0);
+      const QStyleOptionGraphicsItem options[], QWidget *widget = nullptr);
 
    QScopedPointer<QGraphicsScenePrivate> d_ptr;
 
@@ -332,7 +334,6 @@ class Q_GUI_EXPORT QGraphicsScene : public QObject
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsScene)
-   Q_DISABLE_COPY(QGraphicsScene)
 
    GUI_CS_SLOT_1(Private, void _q_emitUpdated())
    GUI_CS_SLOT_2(_q_emitUpdated)
@@ -374,7 +375,5 @@ void QGraphicsScene::cs_setSceneRect(const QRectF &rect)
 }
 
 #endif // QT_NO_GRAPHICSVIEW
-
-Q_DECLARE_METATYPE(QGraphicsScene *)
 
 #endif

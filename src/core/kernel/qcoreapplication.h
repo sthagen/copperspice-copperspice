@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -69,7 +69,11 @@ class Q_CORE_EXPORT QCoreApplication : public QObject
  public:
    enum { ApplicationFlags = CS_VERSION | 0x01000000 };
 
-   QCoreApplication(int &argc, char **argv, int = ApplicationFlags );
+   QCoreApplication(int &argc, char **argv, int = ApplicationFlags);
+
+   QCoreApplication(const QCoreApplication &) = delete;
+   QCoreApplication &operator=(const QCoreApplication &) = delete;
+
    ~QCoreApplication();
 
    static QStringList arguments();
@@ -109,7 +113,7 @@ class Q_CORE_EXPORT QCoreApplication : public QObject
    static int exec();
    static void processEvents(QEventLoop::ProcessEventsFlags flags = QEventLoop::AllEvents);
    static void processEvents(QEventLoop::ProcessEventsFlags flags, int maxtime);
-   static void exit(int retcode = 0);
+   static void exit(int returnCode = 0);
 
    static bool sendEvent(QObject *receiver, QEvent *event);
    static void postEvent(QObject *receiver, QEvent *event, int priority = Qt::NormalEventPriority);
@@ -119,7 +123,7 @@ class Q_CORE_EXPORT QCoreApplication : public QObject
    static QAbstractEventDispatcher *eventDispatcher();
    static void setEventDispatcher(QAbstractEventDispatcher *eventDispatcher);
 
-   virtual bool notify(QObject *, QEvent *);
+   virtual bool notify(QObject *receiver, QEvent *event);
 
    static bool startingUp();
    static bool closingDown();
@@ -128,26 +132,26 @@ class Q_CORE_EXPORT QCoreApplication : public QObject
    static QString applicationFilePath();
    static qint64 applicationPid();
 
-   static void setLibraryPaths(const QStringList &);
+   static void setLibraryPaths(const QStringList &paths);
    static QStringList libraryPaths();
-   static void addLibraryPath(const QString &);
-   static void removeLibraryPath(const QString &);
+   static void addLibraryPath(const QString &path);
+   static void removeLibraryPath(const QString &path);
 
-#ifndef QT_NO_TRANSLATION
-   static void installTranslator(QTranslator *messageFile);
-   static void removeTranslator(QTranslator *messageFile);
-#endif
+   static void installTranslator(QTranslator *translationFile);
+   static void removeTranslator(QTranslator *translationFile);
 
-   enum Encoding { CodecForTr, UnicodeUTF8, DefaultCodec = CodecForTr };
+   static QString translate(const char *context, const char *text, const char *comment = nullptr,
+            std::optional<int> numArg = std::optional<int>());
 
-   static QString translate(const char *context, const char *key, const char *disambiguation = nullptr,
-                  Encoding encoding = CodecForTr, int n = -1);
+   static QString translate(const QString &context, const QString &text, const QString &comment = QString(),
+            std::optional<int> numArg = std::optional<int>());
 
    static void flush();
    void installNativeEventFilter(QAbstractNativeEventFilter *filterObj);
    void removeNativeEventFilter(QAbstractNativeEventFilter *filterObj);
 
    void cs_internal_maybeQuit();
+   bool cs_isRealGuiApp();
 
    static bool isQuitLockEnabled();
    static void setQuitLockEnabled(bool enabled);
@@ -162,8 +166,8 @@ class Q_CORE_EXPORT QCoreApplication : public QObject
    CORE_CS_SIGNAL_1(Public, void aboutToQuit())
    CORE_CS_SIGNAL_2(aboutToQuit)
 
-   CORE_CS_SIGNAL_1(Public, void unixSignal(int un_named_arg1))
-   CORE_CS_SIGNAL_2(unixSignal, un_named_arg1)
+   CORE_CS_SIGNAL_1(Public, void unixSignal(int signalId))
+   CORE_CS_SIGNAL_2(unixSignal, signalId)
 
  protected:
    bool event(QEvent *) override;
@@ -180,8 +184,6 @@ class Q_CORE_EXPORT QCoreApplication : public QObject
 
    static QCoreApplication *self;
 
-   Q_DISABLE_COPY(QCoreApplication)
-
    friend class QApplication;
    friend class QApplicationPrivate;
    friend class QClassFactory;
@@ -191,68 +193,67 @@ class Q_CORE_EXPORT QCoreApplication : public QObject
    friend class QWidgetWindow;
    friend class QWidgetPrivate;
 
-
    friend bool qt_sendSpontaneousEvent(QObject *, QEvent *);
    friend Q_CORE_EXPORT QString qAppName();
-
 };
 
 // wrappers for static method
 void QCoreApplication::cs_setApplicationName(const QString &application)
 {
    QCoreApplication::setApplicationName(application);
-};
+}
 
 QString QCoreApplication::cs_applicationName() const
 {
    return QCoreApplication::applicationName();
-};
+}
 
 void QCoreApplication::cs_setOrganizationName(const QString &orgName)
 {
    QCoreApplication::setOrganizationName(orgName);
-};
+}
 
 QString QCoreApplication::cs_organizationName() const
 {
    return QCoreApplication::organizationName();
-};
+}
 
 void QCoreApplication::cs_setApplicationVersion(const QString &version)
 {
    QCoreApplication::setApplicationVersion(version);
-};
+}
 
 QString QCoreApplication::cs_applicationVersion() const
 {
    return QCoreApplication::applicationVersion();
-};
+}
 
 void QCoreApplication::cs_setOrganizationDomain(const QString &orgDomain)
 {
    QCoreApplication::setOrganizationDomain(orgDomain);
-};
+}
 
 QString QCoreApplication::cs_organizationDomain() const
 {
    return QCoreApplication::organizationDomain();
-};
+}
 
 bool QCoreApplication::cs_isQuitLockEnabled() const
 {
    return QCoreApplication::isQuitLockEnabled();
-};
+}
 
 void QCoreApplication::cs_setQuitLockEnabled(bool enabled)
 {
    return QCoreApplication::setQuitLockEnabled(enabled);
-};
+}
 
 inline bool QCoreApplication::sendEvent(QObject *receiver, QEvent *event)
 {
    if (event) {
       event->spont = false;
    }
+
    return self ? self->notifyInternal(receiver, event) : false;
 }
 
@@ -261,55 +262,20 @@ inline bool QCoreApplication::sendSpontaneousEvent(QObject *receiver, QEvent *ev
    if (event) {
       event->spont = true;
    }
+
    return self ? self->notifyInternal(receiver, event) : false;
 }
 
-// * *
-#ifdef QT_NO_TRANSLATION
-
-// 1
-inline QString QCoreApplication::translate(const char *, const char *sourceText, const char *, Encoding encoding)
-{
-#ifndef QT_NO_TEXTCODEC
-   if (encoding == UnicodeUTF8) {
-      return QString::fromUtf8(sourceText);
-   }
-#endif
-
-   return QString::fromLatin1(sourceText);
-}
-
-// 2
-inline QString QCoreApplication::translate(const char *, const char *sourceText, const char *, Encoding encoding, int)
-{
-#ifndef QT_NO_TEXTCODEC
-   if (encoding == UnicodeUTF8) {
-      return QString::fromUtf8(sourceText);
-   }
-#endif
-   return QString::fromLatin1(sourceText);
-}
-#endif
-
-
-// ### merge the four functions into two (using "int n = -1")
 #define Q_DECLARE_TR_FUNCTIONS(context) \
-public: \
-    static inline QString tr(const char *sourceText, const char *disambiguation = 0) \
-        { return QCoreApplication::translate(#context, sourceText, disambiguation); } \
-    static inline QString trUtf8(const char *sourceText, const char *disambiguation = 0) \
-        { return QCoreApplication::translate(#context, sourceText, disambiguation, \
-                                             QCoreApplication::UnicodeUTF8); } \
-    static inline QString tr(const char *sourceText, const char *disambiguation, int n) \
-        { return QCoreApplication::translate(#context, sourceText, disambiguation, \
-                                             QCoreApplication::CodecForTr, n); } \
-    static inline QString trUtf8(const char *sourceText, const char *disambiguation, int n) \
-        { return QCoreApplication::translate(#context, sourceText, disambiguation, \
-                                             QCoreApplication::UnicodeUTF8, n); } \
-private:
+ public: \
+   static QString tr(const char *text, const char *comment = nullptr, \
+            std::optional<int> numArg = std::optional<int>()) \
+        { return QCoreApplication::translate(#context, text, comment, numArg); } \
+ private:
 
-   using QtStartUpFunction = void (*)();
-   using QtCleanUpFunction = void (*)();
+
+using QtStartUpFunction = void (*)();
+using QtCleanUpFunction = void (*)();
 
 Q_CORE_EXPORT void qAddPreRoutine(QtStartUpFunction);
 Q_CORE_EXPORT void qAddPostRoutine(QtCleanUpFunction);

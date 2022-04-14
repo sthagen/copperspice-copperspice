@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,16 +26,14 @@
 
 #include <qstring.h>
 #include <qstringlist.h>
+#include <qvector.h>
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
 
-# include <qvector.h>
-# if defined(Q_OS_WIN32)
-#  include <qt_windows.h>
-# endif
+#include <qt_windows.h>
 
 // template implementation of the parsing algorithm
-// this is used from qcoreapplication_win.cpp and the tools (rcc, uic...)
+// used from qcoreapplication_win.cpp and the tools (rcc, uic...)
 
 template<typename Char>
 static QVector<Char *> qWinCmdLine(Char *cmdParam, int length, int &argc)
@@ -54,6 +52,7 @@ static QVector<Char *> qWinCmdLine(Char *cmdParam, int length, int &argc)
       if (*p && p < p_end) {                                // arg starts
          int quote;
          Char *start, *r;
+
          if (*p == Char('\"') || *p == Char('\'')) {        // " or ' quote
             quote = *p;
             start = ++p;
@@ -74,14 +73,17 @@ static QVector<Char *> qWinCmdLine(Char *cmdParam, int length, int &argc)
                   quote = 0;
                }
             }
+
             if (*p == '\\') {                // escape char?
                if (*(p + 1) == quote) {
                   p++;
                }
+
             } else {
-               if (!quote && (*p == Char('\"') || *p == Char('\''))) {        // " or ' quote
+               if (! quote && (*p == Char('\"') || *p == Char('\''))) {        // " or ' quote
                   quote = *p++;
                   continue;
+
                } else if (QChar((short)(*p)).isSpace() && !quote) {
                   break;
                }
@@ -90,6 +92,7 @@ static QVector<Char *> qWinCmdLine(Char *cmdParam, int length, int &argc)
                *r++ = *p++;
             }
          }
+
          if (*p && p < p_end) {
             p++;
          }
@@ -101,16 +104,14 @@ static QVector<Char *> qWinCmdLine(Char *cmdParam, int length, int &argc)
          argv[argc++] = start;
       }
    }
-   argv[argc] = 0;
+
+   argv[argc] = nullptr;
 
    return argv;
 }
 
-#if defined(Q_OS_WIN32)
-
 static inline QStringList qCmdLineArgs(int t1, char *t2[])
 {
-   // windows only
    (void) t1;
    (void) t2;
 
@@ -126,9 +127,9 @@ static inline QStringList qCmdLineArgs(int t1, char *t2[])
 
    return args;
 }
-#endif
 
 #else
+   // not windows
 
 static inline QStringList qCmdLineArgs(int argc, char *argv[])
 {
@@ -141,6 +142,6 @@ static inline QStringList qCmdLineArgs(int argc, char *argv[])
    return args;
 }
 
-#endif // Q_OS_WIN
+#endif
 
-#endif // QCORECMDLINEARGS_WIN_P_H
+#endif

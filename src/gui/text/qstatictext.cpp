@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -217,7 +217,7 @@ QSizeF QStaticText::size() const
 }
 
 QStaticTextPrivate::QStaticTextPrivate()
-   : textWidth(-1.0), items(0), itemCount(0), glyphPool(0), positionPool(0),
+   : textWidth(-1.0), items(nullptr), itemCount(0), glyphPool(nullptr), positionPool(nullptr),
      needsRelayout(true), useBackendOptimizations(false), textFormat(Qt::AutoText),
      untransformedCoordinates(false)
 {
@@ -225,7 +225,7 @@ QStaticTextPrivate::QStaticTextPrivate()
 
 QStaticTextPrivate::QStaticTextPrivate(const QStaticTextPrivate &other)
    : text(other.text), font(other.font), textWidth(other.textWidth), matrix(other.matrix),
-     items(0), itemCount(0), glyphPool(0), positionPool(0), textOption(other.textOption),
+     items(nullptr), itemCount(0), glyphPool(nullptr), positionPool(nullptr), textOption(other.textOption),
      needsRelayout(true), useBackendOptimizations(other.useBackendOptimizations),
      textFormat(other.textFormat), untransformedCoordinates(other.untransformedCoordinates)
 {
@@ -525,11 +525,11 @@ void QStaticTextPrivate::init()
 
 QStaticTextItem::~QStaticTextItem()
 {
-   if (m_userData != 0 && !m_userData->ref.deref()) {
+   if (m_userData != nullptr && !m_userData->ref.deref()) {
       delete m_userData;
    }
 
-   setFontEngine(0);
+   setFontEngine(nullptr);
 }
 
 void QStaticTextItem::setFontEngine(QFontEngine *fe)
@@ -538,13 +538,14 @@ void QStaticTextItem::setFontEngine(QFontEngine *fe)
       return;
    }
 
-   if (m_fontEngine != 0 && !m_fontEngine->ref.deref()) {
+   if (m_fontEngine != nullptr && ! m_fontEngine->m_refCount.deref()) {
       delete m_fontEngine;
    }
 
    m_fontEngine = fe;
-   if (m_fontEngine != 0) {
-      m_fontEngine->ref.ref();
+
+   if (m_fontEngine != nullptr) {
+      m_fontEngine->m_refCount.ref();
    }
 }
 

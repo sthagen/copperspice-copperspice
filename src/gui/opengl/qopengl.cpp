@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -22,21 +22,20 @@
 *
 ***********************************************************************/
 
-#include "qopengl.h"
-#include "qopengl_p.h"
+#include <qopengl.h>
+#include <qopengl_p.h>
 
-#include "qopenglcontext.h"
-#include "qopenglfunctions.h"
-#include "qoffscreensurface.h"
-
-#include <QtCore/QDebug>
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonValue>
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
-#include <QtCore/QTextStream>
-#include <QtCore/QFile>
-#include <QtCore/QDir>
+#include <qopenglcontext.h>
+#include <qopenglfunctions.h>
+#include <qoffscreensurface.h>
+#include <qdebug.h>
+#include <qjsondocument.h>
+#include <qjsonvalue.h>
+#include <qjsonobject.h>
+#include <qjsonarray.h>
+#include <qtextstream.h>
+#include <qfile.h>
+#include <qdir.h>
 
 #include <set>
 
@@ -48,7 +47,7 @@ QOpenGLExtensionMatcher::QOpenGLExtensionMatcher()
 {
     QOpenGLContext *ctx = QOpenGLContext::currentContext();
     QOpenGLFunctions *funcs = ctx->functions();
-    const char *extensionStr = 0;
+    const char *extensionStr = nullptr;
 
     if (ctx->isOpenGLES() || ctx->format().majorVersion() < 3)
         extensionStr = reinterpret_cast<const char *>(funcs->glGetString(GL_EXTENSIONS));

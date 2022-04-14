@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,14 +48,14 @@ public:
         Dnd          = 0x002000,
         KdeOverride  = 0x004000
     };
-
-    Q_DECLARE_FLAGS(WmWindowTypes, WmWindowType)
+    using WmWindowTypes = QFlags<WmWindowType>;
 
     typedef void (*SetWmWindowType)(QWindow *window, QXcbWindowFunctions::WmWindowTypes windowType);
     static const QByteArray setWmWindowTypeIdentifier() { return QByteArray("XcbSetWmWindowType"); }
     static void setWmWindowType(QWindow *window, WmWindowType type)
     {
-        return QPlatformHeaderHelper::callPlatformFunction<void, SetWmWindowType, QWindow *, WmWindowType>(setWmWindowTypeIdentifier(), window, type);
+        return QPlatformHeaderHelper::callPlatformFunction<void, SetWmWindowType, QWindow *,
+            WmWindowType>(setWmWindowTypeIdentifier(), window, type);
     }
 
     typedef void (*SetWmWindowRole)(QWindow *window, const QByteArray &role);

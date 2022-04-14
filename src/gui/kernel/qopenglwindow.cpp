@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,15 @@
 #include <qopenglwindow.h>
 #include <qpaintdevicewindow_p.h>
 
-#include <qopenglframebufferobject.h>
-#include <qopenglpaintdevice.h>
+#include <qopengl_framebufferobject.h>
+#include <qopengl_paintdevice.h>
 #include <qopenglfunctions.h>
-#include <qopengltextureblitter_p.h>
-#include <qopenglextensions_p.h>
-#include <qopenglcontext_p.h>
 #include <qmatrix4x4.h>
 #include <qoffscreensurface.h>
+
+#include <qopengl_textureblitter_p.h>
+#include <qopengl_extensions_p.h>
+#include <qopenglcontext_p.h>
 
 // GLES2 builds won't have these constants with the suffixless names
 #ifndef GL_READ_FRAMEBUFFER
@@ -94,8 +95,8 @@ QOpenGLWindowPrivate::~QOpenGLWindowPrivate()
    Q_Q(QOpenGLWindow);
    if (q->isValid()) {
       q->makeCurrent(); // this works even when the platformwindow is destroyed
-      paintDevice.reset(0);
-      fbo.reset(0);
+      paintDevice.reset(nullptr);
+      fbo.reset(nullptr);
       blitter.destroy();
       q->doneCurrent();
    }
@@ -411,7 +412,7 @@ QPaintDevice *QOpenGLWindow::redirected(QPoint *) const
    if (QOpenGLContext::currentContext() == d->context.data()) {
       return d->paintDevice.data();
    }
-   return 0;
+   return nullptr;
 }
 
 

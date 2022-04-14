@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QPRINTPREVIEWWIDGET_H
 #define QPRINTPREVIEWWIDGET_H
 
-#include <QtGui/qwidget.h>
-#include <QtGui/qprinter.h>
+#include <qwidget.h>
+#include <qprinter.h>
 
 #ifndef QT_NO_PRINTPREVIEWWIDGET
-
-QT_BEGIN_NAMESPACE
 
 class QPrintPreviewWidgetPrivate;
 
@@ -52,8 +50,8 @@ class Q_GUI_EXPORT QPrintPreviewWidget : public QWidget
       FitInView
    };
 
-   explicit QPrintPreviewWidget(QPrinter *printer, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
-   explicit QPrintPreviewWidget(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+   explicit QPrintPreviewWidget(QPrinter *printer, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+   explicit QPrintPreviewWidget(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
    ~QPrintPreviewWidget();
 
    qreal zoomFactor() const;
@@ -68,13 +66,13 @@ class Q_GUI_EXPORT QPrintPreviewWidget : public QWidget
    GUI_CS_SLOT_1(Public, void print())
    GUI_CS_SLOT_2(print)
 
-   GUI_CS_SLOT_1(Public, void zoomIn(qreal zoom = 1.1))
+   GUI_CS_SLOT_1(Public, void zoomIn(qreal factor = 1.1))
    GUI_CS_SLOT_2(zoomIn)
 
-   GUI_CS_SLOT_1(Public, void zoomOut(qreal zoom = 1.1))
+   GUI_CS_SLOT_1(Public, void zoomOut(qreal factor = 1.1))
    GUI_CS_SLOT_2(zoomOut)
 
-   GUI_CS_SLOT_1(Public, void setZoomFactor(qreal zoomFactor))
+   GUI_CS_SLOT_1(Public, void setZoomFactor(qreal factor))
    GUI_CS_SLOT_2(setZoomFactor)
 
    GUI_CS_SLOT_1(Public, void setOrientation(QPrinter::Orientation orientation))
@@ -127,6 +125,6 @@ class Q_GUI_EXPORT QPrintPreviewWidget : public QWidget
    GUI_CS_SLOT_2(_q_updateCurrentPage)
 };
 
-
 #endif // QT_NO_PRINTPREVIEWWIDGET
+
 #endif // QPRINTPREVIEWWIDGET_H

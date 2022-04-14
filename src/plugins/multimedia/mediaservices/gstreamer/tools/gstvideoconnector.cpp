@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -98,13 +98,12 @@ static void gst_video_connector_class_init (GstVideoConnectorClass * klass)
     gst_video_connector_signals[SIGNAL_RESEND_NEW_SEGMENT] =
             g_signal_new ("resend-new-segment", G_TYPE_FROM_CLASS (klass),
                           GSignalFlags(G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION),
-                          G_STRUCT_OFFSET (GstVideoConnectorClass, resend_new_segment), NULL, NULL,
+                          G_STRUCT_OFFSET (GstVideoConnectorClass, resend_new_segment), nullptr, nullptr,
                           g_cclosure_marshal_VOID__BOOLEAN, G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
 
     gst_video_connector_signals[SIGNAL_CONNECTION_FAILED] =
             g_signal_new ("connection-failed", G_TYPE_FROM_CLASS (klass),
-                          G_SIGNAL_RUN_LAST,
-                          0, NULL, NULL,
+                          G_SIGNAL_RUN_LAST, 0, nullptr, nullptr,
                           g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 }
 
@@ -128,7 +127,7 @@ static void gst_video_connector_init (GstVideoConnector *element, GstVideoConnec
     element->relinked = FALSE;
     element->failedSignalEmited = FALSE;
     gst_segment_init (&element->segment, GST_FORMAT_TIME);
-    element->latest_buffer = NULL;
+    element->latest_buffer = nullptr;
 }
 
 static void gst_video_connector_reset (GstVideoConnector * element)
@@ -136,9 +135,9 @@ static void gst_video_connector_reset (GstVideoConnector * element)
     element->relinked = FALSE;
     element->failedSignalEmited = FALSE;
 
-    if (element->latest_buffer != NULL) {
+    if (element->latest_buffer != nullptr) {
         gst_buffer_unref (element->latest_buffer);
-        element->latest_buffer = NULL;
+        element->latest_buffer = nullptr;
     }
 
     gst_segment_init (&element->segment, GST_FORMAT_UNDEFINED);
@@ -165,7 +164,7 @@ static GstFlowReturn gst_video_connector_buffer_alloc (GstPad * pad, guint64 off
     if (!buf) {
         return GST_FLOW_ERROR;
     }
-    *buf = NULL;
+    *buf = nullptr;
 
     gboolean isFailed = FALSE;
     while (1) {
@@ -238,7 +237,7 @@ static gboolean gst_video_connector_setcaps (GstPad  *pad, GstCaps *caps)
     /* forward-negotiate */
     gboolean res = gst_pad_set_caps(element->srcpad, caps);
 
-    gchar * debugmsg = NULL;
+    gchar * debugmsg = nullptr;
     GST_DEBUG_OBJECT(element, "gst_video_connector_setcaps %s %i", debugmsg = gst_caps_to_string(caps), res);
     if (debugmsg)
         g_free(debugmsg);
@@ -343,9 +342,7 @@ static GstFlowReturn gst_video_connector_chain (GstPad * pad, GstBuffer * buf)
 
             GST_DEBUG_OBJECT (element, "Pushing new segment event");
             if (!gst_pad_push_event (element->srcpad, ev)) {
-                GST_WARNING_OBJECT (element,
-                                    "Newsegment handling failed in %" GST_PTR_FORMAT,
-                                    element->srcpad);
+                GST_WARNING_OBJECT (element, "New segment handling failed in %" GST_PTR_FORMAT, element->srcpad);
             }
 
             if (element->latest_buffer) {
@@ -379,7 +376,7 @@ static GstFlowReturn gst_video_connector_chain (GstPad * pad, GstBuffer * buf)
 
     if (element->latest_buffer) {
         gst_buffer_unref (element->latest_buffer);
-        element->latest_buffer = NULL;
+        element->latest_buffer = nullptr;
     }
 
     //don't save the last video buffer on maemo6 because of buffers shortage with omapxvsink

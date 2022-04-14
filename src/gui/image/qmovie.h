@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,17 +24,13 @@
 #ifndef QMOVIE_H
 #define QMOVIE_H
 
-#include <QtCore/qobject.h>
+#include <qobject.h>
 
 #ifndef QT_NO_MOVIE
 
-#include <QtCore/qbytearray.h>
-#include <QtCore/qlist.h>
-#include <QtGui/qimagereader.h>
+#include <qlist.h>
+#include <qimagereader.h>
 
-
-
-class QByteArray;
 class QColor;
 class QIODevice;
 class QImage;
@@ -70,11 +66,15 @@ class Q_GUI_EXPORT QMovie : public QObject
    };
 
    explicit QMovie(QObject *parent = nullptr);
-   explicit QMovie(QIODevice *device, const QByteArray &format = QByteArray(), QObject *parent = nullptr);
-   explicit QMovie(const QString &fileName, const QByteArray &format = QByteArray(), QObject *parent = nullptr);
+   explicit QMovie(QIODevice *device, const QString &format = QString(), QObject *parent = nullptr);
+   explicit QMovie(const QString &fileName, const QString &format = QString(), QObject *parent = nullptr);
+
+   QMovie(const QMovie &) = delete;
+   QMovie &operator=(const QMovie &) = delete;
+
    ~QMovie();
 
-   static QList<QByteArray> supportedFormats();
+   static QList<QString> supportedFormats();
 
    void setDevice(QIODevice *device);
    QIODevice *device() const;
@@ -82,8 +82,8 @@ class Q_GUI_EXPORT QMovie : public QObject
    void setFileName(const QString &fileName);
    QString fileName() const;
 
-   void setFormat(const QByteArray &format);
-   QByteArray format() const;
+   void setFormat(const QString &format);
+   QString format() const;
 
    void setBackgroundColor(const QColor &color);
    QColor backgroundColor() const;
@@ -110,7 +110,6 @@ class Q_GUI_EXPORT QMovie : public QObject
    CacheMode cacheMode() const;
    void setCacheMode(CacheMode mode);
 
- public:
    GUI_CS_SIGNAL_1(Public, void started())
    GUI_CS_SIGNAL_2(started)
 
@@ -151,14 +150,10 @@ class Q_GUI_EXPORT QMovie : public QObject
    QScopedPointer<QMoviePrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QMovie)
-
    GUI_CS_SLOT_1(Private, void _q_loadNextFrame())
    GUI_CS_SLOT_2(_q_loadNextFrame)
 };
 
-
-
 #endif // QT_NO_MOVIE
 
-#endif // QMOVIE_H
+#endif

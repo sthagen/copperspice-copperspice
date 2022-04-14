@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -49,13 +49,10 @@
       && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
       && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
 /* The character set is not based on ISO-646.  */
-#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
+#error "gperf generated tables do not work with this execution character set. Report to <bug-gnu-gperf@gnu.org>."
 #endif
 
 #line 107 "TokenLookup.gperf"
-
-
-QT_BEGIN_NAMESPACE
 
 namespace QPatternist {
 
@@ -73,10 +70,11 @@ struct TokenMap {
 
 class TokenLookup
 {
- private:
-   static inline unsigned int hash (const char *str, unsigned int len);
  public:
    static const struct TokenMap *value (const char *str, unsigned int len);
+
+ private:
+   static inline unsigned int hash (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -115,17 +113,18 @@ TokenLookup::hash (const char *str, unsigned int len)
    switch (hval) {
       default:
          hval += asso_values[(unsigned char)str[2]];
-      /*FALLTHROUGH*/
+         [[fallthrough]];
+
       case 2:
       case 1:
          hval += asso_values[(unsigned char)str[0]];
          break;
    }
+
    return hval + asso_values[(unsigned char)str[len - 1]];
 }
 
-const struct TokenMap *
-TokenLookup::value (const char *str, unsigned int len)
+const struct TokenMap * TokenLookup::value (const char *str, unsigned int len)
 {
    enum {
       TOTAL_KEYWORDS = 99,
@@ -410,11 +409,11 @@ TokenLookup::value (const char *str, unsigned int len)
          }
       }
    }
-   return 0;
+
+   return nullptr;
 }
 #line 219 "TokenLookup.gperf"
 
 
 } /* Close the QPatternist namespace. */
 
-QT_END_NAMESPACE

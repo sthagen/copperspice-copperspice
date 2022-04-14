@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -135,7 +135,7 @@ QLinuxInputMouseHandler::QLinuxInputMouseHandler(const QString &key,
         m_notify = new QSocketNotifier(m_fd, QSocketNotifier::Read, this);
         connect(m_notify, SIGNAL(activated(int)), this, SLOT(readMouseData()));
     } else {
-        qWarning("Cannot open mouse input device '%s': %s", qPrintable(dev), strerror(errno));
+        qWarning("Unable to open mouse input device '%s': %s", csPrintable(dev), strerror(errno));
         return;
     }
 #ifdef QT_QPA_EXPERIMENTAL_TOUCHEVENT
@@ -436,7 +436,7 @@ QLinuxInputKeyboardHandler::QLinuxInputKeyboardHandler(const QString &key, const
             }
         }
     } else {
-        qWarning("Cannot open keyboard input device '%s': %s", qPrintable(dev), strerror(errno));
+        qWarning("Unable to open keyboard input device '%s': %s", csPrintable(dev), strerror(errno));
         return;
     }
 }

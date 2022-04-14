@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,17 +29,15 @@
 #include <stdlib.h>
 #include <errno.h>
 
-QT_BEGIN_NAMESPACE
-
 QFileSystemIterator::QFileSystemIterator(const QFileSystemEntry &entry, QDir::Filters filters,
       const QStringList &nameFilters, QDirIterator::IteratorFlags flags)
-   : nativePath(entry.nativeFilePath()), dir(0), dirEntry(0), lastError(0)
+   : nativePath(entry.nativeFilePath()), dir(nullptr), dirEntry(nullptr), lastError(0)
 {
    Q_UNUSED(filters)
    Q_UNUSED(nameFilters)
    Q_UNUSED(flags)
 
-   if ((dir = QT_OPENDIR(nativePath.constData())) == 0) {
+   if ((dir = QT_OPENDIR(nativePath.constData())) == nullptr) {
       lastError = errno;
    } else {
 
@@ -73,7 +71,5 @@ bool QFileSystemIterator::advance(QFileSystemEntry &fileEntry, QFileSystemMetaDa
    lastError = errno;
    return false;
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_FILESYSTEMITERATOR

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,6 +39,7 @@ class QStyleOption;
 class QWindow;
 
 namespace QStyleHelper {
+
 QString uniqueName(const QString &key, const QStyleOption *option, const QSize &size);
 qreal dpiScaled(qreal value);
 
@@ -56,8 +57,9 @@ bool isInstanceOf(QObject *obj, QAccessible::Role role);
 bool hasAncestor(QObject *obj, QAccessible::Role role);
 #endif
 
-QColor backgroundColor(const QPalette &pal, const QWidget *widget = 0);
+QColor backgroundColor(const QPalette &pal, const QWidget *widget = nullptr);
 QWindow *styleObjectWindow(QObject *so);
+
 }
 
 #endif // QSTYLEHELPER_P_H

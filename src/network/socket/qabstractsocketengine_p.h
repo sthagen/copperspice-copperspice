@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 #include <qhostaddress.h>
 #include <qabstractsocket.h>
 #include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
 
 class QAuthenticator;
 class QAbstractSocketEnginePrivate;
@@ -112,6 +110,10 @@ class QAbstractSocketEngine : public QObject
    using PacketHeaderOptions = QFlags<PacketHeaderOption>;
 
    QAbstractSocketEngine(QObject *parent = nullptr);
+
+   QAbstractSocketEngine(const QAbstractSocketEngine &) = delete;
+   QAbstractSocketEngine &operator=(const QAbstractSocketEngine &) = delete;
+
    ~QAbstractSocketEngine();
 
    static QAbstractSocketEngine *createSocketEngine(QAbstractSocket::SocketType socketType, const QNetworkProxy &, QObject *parent);
@@ -161,11 +163,11 @@ class QAbstractSocketEngine : public QObject
    virtual int option(SocketOption option) const = 0;
    virtual bool setOption(SocketOption option, int value) = 0;
 
-   virtual bool waitForRead(int msecs = 30000, bool *timedOut = 0)  = 0;
-   virtual bool waitForWrite(int msecs = 30000, bool *timedOut = 0) = 0;
+   virtual bool waitForRead(int msecs = 30000, bool *timedOut = nullptr)  = 0;
+   virtual bool waitForWrite(int msecs = 30000, bool *timedOut = nullptr) = 0;
 
    virtual bool waitForReadOrWrite(bool *readyToRead, bool *readyToWrite, bool checkRead, bool checkWrite,
-                                   int msecs = 30000, bool *timedOut = 0) = 0;
+                                   int msecs = 30000, bool *timedOut = nullptr) = 0;
 
    QAbstractSocket::SocketError error() const;
    QString errorString() const;
@@ -177,6 +179,8 @@ class QAbstractSocketEngine : public QObject
    quint16 localPort() const;
    QHostAddress peerAddress() const;
    quint16 peerPort() const;
+
+   void setReceiver(QAbstractSocketEngineReceiver *receiver);
 
    virtual bool isReadNotificationEnabled() const = 0;
    virtual void setReadNotificationEnabled(bool enable) = 0;
@@ -205,8 +209,6 @@ class QAbstractSocketEngine : public QObject
    NET_CS_SLOT_2(proxyAuthenticationRequired)
 #endif
 
-   void setReceiver(QAbstractSocketEngineReceiver *receiver);
-
  protected:
    QAbstractSocketEngine(QAbstractSocketEnginePrivate &dd, QObject *parent = nullptr);
 
@@ -223,7 +225,6 @@ class QAbstractSocketEngine : public QObject
 
  private:
    Q_DECLARE_PRIVATE(QAbstractSocketEngine)
-   Q_DISABLE_COPY(QAbstractSocketEngine)
 };
 
 class QAbstractSocketEnginePrivate
@@ -251,7 +252,6 @@ class QAbstractSocketEnginePrivate
    QAbstractSocketEngine *q_ptr;
 };
 
-
 class QSocketEngineHandler
 {
  protected:
@@ -268,4 +268,4 @@ class QSocketEngineHandler
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAbstractSocketEngine::PacketHeaderOptions)
 
-#endif // QABSTRACTSOCKETENGINE_P_H
+#endif

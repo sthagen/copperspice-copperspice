@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,34 +35,44 @@ using QMutableStringListIterator = QMutableListIterator<QString>;
 class QStringList : public QList<QString>
 {
  public:
-   QStringList() { }
+   QStringList()
+   { }
 
    explicit QStringList(const QString &value) {
       append(value);
    }
 
    QStringList(const QStringList &other)
-      : QList<QString>(other) { }
+      : QList<QString>(other)
+   { }
 
    QStringList(const QList<QString> &other)
-      : QList<QString>(other) { }
+      : QList<QString>(other)
+   { }
 
    QStringList(std::initializer_list<QString> args)
-      : QList<QString>(args) { }
+      : QList<QString>(args)
+   { }
 
    // methods
    bool Q_CORE_EXPORT contains(const QString &str, Qt::CaseSensitivity cs = Qt::CaseSensitive) const;
 
    QStringList Q_CORE_EXPORT filter(const QString &str, Qt::CaseSensitivity cs = Qt::CaseSensitive) const;
 
-   QString Q_CORE_EXPORT join(const QString &sep) const;
+   QString Q_CORE_EXPORT join(const QString &separator) const;
 
    int Q_CORE_EXPORT removeDuplicates();
-   Q_CORE_EXPORT QStringList &replaceInStrings(const QString &before, const QString &after, Qt::CaseSensitivity cs = Qt::CaseSensitive);
+   Q_CORE_EXPORT QStringList &replaceInStrings(const QString &before, const QString &after,
+                  Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
    void Q_CORE_EXPORT sort();
 
    // operators
+   QStringList &operator=(const QStringList &other) {
+      QList<QString>::operator=(other);
+      return *this;
+   }
+
    QStringList operator+(const QStringList &other) const {
       QStringList n = *this;
       n += other;
@@ -74,8 +84,8 @@ class QStringList : public QList<QString>
       return *this;
    }
 
-   QStringList &operator<<(const QStringList &value) {
-      *this += value;
+   QStringList &operator<<(const QStringList &other) {
+      *this += other;
       return *this;
    }
 
@@ -92,7 +102,7 @@ class QStringList : public QList<QString>
    using QList<QString>::lastIndexOf;
 };
 
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &in, QStringList &list);
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &out, const QStringList &list);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QStringList &list);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QStringList &list);
 
 #endif

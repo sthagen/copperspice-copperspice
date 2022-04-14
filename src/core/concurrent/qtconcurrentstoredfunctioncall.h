@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,10 +26,8 @@
 #ifndef QTCONCURRENTSTOREDFUNCTIONCALL_H
 #define QTCONCURRENTSTOREDFUNCTIONCALL_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qtconcurrentrunbase.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
+#include <qtconcurrentrunbase.h>
 
 namespace QtConcurrent {
 template <typename T, typename FunctionPointer>
@@ -1534,7 +1532,5 @@ class StoredFunctorCall<void, Functor> : public RunFunctionTask<void>
 
 
 } //namespace QtConcurrent
-
-QT_END_NAMESPACE
 
 #endif

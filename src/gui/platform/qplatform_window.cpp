@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,7 +22,6 @@
 ***********************************************************************/
 
 #include <qplatform_window.h>
-#include <qplatform_window_p.h>
 
 #include <qguiapplication_p.h>
 #include <qplatform_screen.h>
@@ -31,6 +30,7 @@
 #include <qscreen.h>
 
 #include <qhighdpiscaling_p.h>
+#include <qplatform_window_p.h>
 #include <qwindow_p.h>
 
 QPlatformWindow::QPlatformWindow(QWindow *window)
@@ -51,7 +51,7 @@ QWindow *QPlatformWindow::window() const
 
 QPlatformWindow *QPlatformWindow::parent() const
 {
-   return window()->parent() ? window()->parent()->handle() : 0;
+   return window()->parent() ? window()->parent()->handle() : nullptr;
 }
 
 QPlatformScreen *QPlatformWindow::screen() const
@@ -64,6 +64,7 @@ QSurfaceFormat QPlatformWindow::format() const
 {
    return QSurfaceFormat();
 }
+
 void QPlatformWindow::setGeometry(const QRect &rect)
 {
    Q_D(QPlatformWindow);
@@ -80,12 +81,15 @@ QRect QPlatformWindow::normalGeometry() const
 {
    return QRect();
 }
+
 QMargins QPlatformWindow::frameMargins() const
 {
    return QMargins();
 }
+
 void QPlatformWindow::setVisible(bool visible)
 {
+   (void) visible;
 
    QRect rect(QPoint(), geometry().size());
    QWindowSystemInterface::handleExposeEvent(window(), rect);
@@ -94,11 +98,14 @@ void QPlatformWindow::setVisible(bool visible)
 
 void QPlatformWindow::setWindowFlags(Qt::WindowFlags flags)
 {
+   (void) flags;
 }
+
 bool QPlatformWindow::isExposed() const
 {
    return window()->isVisible();
 }
+
 bool QPlatformWindow::isActive() const
 {
    return false;
@@ -106,6 +113,7 @@ bool QPlatformWindow::isActive() const
 
 bool QPlatformWindow::isEmbedded(const QPlatformWindow *parentWindow) const
 {
+   (void) parentWindow;
    return false;
 }
 
@@ -113,10 +121,12 @@ QPoint QPlatformWindow::mapToGlobal(const QPoint &pos) const
 {
    const QPlatformWindow *p = this;
    QPoint result = pos;
+
    while (p) {
       result += p->geometry().topLeft();
       p = p->parent();
    }
+
    return result;
 }
 
@@ -124,11 +134,13 @@ QPoint QPlatformWindow::mapFromGlobal(const QPoint &pos) const
 {
    const QPlatformWindow *p = this;
    QPoint result = pos;
+
    while (p) {
       result -= p->geometry().topLeft();
       p = p->parent();
    }
    return result;
+
 }
 
 void QPlatformWindow::setWindowState(Qt::WindowState)
@@ -146,25 +158,30 @@ WId QPlatformWindow::winId() const
 
 void QPlatformWindow::setParent(const QPlatformWindow *parent)
 {
+   (void) parent;
    qWarning("This plugin does not support setParent");
 }
 
 void QPlatformWindow::setWindowTitle(const QString &title)
 {
+   (void) title;
 }
 
 void QPlatformWindow::setWindowFilePath(const QString &filePath)
 {
+   (void) filePath;
 }
 
 void QPlatformWindow::setWindowIcon(const QIcon &icon)
 {
+   (void) icon;
 }
 
 void QPlatformWindow::raise()
 {
    qWarning("This plugin does not support raise()");
 }
+
 void QPlatformWindow::lower()
 {
    qWarning("This plugin does not support lower()");
@@ -177,12 +194,13 @@ void QPlatformWindow::propagateSizeHints()
 
 void QPlatformWindow::setOpacity(qreal level)
 {
+   (void) level;
    qWarning("This plugin does not support setting window opacity");
 }
 
 void QPlatformWindow::setMask(const QRegion &region)
 {
-
+   (void) region;
    qWarning("This plugin does not support setting window masks");
 }
 
@@ -193,7 +211,9 @@ void QPlatformWindow::requestActivateWindow()
 
 void QPlatformWindow::handleContentOrientationChange(Qt::ScreenOrientation orientation)
 {
+   (void) orientation;
 }
+
 qreal QPlatformWindow::devicePixelRatio() const
 {
    return 1.0;
@@ -201,37 +221,48 @@ qreal QPlatformWindow::devicePixelRatio() const
 
 bool QPlatformWindow::setKeyboardGrabEnabled(bool grab)
 {
+   (void) grab;
+
    qWarning("This plugin does not support grabbing the keyboard");
    return false;
 }
 
 bool QPlatformWindow::setMouseGrabEnabled(bool grab)
 {
+   (void) grab;
+
    qWarning("This plugin does not support grabbing the mouse");
    return false;
 }
 
 bool QPlatformWindow::setWindowModified(bool modified)
 {
+   (void) modified;
    return false;
 }
+
 void QPlatformWindow::windowEvent(QEvent *event)
 {
-
+   (void) event;
 }
+
 bool QPlatformWindow::startSystemResize(const QPoint &pos, Qt::Corner corner)
 {
-
+   (void) pos;
+   (void) corner;
    return false;
 }
+
 void QPlatformWindow::setFrameStrutEventsEnabled(bool enabled)
 {
-   Q_UNUSED(enabled) // Do not warn as widgets enable it by default causing warnings with XCB.
+   (void) enabled;       // Do not warn as widgets enable it by default causing warnings with XCB.
 }
+
 bool QPlatformWindow::frameStrutEventsEnabled() const
 {
    return false;
 }
+
 QString QPlatformWindow::formatWindowTitle(const QString &title, const QString &separator)
 {
    QString fullTitle = title;
@@ -240,6 +271,7 @@ QString QPlatformWindow::formatWindowTitle(const QString &title, const QString &
       if (!fullTitle.isEmpty()) {
          fullTitle += separator;
       }
+
       fullTitle += *QGuiApplicationPrivate::displayName;
 
    } else if (fullTitle.isEmpty()) {
@@ -272,18 +304,22 @@ QPlatformScreen *QPlatformWindow::screenForGeometry(const QRect &newGeometry) co
    }
    return fallback;
 }
+
 QSize QPlatformWindow::constrainWindowSize(const QSize &size)
 {
    return size.expandedTo(QSize(0, 0)).boundedTo(QSize(QWINDOWSIZE_MAX, QWINDOWSIZE_MAX));
 }
+
 void QPlatformWindow::setAlertState(bool enable)
 {
-   Q_UNUSED(enable)
+   (void) enable;
 }
+
 bool QPlatformWindow::isAlertState() const
 {
    return false;
 }
+
 static inline const QScreen *effectiveScreen(const QWindow *window)
 {
    if (!window) {
@@ -308,9 +344,11 @@ static inline const QScreen *effectiveScreen(const QWindow *window)
 #endif
    return screen;
 }
+
 void QPlatformWindow::invalidateSurface()
 {
 }
+
 static QSize fixInitialSize(QSize size, const QWindow *w,
    int defaultWidth, int defaultHeight)
 {
@@ -318,6 +356,7 @@ static QSize fixInitialSize(QSize size, const QWindow *w,
       const int minWidth = w->minimumWidth();
       size.setWidth(minWidth > 0 ? minWidth : defaultWidth);
    }
+
    if (size.height() == 0) {
       const int minHeight = w->minimumHeight();
       size.setHeight(minHeight > 0 ? minHeight : defaultHeight);
@@ -334,10 +373,12 @@ QRect QPlatformWindow::initialGeometry(const QWindow *w,
             w, defaultWidth, defaultHeight);
       return QRect(initialGeometry.topLeft(), QHighDpi::toNative(size, factor));
    }
+
    const QScreen *screen = effectiveScreen(w);
    if (!screen) {
       return initialGeometry;
    }
+
    QRect rect(QHighDpi::fromNativePixels(initialGeometry, w));
    rect.setSize(fixInitialSize(rect.size(), w, defaultWidth, defaultHeight));
    if (qt_window_private(const_cast<QWindow *>(w))->positionAutomatic
@@ -408,10 +449,12 @@ QRect QPlatformWindow::windowGeometry() const
 {
    return QHighDpi::toNativePixels(window()->geometry(), window());
 }
+
 QRect QPlatformWindow::windowFrameGeometry() const
 {
    return QHighDpi::toNativePixels(window()->frameGeometry(), window());
 }
+
 QRectF QPlatformWindow::closestAcceptableGeometry(const QWindow *qWindow, const QRectF &nativeRect)
 {
    const QRectF rectF = QHighDpi::fromNativePixels(nativeRect, qWindow);
@@ -419,6 +462,7 @@ QRectF QPlatformWindow::closestAcceptableGeometry(const QWindow *qWindow, const 
    return !correctedGeometryF.isEmpty() && rectF != correctedGeometryF
       ? QHighDpi::toNativePixels(correctedGeometryF, qWindow) : nativeRect;
 }
+
 QRectF QPlatformWindow::windowClosestAcceptableGeometry(const QRectF &nativeRect) const
 {
    return QPlatformWindow::closestAcceptableGeometry(window(), nativeRect);

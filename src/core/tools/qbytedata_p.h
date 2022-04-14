@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 #include <qbytearray.h>
 #include <qlist.h>
 
-QT_BEGIN_NAMESPACE
-
 // this class handles a list of QByteArrays, it is a variant of QRingBuffer
 // which avoids malloc/realloc/memcpy
 
@@ -53,7 +51,6 @@ class QByteDataBuffer
       buffers.append(other.buffers);
       bufferCompleteSize += other.byteAmount();
    }
-
 
    inline void append(const QByteArray &bd) {
       if (bd.isEmpty()) {
@@ -177,6 +174,4 @@ class QByteDataBuffer
    }
 };
 
-QT_END_NAMESPACE
-
-#endif // QBYTEDATA_H
+#endif

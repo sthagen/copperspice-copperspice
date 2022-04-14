@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QSCRIPTASTVISITOR_P_H
 #define QSCRIPTASTVISITOR_P_H
 
-#include "qscriptastfwd_p.h"
-
-QT_BEGIN_NAMESPACE
+#include <qscriptastfwd_p.h>
 
 namespace QScript {
 namespace AST {
@@ -411,6 +409,4 @@ class Visitor
 }
 } // namespace AST
 
-QT_END_NAMESPACE
-
-#endif // QSCRIPTASTVISITOR_P_H
+#endif

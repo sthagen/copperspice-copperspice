@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QALGORITHMS_H
 #define QALGORITHMS_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 template <typename ForwardIterator>
 void qDeleteAll(ForwardIterator begin, ForwardIterator end)
@@ -40,7 +40,6 @@ inline void qDeleteAll(const Container &c)
 {
    qDeleteAll(c.begin(), c.end());
 }
-
 
 // Use __builtin_popcount on gcc.
 // clang claims to be gcc but has a bug where __builtin_popcount is not marked as constexpr.

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,6 +37,10 @@ class QSocks5SocketEngine : public QAbstractSocketEngine
 
  public:
    QSocks5SocketEngine(QObject *parent = nullptr);
+
+   QSocks5SocketEngine(const QSocks5SocketEngine &) = delete;
+   QSocks5SocketEngine &operator=(const QSocks5SocketEngine &) = delete;
+
    ~QSocks5SocketEngine();
 
    bool initialize(QAbstractSocket::SocketType type,
@@ -98,7 +102,6 @@ class QSocks5SocketEngine : public QAbstractSocketEngine
 
  private:
    Q_DECLARE_PRIVATE(QSocks5SocketEngine)
-   Q_DISABLE_COPY(QSocks5SocketEngine)
 
    NET_CS_SLOT_1(Private, void _q_controlSocketConnected())
    NET_CS_SLOT_2(_q_controlSocketConnected)
@@ -140,6 +143,7 @@ class QSocks5Authenticator
  public:
    QSocks5Authenticator();
    virtual ~QSocks5Authenticator();
+
    virtual char methodId();
    virtual bool beginAuthenticate(QTcpSocket *socket, bool *completed);
    virtual bool continueAuthenticate(QTcpSocket *socket, bool *completed);
@@ -287,4 +291,5 @@ class QSocks5SocketEngineHandler : public QSocketEngineHandler
 };
 
 #endif // QT_NO_SOCKS5
-#endif // QSOCKS5SOCKETENGINE_H
+
+#endif

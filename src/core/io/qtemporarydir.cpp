@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -95,11 +95,11 @@ void QTemporaryDirPrivate::create(const QString &templateName)
    }
 
    QFileSystemEntry baseEntry(buffer);
-   QFileSystemEntry::NativePath basePath = baseEntry.nativeFilePath();
+   QString basePath = baseEntry.nativeFilePath();
 
    std::wstring array = basePath.toStdWString();
 
-   if (_wmktemp(&array[0]) && ::CreateDirectory(array.c_str(), 0)) {
+   if (_wmktemp(&array[0]) && ::CreateDirectory(array.c_str(), nullptr)) {
       success = true;
 
       QFileSystemEntry entry(QString::fromStdWString(array), QFileSystemEntry::FromNativePath());

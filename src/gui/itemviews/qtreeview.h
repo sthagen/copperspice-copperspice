@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QTREEVIEW_H
 #define QTREEVIEW_H
 
-#include <QtGui/qabstractitemview.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractitemview.h>
 
 #ifndef QT_NO_TREEVIEW
 
@@ -64,6 +62,10 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
 
  public:
    explicit QTreeView(QWidget *parent = nullptr);
+
+   QTreeView(const QTreeView &) = delete;
+   QTreeView &operator=(const QTreeView &) = delete;
+
    ~QTreeView();
 
    void setModel(QAbstractItemModel *model) override;
@@ -110,7 +112,7 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
    void setFirstColumnSpanned(int row, const QModelIndex &parent, bool span);
 
    bool isExpanded(const QModelIndex &index) const;
-   void setExpanded(const QModelIndex &index, bool expand);
+   void setExpanded(const QModelIndex &index, bool expanded);
 
    void setSortingEnabled(bool enable);
    bool isSortingEnabled() const;
@@ -130,7 +132,7 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
 
    QRect visualRect(const QModelIndex &index) const override;
    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
-   QModelIndex indexAt(const QPoint &p) const override;
+   QModelIndex indexAt(const QPoint &point) const override;
    QModelIndex indexAbove(const QModelIndex &index) const;
    QModelIndex indexBelow(const QModelIndex &index) const;
 
@@ -175,22 +177,7 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
    GUI_CS_SLOT_1(Public, void expandToDepth(int depth))
    GUI_CS_SLOT_2(expandToDepth)
 
- protected :
-   GUI_CS_SLOT_1(Protected, void columnResized(int column, int oldSize, int newSize))
-   GUI_CS_SLOT_2(columnResized)
-
-   GUI_CS_SLOT_1(Protected, void columnCountChanged(int oldCount, int newCount))
-   GUI_CS_SLOT_2(columnCountChanged)
-
-   GUI_CS_SLOT_1(Protected, void columnMoved())
-   GUI_CS_SLOT_2(columnMoved)
-
-   GUI_CS_SLOT_1(Protected, void reexpand())
-   GUI_CS_SLOT_2(reexpand)
-
-   GUI_CS_SLOT_1(Protected, void rowsRemoved(const QModelIndex &parent, int first, int last))
-   GUI_CS_SLOT_2(rowsRemoved)
-
+ protected:
    QTreeView(QTreeViewPrivate &dd, QWidget *parent = nullptr);
    void scrollContentsBy(int dx, int dy) override;
    void rowsInserted(const QModelIndex &parent, int start, int end)override;
@@ -208,7 +195,7 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
    void paintEvent(QPaintEvent *event) override;
 
    void drawTree(QPainter *painter, const QRegion &region) const;
-   virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const;
+   virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
    virtual void drawBranches(QPainter *painter, const QRect &rect, const QModelIndex &index) const;
 
    void mousePressEvent(QMouseEvent *event) override;
@@ -237,12 +224,25 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
    void currentChanged(const QModelIndex &current, const QModelIndex &previous) override;
 
+   GUI_CS_SLOT_1(Protected, void columnResized(int column, int oldSize, int newSize))
+   GUI_CS_SLOT_2(columnResized)
+
+   GUI_CS_SLOT_1(Protected, void columnCountChanged(int oldCount, int newCount))
+   GUI_CS_SLOT_2(columnCountChanged)
+
+   GUI_CS_SLOT_1(Protected, void columnMoved())
+   GUI_CS_SLOT_2(columnMoved)
+
+   GUI_CS_SLOT_1(Protected, void reexpand())
+   GUI_CS_SLOT_2(reexpand)
+
+   GUI_CS_SLOT_1(Protected, void rowsRemoved(const QModelIndex &parent, int start, int end))
+   GUI_CS_SLOT_2(rowsRemoved)
+
  private:
+   Q_DECLARE_PRIVATE(QTreeView)
 
    int visualIndex(const QModelIndex &index) const;
-
-   Q_DECLARE_PRIVATE(QTreeView)
-   Q_DISABLE_COPY(QTreeView)
 
 #ifndef QT_NO_ANIMATION
    GUI_CS_SLOT_1(Private, void _q_endAnimatedOperation())
@@ -261,6 +261,5 @@ class Q_GUI_EXPORT QTreeView : public QAbstractItemView
 };
 
 #endif // QT_NO_TREEVIEW
-
 
 #endif

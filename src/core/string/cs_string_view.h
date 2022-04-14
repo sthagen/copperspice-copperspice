@@ -1,9 +1,9 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
 *
-* This file is part of CopperSpice.
+* This file is part of CsString.
 *
 * CsString is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
@@ -43,6 +43,9 @@ class CsBasicStringView
       using const_reverse_iterator = typename S::const_reverse_iterator;
       using reverse_iterator       = typename S::const_reverse_iterator;
 
+      using const_storage_iterator         = typename S::const_storage_iterator;
+      using const_storage_reverse_iterator = typename S::const_storage_reverse_iterator;
+
       static constexpr const size_type npos = -1;
 
       CsBasicStringView() = default;
@@ -51,13 +54,17 @@ class CsBasicStringView
       CsBasicStringView(CsBasicStringView &&str) = default;
 
       CsBasicStringView(const S &str)
-         : m_begin(str.begin()), m_end(str.end())
-      { }
+         : m_begin(str.cbegin()), m_end(str.cend())
+      {
+      }
+
+      CsBasicStringView(S &&str) = delete;
 
       // initialize with a range from another string type container
       CsBasicStringView(const_iterator begin, const_iterator end)
          : m_begin(begin), m_end(end)
-      { }
+      {
+      }
 
       // operators
       CsBasicStringView<S> &operator=(const CsBasicStringView &str) = default;
@@ -184,6 +191,24 @@ class CsBasicStringView
          return m_begin;
       }
 
+      // storage iterators
+
+      const_storage_iterator storage_begin() const{
+         return m_begin.codePointBegin();
+      }
+
+      const_storage_iterator storage_end() const {
+         return m_end.codePointBegin();
+      }
+
+      const_storage_reverse_iterator storage_rbegin() const {
+         return std::make_reverse_iterator(m_end.codePointBegin());
+      }
+
+      const_storage_reverse_iterator storage_rend() const {
+         return std::make_reverse_iterator(m_begin.codePointBegin());
+      }
+
    private:
       const_iterator m_begin;
       const_iterator m_end;
@@ -230,7 +255,7 @@ inline bool operator>=(CsBasicStringView<S> &str1, CsBasicStringView<S> &str2)
 template <typename S>
 typename CsBasicStringView<S>::value_type CsBasicStringView<S>::operator[](size_type index) const
 {
-   const_iterator iter = begin();
+   const_iterator iter = cbegin();
    std::advance(iter, index);
 
    return *iter;
@@ -240,7 +265,7 @@ typename CsBasicStringView<S>::value_type CsBasicStringView<S>::operator[](size_
 template <typename S>
 typename CsBasicStringView<S>::value_type CsBasicStringView<S>::at(size_type index) const
 {
-   const_iterator iter = begin();
+   const_iterator iter = cbegin();
    std::advance(iter, index);
 
    return *iter;
@@ -249,7 +274,7 @@ typename CsBasicStringView<S>::value_type CsBasicStringView<S>::at(size_type ind
 template <typename S>
 typename CsBasicStringView<S>::value_type CsBasicStringView<S>::back() const
 {
-   return *(--end());
+   return *(--cend());
 }
 
 template <typename S>
@@ -323,14 +348,14 @@ bool CsBasicStringView<S>::endsWith(CsBasicStringView<S> str) const
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(CsBasicStringView str) const
 {
-   return find_fast(str, begin());
+   return find_fast(str, cbegin());
 }
 
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(CsBasicStringView str,
                   const_iterator iter_begin) const
 {
-   const_iterator iter_end = end();
+   const_iterator iter_end = cend();
 
    if (iter_begin == iter_end) {
       return iter_end;
@@ -346,9 +371,9 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(Cs
 
       if (*iter == str[0])  {
          auto text_iter    = iter + 1;
-         auto pattern_iter = str.begin() + 1;
+         auto pattern_iter = str.cbegin() + 1;
 
-         while (text_iter != iter_end && pattern_iter != str.end())  {
+         while (text_iter != iter_end && pattern_iter != str.cend())  {
 
             if (*text_iter == *pattern_iter)  {
                ++text_iter;
@@ -360,7 +385,7 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(Cs
             }
          }
 
-         if (pattern_iter == str.end()) {
+         if (pattern_iter == str.cend()) {
             // found a match
             return iter;
          }
@@ -382,7 +407,7 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(co
    static_assert(! std::is_same<T, T>::value, "Unsafe operations not allowed, unknown encoding for this operation");
 #endif
 
-   const_iterator iter_end = end();
+   const_iterator iter_end = cend();
 
    if (iter_begin == iter_end) {
       return iter_end;
@@ -431,55 +456,11 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(co
 // for an array of chars
 template <typename S>
 template <int N>
-typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(const char (&str)[N], const_iterator iter_begin,
-                  size_type size) const
+typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(const char (&str)[N],
+                  const_iterator iter_begin, size_type size) const
 {
-   // make this safe
-
-   const_iterator iter_end = end();
-
-   if (iter_begin == iter_end) {
-      return iter_end;
-   }
-
-   if (str == nullptr || str[0] == 0) {
-      return iter_begin;
-   }
-
-   auto iter = iter_begin;
-
-   while (iter != iter_end)   {
-
-      if (*iter == str[0])  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         int count = 0;
-
-         while (text_iter != iter_end && *pattern_iter != 0 && count < size)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-               ++count;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (*pattern_iter == 0) {
-            // found a match
-            return iter;
-         }
-      }
-
-      ++iter;
-   }
-
-   return iter_end;
+   // make this safe by treating str as utf8
+   return find_fast(S::fromUtf8(str, size), iter_begin);
 }
 
 // for a const char * and char *
@@ -487,7 +468,7 @@ template <typename S>
 template <typename T,  typename>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(const T &str) const
 {
-   return find_fast(str, begin());
+   return find_fast(str, cbegin());
 }
 
 // for a const char * and char *
@@ -499,7 +480,7 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(co
    static_assert(! std::is_same<T, T>::value, "Unsafe operations not allowed, unknown encoding for this operation");
 #endif
 
-   const_iterator iter_end = end();
+   const_iterator iter_end = cend();
 
    if (iter_begin == iter_end) {
       return iter_end;
@@ -546,7 +527,7 @@ template <typename S>
 template <int N>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(const char (&str)[N]) const
 {
-   return find_fast(str, begin());
+   return find_fast(str, cbegin());
 }
 
 // for an array of chars
@@ -555,60 +536,20 @@ template <int N>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(const char (&str)[N],
                   const_iterator iter_begin) const
 {
-   // make this safe (find which encoding the compiler is using, convert str from X to E)
-
-   const_iterator iter_end = end();
-
-   if (iter_begin == iter_end) {
-      return iter_end;
-   }
-
-   if (N == 0) {
-      return iter_begin;
-   }
-
-   auto iter = iter_begin;
-
-   while (iter != iter_end)   {
-
-      if (*iter == str[0])  {
-         auto text_iter    = iter + 1;
-         auto pattern_iter = str  + 1;
-
-         while (text_iter != iter_end && pattern_iter != str + N)  {
-
-            if (*text_iter == *pattern_iter)  {
-               ++text_iter;
-               ++pattern_iter;
-
-            } else {
-               break;
-
-            }
-         }
-
-         if (pattern_iter == str + N) {
-            // found a match
-            return iter;
-         }
-      }
-
-      ++iter;
-   }
-
-   return iter_end;
+   // make this safe by treating str as utf8
+   return find_fast(S::fromUtf8(str, N - 1), iter_begin);
 }
 
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(value_type c) const
 {
-   return find_fast(c, begin());
+   return find_fast(c, cbegin());
 }
 
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(value_type c, const_iterator iter_begin) const
 {
-   const_iterator iter_end = end();
+   const_iterator iter_end = cend();
 
    if (iter_begin == iter_end) {
       return iter_end;
@@ -631,21 +572,21 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::find_fast(va
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::rfind_fast(value_type c) const
 {
-   return rfind_fast(c, end());
+   return rfind_fast(c, cend());
 }
 
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::rfind_fast(value_type c, const_iterator iter_end) const
 {
-   const_iterator iter_begin = begin();
+   const_iterator iter_begin = cbegin();
 
    if (iter_begin == iter_end) {
-      return end();
+      return cend();
    }
 
    auto iter = iter_end;
 
-   while (iter != begin())   {
+   while (iter != cbegin())   {
       --iter;
 
       if (*iter == c)  {
@@ -654,22 +595,22 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::rfind_fast(v
       }
    }
 
-   return end();
+   return cend();
 }
 
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::rfind_fast(CsBasicStringView str) const
 {
-   return rfind_fast(str, end());
+   return rfind_fast(str, cend());
 }
 
 template <typename S>
 typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::rfind_fast(CsBasicStringView str, const_iterator iter_end) const
 {
-   const_iterator iter_begin = begin();
+   const_iterator iter_begin = cbegin();
 
    if (iter_begin == iter_end) {
-      return end();
+      return cend();
    }
 
    if (str.empty()) {
@@ -677,17 +618,17 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::rfind_fast(C
    }
 
    auto iter    = iter_end;
-   auto str_end = str.end();
+   auto str_end = str.cend();
 
-   while (iter != begin())   {
+   while (iter != cbegin())   {
       --iter;
 
       if (*iter == str[0])  {
 
          auto text_iter    = iter + 1;
-         auto pattern_iter = str.begin() + 1;
+         auto pattern_iter = str.cbegin() + 1;
 
-         while (text_iter != end() && pattern_iter != str_end)  {
+         while (text_iter != cend() && pattern_iter != str_end)  {
 
             if (*text_iter == *pattern_iter)  {
                ++text_iter;
@@ -707,13 +648,13 @@ typename CsBasicStringView<S>::const_iterator CsBasicStringView<S>::rfind_fast(C
 
    }
 
-   return end();
+   return cend();
 }
 
 template <typename S>
 typename CsBasicStringView<S>::value_type CsBasicStringView<S>::front() const
 {
-   return *begin();
+   return *cbegin();
 }
 
 template <typename S>
@@ -756,7 +697,7 @@ auto CsBasicStringView<S>::size() const -> size_type
 {
    size_type retval = 0;
 
-   for (auto item = begin(); item != end(); ++item) {
+   for (auto item = cbegin(); item != cend(); ++item) {
       ++retval;
    }
 

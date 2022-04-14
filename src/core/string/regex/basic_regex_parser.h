@@ -1,13 +1,13 @@
 /***********************************************************************
 *
-* Copyright (c) 2017-2020 Barbara Geller
-* Copyright (c) 2017-2020 Ansel Sermersheim
-
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
+*
 * Copyright (c) 1998-2009 John Maddock
 *
-* This file is part of CsString.
+* This file is part of CopperSpice.
 *
-* CsString is free software, released under the BSD 2-Clause license.
+* CopperSpice is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
 *
 * CopperSpice is distributed in the hope that it will be useful,
@@ -689,7 +689,7 @@ bool basic_regex_parser<charT, traits>::parse_basic_escape()
 
                char_set.add_class(this->m_word_mask);
 
-               if (0 == this->append_set(char_set)) {
+               if (this->append_set(char_set) == nullptr) {
                   fail(regex_constants::error_ctype, m_position - m_base);
                   return false;
                }
@@ -754,7 +754,7 @@ bool basic_regex_parser<charT, traits>::parse_extended_escape()
 
                char_set.add_class(m);
 
-               if (0 == this->append_set(char_set)) {
+               if (this->append_set(char_set) == nullptr) {
                   fail(regex_constants::error_ctype, m_position - m_base);
                   return false;
                }
@@ -863,7 +863,7 @@ bool basic_regex_parser<charT, traits>::parse_extended_escape()
 
             char_set.add_class(m);
 
-            if (0 == this->append_set(char_set)) {
+            if (this->append_set(char_set) == nullptr) {
                fail(regex_constants::error_ctype, m_position - m_base);
                return false;
             }
@@ -1068,7 +1068,7 @@ bool basic_regex_parser<charT, traits>::parse_repeat(std::size_t low, std::size_
       }
    }
 
-   if (0 == this->m_last_state) {
+   if (this->m_last_state == nullptr) {
       fail(regex_constants::error_badrepeat, std::distance(m_base, m_position), "Nothing to repeat.");
       return false;
    }
@@ -1362,15 +1362,12 @@ bool basic_regex_parser<charT, traits>::parse_alt()
    // or if the last state was a '(' then error:
    //
    if (
-      ((this->m_last_state == 0) || (this->m_last_state->type == syntax_element_startmark))
-      &&
-      !(
-         ((this->flags() & regbase::main_option_type) == regbase::perl_syntax_group)
-         &&
-         ((this->flags() & regbase::no_empty_expressions) == 0)
-      )
-   ) {
-      fail(regex_constants::error_empty, this->m_position - this->m_base, "A regular expression cannot start with the alternation operator |.");
+      ((this->m_last_state == nullptr) || (this->m_last_state->type == syntax_element_startmark)) &&
+      !( ((this->flags() & regbase::main_option_type) == regbase::perl_syntax_group) &&
+         ((this->flags() & regbase::no_empty_expressions) == 0) )) {
+      fail(regex_constants::error_empty, this->m_position - this->m_base,
+                  "A regular expression cannot start with the alternation operator |.");
+
       return false;
    }
    //
@@ -1451,13 +1448,16 @@ bool basic_regex_parser<charT, traits>::parse_set()
                parse_set_literal(char_set);
             }
             break;
+
          case regex_constants::syntax_close_set:
             if (m_position == item_base) {
                parse_set_literal(char_set);
                break;
+
             } else {
                ++m_position;
-               if (0 == this->append_set(char_set)) {
+
+               if (this->append_set(char_set) == nullptr) {
                   fail(regex_constants::error_ctype, m_position - m_base);
                   return false;
                }
@@ -1871,7 +1871,7 @@ charT basic_regex_parser<charT, traits>::unescape_character()
                return result;
             }
 
-            char32_t i = this->m_traits.toi(m_position, m_end, 16);
+            intmax_t i = this->m_traits.toi(m_position, m_end, 16);
 
             if ((m_position == m_end) || (i < 0) ||
                   (this->m_traits.syntax_type(*m_position) != regex_constants::syntax_close_brace)) {
@@ -1887,11 +1887,12 @@ charT basic_regex_parser<charT, traits>::unescape_character()
             }
 
             ++m_position;
-            result = charT(i);
+
+            result = charT(static_cast<char32_t>(i));
 
          } else  {
             std::ptrdiff_t len = (std::min)(static_cast<std::ptrdiff_t>(2), static_cast<std::ptrdiff_t>(m_end - m_position));
-            char32_t i = this->m_traits.toi(m_position, m_position + len, 16);
+            intmax_t i = this->m_traits.toi(m_position, m_position + len, 16);
 
             if ((i < 0) || ! valid_value(charT(0), i)) {
                // Rewind to start of escape:
@@ -1903,7 +1904,7 @@ charT basic_regex_parser<charT, traits>::unescape_character()
                return result;
             }
 
-            result = charT(i);
+            result = charT(static_cast<char32_t>(i));
          }
 
          return result;
@@ -1991,12 +1992,14 @@ charT basic_regex_parser<charT, traits>::unescape_character()
                return s[0];
             }
          }
-         // fall through is a failure:
-         // Rewind to start of escape:
+
+         // failure, rewind to start of escape
          --m_position;
+
          while (this->m_traits.syntax_type(*m_position) != regex_constants::syntax_escape) {
             --m_position;
          }
+
          fail(regex_constants::error_escape, m_position - m_base);
          return false;
       }
@@ -3159,7 +3162,7 @@ bool basic_regex_parser<charT, traits>::add_emacs_code(bool negate)
       return false;
    }
 
-   if (0 == this->append_set(char_set)) {
+   if (this->append_set(char_set) == nullptr) {
       fail(regex_constants::error_ctype, m_position - m_base);
       return false;
    }

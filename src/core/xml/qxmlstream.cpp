@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -168,7 +168,7 @@ void QXmlStreamReader::clear()
          delete d->device;
       }
 
-      d->device = 0;
+      d->device = nullptr;
    }
 }
 
@@ -332,16 +332,16 @@ QXmlStreamPrivateTagStack::QXmlStreamPrivateTagStack()
 QXmlStreamReaderPrivate::QXmlStreamReaderPrivate(QXmlStreamReader *q)
    : q_ptr(q)
 {
-   device = 0;
+   device       = nullptr;
    deleteDevice = false;
-   decoder = 0;
+   decoder      = nullptr;
 
    stack_size  = 64;
-   sym_stack   = 0;
-   state_stack = 0;
+   sym_stack   = nullptr;
+   state_stack = nullptr;
 
    reallocateStack();
-   entityResolver = 0;
+   entityResolver = nullptr;
    init();
 
    entityHash.insert("lt",   Entity::createLiteral("<"));
@@ -380,11 +380,11 @@ void QXmlStreamReaderPrivate::init()
    codec = QTextCodec::codecForMib(106);       // utf8
 
    delete decoder;
-   decoder = 0;
+   decoder = nullptr;
 
    attributeStack.clear();
    attributeStack.reserve(16);
-   entityParser = 0;
+   entityParser = nullptr;
    hasCheckedStartDocument = false;
    normalizeLiterals = false;
    hasSeenTag = false;
@@ -483,7 +483,7 @@ inline uint QXmlStreamReaderPrivate::getChar()
    if (putStack.size() != 0) {
       c = atEnd ? 0 : putStack.pop();
 
-   } else if (readBuffer_Iter != readBuffer.end() ) {
+   } else if (readBuffer_Iter != readBuffer.cend() ) {
       c = readBuffer_Iter->unicode();
       ++readBuffer_Iter;
 
@@ -502,7 +502,7 @@ inline uint QXmlStreamReaderPrivate::peekChar()
    if (putStack.size() != 0) {
       c = putStack.top();
 
-   } else if (readBuffer_Iter != readBuffer.end() ) {
+   } else if (readBuffer_Iter != readBuffer.cend() ) {
          c = readBuffer_Iter->unicode();
 
    } else {
@@ -529,13 +529,13 @@ bool QXmlStreamReaderPrivate::scanUntil(const char *str, short tokenToInject)
             if ((c = filterCarriageReturn()) == 0) {
                break;
             }
+            [[fallthrough]];
 
-         // fall through
          case '\n':
             ++lineNumber;
-            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.begin());
+            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.cbegin());
+            [[fallthrough]];
 
-         // fall through
          case '\t':
             textBuffer += char32_t(c);
             continue;
@@ -731,13 +731,14 @@ inline int QXmlStreamReaderPrivate::fastScanLiteralContent()
             if (filterCarriageReturn() == 0) {
                return n;
             }
+            [[fallthrough]];
 
-         // fall through
          case '\n':
             ++lineNumber;
-            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.begin());
+            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.cbegin());
 
-         // fall through
+            [[fallthrough]];
+
          case ' ':
          case '\t':
             if (normalizeLiterals) {
@@ -757,7 +758,8 @@ inline int QXmlStreamReaderPrivate::fastScanLiteralContent()
                return n;
             }
 
-         // fall through
+            [[fallthrough]];
+
          default:
             textBuffer += char32_t(c);
             ++n;
@@ -778,13 +780,13 @@ inline int QXmlStreamReaderPrivate::fastScanSpace()
             if ((c = filterCarriageReturn()) == 0) {
                return n;
             }
+            [[fallthrough]];
 
-         // fall through
          case '\n':
             ++lineNumber;
-            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.begin());
+            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.cbegin());
+            [[fallthrough]];
 
-         // fall through
          case ' ':
          case '\t':
             textBuffer += char32_t(c);
@@ -844,23 +846,27 @@ inline int QXmlStreamReaderPrivate::fastScanContentCharList()
             if ((c = filterCarriageReturn()) == 0) {
                return n;
             }
-         // fall through
+            [[fallthrough]];
+
          case '\n':
             ++lineNumber;
-            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.begin());
-         // fall through
+            lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.cbegin());
+            [[fallthrough]];
+
          case ' ':
          case '\t':
             textBuffer += QChar(ushort(c));
             ++n;
             break;
+
          case '&':
          case '<':
             if (!(c & 0xff0000)) {
                putChar(c);
                return n;
             }
-         // fall through
+            [[fallthrough]];
+
          default:
             if (c < 0x20) {
                putChar(c);
@@ -924,7 +930,8 @@ inline int QXmlStreamReaderPrivate::fastScanName(int *prefix)
                putChar(c);
                return n;
             }
-         // fall through
+            [[fallthrough]];
+
          default:
             textBuffer += QChar(c);
             ++n;
@@ -934,9 +941,11 @@ inline int QXmlStreamReaderPrivate::fastScanName(int *prefix)
    if (prefix) {
       *prefix = 0;
    }
+
    int pos = textBuffer.size() - n;
    putString(textBuffer, pos);
    textBuffer.resize(pos);
+
    return 0;
 }
 
@@ -1074,7 +1083,7 @@ ushort QXmlStreamReaderPrivate::getChar_helper()
 {
    const int BUFFER_SIZE = 8192;
 
-   characterOffset = characterOffset + (readBuffer_Iter - readBuffer.begin());
+   characterOffset = characterOffset + (readBuffer_Iter - readBuffer.cbegin());
    readBuffer.resize(0);
 
    if (decoder)
@@ -1144,18 +1153,18 @@ ushort QXmlStreamReaderPrivate::getChar_helper()
    }
 
    decoder->toUnicode(&readBuffer, rawReadBuffer.constData(), nbytesread);
-   readBuffer_Iter = readBuffer.begin();
+   readBuffer_Iter = readBuffer.cbegin();
 
    if (lockEncoding && decoder->hasFailure()) {
       raiseWellFormedError(QXmlStream::tr("Encountered incorrectly encoded content."));
 
       readBuffer.clear();
-      readBuffer_Iter = readBuffer.begin();
+      readBuffer_Iter = readBuffer.cbegin();
 
       return 0;
    }
 
-   if (readBuffer_Iter != readBuffer.end()) {
+   if (readBuffer_Iter != readBuffer.cend()) {
       ushort c = readBuffer_Iter->unicode();
       ++readBuffer_Iter;
 
@@ -1486,7 +1495,7 @@ void QXmlStreamReaderPrivate::startDocument()
 
                decoder = codec->makeDecoder();
                decoder->toUnicode(&readBuffer, rawReadBuffer.data(), nbytesread);
-               readBuffer_Iter = readBuffer.begin();
+               readBuffer_Iter = readBuffer.cbegin();
 
             }
          }
@@ -1630,7 +1639,7 @@ qint64 QXmlStreamReader::lineNumber() const
 qint64 QXmlStreamReader::columnNumber() const
 {
    Q_D(const QXmlStreamReader);
-   return d->characterOffset - d->lastLineStart + (d->readBuffer_Iter - d->readBuffer.begin());
+   return d->characterOffset - d->lastLineStart + (d->readBuffer_Iter - d->readBuffer.cbegin());
 }
 
 /*! Returns the current character offset, starting with 0.
@@ -1640,7 +1649,7 @@ qint64 QXmlStreamReader::columnNumber() const
 qint64 QXmlStreamReader::characterOffset() const
 {
    Q_D(const QXmlStreamReader);
-   return d->characterOffset + (d->readBuffer_Iter - d->readBuffer.begin());
+   return d->characterOffset + (d->readBuffer_Iter - d->readBuffer.cbegin());
 }
 
 
@@ -1798,7 +1807,6 @@ QString QXmlStreamReader::readElementText(ReadElementTextBehaviour behaviour)
                   break;
                }
 
-               // Fall through for ErrorOnUnexpectedElement
                [[fallthrough]];
 
             default:
@@ -1937,7 +1945,7 @@ QXmlStreamAttribute::QXmlStreamAttribute(const QString &namespaceUri, const QStr
 QXmlStreamAttribute::QXmlStreamAttribute(const QString &qualifiedName, const QString &value)
 {
    auto iter_colon = qualifiedName.indexOfFast(':') + 1;
-   m_name          = QStringView(iter_colon, qualifiedName.end());
+   m_name          = QStringView(iter_colon, qualifiedName.cend());
 
    m_qualifiedName = qualifiedName;
    m_value         = value;
@@ -2448,9 +2456,6 @@ QXmlStreamWriter::QXmlStreamWriter(QByteArray *array)
    d->deleteDevice = true;
 }
 
-
-/*!  Constructs a stream writer that writes into \a string.
- */
 QXmlStreamWriter::QXmlStreamWriter(QString *string)
    : d_ptr(new QXmlStreamWriterPrivate(this))
 {
@@ -2458,31 +2463,24 @@ QXmlStreamWriter::QXmlStreamWriter(QString *string)
    d->stringDevice = string;
 }
 
-/*!
-    Destructor.
-*/
 QXmlStreamWriter::~QXmlStreamWriter()
 {
 }
 
-
-/*!
-    Sets the current device to \a device. If you want the stream to
-    write into a QByteArray, you can create a QBuffer device.
-
-    \sa device()
-*/
 void QXmlStreamWriter::setDevice(QIODevice *device)
 {
    Q_D(QXmlStreamWriter);
    if (device == d->device) {
       return;
    }
-   d->stringDevice = 0;
+
+   d->stringDevice = nullptr;
+
    if (d->deleteDevice) {
       delete d->device;
       d->deleteDevice = false;
    }
+
    d->device = device;
 }
 
@@ -2491,7 +2489,6 @@ QIODevice *QXmlStreamWriter::device() const
    Q_D(const QXmlStreamWriter);
    return d->device;
 }
-
 
 void QXmlStreamWriter::setCodec(QTextCodec *codec)
 {
@@ -2540,15 +2537,6 @@ int QXmlStreamWriter::autoFormattingIndent() const
    return d->autoFormattingIndent.count(' ') - d->autoFormattingIndent.count('\t');
 }
 
-/*!
-    \since 4.8
-
-    Returns true if the stream failed to write to the underlying device;
-    otherwise returns false.
-
-    The error status is never reset. Writes happening after the error
-    occurred are ignored, even if the error condition is cleared.
- */
 bool QXmlStreamWriter::hasError() const
 {
    Q_D(const QXmlStreamWriter);
@@ -2635,8 +2623,10 @@ void QXmlStreamWriter::writeAttribute(const QXmlStreamAttribute &attribute)
 void QXmlStreamWriter::writeAttributes(const QXmlStreamAttributes &attributes)
 {
    Q_D(QXmlStreamWriter);
+
    Q_ASSERT(d->inStartElement);
-   Q_UNUSED(d);
+   (void) d;
+
    for (int i = 0; i < attributes.size(); ++i) {
       writeAttribute(attributes.at(i));
    }

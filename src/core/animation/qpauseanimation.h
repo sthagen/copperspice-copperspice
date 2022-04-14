@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QPAUSEANIMATION_H
 #define QPAUSEANIMATION_H
 
-#include <QtCore/qanimationgroup.h>
-
-QT_BEGIN_NAMESPACE
+#include <qanimationgroup.h>
 
 #ifndef QT_NO_ANIMATION
 
@@ -42,6 +40,10 @@ class Q_CORE_EXPORT QPauseAnimation : public QAbstractAnimation
  public:
    QPauseAnimation(QObject *parent = nullptr);
    QPauseAnimation(int msecs, QObject *parent = nullptr);
+
+   QPauseAnimation(const QPauseAnimation &) = delete;
+   QPauseAnimation &operator=(const QPauseAnimation &) = delete;
+
    ~QPauseAnimation();
 
    int duration() const override;
@@ -52,12 +54,9 @@ class Q_CORE_EXPORT QPauseAnimation : public QAbstractAnimation
    void updateCurrentTime(int) override;
 
  private:
-   Q_DISABLE_COPY(QPauseAnimation)
    Q_DECLARE_PRIVATE(QPauseAnimation)
 };
 
 #endif //QT_NO_ANIMATION
 
-QT_END_NAMESPACE
-
-#endif // QPAUSEANIMATION_P_H
+#endif

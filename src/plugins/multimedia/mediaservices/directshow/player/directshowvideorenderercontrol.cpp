@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,12 +32,9 @@
 #include <qabstractvideosurface.h>
 
 DirectShowVideoRendererControl::DirectShowVideoRendererControl(DirectShowEventLoop *loop, QObject *parent)
-   : QVideoRendererControl(parent)
-   , m_loop(loop)
-   , m_surface(0)
-   , m_filter(0)
+   : QVideoRendererControl(parent), m_loop(loop), m_surface(nullptr), m_filter(nullptr)
 #ifdef HAVE_EVR
-   , m_evrPresenter(0)
+   , m_evrPresenter(nullptr)
 #endif
 {
 }
@@ -46,10 +43,11 @@ DirectShowVideoRendererControl::~DirectShowVideoRendererControl()
 {
 #ifdef HAVE_EVR
    if (m_evrPresenter) {
-      m_evrPresenter->setSurface(Q_NULLPTR);
+      m_evrPresenter->setSurface(nullptr);
       m_evrPresenter->Release();
    }
 #endif
+
    if (m_filter) {
       m_filter->Release();
    }
@@ -68,31 +66,34 @@ void DirectShowVideoRendererControl::setSurface(QAbstractVideoSurface *surface)
 
 #ifdef HAVE_EVR
    if (m_evrPresenter) {
-      m_evrPresenter->setSurface(Q_NULLPTR);
+      m_evrPresenter->setSurface(nullptr);
       m_evrPresenter->Release();
-      m_evrPresenter = 0;
+      m_evrPresenter = nullptr;
    }
 #endif
 
    if (m_filter) {
       m_filter->Release();
-      m_filter = 0;
+      m_filter = nullptr;
    }
 
    m_surface = surface;
 
    if (m_surface) {
+
 #ifdef HAVE_EVR
       m_filter = com_new<IBaseFilter>(clsid_EnhancedVideoRenderer);
       m_evrPresenter = new EVRCustomPresenter(m_surface);
-      if (!m_evrPresenter->isValid() || !qt_evr_setCustomPresenter(m_filter, m_evrPresenter)) {
+
+      if (! m_evrPresenter->isValid() || !qt_evr_setCustomPresenter(m_filter, m_evrPresenter)) {
          m_filter->Release();
-         m_filter = 0;
+         m_filter = nullptr;
+
          m_evrPresenter->Release();
-         m_evrPresenter = 0;
+         m_evrPresenter = nullptr;
       }
 
-      if (!m_filter)
+      if (! m_filter)
 #endif
       {
          m_filter = new VideoSurfaceFilter(m_surface, m_loop);

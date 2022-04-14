@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QNUMERIC_H
 #define QNUMERIC_H
 
-#include <QtCore/qglobal.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
 
 Q_CORE_EXPORT bool qIsInf(double d);
 Q_CORE_EXPORT bool qIsNaN(double d);
@@ -42,6 +40,4 @@ Q_CORE_EXPORT double qInf();
 #define Q_SNAN (QT_PREPEND_NAMESPACE(qSNaN)())
 #define Q_QNAN (QT_PREPEND_NAMESPACE(qQNaN)())
 
-QT_END_NAMESPACE
-
-#endif // QNUMERIC_H
+#endif

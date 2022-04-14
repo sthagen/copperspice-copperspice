@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,7 +31,6 @@
 #include <qpushbutton.h>
 #include <qplatform_dialoghelper.h>
 
-
 class QSizeGrip;
 
 class QDialogPrivate : public QWidgetPrivate
@@ -41,13 +40,12 @@ class QDialogPrivate : public QWidgetPrivate
  public:
 
    QDialogPrivate()
-      : mainDef(0), orientation(Qt::Horizontal), extension(0), doShowExtension(false),
+      : mainDef(nullptr), orientation(Qt::Horizontal), extension(nullptr), doShowExtension(false),
 #ifndef QT_NO_SIZEGRIP
-        resizer(0),
-        sizeGripEnabled(false),
+        resizer(nullptr), sizeGripEnabled(false),
 #endif
-        rescode(0), resetModalityTo(-1), wasModalitySet(true), eventLoop(0),
-        nativeDialogInUse(false), m_platformHelper(0), m_platformHelperCreated(false)
+        rescode(0), resetModalityTo(-1), wasModalitySet(true), eventLoop(nullptr),
+        nativeDialogInUse(false), m_platformHelper(nullptr), m_platformHelperCreated(false)
    {}
 
    ~QDialogPrivate() {
@@ -58,6 +56,7 @@ class QDialogPrivate : public QWidgetPrivate
    bool setNativeDialogVisible(bool visible);
    QVariant styleHint(QPlatformDialogHelper::StyleHint hint) const;
    void deletePlatformHelper();
+
    QPointer<QPushButton> mainDef;
    Qt::Orientation orientation;
    QWidget *extension;
@@ -76,8 +75,6 @@ class QDialogPrivate : public QWidgetPrivate
    void hideDefault();
    void resetModalitySetByOpen();
 
-
-
    int rescode;
    int resetModalityTo;
    bool wasModalitySet;
@@ -95,6 +92,5 @@ class QDialogPrivate : public QWidgetPrivate
    mutable QPlatformDialogHelper *m_platformHelper;
    mutable bool m_platformHelperCreated;
 };
-
 
 #endif

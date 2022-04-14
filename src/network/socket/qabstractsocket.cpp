@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,7 +45,7 @@
 #define Q_CHECK_SOCKETENGINE(returnValue) do { \
     if (!d->socketEngine) { \
         return returnValue; \
-    } } while (0)
+    } } while (false)
 
 #ifndef QABSTRACTSOCKET_BUFFERSIZE
 #define QABSTRACTSOCKET_BUFFERSIZE 32768
@@ -135,13 +135,13 @@ QAbstractSocketPrivate::QAbstractSocketPrivate()
      port(0),
      localPort(0),
      peerPort(0),
-     socketEngine(0),
+     socketEngine(nullptr),
      cachedSocketDescriptor(-1),
      readBufferMaxSize(0),
      writeBuffer(QABSTRACTSOCKET_BUFFERSIZE),
      isBuffered(false),
-     connectTimer(0),
-     disconnectTimer(0),
+     connectTimer(nullptr),
+     disconnectTimer(nullptr),
      connectTimeElapsed(0),
      hostLookupId(-1),
      socketType(QAbstractSocket::UnknownSocketType),
@@ -175,7 +175,7 @@ void QAbstractSocketPrivate::resetSocketLayer()
       socketEngine->close();
       socketEngine->disconnect();
       delete socketEngine;
-      socketEngine = 0;
+      socketEngine = nullptr;
       cachedSocketDescriptor = -1;
    }
    if (connectTimer) {
@@ -1517,26 +1517,31 @@ bool QAbstractSocket::waitForConnected(int msecs)
    stopWatch.start();
 
    if (d->state == HostLookupState) {
+
 #if defined (QABSTRACTSOCKET_DEBUG)
       qDebug("QAbstractSocket::waitForConnected(%i) doing host name lookup", msecs);
 #endif
+
       QHostInfo::abortHostLookup(d->hostLookupId);
       d->hostLookupId = -1;
 
 #ifndef QT_NO_BEARERMANAGEMENT
       QSharedPointer<QNetworkSession> networkSession;
       QVariant v(property("_q_networksession"));
+
       if (v.isValid()) {
-         networkSession = qvariant_cast< QSharedPointer<QNetworkSession> >(v);
+         networkSession = v.value<QSharedPointer<QNetworkSession>>();
          d->_q_startConnecting(QHostInfoPrivate::fromName(d->hostName, networkSession));
       } else
 #endif
+
       {
          QHostAddress temp;
          if (temp.setAddress(d->hostName)) {
             QHostInfo info;
             info.setAddresses(QList<QHostAddress>() << temp);
             d->_q_startConnecting(info);
+
          } else {
             d->_q_startConnecting(QHostInfo::fromName(d->hostName));
          }
@@ -1824,7 +1829,7 @@ void QAbstractSocket::abort()
    }
 
 #ifdef QT_SSL
-   if (QSslSocket *socket = qobject_cast<QSslSocket *>(this)) {
+   if (QSslSocket *socket = dynamic_cast<QSslSocket *>(this)) {
       socket->abort();
       return;
    }
@@ -1832,7 +1837,7 @@ void QAbstractSocket::abort()
    if (d->connectTimer) {
       d->connectTimer->stop();
       delete d->connectTimer;
-      d->connectTimer = 0;
+      d->connectTimer = nullptr;
    }
 
    d->abortCalled = true;
@@ -1857,7 +1862,7 @@ bool QAbstractSocket::flush()
 
 #ifdef QT_SSL
    // Manual polymorphism; flush() isn't virtual, but QSslSocket overloads it.
-   if (QSslSocket *socket = qobject_cast<QSslSocket *>(this)) {
+   if (QSslSocket *socket = dynamic_cast<QSslSocket *>(this)) {
       return socket->flush();
    }
 #endif

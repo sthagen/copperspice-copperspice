@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,18 +26,16 @@
 
 #include <qobject.h>
 #include <qabstractitemdelegate.h>
-#include <QScopedPointer>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_DATAWIDGETMAPPER
-
-
 
 class QAbstractItemDelegate;
 class QAbstractItemModel;
 class QModelIndex;
 class QDataWidgetMapperPrivate;
 
-class Q_GUI_EXPORT QDataWidgetMapper: public QObject
+class Q_GUI_EXPORT QDataWidgetMapper : public QObject
 {
    GUI_CS_OBJECT(QDataWidgetMapper)
 
@@ -57,6 +55,10 @@ class Q_GUI_EXPORT QDataWidgetMapper: public QObject
    enum SubmitPolicy { AutoSubmit, ManualSubmit };
 
    explicit QDataWidgetMapper(QObject *parent = nullptr);
+
+   QDataWidgetMapper(const QDataWidgetMapper &) = delete;
+   QDataWidgetMapper &operator=(const QDataWidgetMapper &) = delete;
+
    ~QDataWidgetMapper();
 
    void setModel(QAbstractItemModel *model);
@@ -118,7 +120,6 @@ class Q_GUI_EXPORT QDataWidgetMapper: public QObject
 
  private:
    Q_DECLARE_PRIVATE(QDataWidgetMapper)
-   Q_DISABLE_COPY(QDataWidgetMapper)
 
    GUI_CS_SLOT_1(Private, void _q_dataChanged(const QModelIndex &un_named_arg1, const QModelIndex &un_named_arg2, const QVector<int> &))
    GUI_CS_SLOT_2(_q_dataChanged)

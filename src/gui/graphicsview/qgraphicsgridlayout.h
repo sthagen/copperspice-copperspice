@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,8 @@
 #ifndef QGRAPHICSGRIDLAYOUT_H
 #define QGRAPHICSGRIDLAYOUT_H
 
-#include <QtGui/qgraphicsitem.h>
-#include <QtGui/qgraphicslayout.h>
-
+#include <qgraphicsitem.h>
+#include <qgraphicslayout.h>
 
 #if ! defined(QT_NO_GRAPHICSVIEW)
 
@@ -34,9 +33,12 @@ class QGraphicsGridLayoutPrivate;
 
 class Q_GUI_EXPORT QGraphicsGridLayout : public QGraphicsLayout
 {
-
  public:
    QGraphicsGridLayout(QGraphicsLayoutItem *parent = nullptr);
+
+   QGraphicsGridLayout(const QGraphicsGridLayout &) = delete;
+   QGraphicsGridLayout &operator=(const QGraphicsGridLayout &) = delete;
+
    virtual ~QGraphicsGridLayout();
 
    void addItem(QGraphicsLayoutItem *item, int row, int column, int rowSpan, int columnSpan, Qt::Alignment alignment = Qt::Alignment());
@@ -104,13 +106,12 @@ class Q_GUI_EXPORT QGraphicsGridLayout : public QGraphicsLayout
    // QSizePolicy::ControlTypes controlTypes(LayoutSide side) const;
 
  private:
-   Q_DISABLE_COPY(QGraphicsGridLayout)
    Q_DECLARE_PRIVATE(QGraphicsGridLayout)
 };
 
-inline void QGraphicsGridLayout::addItem(QGraphicsLayoutItem *aitem, int arow, int acolumn, Qt::Alignment aalignment)
+inline void QGraphicsGridLayout::addItem(QGraphicsLayoutItem *item, int row, int column, Qt::Alignment alignment)
 {
-   addItem(aitem, arow, acolumn, 1, 1, aalignment);
+   addItem(item, row, column, 1, 1, alignment);
 }
 
 #endif

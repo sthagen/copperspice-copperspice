@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,10 +22,12 @@
 ***********************************************************************/
 
 #include <qrasterizer_p.h>
-#include <QPoint>
-#include <QRect>
+
+#include <qpoint.h>
+#include <qrect.h>
+#include <qvector.h>
+
 #include <qmath_p.h>
-#include <qdatabuffer_p.h>
 #include <qdrawhelper_p.h>
 
 #include <algorithm>
@@ -56,10 +58,7 @@ class QSpanBuffer
 {
  public:
    QSpanBuffer(ProcessSpans blend, void *data, const QRect &clipRect)
-      : m_spanCount(0)
-      , m_blend(blend)
-      , m_data(data)
-      , m_clipRect(clipRect) {
+      : m_spanCount(0), m_blend(blend), m_data(data), m_clipRect(clipRect) {
    }
 
    ~QSpanBuffer() {
@@ -133,6 +132,8 @@ class QScanConverter
       int left, right;
    };
 
+   inline void allocate(int size);
+
    inline bool clip(Q16Dot16 &xFP, int &iTop, int &iBottom, Q16Dot16 slopeFP, Q16Dot16 edgeFP, int winding);
    inline void mergeIntersection(Intersection *head, const Intersection &isect);
 
@@ -141,9 +142,10 @@ class QScanConverter
    void emitNode(const Intersection *node);
    void emitSpans(int chunk);
 
-   inline void allocate(int size);
+   template <bool AllVertical>
+   void scanConvert();
 
-   QDataBuffer<Line> m_lines;
+   QVector<Line> m_lines;
 
    int m_alloc;
    int m_size;
@@ -162,13 +164,8 @@ class QScanConverter
    int m_winding;
 
    Intersection *m_intersections;
-
    QSpanBuffer *m_spanBuffer;
-
-   QDataBuffer<Line *> m_active;
-
-   template <typename T>
-   friend void qScanConvert(QScanConverter &d, T allVertical);
+   QVector<Line *> m_active;
 };
 
 class QRasterizerPrivate
@@ -184,11 +181,7 @@ class QRasterizerPrivate
 };
 
 QScanConverter::QScanConverter()
-   : m_lines(0)
-   , m_alloc(0)
-   , m_size(0)
-   , m_intersections(0)
-   , m_active(0)
+   : m_alloc(0), m_size(0), m_intersections(nullptr)
 {
 }
 
@@ -202,12 +195,12 @@ QScanConverter::~QScanConverter()
 void QScanConverter::begin(int top, int bottom, int left, int right,
    Qt::FillRule fillRule, bool legacyRounding, QSpanBuffer *spanBuffer)
 {
-   m_top = top;
-   m_bottom = bottom;
-   m_leftFP = IntToQ16Dot16(left);
+   m_top     = top;
+   m_bottom  = bottom;
+   m_leftFP  = IntToQ16Dot16(left);
    m_rightFP = IntToQ16Dot16(right + 1);
 
-   m_lines.reset();
+   m_lines.clear();
 
    m_fillRuleMask = fillRule == Qt::WindingFill ? ~0x0 : 0x1;
    m_legacyRounding = legacyRounding;
@@ -268,6 +261,7 @@ static void split(QT_FT_Vector *b)
       b[4].x = (b[5].x + temp) / 2;
       b[3].x = (b[2].x + b[4].x) / 2;
    }
+
    {
       const int temp = (b[1].y + b[2].y) / 2;
 
@@ -289,63 +283,64 @@ static inline bool xOrder(const QScanConverter::Line *a, const QScanConverter::L
    return a->x < b->x;
 }
 
-template <bool B>
-struct QBoolToType {
-   inline bool operator()() const {
-      return B;
-   }
-};
-
-// should be a member function but VC6 doesn't support member template functions
-template <typename T>
-void qScanConvert(QScanConverter &d, T allVertical)
+template <bool AllVertical>
+void QScanConverter::scanConvert()
 {
-   if (!d.m_lines.size()) {
-      d.m_active.reset();
+   if (! m_lines.size()) {
+      m_active.clear();
       return;
    }
 
-   std::sort(d.m_lines.data(), d.m_lines.data() + d.m_lines.size(), QT_PREPEND_NAMESPACE(topOrder));
+   std::sort(m_lines.begin(), m_lines.end(), topOrder);
    int line = 0;
 
-   for (int y = d.m_lines.first().top; y <= d.m_bottom; ++y) {
-      for (; line < d.m_lines.size() && d.m_lines.at(line).top == y; ++line) {
+   for (int y = m_lines.first().top; y <= m_bottom; ++y) {
+      for (; line < m_lines.size() && m_lines.at(line).top == y; ++line) {
          // add node to active list
-         if (allVertical()) {
-            QScanConverter::Line *l = &d.m_lines.at(line);
-            d.m_active.resize(d.m_active.size() + 1);
+
+         if constexpr (AllVertical) {
+            QScanConverter::Line *l = &m_lines[line];
+            m_active.resize(m_active.size() + 1);
             int j;
-            for (j = d.m_active.size() - 2; j >= 0 && xOrder(l, d.m_active.at(j)); --j) {
-               d.m_active.at(j + 1) = d.m_active.at(j);
+
+            for (j = m_active.size() - 2; j >= 0 && xOrder(l, m_active.at(j)); --j) {
+               m_active[j + 1] = m_active.at(j);
             }
-            d.m_active.at(j + 1) = l;
+
+            m_active[j + 1] = l;
+
          } else {
-            d.m_active << &d.m_lines.at(line);
+            m_active << &m_lines[line];
          }
       }
 
-      int numActive = d.m_active.size();
-      if (!allVertical()) {
+      int numActive = m_active.size();
+
+      if constexpr (! AllVertical) {
          // use insertion sort instead of qSort, as the active edge list is quite small
          // and in the average case already sorted
+
          for (int i = 1; i < numActive; ++i) {
-            QScanConverter::Line *l = d.m_active.at(i);
+            QScanConverter::Line *l = m_active[i];
             int j;
-            for (j = i - 1; j >= 0 && QT_PREPEND_NAMESPACE(xOrder)(l, d.m_active.at(j)); --j) {
-               d.m_active.at(j + 1) = d.m_active.at(j);
+
+            for (j = i - 1; j >= 0 && xOrder(l, m_active.at(j)); --j) {
+               m_active[j + 1] = m_active.at(j);
             }
-            d.m_active.at(j + 1) = l;
+
+            m_active[j + 1] = l;
          }
       }
 
       int x = 0;
       int winding = 0;
+
       for (int i = 0; i < numActive; ++i) {
-         QScanConverter::Line *node = d.m_active.at(i);
+         QScanConverter::Line *node = m_active.at(i);
 
          const int current = Q16Dot16ToInt(node->x);
-         if (winding & d.m_fillRuleMask) {
-            d.m_spanBuffer->addSpan(x, current - x, y, 0xff);
+         if (winding & m_fillRuleMask) {
+            m_spanBuffer->addSpan(x, current - x, y, 0xff);
          }
 
          x = current;
@@ -354,17 +349,19 @@ void qScanConvert(QScanConverter &d, T allVertical)
          if (node->bottom == y) {
             // remove node from active list
             for (int j = i; j < numActive - 1; ++j) {
-               d.m_active.at(j) = d.m_active.at(j + 1);
+               m_active[j] = m_active[j + 1];
             }
 
-            d.m_active.resize(--numActive);
+            m_active.resize(--numActive);
             --i;
-         } else if (!allVertical()) {
+
+         } else if constexpr (! AllVertical) {
             node->x += node->delta;
          }
       }
    }
-   d.m_active.reset();
+
+   m_active.clear();
 }
 
 void QScanConverter::end()
@@ -375,17 +372,20 @@ void QScanConverter::end()
 
    if (m_lines.size() <= 32) {
       bool allVertical = true;
+
       for (int i = 0; i < m_lines.size(); ++i) {
          if (m_lines.at(i).delta) {
             allVertical = false;
             break;
          }
       }
+
       if (allVertical) {
-         qScanConvert(*this, QBoolToType<true>());
+         scanConvert<true>();
       } else {
-         qScanConvert(*this, QBoolToType<false>());
+         scanConvert<false>();
       }
+
    } else {
       for (int chunkTop = m_top; chunkTop <= m_bottom; chunkTop += CHUNK_SIZE) {
          prepareChunk();
@@ -394,7 +394,7 @@ void QScanConverter::end()
 
          const int chunkBottom = chunkTop + CHUNK_SIZE;
          for (int i = 0; i < m_lines.size(); ++i) {
-            Line &line = m_lines.at(i);
+            Line &line = m_lines[i];
 
             if ((line.bottom < chunkTop) || (line.top > chunkBottom)) {
                continue;
@@ -431,11 +431,12 @@ void QScanConverter::end()
       free(m_intersections);
       m_alloc = 0;
       m_size = 0;
-      m_intersections = 0;
+      m_intersections = nullptr;
    }
 
    if (m_lines.size() > 1024) {
-      m_lines.shrink(1024);
+      m_lines.resize(1024);
+      m_lines.squeeze();
    }
 }
 
@@ -522,7 +523,7 @@ inline bool QScanConverter::clip(Q16Dot16 &xFP, int &iTop, int &iBottom, Q16Dot1
          return false;
       } else {
          Line line = { edgeFP, 0, iTop, iBottom, winding };
-         m_lines.add(line);
+         m_lines.append(line);
          return true;
       }
    }
@@ -534,7 +535,7 @@ inline bool QScanConverter::clip(Q16Dot16 &xFP, int &iTop, int &iBottom, Q16Dot1
          return false;
       } else {
          Line line = { edgeFP, 0, iTop, iBottom, winding };
-         m_lines.add(line);
+         m_lines.append(line);
          return true;
       }
    }
@@ -549,7 +550,7 @@ inline bool QScanConverter::clip(Q16Dot16 &xFP, int &iTop, int &iBottom, Q16Dot1
          int iMiddle = iTop + iHeight;
 
          Line line = { edgeFP, 0, iTop, iMiddle, winding };
-         m_lines.add(line);
+         m_lines.append(line);
 
          if (iMiddle != iBottom) {
             xFP += slopeFP * (iHeight + 1);
@@ -564,7 +565,7 @@ inline bool QScanConverter::clip(Q16Dot16 &xFP, int &iTop, int &iBottom, Q16Dot1
 
          if (iMiddle != iBottom) {
             Line line = { edgeFP, 0, iMiddle + 1, iBottom, winding };
-            m_lines.add(line);
+            m_lines.append(line);
 
             iBottom = iMiddle;
          }
@@ -572,7 +573,7 @@ inline bool QScanConverter::clip(Q16Dot16 &xFP, int &iTop, int &iBottom, Q16Dot1
       return false;
    } else if ((xFP < edgeFP) ^ right) {
       Line line = { edgeFP, 0, iTop, iBottom, winding };
-      m_lines.add(line);
+      m_lines.append(line);
       return true;
    }
 
@@ -604,7 +605,7 @@ void QScanConverter::mergeLine(QT_FT_Vector a, QT_FT_Vector b)
 
       if (b.x == a.x) {
          Line line = { qBound(m_leftFP, aFP, m_rightFP), 0, iTop, iBottom, winding };
-         m_lines.add(line);
+         m_lines.append(line);
       } else {
          const qreal slope = (b.x - a.x) / qreal(b.y - a.y);
 
@@ -625,7 +626,7 @@ void QScanConverter::mergeLine(QT_FT_Vector a, QT_FT_Vector b)
          Q_ASSERT(xFP >= m_leftFP);
 
          Line line = { xFP, slopeFP, iTop, iBottom, winding };
-         m_lines.add(line);
+         m_lines.append(line);
       }
    }
 }

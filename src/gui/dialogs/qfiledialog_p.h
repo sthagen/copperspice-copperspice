@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -63,7 +63,10 @@ class Ui_QFileDialog;
 class QPlatformDialogHelper;
 
 struct QFileDialogArgs {
-   QFileDialogArgs() : parent(0), mode(QFileDialog::AnyFile) {}
+   QFileDialogArgs()
+      : parent(nullptr), mode(QFileDialog::AnyFile)
+   {
+   }
 
    QWidget *parent;
    QString caption;
@@ -71,7 +74,7 @@ struct QFileDialogArgs {
    QString selection;
    QString filter;
    QFileDialog::FileMode mode;
-   QFileDialog::Options options;
+   QFileDialog::FileDialogOptions options;
 };
 
 #define UrlRole (Qt::UserRole + 1)
@@ -83,15 +86,22 @@ class QFileDialogPrivate : public QDialogPrivate
  public:
    QFileDialogPrivate();
 
+   QFileDialogPrivate(const QFileDialogPrivate &) = delete;
+   QFileDialogPrivate &operator=(const QFileDialogPrivate &) = delete;
+
+   ~QFileDialogPrivate();
+
    QPlatformFileDialogHelper *platformFileDialogHelper() const {
       return static_cast<QPlatformFileDialogHelper *>(platformHelper());
    }
+
    void createToolButtons();
    void createMenuActions();
    void createWidgets();
 
    void init(const QUrl &directory = QUrl(), const QString &nameFilter = QString(),
       const QString &caption = QString());
+
    bool itemViewKeyboardEvent(QKeyEvent *event);
    QString getEnvironmentVariable(const QString &string);
    static QUrl workingDirectory(const QUrl &path);
@@ -123,9 +133,11 @@ class QFileDialogPrivate : public QDialogPrivate
 
    QString basename(const QString &path) const {
       int separator = QDir::toNativeSeparators(path).lastIndexOf(QDir::separator());
+
       if (separator != -1) {
          return path.mid(separator + 1);
       }
+
       return path;
    }
 
@@ -138,30 +150,46 @@ class QFileDialogPrivate : public QDialogPrivate
       } else {
          filters |= QDir::Drives | QDir::AllDirs | QDir::Files | QDir::Dirs;
       }
+
       return filters;
    }
 
    QAbstractItemView *currentView() const;
 
-   static inline QString toInternal(const QString &path) {
+   static QString toInternal(const QString &path) {
+
 #if defined(Q_OS_WIN)
       QString n(path);
-
       n.replace('\\', '/');
-
 
       return n;
 
 #else
       return path;
+
 #endif
 
    }
+
+   // setVisible_sys returns true if it ends up showing a native
+   // dialog. Returning false means that a non-native dialog must be used instead
+   bool canBeNativeDialog() const override;
+   bool usingWidgets() const;
+
+   void setDirectory_sys(const QUrl &directory);
+   QUrl directory_sys() const;
+   void selectFile_sys(const QUrl &filename);
+   QList<QUrl> selectedFiles_sys() const;
+
+   void setFilter_sys();
+   void selectNameFilter_sys(const QString &filter);
+   QString selectedNameFilter_sys() const;
 
 #ifndef QT_NO_SETTINGS
    void saveSettings();
    bool restoreFromSettings();
 #endif
+
    bool restoreWidgetState(QStringList &history, int splitterPosition);
    static void setLastVisitedDirectory(const QUrl &dir);
    void retranslateWindowTitle();
@@ -208,6 +236,7 @@ class QFileDialogPrivate : public QDialogPrivate
 #ifndef QT_NO_FSCOMPLETER
    QFSCompleter *completer;
 #endif
+
    QString setWindowTitle;
 
    QStringList currentHistory;
@@ -221,20 +250,6 @@ class QFileDialogPrivate : public QDialogPrivate
    bool useDefaultCaption;
    bool defaultFileTypes;
 
-   // setVisible_sys returns true if it ends up showing a native
-   // dialog. Returning false means that a non-native dialog must be used instead
-   bool canBeNativeDialog() const override;
-   bool usingWidgets() const;
-
-   void setDirectory_sys(const QUrl &directory);
-   QUrl directory_sys() const;
-   void selectFile_sys(const QUrl &filename);
-   QList<QUrl> selectedFiles_sys() const;
-
-   void setFilter_sys();
-   void selectNameFilter_sys(const QString &filter);
-   QString selectedNameFilter_sys() const;
-
    QScopedPointer<Ui_QFileDialog> qFileDialogUi;
 
    QString acceptLabel;
@@ -243,31 +258,32 @@ class QFileDialogPrivate : public QDialogPrivate
    QString memberToDisconnectOnClose;
    QString signalToDisconnectOnClose;
 
-   QSharedPointer<QFileDialogOptions> options;
+   QSharedPointer<QPlatformFileDialogOptions> options;
 
    // Memory of what was read from QSettings in restoreState() in case widgets are not used
    QByteArray splitterState;
    QByteArray headerData;
    QList<QUrl> sidebarUrls;
-   ~QFileDialogPrivate();
 
  private:
    virtual void initHelper(QPlatformDialogHelper *) override;
    virtual void helperPrepareShow(QPlatformDialogHelper *) override;
    virtual void helperDone(QDialog::DialogCode, QPlatformDialogHelper *) override;
-   Q_DISABLE_COPY(QFileDialogPrivate)
 };
 
 class QFileDialogLineEdit : public QLineEdit
 {
  public:
-   QFileDialogLineEdit(QWidget *parent = nullptr) : QLineEdit(parent), d_ptr(0) {}
+   QFileDialogLineEdit(QWidget *parent = nullptr)
+      : QLineEdit(parent), d_ptr(nullptr)
+   {
+   }
 
    void setFileDialogPrivate(QFileDialogPrivate *d_pointer) {
       d_ptr = d_pointer;
    }
 
-   void keyPressEvent(QKeyEvent *e) override;
+   void keyPressEvent(QKeyEvent *event) override;
    bool hideOnEsc;
 
  private:
@@ -277,7 +293,11 @@ class QFileDialogLineEdit : public QLineEdit
 class QFileDialogComboBox : public QComboBox
 {
  public:
-   QFileDialogComboBox(QWidget *parent = nullptr) : QComboBox(parent), urlModel(0) {}
+   QFileDialogComboBox(QWidget *parent = nullptr)
+      : QComboBox(parent), urlModel(nullptr)
+   {
+   }
+
    void setFileDialogPrivate(QFileDialogPrivate *d_pointer);
    void showPopup() override;
    void setHistory(const QStringList &paths);
@@ -286,7 +306,7 @@ class QFileDialogComboBox : public QComboBox
       return m_history;
    }
 
-   void paintEvent(QPaintEvent *) override;
+   void paintEvent(QPaintEvent *event) override;
 
  private:
    QUrlModel *urlModel;
@@ -302,7 +322,7 @@ class QFileDialogListView : public QListView
    QSize sizeHint() const override;
 
  protected:
-   void keyPressEvent(QKeyEvent *e) override;
+   void keyPressEvent(QKeyEvent *event) override;
 
  private:
    QFileDialogPrivate *d_ptr;
@@ -316,7 +336,7 @@ class QFileDialogTreeView : public QTreeView
    QSize sizeHint() const override;
 
  protected:
-   void keyPressEvent(QKeyEvent *e) override;
+   void keyPressEvent(QKeyEvent *event) override;
 
  private:
    QFileDialogPrivate *d_ptr;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -75,7 +75,8 @@ static QPixmap getPixmap(QTextDocument *doc, const QTextImageFormat &format, con
    const QVariant data = doc->resource(QTextDocument::ImageResource, url);
 
    if (data.type() == QVariant::Pixmap || data.type() == QVariant::Image) {
-      pm = qvariant_cast<QPixmap>(data);
+      pm = data.value<QPixmap>();
+
    } else if (data.type() == QVariant::ByteArray) {
       pm.loadFromData(data.toByteArray());
    }
@@ -159,7 +160,7 @@ static QImage getImage(QTextDocument *doc, const QTextImageFormat &format, const
    const QVariant data = doc->resource(QTextDocument::ImageResource, url);
 
    if (data.type() == QVariant::Image) {
-      image = qvariant_cast<QImage>(data);
+      image = data.value<QImage>();
 
    } else if (data.type() == QVariant::ByteArray) {
       image.loadFromData(data.toByteArray());
@@ -203,6 +204,7 @@ static QSize getImageSize(QTextDocument *doc, const QTextImageFormat &format)
 
    qreal scale = 1.0;
    QPaintDevice *pdev = doc->documentLayout()->paintDevice();
+
    if (pdev) {
       if (image.isNull()) {
          image = getImage(doc, format);
@@ -223,6 +225,8 @@ QTextImageHandler::QTextImageHandler(QObject *parent)
 
 QSizeF QTextImageHandler::intrinsicSize(QTextDocument *doc, int posInDocument, const QTextFormat &format)
 {
+   (void) posInDocument;
+
    const QTextImageFormat imageFormat = format.toImageFormat();
 
    if (QCoreApplication::instance()->thread() != QThread::currentThread()) {
@@ -234,14 +238,14 @@ QSizeF QTextImageHandler::intrinsicSize(QTextDocument *doc, int posInDocument, c
 
 QImage QTextImageHandler::image(QTextDocument *doc, const QTextImageFormat &imageFormat)
 {
-   Q_ASSERT(doc != 0);
+   Q_ASSERT(doc != nullptr);
 
    return getImage(doc, imageFormat);
 }
 
 void QTextImageHandler::drawObject(QPainter *p, const QRectF &rect, QTextDocument *doc, int posInDocument, const QTextFormat &format)
 {
-   Q_UNUSED(posInDocument)
+   (void) posInDocument;
    const QTextImageFormat imageFormat = format.toImageFormat();
 
    if (QCoreApplication::instance()->thread() != QThread::currentThread()) {

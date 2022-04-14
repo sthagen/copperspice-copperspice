@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QFONTCOMBOBOX_H
 #define QFONTCOMBOBOX_H
 
-#include <QtGui/qcombobox.h>
-#include <QtGui/qfontdatabase.h>
+#include <qcombobox.h>
+#include <qfontdatabase.h>
 
 #ifndef QT_NO_FONTCOMBOBOX
 
@@ -35,6 +35,7 @@ class Q_GUI_EXPORT QFontComboBox : public QComboBox
 {
    GUI_CS_OBJECT(QFontComboBox)
 
+   GUI_CS_ENUM(FontFilter)
    GUI_CS_FLAG(FontFilter, FontFilters)
 
    GUI_CS_PROPERTY_READ(writingSystem, writingSystem)
@@ -49,6 +50,10 @@ class Q_GUI_EXPORT QFontComboBox : public QComboBox
 
  public:
    explicit QFontComboBox(QWidget *parent = nullptr);
+
+   QFontComboBox(const QFontComboBox &) = delete;
+   QFontComboBox &operator=(const QFontComboBox &) = delete;
+
    ~QFontComboBox();
 
    void setWritingSystem(QFontDatabase::WritingSystem);
@@ -69,17 +74,16 @@ class Q_GUI_EXPORT QFontComboBox : public QComboBox
    QFont currentFont() const;
    QSize sizeHint() const override;
 
-   GUI_CS_SLOT_1(Public, void setCurrentFont(const QFont &f))
+   GUI_CS_SLOT_1(Public, void setCurrentFont(const QFont &font))
    GUI_CS_SLOT_2(setCurrentFont)
 
-   GUI_CS_SIGNAL_1(Public, void currentFontChanged(const QFont &f))
-   GUI_CS_SIGNAL_2(currentFontChanged, f)
+   GUI_CS_SIGNAL_1(Public, void currentFontChanged(const QFont &font))
+   GUI_CS_SIGNAL_2(currentFontChanged, font)
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QFontComboBox)
    Q_DECLARE_PRIVATE(QFontComboBox)
 
    GUI_CS_SLOT_1(Private, void _q_currentChanged(const QString &un_named_arg1))
@@ -90,7 +94,6 @@ class Q_GUI_EXPORT QFontComboBox : public QComboBox
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFontComboBox::FontFilters)
-
 
 
 #endif // QT_NO_FONTCOMBOBOX

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -85,7 +85,9 @@ class CastingPlatform
                        const Item &sourceValue,
                        const ReportContext::Ptr &context) const;
 
-   Q_DISABLE_COPY(CastingPlatform)
+   CastingPlatform(const CastingPlatform &) = delete;
+   CastingPlatform &operator=(const CastingPlatform &) = delete;
+
    AtomicCaster::Ptr m_caster;
    const ReportContext::ErrorCode m_errorCode;
 };

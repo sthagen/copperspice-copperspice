@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -192,18 +192,18 @@ QDebug operator<<(QDebug d, const QLineF &p)
    return d;
 }
 
-QDataStream &operator<<(QDataStream &stream, const QLineF &line)
+QDataStream &operator<<(QDataStream &stream, const QLineF &lineF)
 {
-   stream << line.p1() << line.p2();
+   stream << lineF.p1() << lineF.p2();
    return stream;
 }
 
-QDataStream &operator>>(QDataStream &stream, QLineF &line)
+QDataStream &operator>>(QDataStream &stream, QLineF &lineF)
 {
    QPointF start, end;
    stream >> start;
    stream >> end;
-   line = QLineF(start, end);
+   lineF = QLineF(start, end);
 
    return stream;
 }

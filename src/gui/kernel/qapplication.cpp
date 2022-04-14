@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -70,7 +70,7 @@
 #include <qtooltip.h>
 #include <qtranslator.h>
 #include <qvariant.h>
-#include <QWhatsThis>
+#include <qwhatsthis.h>
 #include <qwidget.h>
 #include <qwindowsysteminterface.h>
 
@@ -94,6 +94,7 @@
 #include <qplatform_integrationfactory_p.h>
 #include <qplatform_themefactory_p.h>
 #include <qthread_p.h>
+#include <qvariantgui_p.h>
 #include <qwidget_p.h>
 #include <qwindowsysteminterface_p.h>
 #include <qwindow_p.h>
@@ -104,16 +105,17 @@
 #endif
 
 #if defined(Q_OS_DARWIN)
-#  include <qcore_mac_p.h>
+#include <qcore_mac_p.h>
 
 #elif defined(Q_OS_WIN)
-#  include <qt_windows.h>
+#include <qt_windows.h>
+
 #endif
 
 #include <ctype.h>
 #include <stdlib.h>
 
-// Helper macro for static functions to check on the existence of the application class.
+// helper macro for static functions to check on the existence of the application class.
 #define CHECK_QAPP_INSTANCE(...) \
     if (QCoreApplication::instance()) { \
     } else { \
@@ -121,42 +123,26 @@
         return __VA_ARGS__; \
     }
 
-Q_CORE_EXPORT void qt_call_post_routines();
-Q_GUI_EXPORT  bool qt_is_gui_used = true;
-
-extern        void qt_cleanupFontDatabase();
-
-QDesktopWidget *qt_desktopWidget = nullptr;       // root window widgets
-
-void qt_init(QApplicationPrivate *priv, int type);
-void qt_init_tooltip_palette();
-void qt_cleanup();
-
-#if ! defined(QT_NO_STATEMACHINE)
-int qRegisterGuiStateMachine();
-int qUnregisterGuiStateMachine();
-#endif
-
-PaletteHash *cs_app_palettes_hash();
-FontHash *cs_app_fonts_hash();
-
 Qt::ApplicationState  QApplicationPrivate::applicationState  = Qt::ApplicationInactive;
 Qt::KeyboardModifiers QApplicationPrivate::modifier_buttons  = Qt::NoModifier;
-Qt::MouseButtons QApplicationPrivate::tabletState            = Qt::NoButton;
-Qt::MouseButtons QApplicationPrivate::buttons                = Qt::NoButton;
-Qt::MouseButtons QApplicationPrivate::mouse_buttons          = Qt::NoButton;
-Qt::MouseButton  QApplicationPrivate::mousePressButton       = Qt::NoButton;
 
-bool  QApplicationPrivate::scrollNoPhaseAllowed  = false;
-bool  QApplicationPrivate::obey_desktop_settings = true;
-bool  QApplicationPrivate::highDpiScalingUpdated = false;
-int   QApplicationPrivate::mousePressX = 0;
-int   QApplicationPrivate::mousePressY = 0;
+Qt::MouseButtons QApplicationPrivate::tabletState      = Qt::NoButton;
+Qt::MouseButtons QApplicationPrivate::buttons          = Qt::NoButton;
+Qt::MouseButtons QApplicationPrivate::mouse_buttons    = Qt::NoButton;
+Qt::MouseButton  QApplicationPrivate::mousePressButton = Qt::NoButton;
+
+bool  QApplicationPrivate::scrollNoPhaseAllowed        = false;
+bool  QApplicationPrivate::obey_desktop_settings       = true;
+bool  QApplicationPrivate::highDpiScalingUpdated       = false;
+
+int   QApplicationPrivate::mousePressX                 = 0;
+int   QApplicationPrivate::mousePressY                 = 0;
 int   QApplicationPrivate::mouse_double_click_distance = -1;
 int   QApplicationPrivate::m_fakeMouseSourcePointId    = 0;
 ulong QApplicationPrivate::mousePressTime              = 0;
 
-QPointF     QApplicationPrivate::lastCursorPosition(qInf(), qInf());
+QPointF     QApplicationPrivate::lastCursorPosition    = QPointF(qInf(), qInf());
+
 QString     QApplicationPrivate::styleOverride;
 QWindowList QApplicationPrivate::window_list;
 
@@ -167,7 +153,7 @@ QFont    *QApplicationPrivate::app_font                = nullptr;
 QString  *QApplicationPrivate::platform_name           = nullptr;
 QString  *QApplicationPrivate::displayName             = nullptr;
 QIcon    *QApplicationPrivate::app_icon                = nullptr;
-QPalette *QApplicationPrivate::app_pal                 = nullptr;        // default application palette
+QPalette *QApplicationPrivate::app_palette             = nullptr;
 QWindow  *QApplicationPrivate::tabletPressTarget       = nullptr;
 QWindow  *QApplicationPrivate::currentMouseWindow      = nullptr;
 QWindow  *QApplicationPrivate::currentMousePressWindow = nullptr;
@@ -180,17 +166,15 @@ QPlatformTheme         *QApplicationPrivate::platform_theme       = nullptr;
 QStyleHints            *QApplicationPrivate::styleHints           = nullptr;
 QTouchDevice           *QApplicationPrivate::m_fakeTouchDevice    = nullptr;
 
-#ifndef QT_NO_ANIMATION
-extern int qRegisterGuiGetInterpolator();
-#endif
-
 #ifndef QT_NO_CLIPBOARD
-QClipboard *QApplicationPrivate::qt_clipboard = 0;
+   QClipboard *QApplicationPrivate::qt_clipboard = nullptr;
 #endif
 
 #ifndef QT_NO_SESSIONMANAGER
-bool QApplicationPrivate::is_fallback_session_management_enabled = true;
+   bool QApplicationPrivate::is_fallback_session_management_enabled = true;
 #endif
+
+QDesktopWidget *qt_desktopWidget  = nullptr;       // root window widgets
 
 enum ApplicationResourceFlags {
    ApplicationPaletteExplicitlySet = 0x1,
@@ -201,17 +185,31 @@ static bool force_reverse                = false;
 static unsigned applicationResourceFlags = 0;
 static qreal fontSmoothingGamma          = 1.7;
 
-static QBasicMutex applicationFontMutex;
+static QMutex applicationFontMutex;
 static Qt::LayoutDirection layout_direction = Qt::LayoutDirectionAuto;
 
-#ifndef QT_NO_ANIMATION
-extern int qRegisterGuiGetInterpolator();
+void qt_init(QApplicationPrivate *priv, int type);
+void qt_init_tooltip_palette();
+void qt_cleanupFontDatabase();
+void qt_cleanup();
+
+Q_CORE_EXPORT void qt_call_post_routines();
+
+#if ! defined(QT_NO_STATEMACHINE)
+   int qRegisterGuiStateMachine();
+   int qUnregisterGuiStateMachine();
 #endif
+
+PaletteHash *cs_app_palettes_hash();
+FontHash *cs_app_fonts_hash();
+
+// set up for variant system, animations
+void cs_addGuiFormulas();
 
 static bool qt_detectRTLLanguage()
 {
    return force_reverse ^
-      (QGuiApplication::tr("QT_LAYOUT_DIRECTION",
+      (QApplication::tr("QT_LAYOUT_DIRECTION",
             "Translate this string to the string 'LTR' in left-to-right"
             " languages or to 'RTL' in right-to-left languages (such as Hebrew"
             " and Arabic) to get proper widget layout.") == "RTL");
@@ -219,14 +217,14 @@ static bool qt_detectRTLLanguage()
 
 static void initPalette()
 {
-   if (!QGuiApplicationPrivate::app_pal) {
+   if (! QGuiApplicationPrivate::app_palette) {
       if (const QPalette *themePalette = QGuiApplicationPrivate::platformTheme()->palette()) {
-         QGuiApplicationPrivate::app_pal = new QPalette(*themePalette);
+         QGuiApplicationPrivate::app_palette = new QPalette(*themePalette);
       }
    }
 
-   if (!QGuiApplicationPrivate::app_pal) {
-      QGuiApplicationPrivate::app_pal = new QPalette(Qt::gray);
+   if (! QGuiApplicationPrivate::app_palette) {
+      QGuiApplicationPrivate::app_palette = new QPalette(Qt::gray);
    }
 }
 
@@ -238,7 +236,7 @@ static void initResources()
 
 static void initSystemPalette()
 {
-   if (!QApplicationPrivate::sys_pal) {
+   if (! QApplicationPrivate::sys_palette) {
       QPalette defaultPlatte;
       if (QApplicationPrivate::app_style) {
          defaultPlatte = QApplicationPrivate::app_style->standardPalette();
@@ -255,33 +253,35 @@ static void initSystemPalette()
 
 static void clearPalette()
 {
-   delete QGuiApplicationPrivate::app_pal;
-   QGuiApplicationPrivate::app_pal = 0;
+   delete QGuiApplicationPrivate::app_palette;
+   QGuiApplicationPrivate::app_palette = nullptr;
 }
 
 static void clearSystemPalette()
 {
-   delete QApplicationPrivate::sys_pal;
-   QApplicationPrivate::sys_pal = 0;
+   delete QApplicationPrivate::sys_palette;
+   QApplicationPrivate::sys_palette = nullptr;
 }
 
 static void initFontUnlocked()
 {
-   if (!QGuiApplicationPrivate::app_font) {
+   if (! QGuiApplicationPrivate::app_font) {
       if (const QPlatformTheme *theme = QGuiApplicationPrivate::platformTheme())
          if (const QFont *font = theme->font(QPlatformTheme::SystemFont)) {
             QGuiApplicationPrivate::app_font = new QFont(*font);
          }
    }
-   if (!QGuiApplicationPrivate::app_font)
+
+   if (! QGuiApplicationPrivate::app_font) {
       QGuiApplicationPrivate::app_font =
          new QFont(QGuiApplicationPrivate::platformIntegration()->fontDatabase()->defaultFont());
+   }
 }
 
 static inline void clearFontUnlocked()
 {
    delete QGuiApplicationPrivate::app_font;
-   QGuiApplicationPrivate::app_font = 0;
+   QGuiApplicationPrivate::app_font = nullptr;
 }
 
 static QString get_style_class_name()
@@ -428,11 +428,11 @@ void QWindowGeometrySpecification::applyTo(QWindow *window) const
 static QWindowGeometrySpecification windowGeometrySpecification = Q_WINDOW_GEOMETRY_SPECIFICATION_INITIALIZER;
 
 
-
 QApplication::QApplication(int &argc, char **argv, int flags)
    : QCoreApplication(*new QGuiApplicationPrivate(argc, argv, flags))
 {
    Q_D(QApplication);
+
    d->init();
    QCoreApplicationPrivate::eventDispatcher->startingUp();
 }
@@ -457,49 +457,53 @@ QApplication::~QApplication()
    QApplicationPrivate::is_app_running = false;
 
    delete QWidgetPrivate::mapper;
-   QWidgetPrivate::mapper = 0;
+   QWidgetPrivate::mapper = nullptr;
 
    // delete all widgets
    if (QWidgetPrivate::allWidgets) {
       QWidgetSet *mySet = QWidgetPrivate::allWidgets;
-      QWidgetPrivate::allWidgets = 0;
+      QWidgetPrivate::allWidgets = nullptr;
+
       for (QWidgetSet::const_iterator it = mySet->constBegin(), cend = mySet->constEnd(); it != cend; ++it) {
 
          QWidget *w = *it;
-         if (!w->parent()) {                      // window
+
+         if (! w->parent()) {
             w->destroy(true, true);
          }
       }
+
       delete mySet;
    }
 
    delete qt_desktopWidget;
-   qt_desktopWidget = 0;
+   qt_desktopWidget = nullptr;
 
-   delete QApplicationPrivate::app_pal;
-   QApplicationPrivate::app_pal = 0;
+   delete QApplicationPrivate::app_palette;
+   QApplicationPrivate::app_palette = nullptr;
    clearSystemPalette();
-   delete QApplicationPrivate::set_pal;
-   QApplicationPrivate::set_pal = 0;
+
+   delete QApplicationPrivate::set_palette;
+   QApplicationPrivate::set_palette = nullptr;
    cs_app_palettes_hash()->clear();
 
    delete QApplicationPrivate::sys_font;
-   QApplicationPrivate::sys_font = 0;
+   QApplicationPrivate::sys_font = nullptr;
+
    delete QApplicationPrivate::set_font;
-   QApplicationPrivate::set_font = 0;
+   QApplicationPrivate::set_font = nullptr;
    cs_app_fonts_hash()->clear();
 
    delete QApplicationPrivate::app_style;
-   QApplicationPrivate::app_style = 0;
+   QApplicationPrivate::app_style = nullptr;
 
 #ifndef QT_NO_DRAGANDDROP
-   if (qt_is_gui_used) {
+   if (cs_isRealGuiApp()) {
       delete QDragManager::self();
    }
 #endif
 
    d->cleanupMultitouch();
-
    qt_cleanup();
 
    if (QApplicationPrivate::widgetCount) {
@@ -518,16 +522,16 @@ QApplication::~QApplication()
 #endif
 
    d->eventDispatcher->closingDown();
-   d->eventDispatcher = 0;
+   d->eventDispatcher = nullptr;
 
 #ifndef QT_NO_CLIPBOARD
    delete QGuiApplicationPrivate::qt_clipboard;
-   QGuiApplicationPrivate::qt_clipboard = 0;
+   QGuiApplicationPrivate::qt_clipboard = nullptr;
 #endif
 
 #ifndef QT_NO_SESSIONMANAGER
    delete d->session_manager;
-   d->session_manager = 0;
+   d->session_manager = nullptr;
 #endif
 
    clearPalette();
@@ -538,16 +542,16 @@ QApplication::~QApplication()
 #endif
 
    delete QGuiApplicationPrivate::app_icon;
-   QGuiApplicationPrivate::app_icon = 0;
+   QGuiApplicationPrivate::app_icon = nullptr;
 
    delete QGuiApplicationPrivate::platform_name;
-   QGuiApplicationPrivate::platform_name = 0;
+   QGuiApplicationPrivate::platform_name = nullptr;
 
    delete QGuiApplicationPrivate::displayName;
-   QGuiApplicationPrivate::displayName = 0;
+   QGuiApplicationPrivate::displayName = nullptr;
 
    delete QGuiApplicationPrivate::m_inputDeviceManager;
-   QGuiApplicationPrivate::m_inputDeviceManager = 0;
+   QGuiApplicationPrivate::m_inputDeviceManager = nullptr;
 }
 
 void QApplication::setApplicationDisplayName(const QString &name)
@@ -563,7 +567,6 @@ QString QApplication::applicationDisplayName()
 {
    return QGuiApplicationPrivate::displayName ? *QGuiApplicationPrivate::displayName : applicationName();
 }
-
 
 QDesktopWidget *QApplication::desktop()
 {
@@ -626,17 +629,17 @@ QApplicationPrivate::~QApplicationPrivate()
 #ifndef QT_NO_OPENGL
    if (ownGlobalShareContext) {
       delete qt_gl_global_share_context();
-      qt_gl_set_global_share_context(0);
+      qt_gl_set_global_share_context(nullptr);
    }
 #endif
 
    platform_integration->destroy();
 
    delete platform_theme;
-   platform_theme = 0;
+   platform_theme = nullptr;
 
    delete platform_integration;
-   platform_integration = 0;
+   platform_integration = nullptr;
 
    delete m_gammaTables.load();
    window_list.clear();
@@ -664,7 +667,7 @@ void QGuiApplicationPrivate::showModalWindow(QWindow *modal)
          self->modalWindowList.removeFirst();
          QEvent e(QEvent::Leave);
          QGuiApplication::sendEvent(currentMouseWindow, &e);
-         currentMouseWindow = 0;
+         currentMouseWindow = nullptr;
          self->modalWindowList.prepend(modal);
       }
    }
@@ -693,11 +696,6 @@ void QGuiApplicationPrivate::hideModalWindow(QWindow *window)
    }
 }
 
-
-/*!
-    Returns the QWindow that receives events tied to focus,
-    such as key events.
-*/
 QWindow *QApplication::focusWindow()
 {
    return QGuiApplicationPrivate::focus_window;
@@ -708,20 +706,20 @@ QObject *QApplication::focusObject()
    if (focusWindow()) {
       return focusWindow()->focusObject();
    }
-   return 0;
-}
 
+   return nullptr;
+}
 
 QWindowList QApplication::allWindows()
 {
    return QGuiApplicationPrivate::window_list;
 }
 
-
 QWindowList QApplication::topLevelWindows()
 {
    const QWindowList &list = QGuiApplicationPrivate::window_list;
    QWindowList topLevelWindows;
+
    for (int i = 0; i < list.size(); i++) {
       if (!list.at(i)->parent() && list.at(i)->type() != Qt::Desktop) {
          // Top windows of embedded QAxServers do not have QWindow parents,
@@ -738,15 +736,12 @@ QWindowList QApplication::topLevelWindows()
 QScreen *QApplication::primaryScreen()
 {
    if (QGuiApplicationPrivate::screen_list.isEmpty()) {
-      return 0;
+      return nullptr;
    }
+
    return QGuiApplicationPrivate::screen_list.at(0);
 }
 
-/*!
-    Returns a list of all the screens associated with the
-    windowing system the application is connected to.
-*/
 QList<QScreen *> QApplication::screens()
 {
    return QGuiApplicationPrivate::screen_list;
@@ -767,7 +762,6 @@ qreal QApplication::devicePixelRatio() const
 
    return topDevicePixelRatio;
 }
-
 
 bool QApplication::event(QEvent *e)
 {
@@ -805,11 +799,13 @@ bool QApplication::event(QEvent *e)
          }
       }
 #endif
+
    } else if (e->type() == QEvent::Timer) {
       QTimerEvent *te = static_cast<QTimerEvent *>(e);
-      Q_ASSERT(te != 0);
+      Q_ASSERT(te != nullptr);
       if (te->timerId() == d->toolTipWakeUp.timerId()) {
          d->toolTipWakeUp.stop();
+
          if (d->toolTipWidget) {
             QWidget *w = d->toolTipWidget->window();
             // show tooltip if WA_AlwaysShowToolTips is set, or if
@@ -819,18 +815,20 @@ bool QApplication::event(QEvent *e)
             while (w && !showToolTip) {
                showToolTip = w->isActiveWindow();
                w = w->parentWidget();
-               w = w ? w->window() : 0;
+               w = w ? w->window() : nullptr;
             }
+
             if (showToolTip) {
                QHelpEvent e(QEvent::ToolTip, d->toolTipPos, d->toolTipGlobalPos);
                QApplication::sendEvent(d->toolTipWidget, &e);
                if (e.isAccepted()) {
                   QStyle *s = d->toolTipWidget->style();
-                  int sleepDelay = s->styleHint(QStyle::SH_ToolTip_FallAsleepDelay, 0, d->toolTipWidget, 0);
+                  int sleepDelay = s->styleHint(QStyle::SH_ToolTip_FallAsleepDelay, nullptr, d->toolTipWidget, nullptr);
                   d->toolTipFallAsleep.start(sleepDelay, this);
                }
             }
          }
+
       } else if (te->timerId() == d->toolTipFallAsleep.timerId()) {
          d->toolTipFallAsleep.stop();
       }
@@ -844,6 +842,7 @@ bool QApplication::event(QEvent *e)
 
    if (e->type() == QEvent::LanguageChange) {
       QWidgetList list = topLevelWidgets();
+
       for (int i = 0; i < list.size(); ++i) {
          QWidget *w = list.at(i);
          if (!(w->windowType() == Qt::Desktop)) {
@@ -908,7 +907,7 @@ static void init_platform(const QString &pluginArgument, const QString &platform
                   const QString &platformThemeName, int &argc, char **argv)
 {
    // Split into platform arguments and key
-   QStringList arguments   = pluginArgument.split(QChar(':'));
+   QStringList arguments   = pluginArgument.split(':');
    const QString pluginKey = arguments.takeFirst().toLower();
 
    // look up the arguments in system settings
@@ -937,7 +936,7 @@ static void init_platform(const QString &pluginArgument, const QString &platform
       // display the message box unless it is a console application or debug build showing an assert box
 
       if (! GetConsoleWindow()) {
-         MessageBox(0, &fatalMessage.toStdWString()[0],
+         MessageBox(nullptr, &fatalMessage.toStdWString()[0],
             &QCoreApplication::applicationName().toStdWString()[0], MB_OK | MB_ICONERROR);
       }
 #endif
@@ -955,9 +954,9 @@ static void init_platform(const QString &pluginArgument, const QString &platform
 
    // Create the platform theme:
 
-   // (1) Fetch the platform name from the environment if present.
+   // (1) Fetch the platform name from the environment if present
    QStringList themeNames;
-   if (!platformThemeName.isEmpty()) {
+   if (! platformThemeName.isEmpty()) {
       themeNames.append(platformThemeName);
    }
 
@@ -973,18 +972,22 @@ static void init_platform(const QString &pluginArgument, const QString &platform
       }
    }
 
-   // 4) If no theme plugin was found ask the platform integration to create a theme
+   // (4) If no theme plugin was found ask the platform integration to create a theme
    if (! QGuiApplicationPrivate::platform_theme) {
+
       for (const QString &themeName : themeNames) {
-         QGuiApplicationPrivate::platform_theme = QGuiApplicationPrivate::platform_integration->createPlatformTheme(themeName);
+         QGuiApplicationPrivate::platform_theme =
+                  QGuiApplicationPrivate::platform_integration->createPlatformTheme(themeName);
+
          if (QGuiApplicationPrivate::platform_theme) {
             break;
          }
       }
-      // No error message; not having a theme plugin is allowed.
+
+      // No error message, not having a theme plugin is allowed
    }
 
-   // 5) Fall back on the built-in "null" platform theme.
+   // (5) Fall back on the built-in "null" platform theme.
    if (! QGuiApplicationPrivate::platform_theme) {
       QGuiApplicationPrivate::platform_theme = new QPlatformTheme;
    }
@@ -1125,7 +1128,7 @@ void QGuiApplicationPrivate::createPlatformIntegration()
    }
 
    if (j < argc) {
-      argv[j] = 0;
+      argv[j] = nullptr;
       argc = j;
    }
 
@@ -1140,7 +1143,7 @@ void QGuiApplicationPrivate::createEventDispatcher()
 {
    Q_ASSERT(! eventDispatcher);
 
-   if (platform_integration == 0) {
+   if (platform_integration == nullptr) {
       createPlatformIntegration();
    }
 
@@ -1152,7 +1155,7 @@ void QGuiApplicationPrivate::createEventDispatcher()
 
 void QGuiApplicationPrivate::eventDispatcherReady()
 {
-   if (platform_integration == 0) {
+   if (platform_integration == nullptr) {
       createPlatformIntegration();
    }
 
@@ -1168,8 +1171,8 @@ void QGuiApplicationPrivate::eventDispatcherReady()
 void QGuiApplicationPrivate::init()
 {
    QCoreApplicationPrivate::init();
-   QCoreApplicationPrivate::is_app_running = false;
 
+   QCoreApplicationPrivate::is_app_running = false;
    QList<QString> pluginList;
 
    // Get command line params
@@ -1222,13 +1225,12 @@ void QGuiApplicationPrivate::init()
 
 #ifdef Q_OS_DARWIN
       } else if (arg.startsWith("-psn_")) {
-         // consume "-psn_xxxx" on Mac, which is passed when starting an app from Finder.
-         // special hack to change working directory (for an app bundle) when running from finder
+         // consume "-psn_xxxx" on Mac, which is passed when starting an app from Finder
+         // used to change the working directory (for an app bundle) when running from finder
 
          if (QDir::currentPath() == "/") {
-
             QCFType<CFURLRef> bundleURL(CFBundleCopyBundleURL(CFBundleGetMainBundle()));
-            QString qbundlePath = QCFString(CFURLCopyFileSystemPath(bundleURL, kCFURLPOSIXPathStyle));
+            QString qbundlePath = QCFString(CFURLCopyFileSystemPath(bundleURL, kCFURLPOSIXPathStyle)).toQString();
 
             if (qbundlePath.endsWith(".app")) {
                QDir::setCurrent(qbundlePath.section('/', 0, -2));
@@ -1264,13 +1266,13 @@ void QGuiApplicationPrivate::init()
          argv[j++] = argv[i];
       }
 
-      if (!s.isEmpty()) {
+      if (! s.isEmpty()) {
          styleOverride = s;
       }
    }
 
    if (j < argc) {
-      argv[j] = 0;
+      argv[j] = nullptr;
       argc = j;
    }
 
@@ -1283,7 +1285,7 @@ void QGuiApplicationPrivate::init()
       }
    }
 
-   if (platform_integration == 0) {
+   if (platform_integration == nullptr) {
       createPlatformIntegration();
    }
 
@@ -1296,17 +1298,20 @@ void QGuiApplicationPrivate::init()
    QCursorData::initialize();
 #endif
 
-#ifndef QT_NO_ANIMATION
-   // trigger registering of animation interpolators
-   qRegisterGuiGetInterpolator();
-#endif
+   // add gui to the variant system
+   static QVariantGui objVariant;
+   QVariant::registerClient(&objVariant);
 
-   // set a global share context when enabled unless there is already one
+   // set up for variant system, animations
+   cs_addGuiFormulas();
+
+// set a global share context when enabled unless there is already one
 #ifndef QT_NO_OPENGL
-   if (qApp->testAttribute(Qt::AA_ShareOpenGLContexts) && !qt_gl_global_share_context()) {
+   if (qApp->testAttribute(Qt::AA_ShareOpenGLContexts) && ! qt_gl_global_share_context()) {
       QOpenGLContext *ctx = new QOpenGLContext;
       ctx->setFormat(QSurfaceFormat::defaultFormat());
       ctx->create();
+
       qt_gl_set_global_share_context(ctx);
       ownGlobalShareContext = true;
    }
@@ -1332,11 +1337,9 @@ void QGuiApplicationPrivate::init()
    scrollNoPhaseAllowed = ! qgetenv("QT_ENABLE_MOUSE_WHEEL_TRACKING").isEmpty();
 
    initResources();
-
-   qt_is_gui_used = (application_type != QApplicationPrivate::Tty);
    process_cmdline();
 
-   // Must be called before initialize()
+   // must be called before initialize()
    qt_init(this, application_type);
    initialize();
    eventDispatcher->startingUp();
@@ -1355,7 +1358,7 @@ Qt::KeyboardModifiers QApplication::keyboardModifiers()
 
 Qt::KeyboardModifiers QApplication::queryKeyboardModifiers()
 {
-   CHECK_QAPP_INSTANCE(Qt::KeyboardModifiers(0))
+   CHECK_QAPP_INSTANCE(Qt::KeyboardModifiers(Qt::EmptyFlag))
    QPlatformIntegration *pi = QGuiApplicationPrivate::platformIntegration();
 
    return pi->queryKeyboardModifiers();
@@ -1421,24 +1424,31 @@ void QGuiApplicationPrivate::processWindowSystemEvent(QWindowSystemInterfacePriv
       case QWindowSystemInterfacePrivate::Mouse:
          QGuiApplicationPrivate::processMouseEvent(static_cast<QWindowSystemInterfacePrivate::MouseEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::Wheel:
          QGuiApplicationPrivate::processWheelEvent(static_cast<QWindowSystemInterfacePrivate::WheelEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::Key:
          QGuiApplicationPrivate::processKeyEvent(static_cast<QWindowSystemInterfacePrivate::KeyEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::Touch:
          QGuiApplicationPrivate::processTouchEvent(static_cast<QWindowSystemInterfacePrivate::TouchEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::GeometryChange:
          QGuiApplicationPrivate::processGeometryChangeEvent(static_cast<QWindowSystemInterfacePrivate::GeometryChangeEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::Enter:
          QGuiApplicationPrivate::processEnterEvent(static_cast<QWindowSystemInterfacePrivate::EnterEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::Leave:
          QGuiApplicationPrivate::processLeaveEvent(static_cast<QWindowSystemInterfacePrivate::LeaveEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::ActivatedWindow:
          QGuiApplicationPrivate::processActivatedEvent(static_cast<QWindowSystemInterfacePrivate::ActivatedWindowEvent *>(e));
          break;
@@ -1454,11 +1464,13 @@ void QGuiApplicationPrivate::processWindowSystemEvent(QWindowSystemInterfacePriv
          QGuiApplicationPrivate::setApplicationState(changeEvent->newState, changeEvent->forcePropagate);
       }
       break;
+
       case QWindowSystemInterfacePrivate::FlushEvents: {
          QWindowSystemInterfacePrivate::FlushEventsEvent *flushEventsEvent = static_cast<QWindowSystemInterfacePrivate::FlushEventsEvent *>(e);
          QWindowSystemInterface::deferredFlushWindowSystemEvents(flushEventsEvent->flags);
       }
       break;
+
       case QWindowSystemInterfacePrivate::Close:
          QGuiApplicationPrivate::processCloseEvent(
             static_cast<QWindowSystemInterfacePrivate::CloseEvent *>(e));
@@ -1467,14 +1479,17 @@ void QGuiApplicationPrivate::processWindowSystemEvent(QWindowSystemInterfacePriv
          QGuiApplicationPrivate::reportScreenOrientationChange(
             static_cast<QWindowSystemInterfacePrivate::ScreenOrientationEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::ScreenGeometry:
          QGuiApplicationPrivate::reportGeometryChange(
             static_cast<QWindowSystemInterfacePrivate::ScreenGeometryEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::ScreenLogicalDotsPerInch:
          QGuiApplicationPrivate::reportLogicalDotsPerInchChange(
             static_cast<QWindowSystemInterfacePrivate::ScreenLogicalDotsPerInchEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::ScreenRefreshRate:
          QGuiApplicationPrivate::reportRefreshRateChange(
             static_cast<QWindowSystemInterfacePrivate::ScreenRefreshRateEvent *>(e));
@@ -1486,28 +1501,34 @@ void QGuiApplicationPrivate::processWindowSystemEvent(QWindowSystemInterfacePriv
       case QWindowSystemInterfacePrivate::Expose:
          QGuiApplicationPrivate::processExposeEvent(static_cast<QWindowSystemInterfacePrivate::ExposeEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::Tablet:
          QGuiApplicationPrivate::processTabletEvent(
             static_cast<QWindowSystemInterfacePrivate::TabletEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::TabletEnterProximity:
          QGuiApplicationPrivate::processTabletEnterProximityEvent(
             static_cast<QWindowSystemInterfacePrivate::TabletEnterProximityEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::TabletLeaveProximity:
          QGuiApplicationPrivate::processTabletLeaveProximityEvent(
             static_cast<QWindowSystemInterfacePrivate::TabletLeaveProximityEvent *>(e));
          break;
+
 #ifndef QT_NO_GESTURES
       case QWindowSystemInterfacePrivate::Gesture:
          QGuiApplicationPrivate::processGestureEvent(
             static_cast<QWindowSystemInterfacePrivate::GestureEvent *>(e));
          break;
 #endif
+
       case QWindowSystemInterfacePrivate::PlatformPanel:
          QGuiApplicationPrivate::processPlatformPanelEvent(
             static_cast<QWindowSystemInterfacePrivate::PlatformPanelEvent *>(e));
          break;
+
       case QWindowSystemInterfacePrivate::FileOpen:
          QGuiApplicationPrivate::processFileOpenEvent(
             static_cast<QWindowSystemInterfacePrivate::FileOpenEvent *>(e));
@@ -1521,6 +1542,7 @@ void QGuiApplicationPrivate::processWindowSystemEvent(QWindowSystemInterfacePriv
       case QWindowSystemInterfacePrivate::EnterWhatsThisMode:
          QGuiApplication::postEvent(QGuiApplication::instance(), new QEvent(QEvent::EnterWhatsThisMode));
          break;
+
       default:
          qWarning() << "Unknown user input event type:" << e->type;
          break;
@@ -1566,7 +1588,7 @@ void QGuiApplicationPrivate::processMouseEvent(QWindowSystemInterfacePrivate::Mo
             }
          } else if (currentMousePressWindow) {
             window = currentMousePressWindow;
-            currentMousePressWindow = 0;
+            currentMousePressWindow = nullptr;
          }
          QPointF delta = globalPoint - globalPoint.toPoint();
          localPoint = window->mapFromGlobal(globalPoint.toPoint()) + delta;
@@ -1679,12 +1701,16 @@ void QGuiApplicationPrivate::processMouseEvent(QWindowSystemInterfacePrivate::Mo
       fake.flags |= QWindowSystemInterfacePrivate::WindowSystemEvent::Synthetic;
       processTouchEvent(&fake);
    }
+
    if (doubleClick) {
       mousePressButton = Qt::NoButton;
+
       if (!e->window.isNull() || e->nullWindow()) { // QTBUG-36364, check if window closed in response to press
          const QEvent::Type doubleClickType = frameStrut ? QEvent::NonClientAreaMouseButtonDblClick : QEvent::MouseButtonDblClick;
+
          QMouseEvent dblClickEvent(doubleClickType, localPoint, localPoint, globalPoint,
             button, buttons, e->modifiers, e->source);
+
          dblClickEvent.setTimestamp(e->timestamp);
          QGuiApplication::sendSpontaneousEvent(window, &dblClickEvent);
       }
@@ -1700,13 +1726,14 @@ void QGuiApplicationPrivate::processWheelEvent(QWindowSystemInterfacePrivate::Wh
 
    if (e->nullWindow()) {
       window = QGuiApplication::topLevelWindowAt(globalPoint.toPoint());
+
       if (window) {
          QPointF delta = globalPoint - globalPoint.toPoint();
          localPoint = window->mapFromGlobal(globalPoint.toPoint()) + delta;
       }
    }
 
-   if (!window) {
+   if (! window) {
       return;
    }
 
@@ -1718,15 +1745,13 @@ void QGuiApplicationPrivate::processWheelEvent(QWindowSystemInterfacePrivate::Wh
       return;
    }
 
-   QWheelEvent ev(localPoint, globalPoint, e->pixelDelta, e->angleDelta, e->qt4Delta,
-      e->qt4Orientation, buttons, e->modifiers, e->phase, e->source);
+   QWheelEvent ev(localPoint, globalPoint, e->pixelDelta, e->angleDelta, buttons, e->modifiers, e->phase, e->source);
+
    ev.setTimestamp(e->timestamp);
    QGuiApplication::sendSpontaneousEvent(window, &ev);
 
-#endif /* ifndef QT_NO_WHEELEVENT */
+#endif
 }
-
-
 
 void QGuiApplicationPrivate::processKeyEvent(QWindowSystemInterfacePrivate::KeyEvent *e)
 {
@@ -1814,7 +1839,7 @@ void QGuiApplicationPrivate::processLeaveEvent(QWindowSystemInterfacePrivate::Le
       return;
    }
 
-   currentMouseWindow = 0;
+   currentMouseWindow = nullptr;
 
    QEvent event(QEvent::Leave);
    QCoreApplication::sendSpontaneousEvent(e->leave.data(), &event);
@@ -1835,7 +1860,7 @@ void QGuiApplicationPrivate::processActivatedEvent(QWindowSystemInterfacePrivate
             platformWindow->setAlertState(false);
          }
 
-   QObject *previousFocusObject = previous ? previous->focusObject() : 0;
+   QObject *previousFocusObject = previous ? previous->focusObject() : nullptr;
 
    if (previous) {
       QFocusEvent focusAboutToChange(QEvent::FocusAboutToChange);
@@ -1843,7 +1868,7 @@ void QGuiApplicationPrivate::processActivatedEvent(QWindowSystemInterfacePrivate
    }
 
    QGuiApplicationPrivate::focus_window = newFocus;
-   if (!qApp) {
+   if (! qApp) {
       return;
    }
 
@@ -1853,25 +1878,31 @@ void QGuiApplicationPrivate::processActivatedEvent(QWindowSystemInterfacePrivate
          newFocus && (newFocus->flags() & Qt::Popup) == Qt::Popup) {
          r = Qt::PopupFocusReason;
       }
+
       QFocusEvent focusOut(QEvent::FocusOut, r);
       QCoreApplication::sendSpontaneousEvent(previous, &focusOut);
-      QObject::disconnect(previous, SIGNAL(focusObjectChanged(QObject *)),
-         qApp, SLOT(_q_updateFocusObject(QObject *)));
+
+      QObject::disconnect(previous, &QWindow::focusObjectChanged, qApp, &QApplication::_q_updateFocusObject);
+
    } else if (!platformIntegration()->hasCapability(QPlatformIntegration::ApplicationState)) {
       setApplicationState(Qt::ApplicationActive);
    }
 
    if (QGuiApplicationPrivate::focus_window) {
       Qt::FocusReason r = e->reason;
+
       if ((r == Qt::OtherFocusReason || r == Qt::ActiveWindowFocusReason) &&
          previous && (previous->flags() & Qt::Popup) == Qt::Popup) {
          r = Qt::PopupFocusReason;
       }
+
       QFocusEvent focusIn(QEvent::FocusIn, r);
       QCoreApplication::sendSpontaneousEvent(QGuiApplicationPrivate::focus_window, &focusIn);
-      QObject::connect(QGuiApplicationPrivate::focus_window, SIGNAL(focusObjectChanged(QObject *)),
-         qApp, SLOT(_q_updateFocusObject(QObject *)));
-   } else if (!platformIntegration()->hasCapability(QPlatformIntegration::ApplicationState)) {
+
+      QObject::connect(QGuiApplicationPrivate::focus_window, &QWindow::focusObjectChanged,
+            qApp, &QApplication::_q_updateFocusObject);
+
+   } else if (! platformIntegration()->hasCapability(QPlatformIntegration::ApplicationState)) {
       setApplicationState(Qt::ApplicationInactive);
    }
 
@@ -1887,6 +1918,7 @@ void QGuiApplicationPrivate::processActivatedEvent(QWindowSystemInterfacePrivate
    if (previous) {
       emit previous->activeChanged();
    }
+
    if (newFocus) {
       emit newFocus->activeChanged();
    }
@@ -1906,15 +1938,19 @@ void QGuiApplicationPrivate::processWindowScreenChangedEvent(QWindowSystemInterf
    if (QWindow *window  = wse->window.data()) {
       if (window->isTopLevel()) {
          if (QScreen *screen = wse->screen.data()) {
-            window->d_func()->setTopLevelScreen(screen, false /* recreate */);
-         } else { // Fall back to default behavior, and try to find some appropriate screen
-            window->setScreen(0);
+            window->d_func()->setTopLevelScreen(screen, false);
+
+         } else {
+            // Fall back to default behavior, and try to find some appropriate screen
+            window->setScreen(nullptr);
          }
       }
+
       // we may have changed scaling, so trigger resize event if needed
       if (window->handle()) {
-         QWindowSystemInterfacePrivate::GeometryChangeEvent gce(window, QHighDpi::fromNativePixels(window->handle()->geometry(), window),
-            QRect());
+         QWindowSystemInterfacePrivate::GeometryChangeEvent gce(window,
+            QHighDpi::fromNativePixels(window->handle()->geometry(), window), QRect());
+
          processGeometryChangeEvent(&gce);
       }
    }
@@ -1925,6 +1961,7 @@ void QGuiApplicationPrivate::processThemeChanged(QWindowSystemInterfacePrivate::
    if (self) {
       self->notifyThemeChanged();
    }
+
    if (QWindow *window  = tce->window.data()) {
       QEvent e(QEvent::ThemeChange);
       QGuiApplication::sendSpontaneousEvent(window, &e);
@@ -2026,17 +2063,20 @@ void QGuiApplicationPrivate::processTabletEvent(QWindowSystemInterfacePrivate::T
          window = QGuiApplication::topLevelWindowAt(e->global.toPoint());
          localValid = false;
       }
+
       if (!window) {
          return;
       }
+
       tabletPressTarget = window;
+
    } else {
       if (e->nullWindow()) {
          window = tabletPressTarget;
          localValid = false;
       }
       if (type == QEvent::TabletRelease) {
-         tabletPressTarget = 0;
+         tabletPressTarget = nullptr;
       }
       if (!window) {
          return;
@@ -2047,6 +2087,7 @@ void QGuiApplicationPrivate::processTabletEvent(QWindowSystemInterfacePrivate::T
       QPointF delta = e->global - e->global.toPoint();
       local = window->mapFromGlobal(e->global.toPoint()) + delta;
    }
+
    Qt::MouseButtons stateChange = e->buttons ^ tabletState;
    Qt::MouseButton button = Qt::NoButton;
    for (int check = Qt::LeftButton; check <= int(Qt::MaxMouseButton); check = check << 1) {
@@ -2055,15 +2096,18 @@ void QGuiApplicationPrivate::processTabletEvent(QWindowSystemInterfacePrivate::T
          break;
       }
    }
+
    QTabletEvent ev(type, local, e->global,
       e->device, e->pointerType, e->pressure, e->xTilt, e->yTilt,
       e->tangentialPressure, e->rotation, e->z,
       e->modifiers, e->uid, button, e->buttons);
+
    ev.setTimestamp(e->timestamp);
    QGuiApplication::sendSpontaneousEvent(window, &ev);
    tabletState = e->buttons;
+
 #else
-   Q_UNUSED(e)
+   (void) e;
 #endif
 }
 
@@ -2071,13 +2115,13 @@ void QGuiApplicationPrivate::processTabletEnterProximityEvent(QWindowSystemInter
 {
 #ifndef QT_NO_TABLETEVENT
    QTabletEvent ev(QEvent::TabletEnterProximity, QPointF(), QPointF(),
-      e->device, e->pointerType, 0, 0, 0,
-      0, 0, 0,
-      Qt::NoModifier, e->uid, Qt::NoButton, tabletState);
+            e->device, e->pointerType, 0, 0, 0, 0, 0, 0, Qt::NoModifier, e->uid, Qt::NoButton, tabletState);
+
    ev.setTimestamp(e->timestamp);
    QGuiApplication::sendSpontaneousEvent(qGuiApp, &ev);
+
 #else
-   Q_UNUSED(e)
+   (void) e;
 #endif
 }
 
@@ -2085,13 +2129,13 @@ void QGuiApplicationPrivate::processTabletLeaveProximityEvent(QWindowSystemInter
 {
 #ifndef QT_NO_TABLETEVENT
    QTabletEvent ev(QEvent::TabletLeaveProximity, QPointF(), QPointF(),
-      e->device, e->pointerType, 0, 0, 0,
-      0, 0, 0,
-      Qt::NoModifier, e->uid, Qt::NoButton, tabletState);
+            e->device, e->pointerType, 0, 0, 0, 0, 0, 0, Qt::NoModifier, e->uid, Qt::NoButton, tabletState);
+
    ev.setTimestamp(e->timestamp);
    QGuiApplication::sendSpontaneousEvent(qGuiApp, &ev);
+
 #else
-   Q_UNUSED(e)
+   (void) e;
 #endif
 }
 
@@ -2110,7 +2154,7 @@ void QGuiApplicationPrivate::processGestureEvent(QWindowSystemInterfacePrivate::
 
 void QGuiApplicationPrivate::processPlatformPanelEvent(QWindowSystemInterfacePrivate::PlatformPanelEvent *e)
 {
-   if (!e->window) {
+   if (! e->window) {
       return;
    }
 
@@ -2145,8 +2189,7 @@ Q_GUI_EXPORT uint qHash(const QGuiApplicationPrivate::ActiveTouchPointsKey &k)
 Q_GUI_EXPORT bool operator==(const QGuiApplicationPrivate::ActiveTouchPointsKey &a,
    const QGuiApplicationPrivate::ActiveTouchPointsKey &b)
 {
-   return a.device == b.device
-      && a.touchPointId == b.touchPointId;
+   return a.device == b.device && a.touchPointId == b.touchPointId;
 }
 
 void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::TouchEvent *e)
@@ -2159,39 +2202,44 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
       // Send the TouchCancel to all windows with active touches and clean up.
       QTouchEvent touchEvent(QEvent::TouchCancel, e->device, e->modifiers);
       touchEvent.setTimestamp(e->timestamp);
+
       QHash<ActiveTouchPointsKey, ActiveTouchPointsValue>::const_iterator it
          = self->activeTouchPoints.constBegin(), ite = self->activeTouchPoints.constEnd();
       QSet<QWindow *> windowsNeedingCancel;
+
       while (it != ite) {
          QWindow *w = it->window.data();
+
          if (w) {
             windowsNeedingCancel.insert(w);
          }
          ++it;
       }
+
       for (QSet<QWindow *>::const_iterator winIt = windowsNeedingCancel.constBegin(),
          winItEnd = windowsNeedingCancel.constEnd(); winIt != winItEnd; ++winIt) {
          touchEvent.setWindow(*winIt);
          QGuiApplication::sendSpontaneousEvent(*winIt, &touchEvent);
       }
-      if (!self->synthesizedMousePoints.isEmpty() && !e->synthetic()) {
+
+      if (! self->synthesizedMousePoints.isEmpty() && ! e->synthetic()) {
          for (QHash<QWindow *, SynthesizedMouseData>::const_iterator synthIt = self->synthesizedMousePoints.constBegin(),
             synthItEnd = self->synthesizedMousePoints.constEnd(); synthIt != synthItEnd; ++synthIt) {
-            if (!synthIt->window) {
+
+            if (! synthIt->window) {
                continue;
             }
+
             QWindowSystemInterfacePrivate::MouseEvent fake(synthIt->window.data(),
-               e->timestamp,
-               synthIt->pos,
-               synthIt->screenPos,
-               buttons & ~Qt::LeftButton,
-               e->modifiers,
-               Qt::MouseEventSynthesizedByQt);
+               e->timestamp, synthIt->pos, synthIt->screenPos, buttons & ~Qt::LeftButton,
+               e->modifiers, Qt::MouseEventSynthesizedByCS);
+
             fake.flags |= QWindowSystemInterfacePrivate::WindowSystemEvent::Synthetic;
             processMouseEvent(&fake);
          }
          self->synthesizedMousePoints.clear();
       }
+
       self->activeTouchPoints.clear();
       self->lastTouchType = e->touchType;
       return;
@@ -2226,11 +2274,10 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
             if (e->device->type() == QTouchDevice::TouchPad) {
                // on touch-pads, send all touch points to the same widget
                w = d->activeTouchPoints.isEmpty()
-                  ? QPointer<QWindow>()
-                  : d->activeTouchPoints.constBegin().value().window;
+                  ? QPointer<QWindow>() : d->activeTouchPoints.constBegin().value().window;
             }
 
-            if (!w) {
+            if (! w) {
                // determine which window this event will go to
                if (!window) {
                   window = QGuiApplication::topLevelWindowAt(touchPoint.screenPos().toPoint());
@@ -2246,6 +2293,7 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
             touchPoint.d->lastScreenPos = touchPoint.screenPos();
             touchPoint.d->startNormalizedPos = touchPoint.normalizedPos();
             touchPoint.d->lastNormalizedPos = touchPoint.normalizedPos();
+
             if (touchPoint.pressure() < qreal(0.)) {
                touchPoint.d->pressure = qreal(1.);
             }
@@ -2297,12 +2345,12 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
             break;
       }
 
-      Q_ASSERT(w.data() != 0);
+      Q_ASSERT(w.data() != nullptr);
 
       // make the *scene* functions return the same as the *screen* functions
       touchPoint.d->sceneRect = touchPoint.screenRect();
       touchPoint.d->startScenePos = touchPoint.startScreenPos();
-      touchPoint.d->lastScenePos = touchPoint.lastScreenPos();
+      touchPoint.d->lastScenePos  = touchPoint.lastScreenPos();
 
       StatesAndTouchPoints &maskAndPoints = windowsNeedingEvents[w.data()];
       maskAndPoints.first |= touchPoint.state();
@@ -2324,12 +2372,15 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
          case Qt::TouchPointPressed:
             eventType = QEvent::TouchBegin;
             break;
+
          case Qt::TouchPointReleased:
             eventType = QEvent::TouchEnd;
             break;
+
          case Qt::TouchPointStationary:
             // don't send the event if nothing changed
             continue;
+
          default:
             eventType = QEvent::TouchUpdate;
             break;
@@ -2342,9 +2393,7 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
          if (eventType == QEvent::TouchEnd) {
             // but don't leave dangling state: e.g.
             // QQuickWindowPrivate::itemForTouchPointId needs to be cleared.
-            QTouchEvent touchEvent(QEvent::TouchCancel,
-               e->device,
-               e->modifiers);
+            QTouchEvent touchEvent(QEvent::TouchCancel, e->device, e->modifiers);
             touchEvent.setTimestamp(e->timestamp);
             touchEvent.setWindow(w);
             QGuiApplication::sendSpontaneousEvent(w, &touchEvent);
@@ -2352,11 +2401,7 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
          continue;
       }
 
-      QTouchEvent touchEvent(eventType,
-         e->device,
-         e->modifiers,
-         it.value().first,
-         it.value().second);
+      QTouchEvent touchEvent(eventType, e->device, e->modifiers, it.value().first, it.value().second);
       touchEvent.setTimestamp(e->timestamp);
       touchEvent.setWindow(w);
 
@@ -2406,7 +2451,7 @@ void QGuiApplicationPrivate::processTouchEvent(QWindowSystemInterfacePrivate::To
                      touchPoint.screenPos(),
                      b | (buttons & ~Qt::LeftButton),
                      e->modifiers,
-                     Qt::MouseEventSynthesizedByQt);
+                     Qt::MouseEventSynthesizedByCS);
 
                   fake.flags |= QWindowSystemInterfacePrivate::WindowSystemEvent::Synthetic;
                   processMouseEvent(&fake);
@@ -2597,34 +2642,39 @@ QPlatformDragQtResponse QGuiApplicationPrivate::processDrag(QWindow *w, const QM
 {
    static QPointer<QWindow> currentDragWindow;
    static Qt::DropAction lastAcceptedDropAction = Qt::IgnoreAction;
+
    QPlatformDrag *platformDrag = platformIntegration()->drag();
-   if (!platformDrag) {
+
+   if (! platformDrag) {
       lastAcceptedDropAction = Qt::IgnoreAction;
       return QPlatformDragQtResponse(false, lastAcceptedDropAction, QRect());
    }
 
-   if (!dropData) {
+   if (! dropData) {
       if (currentDragWindow.data() == w) {
-         currentDragWindow = 0;
+         currentDragWindow = nullptr;
       }
+
       QDragLeaveEvent e;
       QGuiApplication::sendEvent(w, &e);
       lastAcceptedDropAction = Qt::IgnoreAction;
       return QPlatformDragQtResponse(false, lastAcceptedDropAction, QRect());
    }
-   QDragMoveEvent me(p, supportedActions, dropData,
-      QGuiApplication::mouseButtons(), QGuiApplication::keyboardModifiers());
+
+   QDragMoveEvent me(p, supportedActions, dropData, QGuiApplication::mouseButtons(), QGuiApplication::keyboardModifiers());
 
    if (w != currentDragWindow) {
       lastAcceptedDropAction = Qt::IgnoreAction;
+
       if (currentDragWindow) {
          QDragLeaveEvent e;
          QGuiApplication::sendEvent(currentDragWindow, &e);
       }
+
       currentDragWindow = w;
-      QDragEnterEvent e(p, supportedActions, dropData,
-         QGuiApplication::mouseButtons(), QGuiApplication::keyboardModifiers());
+      QDragEnterEvent e(p, supportedActions, dropData, QGuiApplication::mouseButtons(), QGuiApplication::keyboardModifiers());
       QGuiApplication::sendEvent(w, &e);
+
       if (e.isAccepted() && e.dropAction() != Qt::IgnoreAction) {
          lastAcceptedDropAction = e.dropAction();
       }
@@ -2636,9 +2686,9 @@ QPlatformDragQtResponse QGuiApplicationPrivate::processDrag(QWindow *w, const QM
       me.setDropAction(lastAcceptedDropAction);
       me.accept();
    }
+
    QGuiApplication::sendEvent(w, &me);
-   lastAcceptedDropAction = me.isAccepted() ?
-      me.dropAction() :  Qt::IgnoreAction;
+   lastAcceptedDropAction = me.isAccepted() ? me.dropAction() : Qt::IgnoreAction;
    return QPlatformDragQtResponse(me.isAccepted(), lastAcceptedDropAction, me.answerRect());
 }
 
@@ -2657,29 +2707,26 @@ QPlatformDropQtResponse QGuiApplicationPrivate::processDrop(QWindow *w, const QM
 #endif // QT_NO_DRAGANDDROP
 
 #ifndef QT_NO_CLIPBOARD
-/*!
-    Returns the object for interacting with the clipboard.
-*/
+
 QClipboard *QApplication::clipboard()
 {
-   if (QGuiApplicationPrivate::qt_clipboard == 0) {
-      if (!qApp) {
+   if (QGuiApplicationPrivate::qt_clipboard == nullptr) {
+      if (! qApp) {
          qWarning("QGuiApplication: Must construct a QGuiApplication before accessing a QClipboard");
-         return 0;
+         return nullptr;
       }
-      QGuiApplicationPrivate::qt_clipboard = new QClipboard(0);
+      QGuiApplicationPrivate::qt_clipboard = new QClipboard(nullptr);
    }
+
    return QGuiApplicationPrivate::qt_clipboard;
 }
 #endif
 
-
 QPalette QApplication::palette()
 {
    initPalette();
-   return *QGuiApplicationPrivate::app_pal;
+   return *QGuiApplicationPrivate::app_palette;
 }
-
 
 void QGuiApplicationPrivate::applyWindowGeometrySpecificationTo(QWindow *window)
 {
@@ -2693,8 +2740,6 @@ QFont QApplication::font()
    initFontUnlocked();
    return *QGuiApplicationPrivate::app_font;
 }
-
-
 
 QIcon QGuiApplication::windowIcon()
 {
@@ -2720,8 +2765,6 @@ void QApplication::setQuitOnLastWindowClosed(bool quit)
 {
    QCoreApplication::setQuitLockEnabled(quit);
 }
-
-
 
 bool QApplication::quitOnLastWindowClosed()
 {
@@ -2937,23 +2980,17 @@ Qt::LayoutDirection QApplication::layoutDirection()
 QCursor *QApplication::overrideCursor()
 {
    CHECK_QAPP_INSTANCE(nullptr)
-   return qGuiApp->d_func()->cursor_list.isEmpty() ? 0 : &qGuiApp->d_func()->cursor_list.first();
+   return qGuiApp->d_func()->cursor_list.isEmpty() ? nullptr : &qGuiApp->d_func()->cursor_list.first();
 }
 
-/*!
-    Changes the currently active application override cursor to \a cursor.
-
-    This function has no effect if setOverrideCursor() was not called.
-
-    \sa setOverrideCursor(), overrideCursor(), restoreOverrideCursor(),
-    QWidget::setCursor()
- */
 void QApplication::changeOverrideCursor(const QCursor &cursor)
 {
    CHECK_QAPP_INSTANCE()
+
    if (qGuiApp->d_func()->cursor_list.isEmpty()) {
       return;
    }
+
    qGuiApp->d_func()->cursor_list.removeFirst();
    setOverrideCursor(cursor);
 }
@@ -2963,18 +3000,20 @@ void QApplication::changeOverrideCursor(const QCursor &cursor)
 #ifndef QT_NO_CURSOR
 static inline void applyCursor(QWindow *w, QCursor c)
 {
-   if (const QScreen *screen = w->screen())
+   if (const QScreen *screen = w->screen()) {
       if (QPlatformCursor *cursor = screen->handle()->cursor()) {
          cursor->changeCursor(&c, w);
       }
+   }
 }
 
 static inline void unsetCursor(QWindow *w)
 {
-   if (const QScreen *screen = w->screen())
+   if (const QScreen *screen = w->screen()) {
       if (QPlatformCursor *cursor = screen->handle()->cursor()) {
-         cursor->changeCursor(0, w);
+         cursor->changeCursor(nullptr, w);
       }
+   }
 }
 
 static inline void applyCursor(const QList<QWindow *> &l, const QCursor &c)
@@ -2991,6 +3030,7 @@ static inline void applyWindowCursor(const QList<QWindow *> &l)
 {
    for (int i = 0; i < l.size(); ++i) {
       QWindow *w = l.at(i);
+
       if (w->handle() && w->type() != Qt::Desktop) {
          if (qt_window_private(w)->hasCursor) {
             applyCursor(w, w->cursor());
@@ -3102,13 +3142,13 @@ QStyle *QApplication::style()
 
    if (! qobject_cast<QApplication *>(QCoreApplication::instance())) {
       Q_ASSERT(!"No style available without QApplication!");
-      return 0;
+      return nullptr;
    }
 
-   if (!QApplicationPrivate::app_style) {
+   if (! QApplicationPrivate::app_style) {
       // Compile-time search for default style
-      //
       QString style;
+
       if (!QApplicationPrivate::styleOverride.isEmpty()) {
          style = QApplicationPrivate::styleOverride;
       } else {
@@ -3117,8 +3157,10 @@ QStyle *QApplication::style()
 
       QStyle *&app_style = QApplicationPrivate::app_style;
       app_style = QStyleFactory::create(style);
+
       if (!app_style) {
          QStringList styles = QStyleFactory::keys();
+
          for (int i = 0; i < styles.size(); ++i) {
             if ((app_style = QStyleFactory::create(styles.at(i)))) {
                break;
@@ -3127,11 +3169,10 @@ QStyle *QApplication::style()
       }
       if (! app_style) {
          Q_ASSERT(! "No styles are available");
-         return 0;
+         return nullptr;
       }
 
-      QApplicationPrivate::overrides_native_style =
-               ( app_style->objectName() != QApplicationPrivate::desktopStyleKey());
+      QApplicationPrivate::overrides_native_style = ( app_style->objectName() != QApplicationPrivate::desktopStyleKey());
    }
 
    // take ownership of the style
@@ -3139,9 +3180,9 @@ QStyle *QApplication::style()
 
    initSystemPalette();
 
-   if (QApplicationPrivate::set_pal) {
+   if (QApplicationPrivate::set_palette) {
       // repolish set palette with the new style
-      QApplication::setPalette(*QApplicationPrivate::set_pal);
+      QApplication::setPalette(*QApplicationPrivate::set_palette);
    }
 
 #ifndef QT_NO_STYLE_STYLESHEET
@@ -3202,18 +3243,18 @@ void QApplication::setStyle(QStyle *style)
    // must be done before polishing the application since the style
    // might call QApplication::setPalette() itself
 
-   if (QApplicationPrivate::set_pal) {
-      QApplication::setPalette(*QApplicationPrivate::set_pal);
+   if (QApplicationPrivate::set_palette) {
+      QApplication::setPalette(*QApplicationPrivate::set_palette);
 
-   } else if (QApplicationPrivate::sys_pal) {
+   } else if (QApplicationPrivate::sys_palette) {
       clearSystemPalette();
       initSystemPalette();
       QApplicationPrivate::initializeWidgetPaletteHash();
       QApplicationPrivate::initializeWidgetFontHash();
-      QApplicationPrivate::setPalette_helper(*QApplicationPrivate::sys_pal, 0,  false);
+      QApplicationPrivate::setPalette_helper(*QApplicationPrivate::sys_palette, QString(), false);
 
-   } else if (!QApplicationPrivate::sys_pal) {
-      // Initialize the sys_pal if it has not happened yet
+   } else if (!QApplicationPrivate::sys_palette) {
+      // Initialize the sys_palette if it has not happened yet
       QApplicationPrivate::setSystemPalette(QApplicationPrivate::app_style->standardPalette());
    }
 
@@ -3305,14 +3346,14 @@ void QApplicationPrivate::setPalette_helper(const QPalette &palette, const QStri
    PaletteHash *hash = cs_app_palettes_hash();
 
    if (className.isEmpty()) {
-      if (QApplicationPrivate::app_pal && pal.isCopyOf(*QApplicationPrivate::app_pal)) {
+      if (QApplicationPrivate::app_palette && pal.isCopyOf(*QApplicationPrivate::app_palette)) {
          return;
       }
 
-      if (! QApplicationPrivate::app_pal) {
-         QApplicationPrivate::app_pal = new QPalette(pal);
+      if (! QApplicationPrivate::app_palette) {
+         QApplicationPrivate::app_palette = new QPalette(pal);
       } else {
-         *QApplicationPrivate::app_pal = pal;
+         *QApplicationPrivate::app_palette = pal;
       }
 
       if (hash && hash->size()) {
@@ -3353,17 +3394,17 @@ void QApplicationPrivate::setPalette_helper(const QPalette &palette, const QStri
 
    }
 
-   if (className.isEmpty() && (! QApplicationPrivate::sys_pal || ! palette.isCopyOf(*QApplicationPrivate::sys_pal))) {
-      if (! QApplicationPrivate::set_pal) {
-         QApplicationPrivate::set_pal = new QPalette(palette);
+   if (className.isEmpty() && (! QApplicationPrivate::sys_palette || ! palette.isCopyOf(*QApplicationPrivate::sys_palette))) {
+      if (! QApplicationPrivate::set_palette) {
+         QApplicationPrivate::set_palette = new QPalette(palette);
       } else {
-         *QApplicationPrivate::set_pal = palette;
+         *QApplicationPrivate::set_palette = palette;
       }
 
       applicationResourceFlags |= ApplicationPaletteExplicitlySet;
       QCoreApplication::setAttribute(Qt::AA_SetPalette);
 
-      emit qGuiApp->paletteChanged(*QGuiApplicationPrivate::app_pal);
+      emit qGuiApp->paletteChanged(*QGuiApplicationPrivate::app_palette);
    }
 }
 
@@ -3430,12 +3471,14 @@ const QDrawHelperGammaTables *QGuiApplicationPrivate::gammaTables()
 {
    QDrawHelperGammaTables *result = m_gammaTables.load();
 
-   if (!result) {
-      QDrawHelperGammaTables *tables = new QDrawHelperGammaTables(fontSmoothingGamma);
+   if (! result) {
+      QDrawHelperGammaTables *tables   = new QDrawHelperGammaTables(fontSmoothingGamma);
+      QDrawHelperGammaTables *expected = nullptr;
 
-      if (!m_gammaTables.testAndSetRelease(0, tables)) {
+      if (! m_gammaTables.compareExchange(expected, tables, std::memory_order_release)) {
          delete tables;
       }
+
       result = m_gammaTables.load();
    }
    return result;

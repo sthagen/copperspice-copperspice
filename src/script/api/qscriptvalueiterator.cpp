@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -94,7 +94,7 @@ class QScriptValueIteratorPrivate
   first property).
 */
 QScriptValueIterator::QScriptValueIterator(const QScriptValue &object)
-   : d_ptr(0)
+   : d_ptr(nullptr)
 {
    if (object.isObject()) {
       d_ptr.reset(new QScriptValueIteratorPrivate());
@@ -290,7 +290,7 @@ QScriptValue::PropertyFlags QScriptValueIterator::flags() const
 {
    Q_D(const QScriptValueIterator);
    if (!d || !d->initialized || !d->engine()) {
-      return 0;
+      return Qt::EmptyFlag;
    }
    QScript::APIShim shim(d->engine());
    return d->object()->propertyFlags(*d->current);

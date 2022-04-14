@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -25,14 +25,12 @@
 #ifndef QOPENGLVERSIONFUNCTIONS_1_5_H
 #define QOPENGLVERSIONFUNCTIONS_1_5_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
-#if !defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_2)
+#if ! defined(QT_NO_OPENGL) && ! defined(QT_OPENGL_ES_2)
 
-#include <QtGui/QOpenGLVersionFunctions>
-#include <QtGui/qopenglcontext.h>
-
-QT_BEGIN_NAMESPACE
+#include <qopengl_versionfunctions.h>
+#include <qopenglcontext.h>
 
 class Q_GUI_EXPORT QOpenGLFunctions_1_5 : public QAbstractOpenGLFunctions
 {
@@ -3010,11 +3008,7 @@ inline void QOpenGLFunctions_1_5::glFogCoordf(GLfloat coord)
     d_1_4_Deprecated->FogCoordf(coord);
 }
 
-
 // OpenGL 1.5 deprecated functions
-
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_OPENGL && !QT_OPENGL_ES_2
 

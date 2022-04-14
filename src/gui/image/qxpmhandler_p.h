@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QXPMHANDLER_P_H
 #define QXPMHANDLER_P_H
 
-#include <QtGui/qimageiohandler.h>
+#include <qimageiohandler.h>
 
 #ifndef QT_NO_IMAGEFORMAT_XPM
 
@@ -35,15 +35,15 @@ class QXpmHandler : public QImageIOHandler
  public:
    QXpmHandler();
 
-   bool canRead() const override;
+   bool canRead() override;
    bool read(QImage *image) override;
    bool write(const QImage &image) override;
 
    static bool canRead(QIODevice *device);
 
-   QByteArray name() const override;
+   QString name() const override;
 
-   QVariant option(ImageOption option) const override;
+   QVariant option(ImageOption option) override;
    void setOption(ImageOption option, const QVariant &value) override;
    bool supportsOption(ImageOption option) const override;
 

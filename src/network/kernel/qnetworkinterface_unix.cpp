@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -90,7 +90,7 @@ static QHostAddress addressFromSockaddr(sockaddr *sa, int ifindex = 0, const QSt
 
 static QNetworkInterface::InterfaceFlags convertFlags(uint rawFlags)
 {
-   QNetworkInterface::InterfaceFlags flags = 0;
+   QNetworkInterface::InterfaceFlags flags = Qt::EmptyFlag;
    flags |= (rawFlags & IFF_UP) ? QNetworkInterface::IsUp : QNetworkInterface::InterfaceFlag(0);
    flags |= (rawFlags & IFF_RUNNING) ? QNetworkInterface::IsRunning : QNetworkInterface::InterfaceFlag(0);
    flags |= (rawFlags & IFF_BROADCAST) ? QNetworkInterface::CanBroadcast : QNetworkInterface::InterfaceFlag(0);
@@ -429,7 +429,7 @@ static QList<QNetworkInterfacePrivate *> interfaceListing()
       // find the interface index
       QString name = QString::fromLatin1(ptr->ifa_name);
 
-      QNetworkInterfacePrivate *iface = 0;
+      QNetworkInterfacePrivate *iface = nullptr;
       QList<QNetworkInterfacePrivate *>::iterator if_it = interfaces.begin();
 
       for ( ; if_it != interfaces.end(); ++if_it)

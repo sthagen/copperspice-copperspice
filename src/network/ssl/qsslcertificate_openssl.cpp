@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,7 +25,7 @@
 #include <qsslsocket_openssl_symbols_p.h>
 #include <qsslcertificate_p.h>
 #include <qsslkey_p.h>
-#include <qsslcertificateextension_p.h>
+#include <qsslcertificate_extension_p.h>
 #include <qmutexpool_p.h>
 
 // forward declaration
@@ -52,9 +52,18 @@ uint qHash(const QSslCertificate &key, uint seed)
 {
    if (X509 *const x509 = key.d->x509) {
       // populate x509->sha1_hash
-
       (void)q_X509_cmp(x509, x509);
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      unsigned int n;
+      unsigned char md[EVP_MAX_MD_SIZE];
+      const EVP_MD* digest = q_EVP_sha1();
+      q_X509_digest(x509, digest, md, &n);
+
+      return qHashBits(md, n, seed);
+#else
       return qHashBits(x509->sha1_hash, SHA_DIGEST_LENGTH, seed);
+#endif
 
    } else {
       return seed;
@@ -77,9 +86,18 @@ bool QSslCertificate::isSelfSigned() const
 
 QByteArray QSslCertificate::version() const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+
    if (d->versionString.isEmpty() && d->x509) {
-      d->versionString = QByteArray::number(qint64(q_ASN1_INTEGER_get(d->x509->cert_info->version)) + 1);
+      int64_t version;
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      version = q_X509_get_version(d->x509);
+#else
+      version = q_ASN1_INTEGER_get(d->x509->cert_info->version);
+#endif
+
+      d->versionString = QByteArray::number(qint64(version) + 1);
    }
 
    return d->versionString;
@@ -87,10 +105,16 @@ QByteArray QSslCertificate::version() const
 
 QByteArray QSslCertificate::serialNumber() const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
 
    if (d->serialNumberString.isEmpty() && d->x509) {
-      ASN1_INTEGER *serialNumber = d->x509->cert_info->serialNumber;
+      ASN1_INTEGER *serialNumber;
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      serialNumber = q_X509_get_serialNumber(d->x509);
+#else
+      serialNumber = d->x509->cert_info->serialNumber;
+#endif
 
       QByteArray hexString;
       hexString.reserve(serialNumber->length * 3);
@@ -109,7 +133,7 @@ QByteArray QSslCertificate::serialNumber() const
 
 QStringList QSslCertificate::issuerInfo(SubjectInfo info) const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
 
    // lazy init
    if (d->issuerInfo.isEmpty() && d->x509) {
@@ -121,7 +145,7 @@ QStringList QSslCertificate::issuerInfo(SubjectInfo info) const
 
 QStringList QSslCertificate::issuerInfo(const QByteArray &attribute) const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
 
    // lazy init
    if (d->issuerInfo.isEmpty() && d->x509) {
@@ -133,44 +157,48 @@ QStringList QSslCertificate::issuerInfo(const QByteArray &attribute) const
 
 QStringList QSslCertificate::subjectInfo(SubjectInfo info) const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+
    // lazy init
-   if (d->subjectInfo.isEmpty() && d->x509)
-      d->subjectInfo =
-         _q_mapFromX509Name(q_X509_get_subject_name(d->x509));
+   if (d->subjectInfo.isEmpty() && d->x509) {
+      d->subjectInfo = _q_mapFromX509Name(q_X509_get_subject_name(d->x509));
+   }
 
    return d->subjectInfo.values(d->subjectInfoToString(info));
 }
 
 QStringList QSslCertificate::subjectInfo(const QByteArray &attribute) const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+
    // lazy init
-   if (d->subjectInfo.isEmpty() && d->x509)
-      d->subjectInfo =
-         _q_mapFromX509Name(q_X509_get_subject_name(d->x509));
+   if (d->subjectInfo.isEmpty() && d->x509) {
+      d->subjectInfo = _q_mapFromX509Name(q_X509_get_subject_name(d->x509));
+   }
 
    return d->subjectInfo.values(attribute);
 }
 
 QList<QByteArray> QSslCertificate::subjectInfoAttributes() const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+
    // lazy init
-   if (d->subjectInfo.isEmpty() && d->x509)
-      d->subjectInfo =
-         _q_mapFromX509Name(q_X509_get_subject_name(d->x509));
+   if (d->subjectInfo.isEmpty() && d->x509) {
+      d->subjectInfo = _q_mapFromX509Name(q_X509_get_subject_name(d->x509));
+   }
 
    return d->subjectInfo.uniqueKeys();
 }
 
 QList<QByteArray> QSslCertificate::issuerInfoAttributes() const
 {
-   QMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+   QRecursiveMutexLocker lock(QMutexPool::globalInstanceGet(d.data()));
+
    // lazy init
-   if (d->issuerInfo.isEmpty() && d->x509)
-      d->issuerInfo =
-         _q_mapFromX509Name(q_X509_get_issuer_name(d->x509));
+   if (d->issuerInfo.isEmpty() && d->x509) {
+      d->issuerInfo = _q_mapFromX509Name(q_X509_get_issuer_name(d->x509));
+   }
 
    return d->issuerInfo.uniqueKeys();
 }
@@ -183,7 +211,7 @@ QMultiMap<QSsl::AlternativeNameEntryType, QString> QSslCertificate::subjectAlter
       return result;
    }
 
-   STACK_OF(GENERAL_NAME) *altNames = (STACK_OF(GENERAL_NAME) *)q_X509_get_ext_d2i(d->x509, NID_subject_alt_name, 0, 0);
+   STACK_OF(GENERAL_NAME) *altNames = (STACK_OF(GENERAL_NAME) *)q_X509_get_ext_d2i(d->x509, NID_subject_alt_name, nullptr, nullptr);
 
    if (altNames) {
       for (int i = 0; i < q_sk_GENERAL_NAME_num(altNames); ++i) {
@@ -206,7 +234,11 @@ QMultiMap<QSsl::AlternativeNameEntryType, QString> QSslCertificate::subjectAlter
             result.insert(QSsl::EmailEntry, altName);
          }
       }
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
       q_sk_pop_free((STACK *)altNames, reinterpret_cast<void(*)(void *)>(q_sk_free));
+#else
+      q_OPENSSL_sk_pop_free((STACK *)altNames, reinterpret_cast<void(*)(void *)>(q_OPENSSL_sk_free));
+#endif
    }
 
    return result;
@@ -234,31 +266,40 @@ QSslKey QSslCertificate::publicKey() const
    }
 
    QSslKey key;
+   int pkey_type{};
+   EVP_PKEY* pkey;
 
    key.d->type       = QSsl::PublicKey;
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+   pkey = q_X509_get_pubkey(d->x509);
+   pkey_type = q_EVP_PKEY_base_id(pkey);
+#else
    X509_PUBKEY *xkey = d->x509->cert_info->key;
-   EVP_PKEY *pkey    = q_X509_PUBKEY_get(xkey);
+   pkey              = q_X509_PUBKEY_get(xkey);
+   pkey_type         = q_EVP_PKEY_type(pkey->type);
+#endif
 
    Q_ASSERT(pkey);
 
-   if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_RSA) {
+   if (pkey_type == EVP_PKEY_RSA) {
       key.d->rsa = q_EVP_PKEY_get1_RSA(pkey);
       key.d->algorithm = QSsl::Rsa;
       key.d->isNull = false;
 
-   } else if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_DSA) {
+   } else if (pkey_type == EVP_PKEY_DSA) {
       key.d->dsa = q_EVP_PKEY_get1_DSA(pkey);
       key.d->algorithm = QSsl::Dsa;
       key.d->isNull = false;
 
 #ifndef OPENSSL_NO_EC
-   } else if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_EC) {
+   } else if (pkey_type == EVP_PKEY_EC) {
       key.d->ec = q_EVP_PKEY_get1_EC_KEY(pkey);
       key.d->algorithm = QSsl::Ec;
       key.d->isNull = false;
 #endif
 
-   } else if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_DH) {
+   } else if (pkey_type == EVP_PKEY_DH) {
       // DH unsupported
 
    } else {
@@ -291,7 +332,7 @@ static QVariant x509UnknownExtensionToValue(X509_EXTENSION *ext)
 
    // If this extension can be converted
    if (meth->i2v && ext_internal) {
-      STACK_OF(CONF_VALUE) *val = meth->i2v(meth, ext_internal, 0);
+      STACK_OF(CONF_VALUE) *val = meth->i2v(meth, ext_internal, nullptr);
 
       QVariantMap map;
       QVariantList list;
@@ -389,8 +430,10 @@ static QVariant x509ExtensionToValue(X509_EXTENSION *ext)
             }
          }
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L && OPENSSL_VERSION_NUMBER < 0x10100000L
          q_sk_pop_free((_STACK *)info, reinterpret_cast<void(*)(void *)>(q_sk_free));
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+         q_OPENSSL_sk_pop_free((_STACK *)info, reinterpret_cast<void(*)(void *)>(q_OPENSSL_sk_free));
 #else
          q_sk_pop_free((STACK *)info, reinterpret_cast<void(*)(void *)>(q_sk_free));
 #endif
@@ -539,12 +582,14 @@ QByteArray QSslCertificatePrivate::QByteArray_from_X509(X509 *x509, QSsl::Encodi
    }
 
    // Use i2d_X509 to convert the X509 to an array.
-   int length = q_i2d_X509(x509, 0);
+   int length = q_i2d_X509(x509, nullptr);
+
    QByteArray array;
    array.resize(length);
    char *data = array.data();
    char **dataP = &data;
    unsigned char **dataPu = (unsigned char **)dataP;
+
    if (q_i2d_X509(x509, dataPu) < 0) {
       return QByteArray();
    }
@@ -621,7 +666,7 @@ static QMultiMap<QByteArray, QString> _q_mapFromX509Name(X509_NAME *name)
       X509_NAME_ENTRY *e = q_X509_NAME_get_entry(name, i);
 
       QByteArray name = QSslCertificatePrivate::asn1ObjectName(q_X509_NAME_ENTRY_get_object(e));
-      unsigned char *data = 0;
+      unsigned char *data = nullptr;
 
       int size = q_ASN1_STRING_to_UTF8(&data, q_X509_NAME_ENTRY_get_data(e));
       info.insertMulti(name, QString::fromUtf8((char *)data, size));
@@ -696,9 +741,10 @@ QList<QSslCertificate> QSslCertificatePrivate::certificatesFromPem(const QByteAr
 
       QByteArray decoded = QByteArray::fromBase64(
                               QByteArray::fromRawData(pem.data() + startPos, endPos - startPos));
+
       const unsigned char *data = (const unsigned char *)decoded.data();
 
-      if (X509 *x509 = q_d2i_X509(0, &data, decoded.size())) {
+      if (X509 *x509 = q_d2i_X509(nullptr, &data, decoded.size())) {
          certificates << QSslCertificate_from_X509(x509);
          q_X509_free(x509);
       }
@@ -716,7 +762,7 @@ QList<QSslCertificate> QSslCertificatePrivate::certificatesFromDer(const QByteAr
    int size = der.size();
 
    while (size > 0 && (count == -1 || certificates.size() < count)) {
-      if (X509 *x509 = q_d2i_X509(0, &data, size)) {
+      if (X509 *x509 = q_d2i_X509(nullptr, &data, size)) {
          certificates << QSslCertificate_from_X509(x509);
          q_X509_free(x509);
       } else {

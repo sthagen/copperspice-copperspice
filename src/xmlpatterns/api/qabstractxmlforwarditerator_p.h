@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -59,7 +59,11 @@ class QAbstractXmlForwardIterator : public QSharedData
    typedef QList<QExplicitlySharedDataPointer<QAbstractXmlForwardIterator<T> > > List;
    typedef QVector<QExplicitlySharedDataPointer<QAbstractXmlForwardIterator<T> > > Vector;
 
-   inline QAbstractXmlForwardIterator() : d_ptr(0) {}
+   inline QAbstractXmlForwardIterator()
+      : d_ptr(nullptr)
+   {
+   }
+
    virtual ~QAbstractXmlForwardIterator() {}
 
    virtual T next() = 0;
@@ -76,7 +80,8 @@ class QAbstractXmlForwardIterator : public QSharedData
    virtual qint64 sizeHint() const;
 
  private:
-   Q_DISABLE_COPY(QAbstractXmlForwardIterator<T>)
+   QAbstractXmlForwardIterator<T>(const QAbstractXmlForwardIterator<T> &) = delete;
+   QAbstractXmlForwardIterator<T> &operator=(const QAbstractXmlForwardIterator<T> &) = delete;
 
    QAbstractXmlForwardIteratorPrivate *d_ptr; /* Currently not used. */
 };

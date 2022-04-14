@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,14 @@
 #ifndef QTCONCURRENTTHREADENGINE_H
 #define QTCONCURRENTTHREADENGINE_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qthreadpool.h>
-#include <QtCore/qfuture.h>
-#include <QtCore/qdebug.h>
-#include <QtCore/qtconcurrentexception.h>
-#include <QtCore/qwaitcondition.h>
-#include <QtCore/qatomic.h>
-#include <QtCore/qsemaphore.h>
+#include <qglobal.h>
+#include <qthreadpool.h>
+#include <qfuture.h>
+#include <qdebug.h>
+#include <qtconcurrentexception.h>
+#include <qwaitcondition.h>
+#include <qatomic.h>
+#include <qsemaphore.h>
 
 namespace QtConcurrent {
 

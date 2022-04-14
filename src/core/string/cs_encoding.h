@@ -1,9 +1,9 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
 *
-* This file is part of CopperSpice.
+* This file is part of CsString.
 *
 * CsString is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
@@ -29,10 +29,11 @@ namespace CsString {
 class LIB_CS_STRING_EXPORT utf8
 {
    public:
+      using size_type    = std::ptrdiff_t;
       using storage_unit = uint8_t;
 
       template <typename Iterator>
-      static Iterator advance(Iterator iter_begin, Iterator iter_end, int count)
+      static Iterator advance(Iterator iter_begin, Iterator iter_end, size_type count)
       {
          auto iter = iter_begin;
          storage_unit value = 0;
@@ -57,9 +58,9 @@ class LIB_CS_STRING_EXPORT utf8
       }
 
       template <typename Iterator>
-      static int distance(Iterator iter_begin, Iterator iter_end)
+      static size_type distance(Iterator iter_begin, Iterator iter_end)
       {
-         int retval = 0;
+         size_type retval = 0;
 
          for (auto iter = iter_begin; iter != iter_end; ++iter) {
             storage_unit value = *iter;
@@ -75,11 +76,11 @@ class LIB_CS_STRING_EXPORT utf8
 
       template <typename Container>
       static typename Container::const_iterator insert(Container &str1,
-                  typename Container::const_iterator iter, CsChar c, int count = 1)
+                  typename Container::const_iterator iter, CsChar c, size_type count = 1)
       {
          uint32_t value = c.unicode();
 
-         for (int x = 0; x < count; ++x)  {
+         for (size_type x = 0; x < count; ++x)  {
             if (value <= 0x007F)  {
                iter = str1.insert(iter, value);
 
@@ -104,15 +105,15 @@ class LIB_CS_STRING_EXPORT utf8
          return iter;
       }
 
-      static int walk(int len, std::vector<storage_unit>::const_iterator iter)
+      static size_type walk(size_type len, std::vector<storage_unit>::const_iterator iter)
       {
-         int retval = 0;
-         int count  = 0;
+         size_type retval = 0;
+         size_type count  = 0;
 
          if (len >= 0) {
             // walk forward
 
-            for (int x = 0; x < len; ++x) {
+            for (size_type x = 0; x < len; ++x) {
                uint8_t value = *iter;
 
                count = numOfBytes(value);
@@ -124,7 +125,7 @@ class LIB_CS_STRING_EXPORT utf8
          } else  {
             // walk backwards
 
-            for (int x = 0; x > len; --x) {
+            for (size_type x = 0; x > len; --x) {
 
                while (true) {
                   --iter;
@@ -185,7 +186,7 @@ class LIB_CS_STRING_EXPORT utf8
       }
 
    private:
-      static int numOfBytes(uint8_t value)
+      static size_type numOfBytes(uint8_t value)
       {
          if ((value & 0x80) == 0) {
             return 1;
@@ -208,10 +209,11 @@ class LIB_CS_STRING_EXPORT utf8
 class LIB_CS_STRING_EXPORT utf16
 {
    public:
+      using size_type    = std::ptrdiff_t;
       using storage_unit = uint16_t;
 
       template <typename Iterator>
-      static Iterator advance(Iterator iter_begin, Iterator iter_end, int count)
+      static Iterator advance(Iterator iter_begin, Iterator iter_end, size_type count)
       {
          auto iter = iter_begin;
          storage_unit value = 0;
@@ -220,6 +222,7 @@ class LIB_CS_STRING_EXPORT utf16
 
             value = *iter;
             if (value < 0xDC00 || value > 0xDFFF) {
+               // not a low surrogate
                --count;
             }
 
@@ -234,15 +237,15 @@ class LIB_CS_STRING_EXPORT utf16
       }
 
       template <typename Iterator>
-      static int distance(Iterator iter_begin, Iterator iter_end)
+      static size_type distance(Iterator iter_begin, Iterator iter_end)
       {
-         int retval = 0;
+         size_type retval = 0;
 
          for (auto iter = iter_begin; iter != iter_end; ++iter) {
             storage_unit value = *iter;
 
             if (value < 0xDC00 || value > 0xDFFF) {
-               // not a surrogate
+               // not a low surrogate
                ++retval;
             }
          }
@@ -252,11 +255,11 @@ class LIB_CS_STRING_EXPORT utf16
 
       template <typename Container>
       static typename Container::const_iterator insert(Container &str1,
-                  typename Container::const_iterator iter, CsChar c, int count = 1)
+                  typename Container::const_iterator iter, CsChar c, size_type count = 1)
       {
          uint32_t value = c.unicode();
 
-         for (int x = 0; x < count; ++x)  {
+         for (size_type x = 0; x < count; ++x)  {
 
             if ((value <= 0xD7FF) || ((value >= 0xE000) && (value <= 0xFFFF)))  {
                iter = str1.insert(iter, value);
@@ -273,15 +276,15 @@ class LIB_CS_STRING_EXPORT utf16
          return iter;
       }
 
-      static int walk(int len, std::vector<storage_unit>::const_iterator iter)
+      static size_type walk(size_type len, std::vector<storage_unit>::const_iterator iter)
       {
-         int retval = 0;
-         int count  = 0;
+         size_type retval = 0;
+         size_type count  = 0;
 
          if (len >= 0) {
             // walk forward
 
-            for (int x = 0; x < len; ++x) {
+            for (size_type x = 0; x < len; ++x) {
                uint16_t value = *iter;
 
                count = numOfBytes(value);
@@ -293,7 +296,7 @@ class LIB_CS_STRING_EXPORT utf16
          } else  {
             // walk backwards
 
-            for (int x = 0; x > len; --x) {
+            for (size_type x = 0; x > len; --x) {
 
                while (true) {
                   --iter;
@@ -334,7 +337,7 @@ class LIB_CS_STRING_EXPORT utf16
       }
 
    private:
-      static int numOfBytes(uint16_t value)
+      static size_type numOfBytes(uint16_t value)
       {
          if ((value & 0xFC00) == 0xD800) {
             return 2;

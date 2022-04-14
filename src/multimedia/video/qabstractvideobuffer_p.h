@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,25 +26,21 @@
 
 #include <qshareddata.h>
 #include <qabstractvideobuffer.h>
-
 #include <qmultimedia.h>
-
 
 class QAbstractVideoBufferPrivate
 {
  public:
    QAbstractVideoBufferPrivate()
-      : q_ptr(0)
-   {}
+      : q_ptr(nullptr)
+   {
+   }
 
    virtual ~QAbstractVideoBufferPrivate()
-   { }
+   {
+   }
 
-   virtual int map(
-      QAbstractVideoBuffer::MapMode mode,
-      int *numBytes,
-      int bytesPerLine[4],
-      uchar *data[4]);
+   virtual int map(QAbstractVideoBuffer::MapMode mode, int *numBytes, int bytesPerLine[4], uchar *data[4]);
 
    QAbstractVideoBuffer *q_ptr;
 };
@@ -53,13 +49,13 @@ class QAbstractPlanarVideoBufferPrivate : QAbstractVideoBufferPrivate
 {
  public:
    QAbstractPlanarVideoBufferPrivate()
-   {}
+   {
+   }
 
    int map(QAbstractVideoBuffer::MapMode mode, int *numBytes, int bytesPerLine[4], uchar *data[4]);
 
  private:
    Q_DECLARE_PUBLIC(QAbstractPlanarVideoBuffer)
 };
-
 
 #endif

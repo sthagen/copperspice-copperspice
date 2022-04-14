@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -22,8 +22,8 @@
 *
 ***********************************************************************/
 
-#include "qopenglfunctions_es2.h"
-#include "qopenglcontext.h"
+#include <qopenglfunctions_es2.h>
+#include <qopenglcontext.h>
 
 #if defined(QT_OPENGL_ES_2)
 

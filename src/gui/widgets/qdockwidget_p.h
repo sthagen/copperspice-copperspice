@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QDockWidget_P_H
 #define QDockWidget_P_H
 
-#include <QtGui/qstyleoption.h>
+#include <qstyleoption.h>
 #include <qwidget_p.h>
 #include <qboxlayout.h>
 #include <qdockwidget.h>
@@ -53,9 +53,9 @@ class QDockWidgetPrivate : public QWidgetPrivate
 
  public:
    inline QDockWidgetPrivate()
-      : QWidgetPrivate(), state(0),
+      : QWidgetPrivate(), state(nullptr),
         features(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable),
-        allowedAreas(Qt::AllDockWidgetAreas),  resizer(0)
+        allowedAreas(Qt::AllDockWidgetAreas), resizer(nullptr)
    { }
 
    void init();
@@ -166,16 +166,17 @@ inline QLayoutItem *QDockWidgetItem::dockWidgetChildItem() const
    if (QDockWidgetLayout *layout = dockWidgetLayout()) {
       return layout->itemForRole(QDockWidgetLayout::Content);
    }
-   return 0;
+   return nullptr;
 }
 
 inline QDockWidgetLayout *QDockWidgetItem::dockWidgetLayout() const
 {
    QWidget *w = const_cast<QDockWidgetItem *>(this)->widget();
-   if (w != 0) {
+   if (w != nullptr) {
       return qobject_cast<QDockWidgetLayout *>(w->layout());
    }
-   return 0;
+
+   return nullptr;
 }
 
 #endif // QT_NO_DOCKWIDGET

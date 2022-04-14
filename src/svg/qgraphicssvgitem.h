@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,6 +29,7 @@
 #if ! defined(QT_NO_GRAPHICSVIEW) && ! defined(QT_NO_SVGWIDGET)
 
 #include <qgraphicsitem.h>
+
 class QSvgRenderer;
 class QGraphicsSvgItemPrivate;
 
@@ -44,8 +45,11 @@ class Q_SVG_EXPORT QGraphicsSvgItem : public QGraphicsObject
    SVG_CS_PROPERTY_WRITE(maximumCacheSize, setMaximumCacheSize)
 
  public:
-   QGraphicsSvgItem(QGraphicsItem *parentItem = nullptr);
-   QGraphicsSvgItem(const QString &fileName, QGraphicsItem *parentItem = nullptr);
+   QGraphicsSvgItem(QGraphicsItem *parent = nullptr);
+   QGraphicsSvgItem(const QString &fileName, QGraphicsItem *parent = nullptr);
+
+   QGraphicsSvgItem(const QGraphicsSvgItem &) = delete;
+   QGraphicsSvgItem &operator=(const QGraphicsSvgItem &) = delete;
 
    void setSharedRenderer(QSvgRenderer *renderer);
    QSvgRenderer *renderer() const;
@@ -53,7 +57,7 @@ class Q_SVG_EXPORT QGraphicsSvgItem : public QGraphicsObject
    void setElementId(const QString &id);
    QString elementId() const;
 
-   void setCachingEnabled(bool);
+   void setCachingEnabled(bool caching);
    bool isCachingEnabled() const;
 
    void setMaximumCacheSize(const QSize &size);
@@ -62,11 +66,11 @@ class Q_SVG_EXPORT QGraphicsSvgItem : public QGraphicsObject
    QRectF boundingRect() const override;
    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 
-   enum { Type = 13 };
    int type() const override;
 
+   static constexpr int Type = 13;
+
  private:
-   Q_DISABLE_COPY(QGraphicsSvgItem)
    Q_DECLARE_PRIVATE_D(QGraphicsItem::d_ptr.data(), QGraphicsSvgItem)
 
    SVG_CS_SLOT_1(Private, void _q_repaintItem())
@@ -74,4 +78,5 @@ class Q_SVG_EXPORT QGraphicsSvgItem : public QGraphicsObject
 };
 
 #endif // QT_NO_GRAPHICSVIEW or QT_NO_SVGWIDGETS
+
 #endif

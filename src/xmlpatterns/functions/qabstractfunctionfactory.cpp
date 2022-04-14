@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -51,15 +51,16 @@ void AbstractFunctionFactory::verifyArity(const FunctionSignature::Ptr &s, const
 
    if (s->maximumArguments() != FunctionSignature::UnlimitedArity && arity > s->maximumArguments()) {
 
-      context->error(QtXmlPatterns::tr("%1 takes at most %n argument(s). %2 is therefore invalid.", 0, s->maximumArguments())
-                     .formatArg(formatFunction(context->namePool(), s)).formatArg(arity), ReportContext::XPST0017, r);
+      context->error(QtXmlPatterns::tr("%1 takes at most %n argument(s), %2 is therefore invalid.", nullptr, s->maximumArguments())
+              .formatArg(formatFunction(context->namePool(), s)).formatArg(arity), ReportContext::XPST0017, r);
       return;
    }
 
    if (arity < s->minimumArguments()) {
-      context->error(QtXmlPatterns::tr("%1 requires at least %n argument(s). "
-                  "%2 is therefore invalid.", 0, s->minimumArguments())
-                  .formatArg(formatFunction(context->namePool(), s)).formatArg(arity), ReportContext::XPST0017, r);
+      context->error(QtXmlPatterns::tr("%1 requires at least %n argument(s), %2 is therefore invalid.",
+               nullptr, s->minimumArguments())
+              .formatArg(formatFunction(context->namePool(), s)).formatArg(arity), ReportContext::XPST0017, r);
+
       return;
    }
 }

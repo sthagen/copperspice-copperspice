@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,7 @@
 #include <qsqldriver.h>
 #include <qsqlresult.h>
 
-#if defined (Q_OS_WIN32)
+#if defined (Q_OS_WIN)
 #include <qt_windows.h>
 #endif
 
@@ -116,5 +116,9 @@ class Q_EXPORT_SQLDRIVER_MYSQL QMYSQLDriver : public QSqlDriver
 
    void init();
 };
+
+CS_DECLARE_METATYPE(st_mysql)
+CS_DECLARE_METATYPE(st_mysql_res)
+CS_DECLARE_METATYPE(st_mysql_stmt)
 
 #endif

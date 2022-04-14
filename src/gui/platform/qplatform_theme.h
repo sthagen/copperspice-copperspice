@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -244,6 +244,8 @@ class Q_GUI_EXPORT QPlatformTheme
    using IconOptions = QFlags<IconOption>;
 
    explicit QPlatformTheme();
+   QPlatformTheme(const QPlatformTheme &) = delete;
+
    virtual ~QPlatformTheme();
 
    virtual QPlatformMenuItem *createPlatformMenuItem() const;
@@ -266,7 +268,7 @@ class Q_GUI_EXPORT QPlatformTheme
 
    virtual QPixmap standardPixmap(StandardPixmap sp, const QSizeF &size) const;
    virtual QPixmap fileIconPixmap(const QFileInfo &fileInfo, const QSizeF &size,
-      QPlatformTheme::IconOptions iconOptions = 0) const;
+      QPlatformTheme::IconOptions iconOptions = Qt::EmptyFlag) const;
 
    virtual QIconEngine *createIconEngine(const QString &iconName) const;
 
@@ -280,9 +282,6 @@ class Q_GUI_EXPORT QPlatformTheme
  protected:
    explicit QPlatformTheme(QPlatformThemePrivate *priv);
    QScopedPointer<QPlatformThemePrivate> d_ptr;
-
- private:
-   Q_DISABLE_COPY(QPlatformTheme)
 };
 
 #endif

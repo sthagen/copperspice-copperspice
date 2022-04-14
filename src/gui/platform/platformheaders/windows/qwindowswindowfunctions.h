@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,25 +38,32 @@ public:
         WantPalmTouch = 0x00000002
     };
 
-    Q_DECLARE_FLAGS(TouchWindowTouchTypes, TouchWindowTouchType)
+    using TouchWindowTouchTypes = QFlags<TouchWindowTouchType>;
 
     typedef void (*SetTouchWindowTouchType)(QWindow *window, QWindowsWindowFunctions::TouchWindowTouchTypes touchType);
     static const QByteArray setTouchWindowTouchTypeIdentifier() { return QByteArray("WindowsSetTouchWindowTouchType"); }
 
     static void setTouchWindowTouchType(QWindow *window, TouchWindowTouchTypes type)
     {
-        SetTouchWindowTouchType func = reinterpret_cast<SetTouchWindowTouchType>(QGuiApplication::platformFunction(setTouchWindowTouchTypeIdentifier()));
-        if (func)
-            func(window, type);
+        SetTouchWindowTouchType func =  reinterpret_cast<SetTouchWindowTouchType>(
+            QGuiApplication::platformFunction(setTouchWindowTouchTypeIdentifier()));
+
+        if (func) {
+           func(window, type);
+        }
     }
 
     typedef void (*SetHasBorderInFullScreen)(QWindow *window, bool border);
     static const QByteArray setHasBorderInFullScreenIdentifier() { return QByteArray("WindowsSetHasBorderInFullScreen"); }
+
     static void setHasBorderInFullScreen(QWindow *window, bool border)
     {
-        SetHasBorderInFullScreen func = reinterpret_cast<SetHasBorderInFullScreen>(QGuiApplication::platformFunction(setHasBorderInFullScreenIdentifier()));
-        if (func)
-            func(window, border);
+        SetHasBorderInFullScreen func = reinterpret_cast<SetHasBorderInFullScreen>(
+            QGuiApplication::platformFunction(setHasBorderInFullScreenIdentifier()));
+
+        if (func) {
+           func(window, border);
+        }
     }
 };
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,6 +32,7 @@
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
+#include <qglobal.h>
 #include <qhash.h>
 #include <qmutex.h>
 #include <qtextcodec.h>
@@ -48,7 +49,6 @@
 #include <qprocess_p.h>
 #include <qthread_p.h>
 #include <qfactoryloader_p.h>
-#include <qfunctions_p.h>
 #include <qlocale_p.h>
 
 #if defined(Q_OS_UNIX)
@@ -56,7 +56,7 @@
 #    include <qeventdispatcher_cf_p.h>
 #    include <qeventdispatcher_unix_p.h>
 #  else
-#    if !defined(QT_NO_GLIB)
+#    if ! defined(QT_NO_GLIB)
 #    include <qeventdispatcher_glib_p.h>
 #    endif
 
@@ -85,24 +85,26 @@
 class QMutexUnlocker
 {
  public:
-   inline explicit QMutexUnlocker(QMutex *m)
+   explicit QMutexUnlocker(QMutex *m)
       : mtx(m) {
    }
 
-   inline ~QMutexUnlocker() {
+   QMutexUnlocker(const QMutexUnlocker &) = delete;
+   QMutexUnlocker &operator=(const QMutexUnlocker &) = delete;
+
+   ~QMutexUnlocker() {
       unlock();
    }
 
-   inline void unlock() {
+   void unlock() {
       if (mtx) {
          mtx->unlock();
       }
-      mtx = 0;
+
+      mtx = nullptr;
    }
 
  private:
-   Q_DISABLE_COPY(QMutexUnlocker)
-
    QMutex *mtx;
 };
 
@@ -145,7 +147,7 @@ QString QCoreApplicationPrivate::appName() const
 
 bool QCoreApplicationPrivate::checkInstance(const char *function)
 {
-   bool b = (QCoreApplication::self != 0);
+   bool b = (QCoreApplication::self != nullptr);
 
    if (!b) {
       qWarning("QApplication::%s: Please instantiate the QApplication object first", function);
@@ -186,8 +188,8 @@ void QCoreApplicationPrivate::processCommandLineArguments()
    }
 
    if (j < argc) {
-      argv[j] = 0;
-      argc = j;
+      argv[j] = nullptr;
+      argc    = j;
    }
 }
 
@@ -201,7 +203,7 @@ Q_GLOBAL_STATIC(QStartUpFuncList, preRList)
 using QVFuncList = QList<QtCleanUpFunction>;
 Q_GLOBAL_STATIC(QVFuncList, postRList)
 
-static QBasicMutex globalPreRoutinesMutex;
+static QMutex globalPreRoutinesMutex;
 
 void qAddPreRoutine(QtStartUpFunction p)
 {
@@ -211,7 +213,7 @@ void qAddPreRoutine(QtStartUpFunction p)
      return;
    }
 
-   // C++11 added parallel dynamic initialization, this can be called from multiple threads
+   // this can be called from multiple threads
    QMutexLocker locker(&globalPreRoutinesMutex);
 
    if (QCoreApplication::instance()) {
@@ -226,7 +228,7 @@ void qAddPostRoutine(QtCleanUpFunction p)
 {
    QVFuncList *list = postRList();
 
-   if (!list) {
+   if (! list) {
       return;
    }
 
@@ -261,15 +263,14 @@ static void qt_call_pre_routines()
 
 void Q_CORE_EXPORT qt_call_post_routines()
 {
-   QVFuncList *list = 0;
+   QVFuncList *list = nullptr;
 
    try {
       list = postRList();
 
    } catch (const std::bad_alloc &) {
-      // ignore - if we can't allocate a post routine list,
-      // there's a high probability that there's no post
-      // routine to be executed :)
+      // ignore - if we can not allocate a post routine list,
+      // there's a high probability that there's no post routine to be executed
    }
 
    if (!list) {
@@ -290,13 +291,16 @@ bool QCoreApplicationPrivate::is_app_closing = false;
 // initialized in qcoreapplication and in qtextstream autotest when setlocale is called.
 Q_CORE_EXPORT bool qt_locale_initialized = false;
 
-
-//  Create an instance of cs.conf. Ensures the settings will not be thrown out of QSetting's cache for unused settings.
-Q_GLOBAL_STATIC_WITH_ARGS(QSettings, static_CopperSpiceConf, (QSettings::UserScope, QString("CopperSpice")))
+//  Create an instance of cs.conf. Ensures settings will not be thrown out of QSetting's cache for unused settings
+static QSettings *internal_csConf()
+{
+   static QSettings retval(QSettings::UserScope, "CopperSpice");
+   return &retval;
+}
 
 QSettings *QCoreApplicationPrivate::copperspiceConf()
 {
-   return static_CopperSpiceConf();
+   return internal_csConf();
 }
 
 Q_CORE_EXPORT uint qGlobalPostedEventsCount()
@@ -310,12 +314,12 @@ QAbstractEventDispatcher *QCoreApplicationPrivate::eventDispatcher = nullptr;
 uint QCoreApplicationPrivate::attribs;
 
 #ifdef Q_OS_UNIX
-   Qt::HANDLE qt_application_thread_id = 0;
+   Qt::HANDLE qt_application_thread_id = nullptr;
 #endif
 
 struct QCoreApplicationData {
    QCoreApplicationData() {
-      app_libpaths = 0;
+      app_libpaths = nullptr;
    }
 
    ~QCoreApplicationData() {
@@ -338,7 +342,11 @@ struct QCoreApplicationData {
    QStringList *app_libpaths;
 };
 
-Q_GLOBAL_STATIC(QCoreApplicationData, coreappdata)
+static QCoreApplicationData *coreappdata()
+{
+   static QCoreApplicationData retval;
+   return &retval;
+}
 
 static bool quitLockRefEnabled = true;
 
@@ -350,7 +358,7 @@ QCoreApplicationPrivate::QCoreApplicationPrivate(int &aargc, char **aargv, uint 
 
    static const char *const empty = "";
 
-   if (argc == 0 || argv == 0) {
+   if (argc == 0 || argv == nullptr) {
       argc = 0;
       argv = const_cast<char **>(&empty);
    }
@@ -403,9 +411,9 @@ void QCoreApplicationPrivate::createEventDispatcher()
 
 #if defined(Q_OS_UNIX)
 
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_DARWIN)
     bool ok   = false;
-    int value = qgetenv("QT_EVENT_DISPATCHER_CORE_FOUNDATION").toInteger<int>(&ok);
+    int value = qgetenv("QT_EVENT_DISPATCHER_CORE_FOUNDATION").toInt(&ok);
 
     if (ok && value > 0) {
         eventDispatcher = new QEventDispatcherCoreFoundation(q);
@@ -430,7 +438,7 @@ void QCoreApplicationPrivate::createEventDispatcher()
    eventDispatcher = new QEventDispatcherWin32(q);
 
 #else
-#  error "QEventDispatcher not yet ported to this platform"
+#error "QEventDispatcher has not been ported to this platform."
 
 #endif
 
@@ -444,10 +452,9 @@ QThread *QCoreApplicationPrivate::theMainThread = nullptr;
 
 QThread *QCoreApplicationPrivate::mainThread()
 {
-   Q_ASSERT(theMainThread != 0);
+   Q_ASSERT(theMainThread != nullptr);
    return theMainThread;
 }
-
 
 void QCoreApplicationPrivate::checkReceiverThread(QObject *receiver)
 {
@@ -455,7 +462,7 @@ void QCoreApplicationPrivate::checkReceiverThread(QObject *receiver)
    QThread *thr = receiver->thread();
 
    Q_ASSERT_X(currentThread == thr || ! thr, "QCoreApplication::sendEvent",
-              QString::fromLatin1("Can not send events to objects owned by a different thread. "
+              QString::fromLatin1("Unable to send events to objects owned by a different thread. "
                                   "Current thread %1. Receiver '%2' (of type '%3') was created in thread %4")
               .formatArg(QString::number((quintptr) currentThread, 16))
               .formatArg(receiver->objectName())
@@ -506,14 +513,14 @@ void QCoreApplicationPrivate::initLocale()
     setlocale(LC_ALL, "");
 #endif
 }
+
 // internal
 QCoreApplication::QCoreApplication(QCoreApplicationPrivate &p)
    : QObject(nullptr), d_ptr(&p)
 {
    d_ptr->q_ptr = this;
 
-   // note: it is the subclasses' job to call
-   // QCoreApplicationPrivate::eventDispatcher->startingUp();
+   // subclasses should call QCoreApplicationPrivate::eventDispatcher->startingUp();
 }
 
 void QCoreApplication::flush()
@@ -565,7 +572,7 @@ void QCoreApplicationPrivate::init()
    }
 
    // otherwise we create one
-   if (! eventDispatcher) {
+   if (eventDispatcher == nullptr) {
       createEventDispatcher();
    }
    Q_ASSERT(eventDispatcher != nullptr);
@@ -590,7 +597,7 @@ QCoreApplication::~QCoreApplication()
 {
    qt_call_post_routines();
 
-   self = 0;
+   self = nullptr;
    QCoreApplicationPrivate::is_app_closing = true;
    QCoreApplicationPrivate::is_app_running = false;
 
@@ -617,10 +624,10 @@ QCoreApplication::~QCoreApplication()
       QCoreApplicationPrivate::eventDispatcher->closingDown();
    }
 
-   QCoreApplicationPrivate::eventDispatcher = 0;
+   QCoreApplicationPrivate::eventDispatcher = nullptr;
 
    delete coreappdata()->app_libpaths;
-   coreappdata()->app_libpaths = 0;
+   coreappdata()->app_libpaths = nullptr;
 }
 
 void QCoreApplication::setSetuidAllowed(bool allow)
@@ -773,10 +780,7 @@ bool QCoreApplicationPrivate::sendThroughObjectEventFilters(QObject *receiver, Q
    return false;
 }
 
-/*!\internal
-
-  Helper function called by notify()
- */
+// internal methods called by notify()
 bool QCoreApplicationPrivate::notify_helper(QObject *receiver, QEvent *event)
 {
    // send to all application event filters
@@ -813,7 +817,7 @@ void QCoreApplication::processEvents(QEventLoop::ProcessEventsFlags flags)
    }
 
    if (flags & QEventLoop::DeferredDeletion) {
-      QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+      QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
    }
 
    tmp->processEvents(flags);
@@ -830,7 +834,7 @@ void QCoreApplication::processEvents(QEventLoop::ProcessEventsFlags flags, int m
    start.start();
 
    if (flags & QEventLoop::DeferredDeletion) {
-      QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+      QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
    }
 
    while (data->eventDispatcher.load()->processEvents(flags & ~QEventLoop::WaitForMoreEvents)) {
@@ -839,7 +843,7 @@ void QCoreApplication::processEvents(QEventLoop::ProcessEventsFlags flags, int m
       }
 
       if (flags & QEventLoop::DeferredDeletion) {
-         QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+         QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
       }
    }
 }
@@ -878,7 +882,7 @@ int QCoreApplication::exec()
       }
 
       self->d_func()->aboutToQuitEmitted = true;
-      sendPostedEvents(0, QEvent::DeferredDelete);
+      sendPostedEvents(nullptr, QEvent::DeferredDelete);
    }
 
    return returnCode;
@@ -901,8 +905,8 @@ void QCoreApplication::exit(int returnCode)
 
 void QCoreApplication::postEvent(QObject *receiver, QEvent *event, int priority)
 {
-   if (receiver == 0) {
-      qWarning("QCoreApplication::postEvent: Unexpected null receiver");
+   if (receiver == nullptr) {
+      qWarning("QCoreApplication::postEvent: Unexpected nullptr for receiver");
       delete event;
       return;
    }
@@ -970,7 +974,7 @@ void QCoreApplication::postEvent(QObject *receiver, QEvent *event, int priority)
 
 /*!
   \internal
-  Returns true if \a event was compressed away (possibly deleted) and should not be added to the list.
+  Returns true if event was compressed away (possibly deleted) and should not be added to the list.
 */
 bool QCoreApplication::compressEvent(QEvent *event, QObject *receiver, QPostEventList *postedEvents)
 {
@@ -1003,7 +1007,7 @@ bool QCoreApplication::compressEvent(QEvent *event, QObject *receiver, QPostEven
 
          for (int i = 0; i < postedEvents->size(); ++i) {
             const QPostEvent &cur = postedEvents->at(i);
-            if (cur.receiver != receiver || cur.event == 0 || cur.event->type() != event->type()) {
+            if (cur.receiver != receiver || cur.event == nullptr || cur.event->type() != event->type()) {
                continue;
             }
 
@@ -1073,6 +1077,7 @@ void QCoreApplicationPrivate::sendPostedEvents(QObject *receiver, int event_type
       if (!pe.event) {
          continue;
       }
+
       if ((receiver && receiver != pe.receiver) || (event_type && event_type != pe.event->type())) {
          data->canWait = false;
          continue;
@@ -1082,11 +1087,12 @@ void QCoreApplicationPrivate::sendPostedEvents(QObject *receiver, int event_type
          // DeferredDelete events are only sent when we are explicitly asked to
          // (s.a. QEvent::DeferredDelete), and then only if the event loop that
          // posted the event has returned.
-         const bool allowDeferredDelete =
-            (quintptr(pe.event->d) > unsigned(data->loopLevel)
-             || (! quintptr(pe.event->d) && data->loopLevel > 0)
-             || (event_type == QEvent::DeferredDelete
-                 && quintptr(pe.event->d) == unsigned(data->loopLevel)));
+
+         const bool tmp1 = quintptr(pe.event->d) > unsigned(data->loopLevel);
+         const bool tmp2 = pe.event->d == nullptr && (data->loopLevel > 0);
+         const bool tmp3 = (event_type == QEvent::DeferredDelete) && (quintptr(pe.event->d) == unsigned(data->loopLevel));
+
+         const bool allowDeferredDelete = tmp1 || tmp2 || tmp3;
 
          if (! allowDeferredDelete) {
             // can not send deferred delete
@@ -1097,7 +1103,7 @@ void QCoreApplicationPrivate::sendPostedEvents(QObject *receiver, int event_type
 
                // null out the event so if sendPostedEvents recurses, it
                // will ignore this one, as it's been re-posted
-               const_cast<QPostEvent &>(pe).event = 0;
+               const_cast<QPostEvent &>(pe).event = nullptr;
 
                // re-post the copied event so it is not lost
                data->postEventList.addEvent(pe_copy);
@@ -1118,7 +1124,7 @@ void QCoreApplicationPrivate::sendPostedEvents(QObject *receiver, int event_type
       Q_ASSERT(CSInternalEvents::get_m_PostedEvents(r) >= 0);
 
       // next, update the data structure so that we're ready for the next event
-      const_cast<QPostEvent &>(pe).event = 0;
+      const_cast<QPostEvent &>(pe).event = nullptr;
 
       locker.unlock();
       // time to deliver the event
@@ -1188,8 +1194,7 @@ void QCoreApplication::removePostedEvents(QObject *receiver, int eventType)
 
    // the QObject destructor calls this function directly.  this can
    // happen while the event loop is in the middle of posting events,
-   // and when we get here, we may not have any more posted events
-   // for this object.
+   // and when we get here, we may not have any more posted events for this object
    int peCount = CSInternalEvents::get_m_PostedEvents(receiver);
 
    if (receiver && peCount == 0) {
@@ -1212,7 +1217,7 @@ void QCoreApplication::removePostedEvents(QObject *receiver, int eventType)
 
          pe.event->posted = false;
          events.append(pe.event);
-         const_cast<QPostEvent &>(pe).event = 0;
+         const_cast<QPostEvent &>(pe).event = nullptr;
 
       } else if (! data->postEventList.recursion) {
          if (i != j) {
@@ -1273,7 +1278,7 @@ void QCoreApplicationPrivate::removePostedEvent(QEvent *event)
          pe.event->posted = false;
 
          delete pe.event;
-         const_cast<QPostEvent &>(pe).event = 0;
+         const_cast<QPostEvent &>(pe).event = nullptr;
          return;
       }
    }
@@ -1295,6 +1300,12 @@ void QCoreApplication::cs_internal_maybeQuit()
    d->maybeQuit();
 }
 
+bool QCoreApplication::cs_isRealGuiApp() {
+
+   Q_D(QCoreApplication);
+   return d->application_type == QCoreApplicationPrivate::Type::Gui;
+}
+
 void QCoreApplicationPrivate::maybeQuit()
 {
    if (quitLockRef.load() == 0 && in_exec && quitLockRefEnabled && shouldQuit()) {
@@ -1306,8 +1317,6 @@ void QCoreApplication::quit()
 {
    exit(0);
 }
-
-#ifndef QT_NO_TRANSLATION
 
 void QCoreApplication::installTranslator(QTranslator *translationFile)
 {
@@ -1322,11 +1331,9 @@ void QCoreApplication::installTranslator(QTranslator *translationFile)
    QCoreApplicationPrivate *d = self->d_func();
    d->translators.prepend(translationFile);
 
-#ifndef QT_NO_TRANSLATION_BUILDER
    if (translationFile->isEmpty()) {
       return;
    }
-#endif
 
    QEvent ev(QEvent::LanguageChange);
    QCoreApplication::sendEvent(self, &ev);
@@ -1338,108 +1345,95 @@ void QCoreApplication::removeTranslator(QTranslator *translationFile)
       return;
    }
 
-   if (!QCoreApplicationPrivate::checkInstance("removeTranslator")) {
+   if (! QCoreApplicationPrivate::checkInstance("removeTranslator")) {
       return;
    }
 
    QCoreApplicationPrivate *d = self->d_func();
+
    if (d->translators.removeAll(translationFile) && ! self->closingDown()) {
       QEvent ev(QEvent::LanguageChange);
       QCoreApplication::sendEvent(self, &ev);
    }
 }
 
-static void replacePercentN(QString *result, int n)
+QString QCoreApplication::translate(const char *context, const char *text, const char *comment,
+            std::optional<int> numArg)
 {
-   if (n >= 0) {
-      int percentPos = 0;
-      int len = 0;
+   QString retval;
 
-      while ((percentPos = result->indexOf(QChar('%'), percentPos + len)) != -1) {
-         len = 1;
-         QString fmt;
-
-         if (result->at(percentPos + len) == QChar('L')) {
-            ++len;
-            fmt = QString("%L1");
-         } else {
-            fmt = QString("%1");
-         }
-
-         if (result->at(percentPos + len) == QChar('n')) {
-            fmt = fmt.formatArg(n);
-            ++len;
-            result->replace(percentPos, len, fmt);
-            len = fmt.length();
-         }
-      }
-   }
-}
-
-QString QCoreApplication::translate(const char *context, const char *sourceText,
-                  const char *disambiguation, Encoding encoding, int n)
-{
-   QString result;
-
-   if (! sourceText) {
-      return result;
+   if (! text) {
+      return retval;
    }
 
-   if (self && ! self->d_func()->translators.isEmpty()) {
-      QList<QTranslator *>::const_iterator it;
-      QTranslator *translationFile;
+   if (self != nullptr) {
 
-      for (it = self->d_func()->translators.constBegin(); it != self->d_func()->translators.constEnd(); ++it) {
-         translationFile = *it;
+      for (auto item : self->d_func()->translators) {
+         retval = item->translate(context, text, comment, numArg);
 
-         result = translationFile->translate(context, sourceText, disambiguation, n);
-
-         if (! result.isEmpty()) {
+         if (! retval.isEmpty()) {
             break;
          }
       }
    }
 
-   if (result.isEmpty()) {
+   if (retval.isEmpty()) {
+      retval = QString::fromUtf8(text);
 
-#ifdef QT_NO_TEXTCODEC
-      // nothing
-#else
-      if (encoding == UnicodeUTF8) {
-         result = QString::fromUtf8(sourceText);
-
-      } else if (QTextCodec::codecForTr() != 0) {
-         result = QTextCodec::codecForTr()->toUnicode(sourceText);
-
-      } else
-#endif
-
-      result = QString::fromLatin1(sourceText);
+      if (numArg.has_value()) {
+         retval = QTranslator::replacePercentN(retval, numArg.value());
+      }
    }
 
-   replacePercentN(&result, n);
+   return retval;
+}
 
-   return result;
+QString QCoreApplication::translate(const QString &context, const QString &text, const QString &comment,
+            std::optional<int> numArg)
+{
+   QString retval;
+
+   if (text.isEmpty()) {
+      return retval;
+   }
+
+   if (self != nullptr) {
+
+      for (auto item : self->d_func()->translators) {
+         retval = item->translate(context, text, comment, numArg);
+
+         if (! retval.isEmpty()) {
+            break;
+         }
+      }
+   }
+
+   if (retval.isEmpty()) {
+      retval = text;
+
+      if (numArg.has_value()) {
+         retval = QTranslator::replacePercentN(retval, numArg.value());
+      }
+   }
+
+   return retval;
 }
 
 // Declared in qglobal.h
-QString qtTrId(const char *id, int n)
+QString qtTrId(const char *id, std::optional<int> n)
 {
-   return QCoreApplication::translate(0, id, 0, QCoreApplication::UnicodeUTF8, n);
+   return QCoreApplication::translate(nullptr, id, nullptr, n);
 }
 
 bool QCoreApplicationPrivate::isTranslatorInstalled(QTranslator *translator)
 {
-   return QCoreApplication::self
-          && QCoreApplication::self->d_func()->translators.contains(translator);
+   return QCoreApplication::self && QCoreApplication::self->d_func()->translators.contains(translator);
 }
-
-#endif //QT_NO_TRANSLATE
 
 QString QCoreApplication::applicationDirPath()
 {
    if (! self) {
-      qWarning("QCoreApplication::applicationDirPath: Please instantiate the QApplication object first");
+      qWarning("QCoreApplication::applicationDirPath: QApplication must be instantiated before calling this method");
       return QString();
    }
 
@@ -1471,7 +1465,7 @@ QString QCoreApplication::applicationFilePath()
 #elif defined(Q_OS_DARWIN)
    QString qAppFileName_str = qAppFileName();
 
-   if (!qAppFileName_str.isEmpty()) {
+   if (! qAppFileName_str.isEmpty()) {
       QFileInfo fi(qAppFileName_str);
       d->cachedApplicationFilePath = fi.exists() ? fi.canonicalFilePath() : QString();
       return d->cachedApplicationFilePath;
@@ -1480,7 +1474,7 @@ QString QCoreApplication::applicationFilePath()
 
 #if defined( Q_OS_UNIX )
 
-#  ifdef Q_OS_LINUX
+#ifdef Q_OS_LINUX
    // Try looking for a /proc/<pid>/exe symlink first which points to the absolute path of the executable
    QFileInfo pfi(QString::fromLatin1("/proc/%1/exe").formatArg(getpid()));
 
@@ -1488,17 +1482,17 @@ QString QCoreApplication::applicationFilePath()
       d->cachedApplicationFilePath = pfi.canonicalFilePath();
       return d->cachedApplicationFilePath;
    }
-#  endif
+#endif
 
    QString argv0 = arguments().at(0);
 
    QString absPath;
 
-   if (! argv0.isEmpty() && argv0.at(0) == QChar('/')) {
+   if (! argv0.isEmpty() && argv0.at(0) == '/') {
       // If argv0 starts with a slash, it is already an absolute file path.
       absPath = argv0;
 
-   } else if (argv0.contains(QChar('/'))) {
+   } else if (argv0.contains('/')) {
       // If argv0 contains one or more slashes, it is a file path relative to the current directory.
       absPath = QDir::current().absoluteFilePath(argv0);
 
@@ -1562,10 +1556,12 @@ QStringList QCoreApplication::arguments()
 
          if (l1arg == "-qdevel" || l1arg == "-qdebug" || l1arg == "-reverse" ||
                   l1arg == "-stylesheet" || l1arg == "-widgetcount")  {
-            ;
+
+            // no code here
 
          } else if (l1arg.startsWith("-style=") || l1arg.startsWith("-qmljsdebugger=")) {
-            ;
+
+            // no code here
 
          } else if (l1arg == "-style" || l1arg == "-qmljsdebugger" || l1arg == "-session" ||
                   l1arg == "-graphicssystem" || l1arg == "-testability") {
@@ -1622,7 +1618,7 @@ QString QCoreApplication::applicationName()
    return coreappdata()->application;
 }
 
-// Exported for QDesktopServices (Qt4 behavior compatibility)
+// Exported for QDesktopServices (backward compatibility)
 Q_CORE_EXPORT QString qt_applicationName_noFallback()
 {
    return coreappdata()->applicationNameSet ? coreappdata()->application : QString();
@@ -1638,33 +1634,41 @@ QString QCoreApplication::applicationVersion()
    return coreappdata()->applicationVersion;
 }
 
-Q_GLOBAL_STATIC_WITH_ARGS(QMutex, libraryPathMutex, (QMutex::Recursive))
+static QRecursiveMutex *libraryPathMutex()
+{
+   static QRecursiveMutex retval;
+   return &retval;
+}
 
 QStringList QCoreApplication::libraryPaths()
 {
-   QMutexLocker locker(libraryPathMutex());
+   QRecursiveMutexLocker locker(libraryPathMutex());
 
-   if (!coreappdata()->app_libpaths) {
-      QStringList *app_libpaths = coreappdata()->app_libpaths = new QStringList;
-      QString installPathPlugins =  QLibraryInfo::location(QLibraryInfo::PluginsPath);
+   if (! coreappdata()->app_libpaths) {
+      QStringList *app_libpaths   = new QStringList;
+      coreappdata()->app_libpaths = app_libpaths;
+
+      // retrives the plugins path from cs.conf
+      QString installPathPlugins = QLibraryInfo::location(QLibraryInfo::PluginsPath);
 
       if (QFile::exists(installPathPlugins)) {
-         // Make sure we convert from backslashes to slashes.
-
+         // make sure we convert from backslashes to slashes
          installPathPlugins = QDir(installPathPlugins).canonicalPath();
-         if (!app_libpaths->contains(installPathPlugins)) {
+
+         if (! app_libpaths->contains(installPathPlugins)) {
             app_libpaths->append(installPathPlugins);
          }
       }
 
-      // If QCoreApplication is not yet instantiated,
-      // make sure we add the application path when we construct the QCoreApplication
+      // if QCoreApplication is not yet instantiated, make sure we add the
+      // application path when we construct the QCoreApplication
       if (self) {
          self->d_func()->appendApplicationPathToLibraryPaths();
       }
 
-      const QByteArray libPathEnv = qgetenv("QT_PLUGIN_PATH");
-      if (!libPathEnv.isEmpty()) {
+      const QByteArray libPathEnv = qgetenv("CS_PLUGIN_PATH");
+
+      if (! libPathEnv.isEmpty()) {
 
 #if defined(Q_OS_WIN)
          QChar pathSep(';');
@@ -1688,7 +1692,7 @@ QStringList QCoreApplication::libraryPaths()
 
 void QCoreApplication::setLibraryPaths(const QStringList &paths)
 {
-   QMutexLocker locker(libraryPathMutex());
+   QRecursiveMutexLocker locker(libraryPathMutex());
 
    if (! coreappdata()->app_libpaths) {
       coreappdata()->app_libpaths = new QStringList;
@@ -1706,7 +1710,7 @@ void QCoreApplication::addLibraryPath(const QString &path)
       return;
    }
 
-   QMutexLocker locker(libraryPathMutex());
+   QRecursiveMutexLocker locker(libraryPathMutex());
 
    // make sure that library paths is initialized
    libraryPaths();
@@ -1727,7 +1731,7 @@ void QCoreApplication::removeLibraryPath(const QString &path)
       return;
    }
 
-   QMutexLocker locker(libraryPathMutex());
+   QRecursiveMutexLocker locker(libraryPathMutex());
 
    // make sure that library paths is initialized
    libraryPaths();

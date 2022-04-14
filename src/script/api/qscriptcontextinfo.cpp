@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,15 +22,18 @@
 ***********************************************************************/
 
 #include "config.h"
-#include "qscriptcontextinfo.h"
 
-#include "qscriptcontext_p.h"
-#include "qscriptengine.h"
-#include "qscriptengine_p.h"
-#include "../bridge/qscriptqobject_p.h"
+#include <qscriptcontextinfo.h>
+
+#include <qscriptengine.h>
 #include <qdatastream.h>
 #include <qmetaobject.h>
 #include <qshareddata.h>
+
+#include <qscriptengine_p.h>
+#include <qscriptcontext_p.h>
+#include <qscriptqobject_p.h>
+
 #include "CodeBlock.h"
 #include "JSFunction.h"
 
@@ -128,18 +131,23 @@ QScriptContextInfoPrivate::QScriptContextInfoPrivate(const QScriptContext *conte
             JSC::JITCode code = codeBlock->getJITCode();
             uintptr_t jitOffset = reinterpret_cast<uintptr_t>(JSC::ReturnAddressPtr(returnPC).value()) -
                reinterpret_cast<uintptr_t>(code.addressForCall().executableAddress());
+
             // We can only use the JIT code offset if it's smaller than the JIT size;
             // otherwise calling getBytecodeIndex() is meaningless.
+
             if (jitOffset < code.size()) {
                unsigned bytecodeOffset = codeBlock->getBytecodeIndex(frame, JSC::ReturnAddressPtr(returnPC));
-#else
-            unsigned bytecodeOffset = returnPC - codeBlock->instructions().begin();
-#endif
+
                bytecodeOffset--; //because returnPC is on the next instruction. We want the current one
                lineNumber = codeBlock->lineNumberForBytecodeOffset(const_cast<JSC::ExecState *>(frame), bytecodeOffset);
-#if ENABLE(JIT)
             }
+#else
+            unsigned bytecodeOffset = returnPC - codeBlock->instructions().begin();
+            bytecodeOffset--; //because returnPC is on the next instruction. We want the current one
+            lineNumber = codeBlock->lineNumberForBytecodeOffset(const_cast<JSC::ExecState *>(frame), bytecodeOffset);
+
 #endif
+
          }
       }
    }
@@ -180,7 +188,7 @@ QScriptContextInfoPrivate::QScriptContextInfoPrivate(const QScriptContext *conte
       functionMetaIndex = static_cast<QScript::QtFunction *>(callee)->specificIndex(context);
       const QMetaObject *meta = static_cast<QScript::QtFunction *>(callee)->metaObject();
 
-      if (meta != 0) {
+      if (meta != nullptr) {
          QMetaMethod method     = meta->method(functionMetaIndex);
          QList<QString> formals = method.parameterNames();
 
@@ -212,7 +220,7 @@ QScriptContextInfoPrivate::~QScriptContextInfoPrivate()
   previously created QScriptContextInfo.
 */
 QScriptContextInfo::QScriptContextInfo(const QScriptContext *context)
-   : d_ptr(0)
+   : d_ptr(nullptr)
 {
    if (context) {
       d_ptr = new QScriptContextInfoPrivate(context);
@@ -234,7 +242,7 @@ QScriptContextInfo::QScriptContextInfo(const QScriptContextInfo &other)
   \sa isNull()
 */
 QScriptContextInfo::QScriptContextInfo()
-   : d_ptr(0)
+   : d_ptr(nullptr)
 {
 }
 
@@ -433,7 +441,7 @@ int QScriptContextInfo::functionMetaIndex() const
 bool QScriptContextInfo::isNull() const
 {
    Q_D(const QScriptContextInfo);
-   return (d == 0);
+   return (d == nullptr);
 }
 
 /*!

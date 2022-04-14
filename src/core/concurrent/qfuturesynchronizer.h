@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,22 +24,28 @@
 #ifndef QFutureSynchronizer_H
 #define QFutureSynchronizer_H
 
-#include <QtCore/qfuture.h>
-
-QT_BEGIN_NAMESPACE
+#include <qfuture.h>
 
 template <typename T>
 class QFutureSynchronizer
 {
-   Q_DISABLE_COPY(QFutureSynchronizer)
-
  public:
-   QFutureSynchronizer() : m_cancelOnWait(false) { }
+   QFutureSynchronizer()
+      : m_cancelOnWait(false)
+   {
+   }
+
    explicit QFutureSynchronizer(const QFuture<T> &future)
-      : m_cancelOnWait(false) {
+      : m_cancelOnWait(false)
+   {
       addFuture(future);
    }
-   ~QFutureSynchronizer()  {
+
+   QFutureSynchronizer(const QFutureSynchronizer &) = delete;
+   QFutureSynchronizer &operator=(const QFutureSynchronizer &) = delete;
+
+   ~QFutureSynchronizer()
+   {
       waitForFinished();
    }
 
@@ -86,6 +92,4 @@ class QFutureSynchronizer
    bool m_cancelOnWait;
 };
 
-QT_END_NAMESPACE
-
-#endif // QFUTRUESYNCHRONIZER_H
+#endif

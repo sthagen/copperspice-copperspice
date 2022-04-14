@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QGIFHANDLER_P_H
 #define QGIFHANDLER_P_H
 
-#include <QtGui/qimageiohandler.h>
-#include <QtGui/qimage.h>
-#include <QtCore/qbytearray.h>
+#include <qimageiohandler.h>
+#include <qimage.h>
+#include <qbytearray.h>
 
 
 
@@ -38,19 +38,19 @@ class QGifHandler : public QImageIOHandler
    QGifHandler();
    ~QGifHandler();
 
-   bool canRead() const override;
+   bool canRead() override;
    bool read(QImage *image) override;
    bool write(const QImage &image) override;
 
-   QByteArray name() const override;
+   QString name() const override;
 
    static bool canRead(QIODevice *device);
 
-   QVariant option(ImageOption option) const override;
+   QVariant option(ImageOption option) override;
    void setOption(ImageOption option, const QVariant &value) override;
    bool supportsOption(ImageOption option) const override;
 
-   int imageCount() const override;
+   int imageCount() override;
    int loopCount() const override;
    int nextImageDelay() const override;
    int currentImageNumber() const override;

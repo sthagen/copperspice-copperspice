@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,19 +24,17 @@
 #ifndef QABSTRACTTRANSITION_H
 #define QABSTRACTTRANSITION_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qlist.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractstate.h>
+#include <qobject.h>
+#include <qlist.h>
+#include <qscopedpointer.h>
+#include <qstate.h>
 
 #ifndef QT_NO_STATEMACHINE
 
-class QEvent;
-class QAbstractState;
-class QState;
-class QStateMachine;
 class QAbstractTransitionPrivate;
+class QEvent;
+class QStateMachine;
 
 #ifndef QT_NO_ANIMATION
 class QAbstractAnimation;
@@ -47,13 +45,32 @@ class Q_CORE_EXPORT QAbstractTransition : public QObject
    CORE_CS_OBJECT(QAbstractTransition)
 
    CORE_CS_PROPERTY_READ(sourceState, sourceState)
-   CORE_CS_PROPERTY_READ(targetState, targetState)
-   CORE_CS_PROPERTY_WRITE(targetState, setTargetState)
-   CORE_CS_PROPERTY_READ(targetStates, targetStates)
-   CORE_CS_PROPERTY_WRITE(targetStates, setTargetStates)
+
+   CORE_CS_PROPERTY_READ(targetState,   targetState)
+   CORE_CS_PROPERTY_WRITE(targetState,  setTargetState)
+   CORE_CS_PROPERTY_NOTIFY(targetState, targetStateChanged)
+
+   CORE_CS_PROPERTY_READ(targetStates,   targetStates)
+   CORE_CS_PROPERTY_WRITE(targetStates,  setTargetStates)
+   CORE_CS_PROPERTY_NOTIFY(targetStates, targetStatesChanged)
+
+   CORE_CS_PROPERTY_READ(transitionType,      transitionType)
+   CORE_CS_PROPERTY_WRITE(transitionType,     setTransitionType)
+   CORE_CS_PROPERTY_REVISION(transitionType,  1)
 
  public:
-   QAbstractTransition(QState *sourceState = 0);
+   enum TransitionType {
+      ExternalTransition,
+      InternalTransition
+   };
+
+   CORE_CS_ENUM(TransitionType)
+
+   QAbstractTransition(QState *sourceState = nullptr);
+
+   QAbstractTransition(const QAbstractTransition &) = delete;
+   QAbstractTransition &operator=(const QAbstractTransition &) = delete;
+
    virtual ~QAbstractTransition();
 
    QState *sourceState() const;
@@ -62,6 +79,8 @@ class Q_CORE_EXPORT QAbstractTransition : public QObject
    QList<QAbstractState *> targetStates() const;
    void setTargetStates(const QList<QAbstractState *> &targets);
 
+   TransitionType transitionType() const;
+   void setTransitionType(TransitionType type);
    QStateMachine *machine() const;
 
 #ifndef QT_NO_ANIMATION
@@ -73,9 +92,14 @@ class Q_CORE_EXPORT QAbstractTransition : public QObject
    CORE_CS_SIGNAL_1(Public, void triggered())
    CORE_CS_SIGNAL_2(triggered)
 
+   CORE_CS_SIGNAL_1(Public, void targetStateChanged())
+   CORE_CS_SIGNAL_2(targetStateChanged)
+
+   CORE_CS_SIGNAL_1(Public, void targetStatesChanged())
+   CORE_CS_SIGNAL_2(targetStatesChanged)
+
  protected:
    virtual bool eventTest(QEvent *event) = 0;
-
    virtual void onTransition(QEvent *event) = 0;
 
    bool event(QEvent *e) override;
@@ -85,13 +109,9 @@ class Q_CORE_EXPORT QAbstractTransition : public QObject
    QScopedPointer<QAbstractTransitionPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QAbstractTransition)
    Q_DECLARE_PRIVATE(QAbstractTransition)
-
 };
 
-#endif //QT_NO_STATEMACHINE
-
-QT_END_NAMESPACE
+#endif // QT_NO_STATEMACHINE
 
 #endif

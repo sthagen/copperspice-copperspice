@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -61,7 +61,10 @@ class QItemDelegatePrivate : public QAbstractItemDelegatePrivate
    Q_DECLARE_PUBLIC(QItemDelegate)
 
  public:
-   QItemDelegatePrivate() : f(0), clipPainting(true) {}
+   QItemDelegatePrivate()
+      : f(nullptr), clipPainting(true)
+   {
+   }
 
    inline const QItemEditorFactory *editorFactory() const {
       return f ? f : QItemEditorFactory::defaultFactory();
@@ -137,10 +140,12 @@ QSizeF QItemDelegatePrivate::doTextLayout(int lineWidth) const
 {
    qreal height    = 0;
    qreal widthUsed = 0;
+
    textLayout.beginLayout();
 
    while (true) {
       QTextLine line = textLayout.createLine();
+
       if (! line.isValid()) {
          break;
       }
@@ -152,6 +157,7 @@ QSizeF QItemDelegatePrivate::doTextLayout(int lineWidth) const
    }
 
    textLayout.endLayout();
+
    return QSizeF(widthUsed, height);
 }
 
@@ -206,7 +212,7 @@ void QItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
       pixmap = decoration(opt, value);
 
       if (value.type() == QVariant::Icon) {
-         d->tmp.icon = qvariant_cast<QIcon>(value);
+         d->tmp.icon  = value.value<QIcon>();
          d->tmp.mode = d->iconMode(option.state);
          d->tmp.state = d->iconState(option.state);
 
@@ -227,7 +233,7 @@ void QItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
    QRect displayRect;
    value = index.data(Qt::DisplayRole);
 
-   if (value.isValid() && ! value.isNull()) {
+   if (value.isValid()) {
       text = d->valueToText(value, opt);
       displayRect = textRectangle(painter, d->textLayoutBounds(opt), opt.font, text);
    }
@@ -255,16 +261,17 @@ void QItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
    painter->restore();
 }
 
-QSize QItemDelegate::sizeHint(const QStyleOptionViewItem &option,
-   const QModelIndex &index) const
+QSize QItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
    QVariant value = index.data(Qt::SizeHintRole);
+
    if (value.isValid()) {
-      return qvariant_cast<QSize>(value);
+      return value.value<QSize>();
    }
+
    QRect decorationRect = rect(option, index, Qt::DecorationRole);
-   QRect displayRect = rect(option, index, Qt::DisplayRole);
-   QRect checkRect = rect(option, index, Qt::CheckStateRole);
+   QRect displayRect    = rect(option, index, Qt::DisplayRole);
+   QRect checkRect      = rect(option, index, Qt::CheckStateRole);
 
    doLayout(option, &checkRect, &decorationRect, &displayRect, true);
 
@@ -272,7 +279,7 @@ QSize QItemDelegate::sizeHint(const QStyleOptionViewItem &option,
 }
 
 QWidget *QItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &,
-   const QModelIndex &index) const
+            const QModelIndex &index) const
 {
    Q_D(const QItemDelegate);
 
@@ -304,7 +311,7 @@ void QItemDelegate::setEditorData(QWidget *editor, const QModelIndex &index) con
 
    if (! n.isEmpty()) {
       if (! v.isValid())  {
-         v = QVariant(editor->property(n).userType(), (const void *)0);
+         v = QVariant(editor->property(n).userType(), (const void *)nullptr);
       }
 
       editor->setProperty(n, v);
@@ -342,7 +349,7 @@ void QItemDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionView
    QPixmap pixmap = decoration(option, index.data(Qt::DecorationRole));
    QString text = QItemDelegatePrivate::replaceNewLine(index.data(Qt::DisplayRole).toString());
    QRect pixmapRect = QRect(QPoint(0, 0), option.decorationSize).intersected(pixmap.rect());
-   QRect textRect = textRectangle(0, option.rect, option.font, text);
+   QRect textRect = textRectangle(nullptr, option.rect, option.font, text);
    QRect checkRect = doCheck(option, textRect, index.data(Qt::CheckStateRole));
 
    QStyleOptionViewItem opt = option;
@@ -377,6 +384,7 @@ void QItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &o
    if (option.state & QStyle::State_Selected) {
       painter->fillRect(rect, option.palette.brush(cg, QPalette::Highlight));
       painter->setPen(option.palette.color(cg, QPalette::HighlightedText));
+
    } else {
       painter->setPen(option.palette.color(cg, QPalette::Text));
    }
@@ -397,7 +405,7 @@ void QItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &o
    const QWidget *widget = d->widget(option);
    QStyle *style = widget ? widget->style() : QApplication::style();
 
-   const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1;
+   const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, widget) + 1;
    QRect textRect = rect.adjusted(textMargin, 0, -textMargin, 0); // remove width padding
 
    const bool wrapText = opt.features & QStyleOptionViewItem::WrapText;
@@ -541,7 +549,7 @@ void QItemDelegate::drawBackground(QPainter *painter, const QStyleOptionViewItem
       if (value.canConvert<QBrush>()) {
          QPointF oldBO = painter->brushOrigin();
          painter->setBrushOrigin(option.rect.topLeft());
-         painter->fillRect(option.rect, qvariant_cast<QBrush>(value));
+         painter->fillRect(option.rect, value.value<QBrush>());
          painter->setBrushOrigin(oldBO);
       }
    }
@@ -556,21 +564,26 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
 {
    Q_ASSERT(checkRect && pixmapRect && textRect);
    Q_D(const QItemDelegate);
+
    const QWidget *widget = d->widget(option);
    QStyle *style = widget ? widget->style() : QApplication::style();
-   const bool hasCheck = checkRect->isValid();
-   const bool hasPixmap = pixmapRect->isValid();
-   const bool hasText = textRect->isValid();
-   const int textMargin = hasText ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1 : 0;
-   const int pixmapMargin = hasPixmap ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1 : 0;
-   const int checkMargin = hasCheck ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, widget) + 1 : 0;
+
+   const bool hasCheck    = checkRect->isValid();
+   const bool hasPixmap   = pixmapRect->isValid();
+   const bool hasText     = textRect->isValid();
+   const int textMargin   = hasText   ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, widget) + 1 : 0;
+   const int pixmapMargin = hasPixmap ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, widget) + 1 : 0;
+   const int checkMargin  = hasCheck  ? style->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, widget) + 1 : 0;
+
    int x = option.rect.left();
    int y = option.rect.top();
-   int w, h;
+   int w;
+   int h;
 
    textRect->adjust(-textMargin, 0, textMargin, 0); // add width padding
-   if (textRect->height() == 0 && (!hasPixmap || !hint)) {
-      //if there is no text, we still want to have a decent height for the item sizeHint and the editor size
+
+   if (textRect->height() == 0 && (! hasPixmap || ! hint)) {
+      // if there is no text, we still want to have a decent height for the item sizeHint and the editor size
       textRect->setHeight(option.fontMetrics.height());
    }
 
@@ -596,11 +609,14 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
 
    int cw = 0;
    QRect check;
+
    if (hasCheck) {
       cw = checkRect->width() + 2 * checkMargin;
+
       if (hint) {
          w += cw;
       }
+
       if (option.direction == Qt::RightToLeft) {
          check.setRect(x + w - cw, y, cw, h);
       } else {
@@ -612,11 +628,13 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
 
    QRect display;
    QRect decoration;
+
    switch (option.decorationPosition) {
       case QStyleOptionViewItem::Top: {
          if (hasPixmap) {
             pm.setHeight(pm.height() + pixmapMargin);   // add space
          }
+
          h = hint ? textRect->height() : h - pm.height();
 
          if (option.direction == Qt::RightToLeft) {
@@ -628,10 +646,12 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
          }
          break;
       }
+
       case QStyleOptionViewItem::Bottom: {
          if (hasText) {
             textRect->setHeight(textRect->height() + textMargin);   // add space
          }
+
          h = hint ? textRect->height() + pm.height() : h;
 
          if (option.direction == Qt::RightToLeft) {
@@ -643,6 +663,7 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
          }
          break;
       }
+
       case QStyleOptionViewItem::Left: {
          if (option.direction == Qt::LeftToRight) {
             decoration.setRect(x + cw, y, pm.width(), h);
@@ -653,6 +674,7 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
          }
          break;
       }
+
       case QStyleOptionViewItem::Right: {
          if (option.direction == Qt::LeftToRight) {
             display.setRect(x + cw, y, w - pm.width() - cw, h);
@@ -663,6 +685,7 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
          }
          break;
       }
+
       default:
          qWarning("doLayout: decoration position is invalid");
          decoration = *pixmapRect;
@@ -672,18 +695,22 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
    if (!hint) { // we only need to do the internal layout if we are going to paint
       *checkRect = QStyle::alignedRect(option.direction, Qt::AlignCenter,
             checkRect->size(), check);
+
       *pixmapRect = QStyle::alignedRect(option.direction, option.decorationAlignment,
             pixmapRect->size(), decoration);
+
       // the text takes up all available space, unless the decoration is not shown as selected
       if (option.showDecorationSelected) {
          *textRect = display;
-      } else
+      } else {
          *textRect = QStyle::alignedRect(option.direction, option.displayAlignment,
                textRect->size().boundedTo(display.size()), display);
+      }
+
    } else {
-      *checkRect = check;
+      *checkRect  = check;
       *pixmapRect = decoration;
-      *textRect = display;
+      *textRect   = display;
    }
 }
 
@@ -698,22 +725,25 @@ void QItemDelegate::doLayout(const QStyleOptionViewItem &option,
 QPixmap QItemDelegate::decoration(const QStyleOptionViewItem &option, const QVariant &variant) const
 {
    Q_D(const QItemDelegate);
+
    switch (variant.type()) {
       case QVariant::Icon: {
          QIcon::Mode mode = d->iconMode(option.state);
          QIcon::State state = d->iconState(option.state);
-         return qvariant_cast<QIcon>(variant).pixmap(option.decorationSize, mode, state);
+         return variant.value<QIcon>().pixmap(option.decorationSize, mode, state);
       }
+
       case QVariant::Color: {
          static QPixmap pixmap(option.decorationSize);
-         pixmap.fill(qvariant_cast<QColor>(variant));
+         pixmap.fill(variant.value<QColor>());
          return pixmap;
       }
+
       default:
          break;
    }
 
-   return qvariant_cast<QPixmap>(variant);
+   return variant.value<QPixmap>();
 }
 
 // hacky but faster version of "QString::sprintf("%d-%d", i, enabled)"
@@ -733,10 +763,6 @@ static QString cs_internal_PixmapSerial(quint64 i, bool enabled)
    return QString(ptr, std::end(arr));
 }
 
-/*!
-  Returns the selected version of the given pixmap using the given palette.
-  The enabled argument decides whether the normal or disabled highlight color of the palette is used.
-*/
 QPixmap *QItemDelegate::selected(const QPixmap &pixmap, const QPalette &palette, bool enabled) const
 {
    QString key = cs_internal_PixmapSerial(pixmap.cacheKey(), enabled);
@@ -766,8 +792,7 @@ QPixmap *QItemDelegate::selected(const QPixmap &pixmap, const QPalette &palette,
    return pm;
 }
 
-QRect QItemDelegate::rect(const QStyleOptionViewItem &option,
-   const QModelIndex &index, int role) const
+QRect QItemDelegate::rect(const QStyleOptionViewItem &option, const QModelIndex &index, int role) const
 {
    Q_D(const QItemDelegate);
    QVariant value = index.data(role);
@@ -776,25 +801,25 @@ QRect QItemDelegate::rect(const QStyleOptionViewItem &option,
       return doCheck(option, option.rect, value);
    }
 
-   if (value.isValid() && !value.isNull()) {
+   if (value.isValid()) {
       switch (value.type()) {
          case QVariant::Invalid:
             break;
 
          case QVariant::Pixmap: {
-            const QPixmap &pixmap = qvariant_cast<QPixmap>(value);
+            const QPixmap &pixmap = value.value<QPixmap>();
             return QRect(QPoint(0, 0), pixmap.size() / pixmap.devicePixelRatio() );
          }
 
          case QVariant::Image: {
-            const QImage &image = qvariant_cast<QImage>(value);
+            const QImage &image = value.value<QImage>();
             return QRect(QPoint(0, 0), image.size() /  image.devicePixelRatio() );
          }
 
          case QVariant::Icon: {
             QIcon::Mode mode = d->iconMode(option.state);
             QIcon::State state = d->iconState(option.state);
-            QIcon icon = qvariant_cast<QIcon>(value);
+            QIcon icon = value.value<QIcon>();
             QSize size = icon.actualSize(option.decorationSize, mode, state);
             return QRect(QPoint(0, 0), size);
          }
@@ -806,8 +831,10 @@ QRect QItemDelegate::rect(const QStyleOptionViewItem &option,
          default: {
             const QString text = d->valueToText(value, option);
             value = index.data(Qt::FontRole);
-            QFont fnt = qvariant_cast<QFont>(value).resolve(option.font);
-            return textRectangle(0, d->textLayoutBounds(option), fnt, text);
+
+            QFont fnt = value.value<QFont>().resolve(option.font);
+
+            return textRectangle(nullptr, d->textLayoutBounds(option), fnt, text);
          }
       }
    }
@@ -816,7 +843,7 @@ QRect QItemDelegate::rect(const QStyleOptionViewItem &option,
 }
 
 QRect QItemDelegate::doCheck(const QStyleOptionViewItem &option,
-   const QRect &bounding, const QVariant &value) const
+            const QRect &bounding, const QVariant &value) const
 {
    if (value.isValid()) {
       Q_D(const QItemDelegate);
@@ -827,7 +854,7 @@ QRect QItemDelegate::doCheck(const QStyleOptionViewItem &option,
 
       const QWidget *widget = d->widget(option);
       QStyle *style = widget ? widget->style() : QApplication::style();
-      return style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, widget);
+      return style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, widget);
    }
 
    return QRect();
@@ -840,15 +867,18 @@ QRect QItemDelegate::textRectangle(QPainter * /*painter*/, const QRect &rect,
    const QFont &font, const QString &text) const
 {
    Q_D(const QItemDelegate);
+
    d->textOption.setWrapMode(QTextOption::WordWrap);
    d->textLayout.setTextOption(d->textOption);
    d->textLayout.setFont(font);
    d->textLayout.setText(QItemDelegatePrivate::replaceNewLine(text));
+
    QSizeF fpSize = d->doTextLayout(rect.width());
    const QSize size = QSize(qCeil(fpSize.width()), qCeil(fpSize.height()));
 
    // ###: textRectangle should take style option as argument
    const int textMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
+
    return QRect(0, 0, size.width() + 2 * textMargin, size.height());
 }
 
@@ -924,7 +954,7 @@ QStyleOptionViewItem QItemDelegate::setOptions(const QModelIndex &index,
    // set font
    QVariant value = index.data(Qt::FontRole);
    if (value.isValid()) {
-      opt.font = qvariant_cast<QFont>(value).resolve(opt.font);
+      opt.font = value.value<QFont>().resolve(opt.font);
       opt.fontMetrics = QFontMetrics(opt.font);
    }
 
@@ -937,11 +967,11 @@ QStyleOptionViewItem QItemDelegate::setOptions(const QModelIndex &index,
    // set foreground brush
    value = index.data(Qt::ForegroundRole);
    if (value.canConvert<QBrush>()) {
-      opt.palette.setBrush(QPalette::Text, qvariant_cast<QBrush>(value));
+      opt.palette.setBrush(QPalette::Text, value.value<QBrush>());
    }
 
    // disable style animations for checkboxes etc. within itemviews (QTBUG-30146)
-   opt.styleObject = 0;
+   opt.styleObject = nullptr;
 
    return opt;
 }

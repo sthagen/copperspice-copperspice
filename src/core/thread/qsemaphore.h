@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QSEMAPHORE_H
 #define QSEMAPHORE_H
 
-#include <QtCore/qglobal.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
 
 class QSemaphorePrivate;
 
@@ -34,6 +32,10 @@ class Q_CORE_EXPORT QSemaphore
 {
  public:
    explicit QSemaphore(int n = 0);
+
+   QSemaphore(const QSemaphore &) = delete;
+   QSemaphore &operator=(const QSemaphore &) = delete;
+
    ~QSemaphore();
 
    void acquire(int n = 1);
@@ -45,11 +47,7 @@ class Q_CORE_EXPORT QSemaphore
    int available() const;
 
  private:
-   Q_DISABLE_COPY(QSemaphore)
-
    QSemaphorePrivate *d;
 };
 
-QT_END_NAMESPACE
-
-#endif // QSEMAPHORE_H
+#endif

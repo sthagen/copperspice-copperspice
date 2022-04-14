@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -74,10 +74,9 @@ class QHostInfoAgent : public QObject
 class QHostInfoPrivate
 {
  public:
-   inline QHostInfoPrivate()
-      : err(QHostInfo::NoError),
-        errorStr(QLatin1String(QT_TRANSLATE_NOOP("QHostInfo", "Unknown error"))),
-        lookupId(0) {
+   QHostInfoPrivate()
+      : err(QHostInfo::NoError), errorStr(QString::fromLatin1(cs_mark_tr("QHostInfo", "Unknown error"))), lookupId(0)
+   {
    }
 
 #ifndef QT_NO_BEARERMANAGEMENT
@@ -184,7 +183,7 @@ class QHostInfoLookupManager : public QAbstractHostInfoLookupManager
 
    QThreadPool threadPool;
 
-   QMutex mutex;
+   QRecursiveMutex mutex;
 
    bool wasDeleted;
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,6 +30,7 @@
 #include <qabstractitemmodel.h>
 #include <qpointer.h>
 #include <qicon.h>
+
 #include <qlistview_p.h>
 
 class QUndoModel : public QAbstractItemModel
@@ -63,11 +64,9 @@ class QUndoModel : public QAbstractItemModel
    GUI_CS_SLOT_1(Private, void stackChanged())
    GUI_CS_SLOT_2(stackChanged)
 
-   GUI_CS_SLOT_1(Private, void stackDestroyed(QObject *obj))
-   GUI_CS_SLOT_2(stackDestroyed)
-
-   GUI_CS_SLOT_1(Private, void setStackCurrentIndex(const QModelIndex &index))
-   GUI_CS_SLOT_2(setStackCurrentIndex)
+   // slots
+   void stackDestroyed(QObject *obj);
+   void setStackCurrentIndex(const QModelIndex &index);
 
    QUndoStack *m_stack;
    QItemSelectionModel *m_sel_model;
@@ -78,7 +77,7 @@ class QUndoModel : public QAbstractItemModel
 QUndoModel::QUndoModel(QObject *parent)
    : QAbstractItemModel(parent)
 {
-   m_stack = 0;
+   m_stack = nullptr;
    m_sel_model = new QItemSelectionModel(this, this);
 
    connect(m_sel_model, &QItemSelectionModel::currentChanged, this, &QUndoModel::setStackCurrentIndex);
@@ -102,7 +101,7 @@ void QUndoModel::setStack(QUndoStack *stack)
       return;
    }
 
-   if (m_stack != 0) {
+   if (m_stack != nullptr) {
       disconnect(m_stack, &QUndoStack::cleanChanged, this, &QUndoModel::stackChanged);
       disconnect(m_stack, &QUndoStack::indexChanged, this, &QUndoModel::stackChanged);
       disconnect(m_stack, &QUndoStack::destroyed,    this, &QUndoModel::stackDestroyed);
@@ -110,7 +109,7 @@ void QUndoModel::setStack(QUndoStack *stack)
 
    m_stack = stack;
 
-   if (m_stack != 0) {
+   if (m_stack != nullptr) {
       connect(m_stack, &QUndoStack::cleanChanged, this, &QUndoModel::stackChanged);
       connect(m_stack, &QUndoStack::indexChanged, this, &QUndoModel::stackChanged);
       connect(m_stack, &QUndoStack::destroyed,    this, &QUndoModel::stackDestroyed);
@@ -124,8 +123,8 @@ void QUndoModel::stackDestroyed(QObject *obj)
    if (obj != m_stack) {
       return;
    }
-   m_stack = 0;
 
+   m_stack = nullptr;
    stackChanged();
 }
 
@@ -138,7 +137,7 @@ void QUndoModel::stackChanged()
 
 void QUndoModel::setStackCurrentIndex(const QModelIndex &index)
 {
-   if (m_stack == 0) {
+   if (m_stack == nullptr) {
       return;
    }
 
@@ -155,12 +154,12 @@ void QUndoModel::setStackCurrentIndex(const QModelIndex &index)
 
 QModelIndex QUndoModel::selectedIndex() const
 {
-   return m_stack == 0 ? QModelIndex() : createIndex(m_stack->index(), 0);
+   return m_stack == nullptr ? QModelIndex() : createIndex(m_stack->index(), 0);
 }
 
 QModelIndex QUndoModel::index(int row, int column, const QModelIndex &parent) const
 {
-   if (m_stack == 0) {
+   if (m_stack == nullptr) {
       return QModelIndex();
    }
 
@@ -186,7 +185,7 @@ QModelIndex QUndoModel::parent(const QModelIndex &) const
 
 int QUndoModel::rowCount(const QModelIndex &parent) const
 {
-   if (m_stack == 0) {
+   if (m_stack == nullptr) {
       return 0;
    }
 
@@ -204,7 +203,7 @@ int QUndoModel::columnCount(const QModelIndex &) const
 
 QVariant QUndoModel::data(const QModelIndex &index, int role) const
 {
-   if (m_stack == 0) {
+   if (m_stack == nullptr) {
       return QVariant();
    }
 
@@ -253,38 +252,28 @@ QIcon QUndoModel::cleanIcon() const
    return m_clean_icon;
 }
 
-/*!
-    \class QUndoView
-    \brief The QUndoView class displays the contents of a QUndoStack.
-    \since 4.2
-
-    \ingroup advanced
-
-    QUndoView is a QListView which displays the list of commands pushed on an undo stack.
-    The most recently executed command is always selected. Selecting a different command
-    results in a call to QUndoStack::setIndex(), rolling the state of the document
-    backwards or forward to the new command.
-
-    The stack can be set explicitly with setStack(). Alternatively, a QUndoGroup object can
-    be set with setGroup(). The view will then update itself automatically whenever the
-    active stack of the group changes.
-
-    \image qundoview.png
-*/
-
 class QUndoViewPrivate : public QListViewPrivate
 {
    Q_DECLARE_PUBLIC(QUndoView)
- public:
-   QUndoViewPrivate() :
-#ifndef QT_NO_UNDOGROUP
-      group(0),
-#endif
-      model(0) {}
 
-#ifndef QT_NO_UNDOGROUP
+ public:
+
+#ifdef QT_NO_UNDOGROUP
+   QUndoViewPrivate()
+      : model(nullptr)
+  {
+  }
+
+#else
+   QUndoViewPrivate()
+      : group(nullptr), model(nullptr)
+   {
+   }
+
    QPointer<QUndoGroup> group;
+
 #endif
+
    QUndoModel *model;
 
    void init();
@@ -299,20 +288,12 @@ void QUndoViewPrivate::init()
    q->setSelectionModel(model->selectionModel());
 }
 
-/*!
-    Constructs a new view with parent \a parent.
-*/
-
 QUndoView::QUndoView(QWidget *parent)
    : QListView(*new QUndoViewPrivate(), parent)
 {
    Q_D(QUndoView);
    d->init();
 }
-
-/*!
-    Constructs a new view with parent \a parent and sets the observed stack to \a stack.
-*/
 
 QUndoView::QUndoView(QUndoStack *stack, QWidget *parent)
    : QListView(*new QUndoViewPrivate(), parent)
@@ -324,12 +305,6 @@ QUndoView::QUndoView(QUndoStack *stack, QWidget *parent)
 
 #ifndef QT_NO_UNDOGROUP
 
-/*!
-    Constructs a new view with parent \a parent and sets the observed group to \a group.
-
-    The view will update itself autmiatically whenever the active stack of the group changes.
-*/
-
 QUndoView::QUndoView(QUndoGroup *group, QWidget *parent)
    : QListView(*new QUndoViewPrivate(), parent)
 {
@@ -338,22 +313,11 @@ QUndoView::QUndoView(QUndoGroup *group, QWidget *parent)
    setGroup(group);
 }
 
-#endif // QT_NO_UNDOGROUP
-
-/*!
-    Destroys this view.
-*/
+#endif
 
 QUndoView::~QUndoView()
 {
 }
-
-/*!
-    Returns the stack currently displayed by this view. If the view is looking at a
-    QUndoGroup, this the group's active stack.
-
-    \sa setStack() setGroup()
-*/
 
 QUndoStack *QUndoView::stack() const
 {
@@ -361,21 +325,14 @@ QUndoStack *QUndoView::stack() const
    return d->model->stack();
 }
 
-/*!
-    Sets the stack displayed by this view to \a stack. If \a stack is 0, the view
-    will be empty.
-
-    If the view was previously looking at a QUndoGroup, the group is set to 0.
-
-    \sa stack() setGroup()
-*/
-
 void QUndoView::setStack(QUndoStack *stack)
 {
    Q_D(QUndoView);
+
 #ifndef QT_NO_UNDOGROUP
-   setGroup(0);
+   setGroup(nullptr);
 #endif
+
    d->model->setStack(stack);
 }
 
@@ -389,18 +346,18 @@ void QUndoView::setGroup(QUndoGroup *group)
       return;
    }
 
-   if (d->group != 0) {
+   if (d->group != nullptr) {
       disconnect(d->group.data(), &QUndoGroup::activeStackChanged, d->model, &QUndoModel::setStack);
    }
 
    d->group = group;
 
-   if (d->group != 0) {
+   if (d->group != nullptr) {
       connect(d->group.data(), &QUndoGroup::activeStackChanged, d->model, &QUndoModel::setStack);
       d->model->setStack(d->group->activeStack());
 
    } else {
-      d->model->setStack(0);
+      d->model->setStack(nullptr);
 
    }
 }
@@ -429,7 +386,6 @@ void QUndoView::setCleanIcon(const QIcon &icon)
 {
    Q_D(const QUndoView);
    d->model->setCleanIcon(icon);
-
 }
 
 QIcon QUndoView::cleanIcon() const

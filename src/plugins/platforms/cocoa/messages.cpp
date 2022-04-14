@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,17 +29,17 @@
 
 QString msgAboutCs()
 {
-   return QCoreApplication::translate("QCocoaMenuItem", "About Cs");
+   return QCoreApplication::translate("QCocoaMenuItem", "About CS");
 }
 
 static const char *application_menu_strings[] = {
-   QT_TRANSLATE_NOOP("MAC_APPLICATION_MENU", "Services"),
-   QT_TRANSLATE_NOOP("MAC_APPLICATION_MENU", "Hide %1"),
-   QT_TRANSLATE_NOOP("MAC_APPLICATION_MENU", "Hide Others"),
-   QT_TRANSLATE_NOOP("MAC_APPLICATION_MENU", "Show All"),
-   QT_TRANSLATE_NOOP("MAC_APPLICATION_MENU", "Preferences..."),
-   QT_TRANSLATE_NOOP("MAC_APPLICATION_MENU", "Quit %1"),
-   QT_TRANSLATE_NOOP("MAC_APPLICATION_MENU", "About %1")
+   cs_mark_tr("MAC_APPLICATION_MENU", "Services"),
+   cs_mark_tr("MAC_APPLICATION_MENU", "Hide %1"),
+   cs_mark_tr("MAC_APPLICATION_MENU", "Hide Others"),
+   cs_mark_tr("MAC_APPLICATION_MENU", "Show All"),
+   cs_mark_tr("MAC_APPLICATION_MENU", "Preferences..."),
+   cs_mark_tr("MAC_APPLICATION_MENU", "Quit %1"),
+   cs_mark_tr("MAC_APPLICATION_MENU", "About %1")
 };
 
 QString qt_mac_applicationmenu_string(int type)

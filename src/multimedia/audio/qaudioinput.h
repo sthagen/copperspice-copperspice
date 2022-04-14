@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,6 +40,10 @@ class Q_MULTIMEDIA_EXPORT QAudioInput : public QObject
    explicit QAudioInput(const QAudioFormat &format = QAudioFormat(), QObject *parent = nullptr);
    explicit QAudioInput(const QAudioDeviceInfo &audioDeviceInfo, const QAudioFormat &format = QAudioFormat(),
       QObject *parent = nullptr);
+
+   QAudioInput(const QAudioInput &) = delete;
+   QAudioInput &operator=(const QAudioInput &) = delete;
+
    ~QAudioInput();
 
    QAudioFormat format() const;
@@ -69,16 +73,14 @@ class Q_MULTIMEDIA_EXPORT QAudioInput : public QObject
    QAudio::Error error() const;
    QAudio::State state() const;
 
-   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudio::State un_named_arg1))
-   MULTI_CS_SIGNAL_2(stateChanged, un_named_arg1)
+   MULTI_CS_SIGNAL_1(Public, void stateChanged(QAudio::State state))
+   MULTI_CS_SIGNAL_2(stateChanged, state)
 
    MULTI_CS_SIGNAL_1(Public, void notify())
    MULTI_CS_SIGNAL_2(notify)
 
  private:
-   Q_DISABLE_COPY(QAudioInput)
-
-   QAbstractAudioInput *d;
+   QAbstractAudioInput *m_audioInput;
 };
 
 #endif

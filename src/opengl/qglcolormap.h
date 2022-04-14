@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,18 +24,18 @@
 #ifndef QGLCOLORMAP_H
 #define QGLCOLORMAP_H
 
-#include <QtGui/qcolor.h>
-#include <QtCore/qvector.h>
-
+#include <qcolor.h>
+#include <qvector.h>
 
 class Q_OPENGL_EXPORT QGLColormap
 {
  public:
    QGLColormap();
-   QGLColormap(const QGLColormap &);
+   QGLColormap(const QGLColormap &other);
+
    ~QGLColormap();
 
-   QGLColormap &operator=(const QGLColormap &);
+   QGLColormap &operator=(const QGLColormap &other);
 
    bool   isEmpty() const;
    int    size() const;

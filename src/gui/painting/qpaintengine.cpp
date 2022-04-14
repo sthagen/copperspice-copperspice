@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -54,13 +54,11 @@ qreal QTextItem::width() const
    return ti->width.toReal();
 }
 
-
 QTextItem::RenderFlags QTextItem::renderFlags() const
 {
    const QTextItemInt *ti = static_cast<const QTextItemInt *>(this);
    return ti->flags;
 }
-
 
 QString QTextItem::text() const
 {
@@ -68,13 +66,11 @@ QString QTextItem::text() const
    return QString(ti->m_iter, ti->m_end);
 }
 
-
 QFont QTextItem::font() const
 {
    const QTextItemInt *ti = static_cast<const QTextItemInt *>(this);
    return ti->f ? *ti->f : QGuiApplication::font();
 }
-
 
 void QPaintEngine::syncState()
 {
@@ -86,28 +82,29 @@ void QPaintEngine::syncState()
    }
 }
 
-static QPaintEngine *qt_polygon_recursion = 0;
+static QPaintEngine *qt_polygon_recursion = nullptr;
 
 struct QT_Point {
    int x;
    int y;
 };
 
-void QPaintEngine::drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode)
+void QPaintEngine::drawPolygon(const QPointF *pointPtr, int pointCount, PolygonDrawMode mode)
 {
    Q_ASSERT_X(qt_polygon_recursion != this, "QPaintEngine::drawPolygon",
       "At least one drawPolygon function must be implemented");
+
    qt_polygon_recursion = this;
    Q_ASSERT(sizeof(QT_Point) == sizeof(QPoint));
    QVarLengthArray<QT_Point> p(pointCount);
 
    for (int i = 0; i < pointCount; ++i) {
-      p[i].x = qRound(points[i].x());
-      p[i].y = qRound(points[i].y());
+      p[i].x = qRound(pointPtr[i].x());
+      p[i].y = qRound(pointPtr[i].y());
    }
 
    drawPolygon((QPoint *)p.data(), pointCount, mode);
-   qt_polygon_recursion = 0;
+   qt_polygon_recursion = nullptr;
 }
 
 struct QT_PointF {
@@ -115,28 +112,30 @@ struct QT_PointF {
    qreal y;
 };
 
-void QPaintEngine::drawPolygon(const QPoint *points, int pointCount, PolygonDrawMode mode)
+void QPaintEngine::drawPolygon(const QPoint *pointPtr, int pointCount, PolygonDrawMode mode)
 {
    Q_ASSERT_X(qt_polygon_recursion != this, "QPaintEngine::drawPolygon",
       "At least one drawPolygon function must be implemented");
+
    qt_polygon_recursion = this;
 
    Q_ASSERT(sizeof(QT_PointF) == sizeof(QPointF));
    QVarLengthArray<QT_PointF> p(pointCount);
 
    for (int i = 0; i < pointCount; ++i) {
-      p[i].x = points[i].x();
-      p[i].y = points[i].y();
+      p[i].x = pointPtr[i].x();
+      p[i].y = pointPtr[i].y();
    }
+
    drawPolygon((QPointF *)p.data(), pointCount, mode);
-   qt_polygon_recursion = 0;
+   qt_polygon_recursion = nullptr;
 }
 
-
-void QPaintEngine::drawPoints(const QPointF *points, int pointCount)
+void QPaintEngine::drawPoints(const QPointF *pointPtr, int pointCount)
 {
    QPainter *p = painter();
-   if (!p) {
+
+   if (! p) {
       return;
    }
 
@@ -160,7 +159,7 @@ void QPaintEngine::drawPoints(const QPointF *points, int pointCount)
    p->setPen(Qt::NoPen);
 
    for (int i = 0; i < pointCount; ++i) {
-      QPointF pos = transform.map(points[i]);
+      QPointF pos = transform.map(pointPtr[i]);
       QRectF rect(pos.x() - penWidth / 2, pos.y() - penWidth / 2, penWidth, penWidth);
 
       if (ellipses) {
@@ -173,28 +172,31 @@ void QPaintEngine::drawPoints(const QPointF *points, int pointCount)
    p->restore();
 }
 
-void QPaintEngine::drawPoints(const QPoint *points, int pointCount)
+void QPaintEngine::drawPoints(const QPoint *pointPtr, int pointCount)
 {
    Q_ASSERT(sizeof(QT_PointF) == sizeof(QPointF));
    QT_PointF fp[256];
+
    while (pointCount) {
       int i = 0;
+
       while (i < pointCount && i < 256) {
-         fp[i].x = points[i].x();
-         fp[i].y = points[i].y();
+         fp[i].x = pointPtr[i].x();
+         fp[i].y = pointPtr[i].y();
          ++i;
       }
+
       drawPoints((QPointF *)(void *)fp, i);
-      points += i;
+      pointPtr   += i;
       pointCount -= i;
    }
 }
-
 
 void QPaintEngine::drawEllipse(const QRectF &rect)
 {
    QPainterPath path;
    path.addEllipse(rect);
+
    if (hasFeature(PainterPaths)) {
       drawPath(path);
    } else {
@@ -203,25 +205,22 @@ void QPaintEngine::drawEllipse(const QRectF &rect)
    }
 }
 
-/*!
-    The default implementation of this function calls the floating
-    point version of this function
-*/
 void QPaintEngine::drawEllipse(const QRect &rect)
 {
    drawEllipse(QRectF(rect));
 }
-
 
 void qt_fill_tile(QPixmap *tile, const QPixmap &pixmap)
 {
    QPainter p(tile);
    p.drawPixmap(0, 0, pixmap);
    int x = pixmap.width();
+
    while (x < tile->width()) {
       p.drawPixmap(x, 0, *tile, 0, 0, x, pixmap.height());
       x *= 2;
    }
+
    int y = pixmap.height();
    while (y < tile->height()) {
       p.drawPixmap(0, y, *tile, 0, 0, tile->width(), y);
@@ -235,13 +234,16 @@ void qt_draw_tile(QPaintEngine *gc, qreal x, qreal y, qreal w, qreal h,
    qreal yPos, xPos, drawH, drawW, yOff, xOff;
    yPos = y;
    yOff = yOffset;
+
    while (yPos < y + h) {
       drawH = pixmap.height() - yOff;        // Cropping first row
       if (yPos + drawH > y + h) {            // Cropping last row
          drawH = y + h - yPos;
       }
+
       xPos = x;
       xOff = xOffset;
+
       while (xPos < x + w) {
          drawW = pixmap.width() - xOff;      // Cropping first column
          if (xPos + drawW > x + w) {         // Cropping last column
@@ -257,7 +259,6 @@ void qt_draw_tile(QPaintEngine *gc, qreal x, qreal y, qreal w, qreal h,
       yOff = 0;
    }
 }
-
 
 void QPaintEngine::drawTiledPixmap(const QRectF &rect, const QPixmap &pixmap, const QPointF &p)
 {
@@ -281,8 +282,10 @@ void QPaintEngine::drawTiledPixmap(const QRectF &rect, const QPixmap &pixmap, co
             tile.fill(Qt::transparent);
          }
       }
+
       qt_fill_tile(&tile, pixmap);
       qt_draw_tile(this, rect.x(), rect.y(), rect.width(), rect.height(), tile, p.x(), p.y());
+
    } else {
       qt_draw_tile(this, rect.x(), rect.y(), rect.width(), rect.height(), pixmap, p.x(), p.y());
    }
@@ -293,50 +296,38 @@ void QPaintEngine::drawImage(const QRectF &r, const QImage &image, const QRectF 
 {
    QRectF baseSize(0, 0, image.width(), image.height());
    QImage im = image;
-   if (baseSize != sr)
-      im = im.copy(qFloor(sr.x()), qFloor(sr.y()),
-            qCeil(sr.width()), qCeil(sr.height()));
+
+   if (baseSize != sr) {
+      im = im.copy(qFloor(sr.x()), qFloor(sr.y()), qCeil(sr.width()), qCeil(sr.height()));
+   }
+
    QPixmap pm = QPixmap::fromImage(im, flags);
    drawPixmap(r, pm, QRectF(QPointF(0, 0), pm.size()));
 }
 
-
 QPaintEngine::QPaintEngine(PaintEngineFeatures caps)
-   : state(0),
-     gccaps(caps),
-     active(0),
-     selfDestruct(false),
-     extended(false),
+   : state(nullptr), gccaps(caps), active(0), selfDestruct(false), extended(false),
      d_ptr(new QPaintEnginePrivate)
 {
    d_ptr->q_ptr = this;
 }
 
-/*!
-  \internal
-*/
-
+// internal
 QPaintEngine::QPaintEngine(QPaintEnginePrivate &dptr, PaintEngineFeatures caps)
-   : state(0),
-     gccaps(caps),
-     active(0),
-     selfDestruct(false),
-     extended(false),
-     d_ptr(&dptr)
+   : state(nullptr), gccaps(caps), active(0), selfDestruct(false), extended(false), d_ptr(&dptr)
 {
    d_ptr->q_ptr = this;
 }
-
 
 QPaintEngine::~QPaintEngine()
 {
 }
 
-
 QPainter *QPaintEngine::painter() const
 {
-   return state ? state->painter() : 0;
+   return state ? state->painter() : nullptr;
 }
+
 void QPaintEngine::drawPath(const QPainterPath &)
 {
    if (hasFeature(PainterPaths)) {
@@ -344,16 +335,12 @@ void QPaintEngine::drawPath(const QPainterPath &)
    }
 }
 
-
 void QPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
 {
    const QTextItemInt &ti = static_cast<const QTextItemInt &>(textItem);
 
    QPainterPath path;
-
-
    path.setFillRule(Qt::WindingFill);
-
 
    if (ti.glyphs.numGlyphs) {
       ti.fontEngine->addOutlineToPath(0, 0, ti.glyphs, &path, ti.flags);
@@ -372,15 +359,10 @@ void QPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
    }
 }
 
-/*!
-    The default implementation splits the list of lines in \a lines
-    into \a lineCount separate calls to drawPath() or drawPolygon()
-    depending on the feature set of the paint engine.
-*/
-void QPaintEngine::drawLines(const QLineF *lines, int lineCount)
+void QPaintEngine::drawLines(const QLineF *linePtr, int lineCount)
 {
    for (int i = 0; i < lineCount; ++i) {
-      QPointF pts[2] = { lines[i].p1(), lines[i].p2() };
+      QPointF pts[2] = { linePtr[i].p1(), linePtr[i].p2() };
 
       if (pts[0] == pts[1]) {
          if (state->pen().capStyle() != Qt::FlatCap) {
@@ -393,35 +375,40 @@ void QPaintEngine::drawLines(const QLineF *lines, int lineCount)
    }
 }
 
-void QPaintEngine::drawLines(const QLine *lines, int lineCount)
+void QPaintEngine::drawLines(const QLine *linePtr, int lineCount)
 {
    struct PointF {
       qreal x;
       qreal y;
    };
+
    struct LineF {
       PointF p1;
       PointF p2;
    };
+
    Q_ASSERT(sizeof(PointF) == sizeof(QPointF));
-   Q_ASSERT(sizeof(LineF) == sizeof(QLineF));
+   Q_ASSERT(sizeof(LineF)  == sizeof(QLineF));
+
    LineF fl[256];
+
    while (lineCount) {
       int i = 0;
       while (i < lineCount && i < 256) {
-         fl[i].p1.x = lines[i].x1();
-         fl[i].p1.y = lines[i].y1();
-         fl[i].p2.x = lines[i].x2();
-         fl[i].p2.y = lines[i].y2();
+         fl[i].p1.x = linePtr[i].x1();
+         fl[i].p1.y = linePtr[i].y1();
+         fl[i].p2.x = linePtr[i].x2();
+         fl[i].p2.y = linePtr[i].y2();
          ++i;
       }
+
       drawLines((QLineF *)(void *)fl, i);
-      lines += i;
+      linePtr   += i;
       lineCount -= i;
    }
 }
 
-void QPaintEngine::drawRects(const QRect *rects, int rectCount)
+void QPaintEngine::drawRects(const QRect *rectPtr, int rectCount)
 {
    struct RectF {
       qreal x;
@@ -430,43 +417,43 @@ void QPaintEngine::drawRects(const QRect *rects, int rectCount)
       qreal h;
    };
    Q_ASSERT(sizeof(RectF) == sizeof(QRectF));
+
    RectF fr[256];
    while (rectCount) {
       int i = 0;
+
       while (i < rectCount && i < 256) {
-         fr[i].x = rects[i].x();
-         fr[i].y = rects[i].y();
-         fr[i].w = rects[i].width();
-         fr[i].h = rects[i].height();
+         fr[i].x = rectPtr[i].x();
+         fr[i].y = rectPtr[i].y();
+         fr[i].w = rectPtr[i].width();
+         fr[i].h = rectPtr[i].height();
          ++i;
       }
+
       drawRects((QRectF *)(void *)fr, i);
-      rects += i;
+      rectPtr   += i;
       rectCount -= i;
    }
 }
 
-/*!
-    Draws the first \a rectCount rectangles in the buffer \a
-    rects. The default implementation of this function calls drawPath()
-    or drawPolygon() depending on the feature set of the paint engine.
-*/
-void QPaintEngine::drawRects(const QRectF *rects, int rectCount)
+void QPaintEngine::drawRects(const QRectF *rectPtr, int rectCount)
 {
-   if (hasFeature(PainterPaths) &&
-      !state->penNeedsResolving() &&
-      !state->brushNeedsResolving()) {
+   if (hasFeature(PainterPaths) && ! state->penNeedsResolving() && ! state->brushNeedsResolving()) {
       for (int i = 0; i < rectCount; ++i) {
          QPainterPath path;
-         path.addRect(rects[i]);
+         path.addRect(rectPtr[i]);
+
          if (path.isEmpty()) {
             continue;
          }
+
          drawPath(path);
       }
+
    } else {
       for (int i = 0; i < rectCount; ++i) {
-         QRectF rf = rects[i];
+         QRectF rf = rectPtr[i];
+
          QPointF pts[4] = { QPointF(rf.x(), rf.y()),
                QPointF(rf.x() + rf.width(), rf.y()),
                QPointF(rf.x() + rf.width(), rf.y() + rf.height()),

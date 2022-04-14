@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,16 @@
 #ifndef QPaintEngineEx_OPENGL2_P_H
 #define QPaintEngineEx_OPENGL2_P_H
 
-#include <QDebug>
+#include <qdebug.h>
+#include <qvector.h>
+
 #include <qpaintengineex_p.h>
 #include <qglengineshadermanager_p.h>
 #include <qgl2pexvertexarray_p.h>
 #include <qglpaintdevice_p.h>
-
 #include <qfontengine_p.h>
-#include <qdatabuffer_p.h>
 #include <qtriangulatingstroker_p.h>
-#include <qopenglextensions_p.h>
+#include <qopengl_extensions_p.h>
 
 enum EngineMode {
    ImageDrawingMode,
@@ -42,7 +42,6 @@ enum EngineMode {
    ImageArrayDrawingMode,
 
 };
-
 
 #define GL_STENCIL_HIGH_BIT         GLuint(0x80)
 #define QT_BRUSH_TEXTURE_UNIT       GLuint(0)
@@ -77,8 +76,13 @@ class QGL2PaintEngineState : public QPainterState
 class Q_OPENGL_EXPORT QGL2PaintEngineEx : public QPaintEngineEx
 {
    Q_DECLARE_PRIVATE(QGL2PaintEngineEx)
+
  public:
    QGL2PaintEngineEx();
+
+   QGL2PaintEngineEx(const QGL2PaintEngineEx &) = delete;
+   QGL2PaintEngineEx &operator=(const QGL2PaintEngineEx &) = delete;
+
    ~QGL2PaintEngineEx();
 
    bool begin(QPaintDevice *device) override;
@@ -108,7 +112,7 @@ class Q_OPENGL_EXPORT QGL2PaintEngineEx : public QPaintEngineEx
 
    void drawStaticTextItem(QStaticTextItem *textItem) override;
 
-   bool drawTexture(const QRectF &r, GLuint textureId, const QSize &size, const QRectF &sr);
+   bool drawTexture(const QRectF &r, GLuint texture_id, const QSize &size, const QRectF &sr);
 
    Type type() const override {
       return OpenGL2;
@@ -138,9 +142,6 @@ class Q_OPENGL_EXPORT QGL2PaintEngineEx : public QPaintEngineEx
    bool shouldDrawCachedGlyphs(QFontEngine *, const QTransform &) const override;
 
    void setTranslateZ(GLfloat z);
-
- private:
-   Q_DISABLE_COPY(QGL2PaintEngineEx)
 };
 
 class QGL2PaintEngineExPrivate : public QPaintEngineExPrivate, protected QOpenGLExtensions
@@ -154,19 +155,10 @@ class QGL2PaintEngineExPrivate : public QPaintEngineExPrivate, protected QOpenGL
       TriStripStrokeFillMode
    };
 
-   QGL2PaintEngineExPrivate(QGL2PaintEngineEx *q_ptr) :
-      q(q_ptr),
-      shaderManager(0),
-      width(0), height(0),
-      ctx(0),
-      useSystemClip(true),
-      elementIndicesVBOId(0),
-      opacityArray(0),
-      snapToPixelGrid(false),
-      nativePaintingActive(false),
-      inverseScale(1),
-      lastMaskTextureUsed(0),
-      translateZ(0)
+   QGL2PaintEngineExPrivate(QGL2PaintEngineEx *q_ptr)
+      : q(q_ptr), shaderManager(nullptr), width(0), height(0), ctx(nullptr), useSystemClip(true),
+        elementIndicesVBOId(0), snapToPixelGrid(false), nativePaintingActive(false),
+        inverseScale(1), lastMaskTextureUsed(0), translateZ(0)
     { }
 
    ~QGL2PaintEngineExPrivate();
@@ -175,10 +167,10 @@ class QGL2PaintEngineExPrivate : public QPaintEngineExPrivate, protected QOpenGL
    void updateBrushUniforms();
    void updateMatrix();
    void updateCompositionMode();
-   void updateTextureFilter(GLenum target, GLenum wrapMode, bool smoothPixmapTransform, GLuint id = GLuint(-1));
+   void updateTextureFilter(GLenum target, GLenum wrapMode, bool smoothPixmapTransform, GLuint texture_id = GLuint(-1));
 
    void resetGLState();
-    bool resetOpenGLContextActiveEngine();
+   bool resetOpenGLContextActiveEngine();
 
    // fill, stroke, drawTexture, drawPixmaps & drawCachedGlyphs are the main rendering entry-points,
    // however writeClip can also be thought of as en entry point as it does similar things.
@@ -194,7 +186,8 @@ class QGL2PaintEngineExPrivate : public QPaintEngineExPrivate, protected QOpenGL
    inline void setVertexAttributePointer(unsigned int arrayIndex, const GLfloat *pointer);
 
    // draws whatever is in the vertex array:
-   void drawVertexArrays(const float *data, int *stops, int stopCount, GLenum primitive);
+   void drawVertexArrays(const float *data, const int *stops, int stopCount, GLenum primitive);
+
    void drawVertexArrays(QGL2PEXVertexArray &vertexArray, GLenum primitive) {
       drawVertexArrays((const float *) vertexArray.data(), vertexArray.stops(), vertexArray.stopCount(), primitive);
    }
@@ -203,8 +196,9 @@ class QGL2PaintEngineExPrivate : public QPaintEngineExPrivate, protected QOpenGL
    void composite(const QGLRect &boundingRect);
 
    // Calls drawVertexArrays to render into stencil buffer:
-   void fillStencilWithVertexArray(const float *data, int count, int *stops, int stopCount, const QGLRect &bounds,
+   void fillStencilWithVertexArray(const float *data, int count, const int *stops, int stopCount, const QGLRect &bounds,
                                    StencilFillMode mode);
+
    void fillStencilWithVertexArray(QGL2PEXVertexArray &vertexArray, bool useWindingFill) {
       fillStencilWithVertexArray((const float *) vertexArray.data(), 0, vertexArray.stops(), vertexArray.stopCount(),
                                  vertexArray.boundingRect(),
@@ -268,7 +262,7 @@ class QGL2PaintEngineExPrivate : public QPaintEngineExPrivate, protected QOpenGL
    QGL2PEXVertexArray textureCoordinateArray;
    QVector<GLushort> elementIndices;
    GLuint elementIndicesVBOId;
-   QDataBuffer<GLfloat> opacityArray;
+   QVector<GLfloat> opacityArray;
    GLfloat staticVertexCoordinateArray[8];
    GLfloat staticTextureCoordinateArray[8];
 
@@ -296,9 +290,8 @@ class QGL2PaintEngineExPrivate : public QPaintEngineExPrivate, protected QOpenGL
 
    const GLfloat *vertexAttribPointers[3];
 
-    GLfloat translateZ;
+   GLfloat translateZ;
 };
-
 
 void QGL2PaintEngineExPrivate::setVertexAttributePointer(unsigned int arrayIndex, const GLfloat *pointer)
 {
@@ -314,7 +307,5 @@ void QGL2PaintEngineExPrivate::setVertexAttributePointer(unsigned int arrayIndex
       glVertexAttribPointer(arrayIndex, 2, GL_FLOAT, GL_FALSE, 0, pointer);
    }
 }
-
-
 
 #endif

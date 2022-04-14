@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2012-2020 Barbara Geller
-# Copyright (c) 2012-2020 Ansel Sermersheim
+# Copyright (c) 2012-2022 Barbara Geller
+# Copyright (c) 2012-2022 Ansel Sermersheim
 #
 # This file is part of CopperSpice.
 #
@@ -14,6 +14,10 @@
 #
 # https://www.gnu.org/licenses/
 #
+
+# workaround because cmake 3.17 removed .dll suffix
+set(OLD_CMAKE_FIND_LIBRARY_SUFFIXES  ${CMAKE_FIND_LIBRARY_SUFFIXES})
+set(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
    set(libgcc libgcc_s_seh-1)
@@ -33,3 +37,6 @@ foreach(library ${mingw_required_libraries})
 endforeach()
 
 include(InstallRequiredSystemLibraries)
+
+# restore
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${OLD_CMAKE_FIND_LIBRARY_SUFFIXES})

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -318,7 +318,7 @@ QAccessibleInterface *QAccessibleToolButton::child(int index) const
       return QAccessible::queryAccessibleInterface(toolButton()->menu());
    }
 #endif
-   return 0;
+   return nullptr;
 }
 
 /*
@@ -732,7 +732,7 @@ QRect QAccessibleLineEdit::characterRect(int offset) const
 {
    int x = lineEdit()->d_func()->control->cursorToX(offset);
    int y;
-   lineEdit()->getTextMargins(0, &y, 0, 0);
+   lineEdit()->getTextMargins(nullptr, &y, nullptr, nullptr);
    QFontMetrics fm(lineEdit()->font());
    const QString ch = text(offset, offset + 1);
    if (ch.isEmpty()) {
@@ -942,7 +942,7 @@ QAccessibleInterface *QAccessibleWindowContainer::child(int i) const
    if (i == 0) {
       return QAccessible::queryAccessibleInterface(container()->containedWindow());
    }
-   return 0;
+   return nullptr;
 }
 
 QWindowContainer *QAccessibleWindowContainer::container() const

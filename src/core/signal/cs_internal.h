@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2016-2022 Barbara Geller
+* Copyright (c) 2016-2022 Ansel Sermersheim
 *
 * This file is part of CsSignal.
 *
@@ -23,7 +23,7 @@
 #include <memory>
 #include <tuple>
 
-/**   \cond INTERNAL (notation so DoxyPress will not parse this class  */
+#if ! defined (CS_DOXYPRESS)
 
 namespace CsSignal {
 
@@ -56,8 +56,8 @@ class cs_check_connect_args<void (*)(ArgsX...), void (*)()>
 //  slot is a func ptr, signal has the same number of parms as the slot, types mismatch
 template<class ...ArgsX, class ...ArgsY>
 class cs_check_connect_args < void (*)(ArgsX...), void (*)(ArgsY...),
-   typename std::enable_if < sizeof...(ArgsX) == sizeof...(ArgsY) &&
-   ! std::is_same<std::tuple<ArgsX...>, std::tuple<ArgsY...>>::value >::type >
+   typename std::enable_if< sizeof...(ArgsX) == sizeof...(ArgsY) &&
+      ! std::is_same<std::tuple<ArgsX...>, std::tuple<ArgsY...>>::value >::type>
          : public std::integral_constant<bool, false>
 {
 };
@@ -209,7 +209,7 @@ CSVoidReturn cs_unpack_method_args(const MethodClass *obj, void (MethodClass::*m
 template <class T1, class T2>
 class prePend
 {
-   // required class to utilze a specialization
+   // required class to utilize a specialization
 };
 
 template <class T, class ...Ts>
@@ -503,7 +503,7 @@ bool Bento<T>::operator ==(const BentoAbstract &) const
 template<class T>
 void Bento<T>::invoke(SlotBase *, const TeaCupAbstract *dataPack) const
 {
-   // T must be a class or it will be a compiler erroe
+   // T must be a class or it will be a compiler error
    auto methodPtr = &T::operator();
 
    this->invoke_internal(dataPack, methodPtr);
@@ -704,6 +704,6 @@ void Bento<MethodReturn(MethodClass::*)(MethodArgs...) const>::invoke(SlotBase *
 
 } }
 
-/**   \endcond   */
+#endif // doxypress
 
 #endif

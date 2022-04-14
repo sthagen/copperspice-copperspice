@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -73,7 +73,7 @@ class QDragPrivate
  public:
 
    QDragPrivate()
-      : source(0), target(0), data(0)
+      : source(nullptr), target(nullptr), data(nullptr)
    { }
 
    virtual ~QDragPrivate() {};
@@ -91,12 +91,16 @@ class QDragPrivate
    QMap<Qt::DropAction, QPixmap> customCursors;
 };
 
-class QDragManager: public QObject
+class QDragManager : public QObject
 {
    GUI_CS_OBJECT(QDragManager)
 
  public:
    QDragManager();
+
+   QDragManager(const QDragManager &) = delete;
+   QDragManager &operator=(const QDragManager &) = delete;
+
    ~QDragManager();
 
    static QDragManager *self();
@@ -119,7 +123,6 @@ class QDragManager: public QObject
    QDrag *m_object;
 
    static QDragManager *m_instance;
-   Q_DISABLE_COPY(QDragManager)
 };
 
 #endif // ! QT_NO_DRAGANDDROP

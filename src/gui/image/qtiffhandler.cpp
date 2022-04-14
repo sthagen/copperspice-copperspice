@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,8 +33,6 @@ extern "C" {
 #include <tiffio.h>
 }
 
-QT_BEGIN_NAMESPACE
-
 tsize_t qtiffReadProc(thandle_t fd, tdata_t buf, tsize_t size)
 {
    QIODevice *device = static_cast<QTiffHandler *>(fd)->device();
@@ -53,9 +51,11 @@ toff_t qtiffSeekProc(thandle_t fd, toff_t off, int whence)
       case SEEK_SET:
          device->seek(off);
          break;
+
       case SEEK_CUR:
          device->seek(device->pos() + off);
          break;
+
       case SEEK_END:
          device->seek(device->size() + off);
          break;
@@ -91,6 +91,7 @@ inline void rotate_right_mirror_horizontal(QImage *const image)// rotate right->
    QImage generated(/* width = */ height, /* height = */ width, image->format());
    const uint32 *originalPixel = reinterpret_cast<const uint32 *>(image->bits());
    uint32 *const generatedPixels = reinterpret_cast<uint32 *>(generated.bits());
+
    for (int row = 0; row < height; ++row) {
       for (int col = 0; col < width; ++col) {
          int idx = col * height + row;
@@ -110,6 +111,7 @@ inline void rotate_right_mirror_vertical(QImage *const image) // rotate right->m
    const int lastRow = height - 1;
    const uint32 *pixel = reinterpret_cast<const uint32 *>(image->bits());
    uint32 *const generatedBits = reinterpret_cast<uint32 *>(generated.bits());
+
    for (int row = 0; row < height; ++row) {
       for (int col = 0; col < width; ++col) {
          int idx = (lastCol - col) * height + (lastRow - row);
@@ -125,18 +127,19 @@ QTiffHandler::QTiffHandler() : QImageIOHandler()
    compression = NoCompression;
 }
 
-bool QTiffHandler::canRead() const
+bool QTiffHandler::canRead()
 {
    if (canRead(device())) {
       setFormat("tiff");
       return true;
    }
+
    return false;
 }
 
 bool QTiffHandler::canRead(QIODevice *device)
 {
-   if (!device) {
+   if (! device) {
       qWarning("QTiffHandler::canRead() called with no device");
       return false;
    }
@@ -147,6 +150,7 @@ bool QTiffHandler::canRead(QIODevice *device)
    if (pos != 0) {
       device->seek(0);   // need the magic from the beginning
    }
+
    QByteArray header = device->peek(4);
    if (pos != 0) {
       device->seek(pos);   // put it back where we found it
@@ -227,16 +231,19 @@ bool QTiffHandler::read(QImage *image)
          if (!image->isNull()) {
             const uint16 tableSize = 256;
             QVector<QRgb> qtColorTable(tableSize);
+
             if (grayscale) {
                for (int i = 0; i < tableSize; ++i) {
                   const int c = (photometric == PHOTOMETRIC_MINISBLACK) ? i : (255 - i);
                   qtColorTable[i] = qRgb(c, c, c);
                }
+
             } else {
                // create the color table
-               uint16 *redTable = 0;
-               uint16 *greenTable = 0;
-               uint16 *blueTable = 0;
+               uint16 *redTable   = nullptr;
+               uint16 *greenTable = nullptr;
+               uint16 *blueTable  = nullptr;
+
                if (!TIFFGetField(tiff, TIFFTAG_COLORMAP, &redTable, &greenTable, &blueTable)) {
                   TIFFClose(tiff);
                   return false;
@@ -593,12 +600,12 @@ bool QTiffHandler::write(const QImage &image)
    return true;
 }
 
-QByteArray QTiffHandler::name() const
+QString QTiffHandler::name() const
 {
    return "tiff";
 }
 
-QVariant QTiffHandler::option(ImageOption option) const
+QVariant QTiffHandler::option(ImageOption option)
 {
    if (option == Size && canRead()) {
       QSize imageSize;
@@ -672,5 +679,3 @@ void QTiffHandler::convert32BitOrderBigEndian(void *buffer, int width)
          | (p & 0x000000ff) << 8;
    }
 }
-
-QT_END_NAMESPACE

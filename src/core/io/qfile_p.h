@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,15 +26,10 @@
 
 #include <qfiledevice_p.h>
 
-QT_BEGIN_NAMESPACE
-
 class QTemporaryFile;
 
 class QFilePrivate : public QFileDevicePrivate
 {
-   Q_DECLARE_PUBLIC(QFile)
-   friend class QTemporaryFile;
-
  protected:
    QFilePrivate();
    ~QFilePrivate();
@@ -47,10 +42,12 @@ class QFilePrivate : public QFileDevicePrivate
    QString fileName;
 
  private:
+   Q_DECLARE_PUBLIC(QFile)
+
    static QFile::EncoderFn encoder;
    static QFile::DecoderFn decoder;
+
+   friend class QTemporaryFile;
 };
 
-QT_END_NAMESPACE
-
-#endif // QFILE_P_H
+#endif

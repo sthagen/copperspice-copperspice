@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,12 +21,10 @@
 *
 ***********************************************************************/
 
-#include "statistics.h"
+#include <statistics.h>
 
-QT_BEGIN_NAMESPACE
-
-Statistics::Statistics(QWidget *parent, Qt::WindowFlags fl)
-   : QDialog(parent, fl)
+Statistics::Statistics(QWidget *parent, Qt::WindowFlags flags)
+   : QDialog(parent, flags)
 {
    setupUi(this);
 }
@@ -45,5 +43,3 @@ void Statistics::updateStats(int sW, int sC, int sCS, int trW, int trC, int trCS
    trChars->setText(QString::number(trC));
    trCharsSpc->setText(QString::number(trCS));
 }
-
-QT_END_NAMESPACE

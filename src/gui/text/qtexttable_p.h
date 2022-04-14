@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,8 +32,11 @@ class QTextTablePrivate : public QTextFramePrivate
    Q_DECLARE_PUBLIC(QTextTable)
 
  public:
-   QTextTablePrivate(QTextDocument *document) : QTextFramePrivate(document), grid(0), nRows(0), nCols(0), dirty(true),
-      blockFragmentUpdates(false) {}
+   QTextTablePrivate(QTextDocument *document)
+      : QTextFramePrivate(document), grid(nullptr), nRows(0), nCols(0), dirty(true),
+        blockFragmentUpdates(false)
+   {
+   }
 
    ~QTextTablePrivate();
 

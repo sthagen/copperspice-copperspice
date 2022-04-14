@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,7 +21,9 @@
 *
 ***********************************************************************/
 
-// Copyright (C) 2012 David Faure <faure@kde.org>
+/*****************************************************
+** Copyright (c) 2012 David Faure <faure@kde.org>
+*****************************************************/
 
 #ifndef QSAVEFILE_H
 #define QSAVEFILE_H
@@ -42,16 +44,19 @@ class Q_CORE_EXPORT QSaveFile : public QFileDevice
    Q_DECLARE_PRIVATE(QSaveFile)
 
  public:
-
    explicit QSaveFile(const QString &name);
    explicit QSaveFile(QObject *parent = nullptr);
    explicit QSaveFile(const QString &name, QObject *parent);
+
+   QSaveFile(const QSaveFile &) = delete;
+   QSaveFile &operator=(const QSaveFile &) = delete;
+
    ~QSaveFile();
 
    QString fileName() const override;
    void setFileName(const QString &name);
 
-   bool open(OpenMode flags) override;
+   bool open(OpenMode mode) override;
    bool commit();
 
    void cancelWriting();
@@ -64,7 +69,6 @@ class Q_CORE_EXPORT QSaveFile : public QFileDevice
 
  private:
    void close() override;
-   Q_DISABLE_COPY(QSaveFile)
 };
 
 #endif

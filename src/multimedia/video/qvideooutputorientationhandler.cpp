@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,10 +33,9 @@ QVideoOutputOrientationHandler::QVideoOutputOrientationHandler(QObject *parent)
 
     // we want to be informed about all orientation changes
     screen->setOrientationUpdateMask(Qt::PortraitOrientation|Qt::LandscapeOrientation
-                                     |Qt::InvertedPortraitOrientation|Qt::InvertedLandscapeOrientation);
+                  | Qt::InvertedPortraitOrientation|Qt::InvertedLandscapeOrientation);
 
-    connect(screen, SIGNAL(orientationChanged(Qt::ScreenOrientation)),
-            this, SLOT(screenOrientationChanged(Qt::ScreenOrientation)));
+    connect(screen, &QScreen::orientationChanged, this, &QVideoOutputOrientationHandler::screenOrientationChanged);
 
     screenOrientationChanged(screen->orientation());
 }

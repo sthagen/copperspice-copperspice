@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QXMLSCHEMA_H
 #define QXMLSCHEMA_H
 
-#include <QtCore/QSharedDataPointer>
-#include <QtCore/QUrl>
-#include <QtXmlPatterns/QXmlNamePool>
+#include <QSharedDataPointer>
+#include <QUrl>
+#include <QXmlNamePool>
 
 QT_BEGIN_NAMESPACE
 
@@ -62,7 +62,7 @@ class Q_XMLPATTERNS_EXPORT QXmlSchema
    void setUriResolver(const QAbstractUriResolver *resolver);
    const QAbstractUriResolver *uriResolver() const;
 
-   void setNetworkAccessManager(QNetworkAccessManager *networkmanager);
+   void setNetworkAccessManager(QNetworkAccessManager *manager);
    QNetworkAccessManager *networkAccessManager() const;
 
  private:

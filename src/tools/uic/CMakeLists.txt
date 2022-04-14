@@ -6,7 +6,7 @@ add_definitions(
    -DQT_UIC_CPP_GENERATOR
 )
 
-set(EXTRA_UIC_LIBS CsCore ${CMAKE_THREAD_LIBS_INIT})
+set(EXTRA_UIC_LIBS CsCore)
 set(EXTRA_UIC_CXXFLAGS)
 set(EXTRA_UIC_LDFLAGS)
 
@@ -23,13 +23,14 @@ include_directories(
 
 target_sources(uic${TOOLS_SUFFIX}
    PRIVATE
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppextractimages.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwritedeclaration.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteicondata.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteicondeclaration.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteiconinitialization.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteincludes.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteinitialization.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/extract_images.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_declaration.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_icondata.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_icondeclaration.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_iconinitialization.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_includes.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_initialization.h
+
    ${CMAKE_CURRENT_SOURCE_DIR}/customwidgetsinfo.h
    ${CMAKE_CURRENT_SOURCE_DIR}/databaseinfo.h
    ${CMAKE_CURRENT_SOURCE_DIR}/driver.h
@@ -42,13 +43,14 @@ target_sources(uic${TOOLS_SUFFIX}
    ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
    ${CMAKE_CURRENT_SOURCE_DIR}/validator.h
 
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppextractimages.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwritedeclaration.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteicondata.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteicondeclaration.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteiconinitialization.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteincludes.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/cppwriteinitialization.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/extract_images.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_declaration.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_icondata.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_icondeclaration.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_iconinitialization.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_includes.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpp/write_initialization.cpp
+
    ${CMAKE_CURRENT_SOURCE_DIR}/customwidgetsinfo.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/databaseinfo.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/driver.cpp
@@ -60,19 +62,19 @@ target_sources(uic${TOOLS_SUFFIX}
 )
 
 if(CMAKE_SYSTEM_NAME MATCHES "DARWIN")
-   set(EXTRA_UIC_LDFLAGS  ${EXTRA_UIC_LDFLAGS} '-Wl,-rpath,$ORIGIN/../lib')
+   list(APPEND EXTRA_UIC_LDFLAGS '-Wl,-rpath,$ORIGIN/../lib')
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-   set(EXTRA_UIC_LDFLAGS  ${EXTRA_UIC_LDFLAGS} '-Wl,-rpath,$ORIGIN/../lib')
+   list(APPEND EXTRA_UIC_LDFLAGS  '-Wl,-rpath,$ORIGIN/../lib')
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD)")
-   set(EXTRA_UIC_LDFLAGS  ${EXTRA_UIC_LDFLAGS} '-Wl,-rpath,$ORIGIN/../lib')
+   list(APPEND EXTRA_UIC_LDFLAGS  '-Wl,-rpath,$ORIGIN/../lib')
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-   set(EXTRA_UIC_LIBS ${EXTRA_UIC_LIBS} uuid)
+   list(APPEND EXTRA_UIC_LIBS uuid)
 endif()
 
 function_variable_fixup("${EXTRA_UIC_CXXFLAGS}" EXTRA_UIC_CXXFLAGS)

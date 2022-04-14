@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,46 +21,41 @@
 *
 ***********************************************************************/
 
-#include <QFile>
-#include <QHash>
-#include <QTextCodec>
+#include <qfile.h>
+#include <qhash.h>
+#include <qtextcodec.h>
 
-#include "qcoloroutput_p.h"
+#include <qcoloroutput_p.h>
 
 // TODO: rename insertMapping() to insertColorMapping()
 // TODO: Use a smart pointer for managing ColorOutputPrivate *d;
 // TODO: break out the C++ example into a snippet file
 
-/* This include must appear here, because if it appears at the beginning of the file for
- * instance, it breaks build -- "qglobal.h:628: error: template with
- * C linkage" -- on Mac OS X 10.4. */
-
 #ifndef Q_OS_WIN
 #include <unistd.h>
 #endif
 
-QT_BEGIN_NAMESPACE
-
 using namespace QPatternist;
 
 namespace QPatternist {
+
 class ColorOutputPrivate
 {
  public:
    ColorOutputPrivate() : currentColorID(-1)
 
    {
-      /* - QIODevice::Unbuffered because we want it to appear when the user actually calls, performance
-       *   is considered of lower priority.
-       */
+      // QIODevice::Unbuffered because we want it to appear when the user actually calls, performance
+      //  is considered of lower priority.
+
       m_out.open(stderr, QIODevice::WriteOnly | QIODevice::Unbuffered);
 
       coloringEnabled = isColoringPossible();
    }
 
    ColorOutput::ColorMapping  colorMapping;
-   int                        currentColorID;
-   bool                       coloringEnabled;
+   int  currentColorID;
+   bool coloringEnabled;
 
    static const char *const foregrounds[];
    static const char *const backgrounds[];
@@ -81,23 +76,27 @@ class ColorOutputPrivate
  private:
    QFile m_out;
 
-   /*!
-    Returns true if it's suitable to send colored output to \c stderr.
-    */
+   // returns true if it's suitable to send colored output to \c stderr
+
    inline bool isColoringPossible() const {
-#           if defined(Q_OS_WIN32)
-      /* Windows doesn't at all support ANSI escape codes, unless
-       * the user install a "device driver". See the Wikipedia links in the
-       * class documentation for details. */
+
+#if defined(Q_OS_WIN)
+      // Windows does not at all support ANSI escape codes, unless
+      // the user install a "device driver".
+
       return false;
-#           else
-      /* We use QFile::handle() to get the file descriptor. It's a bit unsure
+
+#else
+      /* Use QFile::handle() to get the file descriptor. It's a bit unsure
        * whether it's 2 on all platforms and in all cases, so hopefully this layer
        * of abstraction helps handle such cases. */
+
       return isatty(m_out.handle());
-#           endif
+#endif
+
    }
 };
+
 }
 
 const char *const ColorOutputPrivate::foregrounds[] = {
@@ -205,17 +204,8 @@ QString ColorOutput::colorify(const QString &message, int colorID) const
    }
 }
 
-/*!
-  Adds a color mapping from \a colorID to \a colorCode, for this ColorOutput instance.
-
-  This is a convenience function for creating a ColorOutput::ColorMapping instance and
-  calling setColorMapping().
-
-  \sa colorMapping(), setColorMapping()
- */
 void ColorOutput::insertMapping(int colorID, const ColorCode colorCode)
 {
    d->colorMapping.insert(colorID, colorCode);
 }
 
-QT_END_NAMESPACE

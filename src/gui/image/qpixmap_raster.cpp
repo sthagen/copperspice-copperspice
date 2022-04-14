@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,15 +22,17 @@
 ***********************************************************************/
 
 #include <qpixmap.h>
-#include <qfont_p.h>
-#include <qpixmap_raster_p.h>
-#include <qnativeimage_p.h>
-#include <qimage_p.h>
+
 #include <qpaintengine.h>
 #include <qbitmap.h>
 #include <qimage.h>
-#include <QBuffer>
-#include <QImageReader>
+#include <qbuffer.h>
+#include <qimagereader.h>
+
+#include <qfont_p.h>
+#include <qimage_p.h>
+#include <qnativeimage_p.h>
+#include <qpixmap_raster_p.h>
 #include <qimage_p.h>
 #include <qsimd_p.h>
 #include <qwidget_p.h>
@@ -101,7 +103,7 @@ void QRasterPlatformPixmap::resize(int width, int height)
    setSerialNumber(image.cacheKey() >> 32);
 }
 
-bool QRasterPlatformPixmap::fromData(const uchar *buffer, uint len, const char *format,
+bool QRasterPlatformPixmap::fromData(const uchar *buffer, uint len, const QString &format,
    Qt::ImageConversionFlags flags)
 {
    QByteArray a = QByteArray::fromRawData(reinterpret_cast<const char *>(buffer), len);
@@ -130,10 +132,11 @@ void QRasterPlatformPixmap::fromImageInPlace(QImage &sourceImage,
 {
    createPixmapForImage(sourceImage, flags, /* inplace = */true);
 }
+
 void QRasterPlatformPixmap::fromImageReader(QImageReader *imageReader,
    Qt::ImageConversionFlags flags)
 {
-   Q_UNUSED(flags);
+   (void) flags;
    QImage image = imageReader->read();
 
    if (image.isNull()) {
@@ -191,7 +194,7 @@ void QRasterPlatformPixmap::fill(const QColor &color)
 
       pixel = qPremultiply(color.rgba());
       const QPixelLayout *layout = &qPixelLayouts[image.format()];
-      layout->convertFromARGB32PM(&pixel, &pixel, 1, layout, 0);
+      layout->convertFromARGB32PM(&pixel, &pixel, 1, layout, nullptr);
 
    } else if (image.format() == QImage::Format_Alpha8) {
       pixel = qAlpha(color.rgba());

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,8 +23,8 @@
 
 #include <qsimplex_p.h>
 
-#include <QtCore/qset.h>
-#include <QtCore/qdebug.h>
+#include <qset.h>
+#include <qdebug.h>
 
 #include <stdlib.h>
 
@@ -58,7 +58,7 @@
 /*!
   \internal
 */
-QSimplex::QSimplex() : objective(0), rows(0), columns(0), firstArtificial(0), matrix(0)
+QSimplex::QSimplex() : objective(nullptr), rows(0), columns(0), firstArtificial(0), matrix(nullptr)
 {
 }
 
@@ -75,7 +75,7 @@ QSimplex::~QSimplex()
 */
 void QSimplex::clearDataStructures()
 {
-   if (matrix == 0) {
+   if (matrix == nullptr) {
       return;
    }
 
@@ -84,7 +84,7 @@ void QSimplex::clearDataStructures()
    columns = 0;
    firstArtificial = 0;
    free(matrix);
-   matrix = 0;
+   matrix = nullptr;
 
    // Constraints
    for (int i = 0; i < constraints.size(); ++i) {
@@ -96,7 +96,7 @@ void QSimplex::clearDataStructures()
 
    // Other
    variables.clear();
-   objective = 0;
+   objective = nullptr;
 }
 
 /*!
@@ -174,8 +174,8 @@ bool QSimplex::setConstraints(const QList<QSimplexConstraint *> &newConstraints)
       QSimplexVariable *surplus;
       QSimplexVariable *artificial;
 
-      Q_ASSERT(constraints[i]->helper.first == 0);
-      Q_ASSERT(constraints[i]->artificial == 0);
+      Q_ASSERT(constraints[i]->helper.first == nullptr);
+      Q_ASSERT(constraints[i]->artificial == nullptr);
 
       switch (constraints[i]->ratio) {
          case QSimplexConstraint::LessOrEqual:
@@ -184,12 +184,14 @@ bool QSimplex::setConstraints(const QList<QSimplexConstraint *> &newConstraints)
             constraints[i]->helper.first = slack;
             constraints[i]->helper.second = 1.0;
             break;
+
          case QSimplexConstraint::MoreOrEqual:
             surplus = new QSimplexVariable;
             surplus->index = ++variableIndex;
             constraints[i]->helper.first = surplus;
             constraints[i]->helper.second = -1.0;
-         // fall through
+            [[fallthrough]];
+
          case QSimplexConstraint::Equal:
             artificial = new QSimplexVariable;
             constraints[i]->artificial = artificial;

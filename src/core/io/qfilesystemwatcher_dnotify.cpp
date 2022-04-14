@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,13 +35,15 @@
 #include <qmutex.h>
 #include <dirent.h>
 #include <qdir.h>
+
+#include <qcore_unix_p.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
-#include <qcore_unix_p.h>
 
 #ifdef QT_LINUXBASE
 
@@ -57,11 +59,9 @@
 
 #endif
 
-QT_BEGIN_NAMESPACE
-
 static int qfswd_fileChanged_pipe[2];
-static void (*qfswd_old_sigio_handler)(int) = 0;
-static void (*qfswd_old_sigio_action)(int, siginfo_t *, void *) = 0;
+static void (*qfswd_old_sigio_handler)(int) = nullptr;
+static void (*qfswd_old_sigio_action)(int, siginfo_t *, void *) = nullptr;
 
 static void qfswd_sigio_monitor(int signum, siginfo_t *i, void *v)
 {
@@ -153,16 +153,18 @@ void QDnotifySignalThread::startNotify()
    // QDnotifySignalThread singleton is deleted
    start();
    mutex.lock();
+
    while (!isExecing) {
       wait.wait(&mutex);
    }
+
    mutex.unlock();
 }
 
 void QDnotifySignalThread::run()
 {
    QSocketNotifier sn(qfswd_fileChanged_pipe[0], QSocketNotifier::Read, this);
-   connect(&sn, SIGNAL(activated(int)), this, SLOT(readFromDnotify()));
+   connect(&sn, &QSocketNotifier::activated, this, &QDnotifySignalThread::readFromDnotify);
 
    QCoreApplication::instance()->postEvent(this, new QEvent(QEvent::User));
    (void) exec();
@@ -172,6 +174,7 @@ void QDnotifySignalThread::readFromDnotify()
 {
    int fd;
    int readrv = qt_safe_read(qfswd_fileChanged_pipe[0], reinterpret_cast<char *>(&fd), sizeof(int));
+
    // Only expect EAGAIN or EINTR.  Other errors are assumed to be impossible.
    if (readrv != -1) {
       Q_ASSERT(readrv == sizeof(int));
@@ -187,17 +190,16 @@ void QDnotifySignalThread::readFromDnotify()
 
 QDnotifyFileSystemWatcherEngine::QDnotifyFileSystemWatcherEngine()
 {
-   QObject::connect(dnotifySignal(), SIGNAL(fdChanged(int)), this, SLOT(refresh(int)), Qt::DirectConnection);
+   QObject::connect(dnotifySignal(), &QDnotifySignalThread::fdChanged, this, &QDnotifyFileSystemWatcherEngine::refresh, Qt::DirectConnection);
 }
 
 QDnotifyFileSystemWatcherEngine::~QDnotifyFileSystemWatcherEngine()
 {
    QMutexLocker locker(&mutex);
 
-   for (QHash<int, Directory>::const_iterator iter = fdToDirectory.constBegin();
-         iter != fdToDirectory.constEnd();
-         ++iter) {
+   for (auto iter = fdToDirectory.constBegin(); iter != fdToDirectory.constEnd(); ++iter) {
       qt_safe_close(iter->fd);
+
       if (iter->parentFd) {
          qt_safe_close(iter->parentFd);
       }
@@ -252,7 +254,7 @@ QStringList QDnotifyFileSystemWatcherEngine::addPaths(const QStringList &paths, 
          if (!d) {
             continue;   // Could not open directory
          }
-         QT_DIR *parent = 0;
+         QT_DIR *parent = nullptr;
 
          QDir parentDir(path);
          if (!parentDir.isRoot()) {
@@ -457,7 +459,5 @@ bool QDnotifyFileSystemWatcherEngine::Directory::File::updateInfo()
       return false;
    }
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_FILESYSTEMWATCHER

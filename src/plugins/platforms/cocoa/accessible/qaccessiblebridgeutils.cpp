@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -68,9 +68,11 @@ bool performEffectiveAction(QAccessibleInterface *iface, const QString &actionNa
     if (!valueIface)
         return false;
     bool success;
+
     const QVariant currentVariant = valueIface->currentValue();
     double stepSize = valueIface->minimumStepSize().toDouble(&success);
-    if (!success || qFuzzyIsNull(stepSize)) {
+
+    if (! success || qFuzzyIsNull(stepSize)) {
         const double min = valueIface->minimumValue().toDouble(&success);
         if (!success)
             return false;
@@ -79,7 +81,8 @@ bool performEffectiveAction(QAccessibleInterface *iface, const QString &actionNa
             return false;
         stepSize = (max - min) / 10;  // this is pretty arbitrary, we just need to provide something
         const int typ = currentVariant.type();
-        if (typ != QMetaType::Float && typ != QMetaType::Double) {
+
+        if (typ != QVariant::Float && typ != QVariant::Double) {
             // currentValue is an integer. Round it up to ensure stepping in case it was below 1
             stepSize = qCeil(stepSize);
         }

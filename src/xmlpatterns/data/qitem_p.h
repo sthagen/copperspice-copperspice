@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -172,7 +172,7 @@ class Item
 
    inline Item &operator=(const Item &other) {
       Q_ASSERT_X(sizeof(QXmlNodeModelIndex) >= sizeof(AtomicValue *), Q_FUNC_INFO,
-                 "If this doesn't hold, we won't copy all data.");
+                 "If this is not true some data will not be copied.");
 
       if (other.isAtomicValue()) {
          other.atomicValue->ref.ref();
@@ -289,10 +289,8 @@ class Item
    }
 
    inline const QXmlNodeModelIndex &asNode() const {
-      Q_ASSERT_X(isNode() || isNull(), Q_FUNC_INFO,
-                 "This item isn't a valid QXmlNodeModelIndex.");
-      Q_ASSERT_X(sizeof(QXmlNodeModelIndex) == sizeof(QPatternist::NodeIndexStorage), Q_FUNC_INFO,
-                 "If this doesn't hold, something is wrong.");
+      Q_ASSERT_X(isNode() || isNull(), Q_FUNC_INFO, "This item is not a valid QXmlNodeModelIndex.");
+      Q_ASSERT_X(sizeof(QXmlNodeModelIndex) == sizeof(QPatternist::NodeIndexStorage), Q_FUNC_INFO, "Size mismatch");
 
       return reinterpret_cast<const QXmlNodeModelIndex &>(node);
    }

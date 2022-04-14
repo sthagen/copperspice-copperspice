@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #define QSPINBOX_H
 
 #include <qabstractspinbox.h>
-
-
 
 #ifndef QT_NO_SPINBOX
 
@@ -64,6 +62,10 @@ class Q_GUI_EXPORT QSpinBox : public QAbstractSpinBox
 
  public:
    explicit QSpinBox(QWidget *parent = nullptr);
+
+   QSpinBox(const QSpinBox &) = delete;
+   QSpinBox &operator=(const QSpinBox &) = delete;
+
    ~QSpinBox();
 
    int value() const;
@@ -93,11 +95,11 @@ class Q_GUI_EXPORT QSpinBox : public QAbstractSpinBox
    GUI_CS_SLOT_1(Public, void setValue(int val))
    GUI_CS_SLOT_2(setValue)
 
-   GUI_CS_SIGNAL_1(Public, void valueChanged(int un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (int), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void valueChanged(int newValue))
+   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (int), newValue)
 
-   GUI_CS_SIGNAL_1(Public, void valueChanged(const QString &un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (const QString &), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void valueChanged(const QString &text))
+   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (const QString &), text)
 
    // wrapper for property
    GUI_CS_SIGNAL_1(Public, void cs_valueChanged(int un_named_arg1))
@@ -107,11 +109,10 @@ class Q_GUI_EXPORT QSpinBox : public QAbstractSpinBox
    bool event(QEvent *event) override;
    QValidator::State validate(QString &input, int &pos) const override;
    virtual int valueFromText(const QString &text) const;
-   virtual QString textFromValue(int val) const;
+   virtual QString textFromValue(int value) const;
    void fixup(QString &str) const override;
 
  private:
-   Q_DISABLE_COPY(QSpinBox)
    Q_DECLARE_PRIVATE(QSpinBox)
 };
 
@@ -146,6 +147,10 @@ class Q_GUI_EXPORT QDoubleSpinBox : public QAbstractSpinBox
 
  public:
    explicit QDoubleSpinBox(QWidget *parent = nullptr);
+
+   QDoubleSpinBox(const QDoubleSpinBox &) = delete;
+   QDoubleSpinBox &operator=(const QDoubleSpinBox &) = delete;
+
    ~QDoubleSpinBox();
 
    double value() const;
@@ -174,28 +179,26 @@ class Q_GUI_EXPORT QDoubleSpinBox : public QAbstractSpinBox
 
    QValidator::State validate(QString &input, int &pos) const override;
    virtual double valueFromText(const QString &text) const;
-   virtual QString textFromValue(double val) const;
-   void fixup(QString &str) const override;
+   virtual QString textFromValue(double value) const;
+   void fixup(QString &input) const override;
 
    GUI_CS_SLOT_1(Public, void setValue(double val))
    GUI_CS_SLOT_2(setValue)
 
-   GUI_CS_SIGNAL_1(Public, void valueChanged(double un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (double), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void valueChanged(double newValue))
+   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (double), newValue)
 
-   GUI_CS_SIGNAL_1(Public, void valueChanged(const QString &un_named_arg1))
-   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (const QString &), un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void valueChanged(const QString &text))
+   GUI_CS_SIGNAL_OVERLOAD(valueChanged, (const QString &), text)
 
    // wrapper for property
    GUI_CS_SIGNAL_1(Public, void cs_valueChanged(double un_named_arg1))
    GUI_CS_SIGNAL_2(cs_valueChanged, un_named_arg1)
 
  private:
-   Q_DISABLE_COPY(QDoubleSpinBox)
    Q_DECLARE_PRIVATE(QDoubleSpinBox)
 };
 
-#endif // QT_NO_SPINBOX
-
+#endif
 
 #endif // QSPINBOX_H

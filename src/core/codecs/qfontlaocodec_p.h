@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qtextcodec.h>
 
-QT_BEGIN_NAMESPACE
-
 #ifndef QT_NO_CODECS
 
 class Q_CORE_EXPORT QFontLaoCodec : public QTextCodec
@@ -42,8 +40,6 @@ class Q_CORE_EXPORT QFontLaoCodec : public QTextCodec
    int mibEnum() const override;
 };
 
-#endif
-
-QT_END_NAMESPACE
+#endif  // QT_NO_CODECS
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,12 +21,12 @@
 *
 ***********************************************************************/
 
-#include <QtCore/qmap.h>
-#include <QtCore/qtimer.h>
-#include <QtCore/qmutex.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qabstracteventdispatcher.h>
-#include <QtCore/qcoreapplication.h>
+#include <qmap.h>
+#include <qtimer.h>
+#include <qmutex.h>
+#include <qlist.h>
+#include <qabstracteventdispatcher.h>
+#include <qcoreapplication.h>
 
 #include <qgstreamerbushelper_p.h>
 
@@ -49,12 +49,12 @@ class QGstreamerBusHelperPrivate : public QObject
          m_intervalTimer->start();
 
       } else {
-         m_tag = gst_bus_add_watch_full(bus, G_PRIORITY_DEFAULT, busCallback, this, NULL);
+         m_tag = gst_bus_add_watch_full(bus, G_PRIORITY_DEFAULT, busCallback, this, nullptr);
       }
    }
 
    ~QGstreamerBusHelperPrivate() {
-      m_helper = 0;
+      m_helper = nullptr;
       delete m_intervalTimer;
 
       if (m_tag) {
@@ -82,6 +82,7 @@ class QGstreamerBusHelperPrivate : public QObject
    }
 
    static gboolean busCallback(GstBus *bus, GstMessage *message, gpointer data) {
+      (void) bus;
       reinterpret_cast<QGstreamerBusHelperPrivate *>(data)->queueMessage(message);
 
       return TRUE;
@@ -115,7 +116,7 @@ void QGstreamerBusHelperPrivate::interval()
 {
    GstMessage *message;
 
-   while ((message = gst_bus_poll(m_bus, GST_MESSAGE_ANY, 0)) != 0) {
+   while ((message = gst_bus_poll(m_bus, GST_MESSAGE_ANY, 0)) != nullptr) {
       processMessage(message);
       gst_message_unref(message);
    }
@@ -123,6 +124,8 @@ void QGstreamerBusHelperPrivate::interval()
 
 static GstBusSyncReply syncGstBusFilter(GstBus *bus, GstMessage *message, QGstreamerBusHelperPrivate *d)
 {
+   (void) bus;
+
    QMutexLocker lock(&d->filterMutex);
 
    for (QGstreamerSyncMessageFilter *filter : d->syncFilters) {
@@ -140,7 +143,7 @@ QGstreamerBusHelper::QGstreamerBusHelper(GstBus *bus, QObject *parent)
    d = new QGstreamerBusHelperPrivate(this, bus);
 
 #if GST_CHECK_VERSION(1,0,0)
-   gst_bus_set_sync_handler(bus, (GstBusSyncHandler)syncGstBusFilter, d, 0);
+   gst_bus_set_sync_handler(bus, (GstBusSyncHandler)syncGstBusFilter, d, nullptr);
 #else
    gst_bus_set_sync_handler(bus, (GstBusSyncHandler)syncGstBusFilter, d);
 #endif
@@ -151,16 +154,16 @@ QGstreamerBusHelper::QGstreamerBusHelper(GstBus *bus, QObject *parent)
 QGstreamerBusHelper::~QGstreamerBusHelper()
 {
 #if GST_CHECK_VERSION(1,0,0)
-   gst_bus_set_sync_handler(d->bus(), 0, 0, 0);
+   gst_bus_set_sync_handler(d->bus(), nullptr, nullptr, nullptr);
 #else
-   gst_bus_set_sync_handler(d->bus(), 0, 0);
+   gst_bus_set_sync_handler(d->bus(), nullptr, nullptr);
 #endif
    gst_object_unref(GST_OBJECT(d->bus()));
 }
 
 void QGstreamerBusHelper::installMessageFilter(QObject *filter)
 {
-   QGstreamerSyncMessageFilter *syncFilter = qobject_cast<QGstreamerSyncMessageFilter *>(filter);
+   QGstreamerSyncMessageFilter *syncFilter = dynamic_cast<QGstreamerSyncMessageFilter *>(filter);
    if (syncFilter) {
       QMutexLocker lock(&d->filterMutex);
       if (!d->syncFilters.contains(syncFilter)) {
@@ -168,7 +171,7 @@ void QGstreamerBusHelper::installMessageFilter(QObject *filter)
       }
    }
 
-   QGstreamerBusMessageFilter *busFilter = qobject_cast<QGstreamerBusMessageFilter *>(filter);
+   QGstreamerBusMessageFilter *busFilter = dynamic_cast<QGstreamerBusMessageFilter *>(filter);
    if (busFilter && !d->busFilters.contains(busFilter)) {
       d->busFilters.append(busFilter);
    }
@@ -176,13 +179,13 @@ void QGstreamerBusHelper::installMessageFilter(QObject *filter)
 
 void QGstreamerBusHelper::removeMessageFilter(QObject *filter)
 {
-   QGstreamerSyncMessageFilter *syncFilter = qobject_cast<QGstreamerSyncMessageFilter *>(filter);
+   QGstreamerSyncMessageFilter *syncFilter = dynamic_cast<QGstreamerSyncMessageFilter *>(filter);
    if (syncFilter) {
       QMutexLocker lock(&d->filterMutex);
       d->syncFilters.removeAll(syncFilter);
    }
 
-   QGstreamerBusMessageFilter *busFilter = qobject_cast<QGstreamerBusMessageFilter *>(filter);
+   QGstreamerBusMessageFilter *busFilter = dynamic_cast<QGstreamerBusMessageFilter *>(filter);
    if (busFilter) {
       d->busFilters.removeAll(busFilter);
    }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QTCONCURRENTFILTERKERNEL_H
 #define QTCONCURRENTFILTERKERNEL_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qtconcurrentiteratekernel.h>
-#include <QtCore/qtconcurrentmapkernel.h>
-#include <QtCore/qtconcurrentreducekernel.h>
-
-QT_BEGIN_NAMESPACE
+#include <qglobal.h>
+#include <qtconcurrentiteratekernel.h>
+#include <qtconcurrentmapkernel.h>
+#include <qtconcurrentreducekernel.h>
 
 namespace QtConcurrent {
 
@@ -290,7 +288,5 @@ inline ThreadEngineStarter<ResultType> startFilteredReduced(Iterator begin, Iter
 
 
 } // namespace QtConcurrent
-
-QT_END_NAMESPACE
 
 #endif

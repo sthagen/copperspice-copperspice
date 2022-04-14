@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,6 +22,8 @@
 ***********************************************************************/
 
 #include <qstringview.h>
+#include <qstring8.h>
+#include <qstring16.h>
 #include <qunicodetables_p.h>
 
 std::pair<char32_t, const char32_t *> cs_internal_convertCaseTrait(int trait, char32_t value)
@@ -55,4 +57,14 @@ std::pair<char32_t, const char32_t *> cs_internal_convertCaseTrait(int trait, ch
    }
 
    return { caseValue, caseSpecial };
+}
+
+QStringView8 make_view(QString8 &&str)
+{
+   return QStringView8(str.cbegin(), str.cend());
+}
+
+QStringView16 make_view(QString16 &&str)
+{
+   return QStringView16(str.cbegin(), str.cend());
 }

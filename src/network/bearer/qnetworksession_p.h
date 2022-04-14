@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,11 +26,9 @@
 
 #include <qnetworksession.h>
 #include <qnetworkconfiguration_p.h>
-#include <QtCore/qsharedpointer.h>
+#include <qsharedpointer.h>
 
 #ifndef QT_NO_BEARERMANAGEMENT
-
-QT_BEGIN_NAMESPACE
 
 class Q_NETWORK_EXPORT QNetworkSessionPrivate : public QObject
 {
@@ -39,8 +37,8 @@ class Q_NETWORK_EXPORT QNetworkSessionPrivate : public QObject
    friend class QNetworkSession;
 
  public:
-   QNetworkSessionPrivate() : QObject(),
-      state(QNetworkSession::Invalid), isOpen(false), mutex(QMutex::Recursive) {
+   QNetworkSessionPrivate()
+      : state(QNetworkSession::Invalid), isOpen(false) {
    }
 
    virtual ~QNetworkSessionPrivate() {
@@ -55,6 +53,7 @@ class Q_NETWORK_EXPORT QNetworkSessionPrivate : public QObject
 #ifndef QT_NO_NETWORKINTERFACE
    virtual QNetworkInterface currentInterface() const = 0;
 #endif
+
    virtual QVariant sessionProperty(const QString &key) const = 0;
    virtual void setSessionProperty(const QString &key, const QVariant &value) = 0;
 
@@ -128,10 +127,8 @@ class Q_NETWORK_EXPORT QNetworkSessionPrivate : public QObject
    QNetworkSession::State state;
    bool isOpen;
 
-   QMutex mutex;
+   QRecursiveMutex mutex;
 };
-
-
 
 #endif // QT_NO_BEARERMANAGEMENT
 

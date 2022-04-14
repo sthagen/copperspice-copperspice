@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QFINALSTATE_H
 #define QFINALSTATE_H
 
-#include <QtCore/qabstractstate.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractstate.h>
 
 #ifndef QT_NO_STATEMACHINE
 
@@ -37,22 +35,23 @@ class Q_CORE_EXPORT QFinalState : public QAbstractState
    CORE_CS_OBJECT(QFinalState)
 
  public:
-   QFinalState(QState *parent = 0);
+   QFinalState(QState *parent = nullptr);
+
+   QFinalState(const QFinalState &other) = delete;
+   QFinalState &operator=(const QFinalState &other) = delete;
+
    ~QFinalState();
 
  protected:
    void onEntry(QEvent *event) override;
    void onExit(QEvent *event) override;
 
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QFinalState)
    Q_DECLARE_PRIVATE(QFinalState)
 };
 
 #endif //QT_NO_STATEMACHINE
-
-QT_END_NAMESPACE
 
 #endif

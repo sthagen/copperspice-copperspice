@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QABSTRACTSTATE_H
 #define QABSTRACTSTATE_H
 
-#include <QtCore/qobject.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_STATEMACHINE
 
@@ -39,11 +37,19 @@ class Q_CORE_EXPORT QAbstractState : public QObject
 {
    CORE_CS_OBJECT(QAbstractState)
 
+   CORE_CS_PROPERTY_READ(active, active)
+   CORE_CS_PROPERTY_NOTIFY(active, activeChanged)
+
  public:
+   QAbstractState(const QAbstractState &) = delete;
+   QAbstractState &operator=(const QAbstractState &) = delete;
+
    ~QAbstractState();
 
    QState *parentState() const;
    QStateMachine *machine() const;
+
+   bool active() const;
 
    CORE_CS_SIGNAL_1(Public, void entered())
    CORE_CS_SIGNAL_2(entered)
@@ -51,25 +57,24 @@ class Q_CORE_EXPORT QAbstractState : public QObject
    CORE_CS_SIGNAL_1(Public, void exited())
    CORE_CS_SIGNAL_2(exited)
 
+   CORE_CS_SIGNAL_1(Public, void activeChanged(bool active))
+   CORE_CS_SIGNAL_2(activeChanged, active)
+
  protected:
-   QAbstractState(QState *parent = 0);
+   QAbstractState(QState *parent = nullptr);
 
    virtual void onEntry(QEvent *event) = 0;
    virtual void onExit(QEvent *event) = 0;
 
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
    QAbstractState(QAbstractStatePrivate &dd, QState *parent);
 
    QScopedPointer<QAbstractStatePrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QAbstractState)
    Q_DECLARE_PRIVATE(QAbstractState)
-  
 };
 
 #endif //QT_NO_STATEMACHINE
-
-QT_END_NAMESPACE
 
 #endif

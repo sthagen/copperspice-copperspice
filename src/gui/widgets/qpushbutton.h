@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -46,6 +46,10 @@ class Q_GUI_EXPORT QPushButton : public QAbstractButton
    explicit QPushButton(QWidget *parent = nullptr);
    explicit QPushButton(const QString &text, QWidget *parent = nullptr);
    QPushButton(const QIcon &icon, const QString &text, QWidget *parent = nullptr);
+
+   QPushButton(const QPushButton &) = delete;
+   QPushButton &operator=(const QPushButton &) = delete;
+
    ~QPushButton();
 
    QSize sizeHint() const override;
@@ -68,18 +72,16 @@ class Q_GUI_EXPORT QPushButton : public QAbstractButton
 #endif
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
 
-
-   void paintEvent(QPaintEvent *) override;
-   void keyPressEvent(QKeyEvent *) override;
-   void focusInEvent(QFocusEvent *) override;
-   void focusOutEvent(QFocusEvent *) override;
+   void paintEvent(QPaintEvent *event) override;
+   void keyPressEvent(QKeyEvent *event) override;
+   void focusInEvent(QFocusEvent *event) override;
+   void focusOutEvent(QFocusEvent *event) override;
    void initStyleOption(QStyleOptionButton *option) const;
    QPushButton(QPushButtonPrivate &dd, QWidget *parent = nullptr);
 
  private:
-   Q_DISABLE_COPY(QPushButton)
    Q_DECLARE_PRIVATE(QPushButton)
 
 #ifndef QT_NO_MENU
@@ -88,6 +90,5 @@ class Q_GUI_EXPORT QPushButton : public QAbstractButton
 #endif
 
 };
-
 
 #endif // QPUSHBUTTON_H

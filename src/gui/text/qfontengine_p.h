@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -259,31 +259,28 @@ class Q_GUI_EXPORT QFontEngine
 
    virtual bool hasUnreliableGlyphOutline() const;
 
-   virtual void setDefaultHintStyle(HintStyle) { }
+   virtual void setDefaultHintStyle(HintStyle) {
+   }
 
    inline QVariant userData() const {
       return m_userData;
    }
 
    // harfbuzz
-   void *harfbuzzFace() const;
+   std::shared_ptr<hb_face_t> harfbuzzFace() const;
 
-   QAtomicInt ref;
-   QFontDef fontDef;
-
-   // harfbuzz
-   mutable void *m_hb_font;
-   mutable qt_destroy_func_ptr  font_destroy_func_ptr;
-
-   mutable void *m_hb_face;
-   mutable qt_destroy_func_ptr  face_destroy_func_ptr;
+   mutable std::shared_ptr<hb_font_t> m_hb_font;
+   mutable std::shared_ptr<hb_face_t> m_hb_face;
 
    struct FaceData {
       void *user_data;
-      qt_get_font_table_func_ptr  font_table_func_ptr;
+      cs_fontTable_func_ptr  m_fontTable_funcPtr;
    } faceData;
 
-   uint cache_cost;       // amount of mem used in kb by the font
+   QAtomicInt m_refCount;
+   QFontDef fontDef;
+
+   uint cache_cost;       // amount of memory used in kb by the font
 
    uint fsType : 16;
    bool symbol;

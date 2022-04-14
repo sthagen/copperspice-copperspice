@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,11 @@
 #ifndef QCOSMETICSTROKER_P_H
 #define QCOSMETICSTROKER_P_H
 
+#include <qpen.h>
+
 #include <qdrawhelper_p.h>
 #include <qvectorpath_p.h>
 #include <qpaintengine_raster_p.h>
-#include <qpen.h>
-
-
 
 class QCosmeticStroker;
 
@@ -64,18 +63,10 @@ class QCosmeticStroker
    };
 
    QCosmeticStroker(QRasterPaintEngineState *s, const QRect &dr, const QRect &dr_unclipped)
-      : state(s),
-        deviceRect(dr_unclipped),
-        clip(dr),
-        pattern(0),
-        reversePattern(0),
-        patternSize(0),
-        patternLength(0),
-        patternOffset(0),
-        legacyRounding(false),
-        current_span(0),
-        lastDir(LeftToRight),
-        lastAxisAligned(false) {
+      : state(s), deviceRect(dr_unclipped), clip(dr), pattern(nullptr), reversePattern(nullptr),
+        patternSize(0), patternLength(0), patternOffset(0), legacyRounding(false),
+        current_span(0), lastDir(LeftToRight), lastAxisAligned(false)
+   {
       setup();
    }
 
@@ -90,9 +81,8 @@ class QCosmeticStroker
 
    void drawLine(const QPointF &p1, const QPointF &p2);
    void drawPath(const QVectorPath &path);
-   void drawPoints(const QPoint *points, int num);
-   void drawPoints(const QPointF *points, int num);
-
+   void drawPoints(const QPoint *pointPtr, int pointCount);
+   void drawPoints(const QPointF *pointPtr, int pointCount);
 
    QRasterPaintEngineState *state;
    QRect deviceRect;

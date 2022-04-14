@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,14 +28,16 @@
 #include <qstringparser.h>
 
 #ifdef QT_NO_SHAREDMEMORY
+
 #ifndef QT_NO_SYSTEMSEMAPHORE
 
 namespace QSharedMemoryPrivate {
-int createUnixKeyFile(const QString &fileName);
-QString makePlatformSafeKey(const QString &key, const QString &prefix = QString("qipc_sharedmemory_");
+   int createUnixKeyFile(const QString &fileName);
+   QString makePlatformSafeKey(const QString &key, const QString &prefix = QString("qipc_sharedmemory_"));
 }
 
 #endif
+
 #else
 
 #include <qsystemsemaphore.h>
@@ -45,8 +47,6 @@ QString makePlatformSafeKey(const QString &key, const QString &prefix = QString(
 #else
 #  include <sys/types.h>
 #endif
-
-QT_BEGIN_NAMESPACE
 
 #ifndef QT_NO_SYSTEMSEMAPHORE
 
@@ -58,17 +58,18 @@ class QSharedMemoryLocker
       Q_ASSERT(q_sm);
    }
 
-   inline ~QSharedMemoryLocker() {
+   ~QSharedMemoryLocker() {
       if (q_sm) {
          q_sm->unlock();
       }
    }
 
-   inline bool lock() {
+   bool lock() {
       if (q_sm && q_sm->lock()) {
          return true;
       }
-      q_sm = 0;
+
+      q_sm = nullptr;
       return false;
    }
 
@@ -117,9 +118,9 @@ class QSharedMemoryPrivate
    void setErrorString(const QString &function);
 
 #ifndef QT_NO_SYSTEMSEMAPHORE
-   inline bool tryLocker(QSharedMemoryLocker *locker, const QString &function) {
+   bool tryLocker(QSharedMemoryLocker *locker, const QString &function) {
 
-      if (!locker->lock()) {
+      if (! locker->lock()) {
          errorString = QSharedMemory::tr("%1: unable to lock").formatArg(function);
          error = QSharedMemory::LockError;
          return false;
@@ -127,7 +128,7 @@ class QSharedMemoryPrivate
 
       return true;
    }
-#endif // QT_NO_SYSTEMSEMAPHORE
+#endif
 
  protected:
    QSharedMemory *q_ptr;
@@ -143,9 +144,7 @@ class QSharedMemoryPrivate
 
 };
 
-QT_END_NAMESPACE
-
 #endif // QT_NO_SHAREDMEMORY
 
-#endif // QSHAREDMEMORY_P_H
+#endif
 

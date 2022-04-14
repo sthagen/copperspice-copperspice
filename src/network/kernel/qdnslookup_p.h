@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -59,7 +59,7 @@ class QDnsLookupPrivate
 
  public:
     QDnsLookupPrivate()
-        : isFinished(false), type(QDnsLookup::A), runnable(0)
+        : isFinished(false), type(QDnsLookup::A), runnable(nullptr)
     { }
 
     void _q_lookupFinished(const QDnsLookupReply &reply);
@@ -177,7 +177,5 @@ class QDnsTextRecordPrivate : public QDnsRecordPrivate
 
     QList<QByteArray> values;
 };
-
-Q_DECLARE_METATYPE(QDnsLookupReply)
 
 #endif

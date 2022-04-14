@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QSCRIPTCONTEXTINFO_H
 #define QSCRIPTCONTEXTINFO_H
 
-#include <QtCore/qlist.h>
-#include <QtCore/qstringlist.h>
-#include <QtCore/qsharedpointer.h>
+#include <qlist.h>
+#include <qstringlist.h>
+#include <qsharedpointer.h>
 
 class QDataStream;
 class QScriptContext;

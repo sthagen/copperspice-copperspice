@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,7 +32,7 @@
 #include <qevent.h>
 #include <qapplication.h>
 #include <qcombobox_p.h>
-#include <QDesktopWidget>
+#include <qdesktopwidget.h>
 #include <qdebug.h>
 
 static QFontDatabase::WritingSystem writingSystemFromScript(QLocale::Script script)
@@ -190,13 +190,12 @@ class QFontFamilyDelegate : public QAbstractItemDelegate
 QFontFamilyDelegate::QFontFamilyDelegate(QObject *parent)
    : QAbstractItemDelegate(parent)
 {
-   truetype = QIcon(QLatin1String(":/copperspice/styles/commonstyle/images/fonttruetype-16.png"));
-   bitmap = QIcon(QLatin1String(":/copperspice/styles/commonstyle/images/fontbitmap-16.png"));
+   truetype = QIcon(":/copperspice/styles/commonstyle/images/fonttruetype-16.png");
+   bitmap   = QIcon(":/copperspice/styles/commonstyle/images/fontbitmap-16.png");
    writingSystem = QFontDatabase::Any;
 }
 
-void QFontFamilyDelegate::paint(QPainter *painter,
-   const QStyleOptionViewItem &option,
+void QFontFamilyDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
    const QModelIndex &index) const
 {
    QString text = index.data(Qt::DisplayRole).toString();
@@ -242,6 +241,7 @@ void QFontFamilyDelegate::paint(QPainter *painter,
    // This is specifically for fonts where the ascent is very large compared to
    // the descent, like certain of the Stix family.
    QFontMetricsF fontMetrics(font);
+
    if (fontMetrics.ascent() > r.height()) {
       QRectF tbr = fontMetrics.tightBoundingRect(text);
       painter->drawText(r.x(), r.y() + (r.height() + tbr.height()) / 2.0, text);
@@ -272,13 +272,15 @@ void QFontFamilyDelegate::paint(QPainter *painter,
 
 }
 
-QSize QFontFamilyDelegate::sizeHint(const QStyleOptionViewItem &option,
-   const QModelIndex &index) const
+QSize QFontFamilyDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
    QString text = index.data(Qt::DisplayRole).toString();
+
    QFont font(option.font);
-   //     font.setFamily(text);
+   // font.setFamily(text);
+
    font.setPointSize(QFontInfo(font).pointSize() * 3 / 2);
+
    QFontMetrics fontMetrics(font);
    return QSize(fontMetrics.width(text), fontMetrics.height());
 }
@@ -300,7 +302,6 @@ class QFontComboBoxPrivate : public QComboBoxPrivate
    Q_DECLARE_PUBLIC(QFontComboBox)
 };
 
-
 void QFontComboBoxPrivate::_q_updateModel()
 {
    Q_Q(QFontComboBox);
@@ -308,9 +309,10 @@ void QFontComboBoxPrivate::_q_updateModel()
    const int spacingMask = (QFontComboBox::ProportionalFonts | QFontComboBox::MonospacedFonts);
 
    QStringListModel *m = qobject_cast<QStringListModel *>(q->model());
-   if (!m) {
+   if (! m) {
       return;
    }
+
    QFontFamilyDelegate *delegate = qobject_cast<QFontFamilyDelegate *>(q->view()->itemDelegate());
    QFontDatabase::WritingSystem system = delegate ? delegate->writingSystem : QFontDatabase::Any;
 
@@ -331,22 +333,27 @@ void QFontComboBoxPrivate::_q_updateModel()
             continue;
          }
       }
+
       if ((filters & spacingMask) && (filters & spacingMask) != spacingMask) {
          if (bool(filters & QFontComboBox::MonospacedFonts) != fdb.isFixedPitch(list.at(i))) {
             continue;
          }
       }
+
       result += list.at(i);
+
       if (list.at(i) == fi.family() || list.at(i).startsWith(fi.family() + QLatin1String(" ["))) {
          offset = result.count() - 1;
       }
    }
+
    list = result;
 
-   //we need to block the signals so that the model doesn't emit reset
-   //this prevents the current index from changing
-   //it will be updated just after this
-   ///TODO: we should finda way to avoid blocking signals and have a real update of the model
+   // need to block the signals so that the model doesn't emit reset
+   // this prevents the current index from changing
+   // it will be updated just after this
+   // TODO: we should finda way to avoid blocking signals and have a real update of the model
+
    const bool old = m->blockSignals(true);
    m->setStringList(list);
    m->blockSignals(old);
@@ -356,6 +363,7 @@ void QFontComboBoxPrivate::_q_updateModel()
          currentFont = QFont();
          emit q->currentFontChanged(currentFont);
       }
+
    } else {
       q->setCurrentIndex(offset);
    }
@@ -382,16 +390,15 @@ QFontComboBox::QFontComboBox(QWidget *parent)
    setModel(m);
    setItemDelegate(new QFontFamilyDelegate(this));
 
-   QListView *lview = qobject_cast<QListView *>(view());
+   QListView *lview = dynamic_cast<QListView *>(view());
 
    if (lview) {
       lview->setUniformItemSizes(true);
    }
    setWritingSystem(QFontDatabase::Any);
 
-   // broom - should be QFontComboBox, resolve ( not a major issue )
-   connect(this, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
-                  this, &QFontComboBox::_q_currentChanged);
+   // broom - should be QFontComboBox ( not a major issue )
+   connect(this, cs_mp_cast<const QString &>(&QComboBox::currentIndexChanged), this, &QFontComboBox::_q_currentChanged);
 
    connect(qApp, &QApplication::fontDatabaseChanged,  this, &QFontComboBox::_q_updateModel);
 }
@@ -405,15 +412,18 @@ void QFontComboBox::setWritingSystem(QFontDatabase::WritingSystem script)
    Q_D(QFontComboBox);
 
    QFontFamilyDelegate *delegate = qobject_cast<QFontFamilyDelegate *>(view()->itemDelegate());
+
    if (delegate) {
       delegate->writingSystem = script;
    }
+
    d->_q_updateModel();
 }
 
 QFontDatabase::WritingSystem QFontComboBox::writingSystem() const
 {
    QFontFamilyDelegate *delegate = qobject_cast<QFontFamilyDelegate *>(view()->itemDelegate());
+
    if (delegate) {
       return delegate->writingSystem;
    }
@@ -434,12 +444,6 @@ QFontComboBox::FontFilters QFontComboBox::fontFilters() const
    return d->filters;
 }
 
-/*!
-    \property QFontComboBox::currentFont
-    \brief the currently selected font
-
-    \sa currentFontChanged(), currentIndex, currentText
-*/
 QFont QFontComboBox::currentFont() const
 {
    Q_D(const QFontComboBox);
@@ -449,6 +453,7 @@ QFont QFontComboBox::currentFont() const
 void QFontComboBox::setCurrentFont(const QFont &font)
 {
    Q_D(QFontComboBox);
+
    if (font != d->currentFont) {
       d->currentFont = font;
       d->_q_updateModel();

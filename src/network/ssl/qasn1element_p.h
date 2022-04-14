@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -72,10 +72,10 @@ class  QAsn1Element
     static QAsn1Element fromVector(const QVector<QAsn1Element> &items);
     static QAsn1Element fromObjectId(const QByteArray &id);
 
-    bool toBool(bool *ok = 0) const;
+    bool toBool(bool *ok = nullptr) const;
     QDateTime toDateTime() const;
     QMultiMap<QByteArray, QString> toInfo() const;
-    qint64 toInteger(bool *ok = 0) const;
+    qint64 toInteger(bool *ok = nullptr) const;
     QVector<QAsn1Element> toVector() const;
     QByteArray toObjectId() const;
     QByteArray toObjectName() const;

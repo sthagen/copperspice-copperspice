@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,24 +25,23 @@
 
 #include "qscriptastvisitor_p.h"
 
-QT_BEGIN_NAMESPACE
-
 namespace QScript {
+
 namespace AST {
 
 ExpressionNode *Node::expressionCast()
 {
-   return 0;
+   return nullptr;
 }
 
 BinaryExpression *Node::binaryExpressionCast()
 {
-   return 0;
+   return nullptr;
 }
 
 Statement *Node::statementCast()
 {
-   return 0;
+   return nullptr;
 }
 
 ExpressionNode *ExpressionNode::expressionCast()
@@ -728,6 +727,7 @@ void SourceElements::accept0(Visitor *visitor)
 {
    if (visitor->visit(this)) {
       SourceElements *it = this;
+
       do {
          acceptChild(it->element, visitor);
          it = it->next;
@@ -764,6 +764,5 @@ void DebuggerStatement::accept0(Visitor *visitor)
 }
 
 }
-} // namespace QScript::AST
 
-QT_END_NAMESPACE
+} // namespace

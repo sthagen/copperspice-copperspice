@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,12 +23,12 @@
 
 #include <qtextdocumentwriter.h>
 
-#include <QtCore/qfile.h>
-#include <QtCore/qbytearray.h>
-#include <QtCore/qfileinfo.h>
-#include <QtCore/qtextcodec.h>
-#include <QtCore/qtextstream.h>
-#include <QtCore/qdebug.h>
+#include <qfile.h>
+#include <qbytearray.h>
+#include <qfileinfo.h>
+#include <qtextcodec.h>
+#include <qtextstream.h>
+#include <qdebug.h>
 #include <qtextdocument.h>
 #include <qtextdocumentfragment.h>
 
@@ -54,8 +54,7 @@ class QTextDocumentWriterPrivate
 };
 
 QTextDocumentWriterPrivate::QTextDocumentWriterPrivate(QTextDocumentWriter *qq)
-   : device(0),
-     deleteDevice(false),
+   : device(nullptr), deleteDevice(false),
 #ifndef QT_NO_TEXTCODEC
      codec(QTextCodec::codecForName("utf-8")),
 #endif
@@ -221,7 +220,7 @@ bool QTextDocumentWriter::write(const QTextDocument *document)
 #endif
       return writer.writeAll();
    }
-#endif // QT_NO_TEXTODFWRITER
+#endif
 
 #ifndef QT_NO_TEXTHTMLPARSER
    if (format == "html" || format == "htm") {
@@ -229,7 +228,9 @@ bool QTextDocumentWriter::write(const QTextDocument *document)
          qWarning() << "QTextDocumentWriter::write: the device can not be opened for writing";
          return false;
       }
+
       QTextStream ts(d->device);
+
 #ifndef QT_NO_TEXTCODEC
       ts.setCodec(d->codec);
       ts << document->toHtml(d->codec->name());
@@ -243,12 +244,16 @@ bool QTextDocumentWriter::write(const QTextDocument *document)
          qWarning() << "QTextDocumentWriter::write: the device can not be opened for writing";
          return false;
       }
+
       QTextStream ts(d->device);
+
 #ifndef QT_NO_TEXTCODEC
       ts.setCodec(d->codec);
 #endif
+
       ts << document->toPlainText();
       d->device->close();
+
       return true;
    }
 
@@ -261,7 +266,7 @@ bool QTextDocumentWriter::write(const QTextDocument *document)
 */
 bool QTextDocumentWriter::write(const QTextDocumentFragment &fragment)
 {
-   if (fragment.d == 0) {
+   if (fragment.d == nullptr) {
       return false;   // invalid fragment.
    }
 
@@ -281,9 +286,10 @@ bool QTextDocumentWriter::write(const QTextDocumentFragment &fragment)
 #ifndef QT_NO_TEXTCODEC
 void QTextDocumentWriter::setCodec(QTextCodec *codec)
 {
-   if (codec == 0) {
+   if (codec == nullptr) {
       codec = QTextCodec::codecForName("UTF-8");
    }
+
    Q_ASSERT(codec);
    d->codec = codec;
 }
@@ -298,7 +304,6 @@ QTextCodec *QTextDocumentWriter::codec() const
    return d->codec;
 }
 #endif
-
 
 QList<QByteArray> QTextDocumentWriter::supportedDocumentFormats()
 {

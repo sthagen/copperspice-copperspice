@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,8 +48,10 @@ class Q_GUI_EXPORT QListWidgetItem
    enum ItemType { Type = 0, UserType = 1000 };
    explicit QListWidgetItem(QListWidget *view = nullptr, int type = Type);
    explicit QListWidgetItem(const QString &text, QListWidget *view = nullptr, int type = Type);
-   explicit QListWidgetItem(const QIcon &icon, const QString &text, QListWidget *view = 0, int type = Type);
+   explicit QListWidgetItem(const QIcon &icon, const QString &text, QListWidget *view = nullptr, int type = Type);
+
    QListWidgetItem(const QListWidgetItem &other);
+
    virtual ~QListWidgetItem();
 
    virtual QListWidgetItem *clone() const;
@@ -75,7 +77,7 @@ class Q_GUI_EXPORT QListWidgetItem
    inline void setText(const QString &text);
 
    inline QIcon icon() const {
-      return qvariant_cast<QIcon>(data(Qt::DecorationRole));
+      return data(Qt::DecorationRole).value<QIcon>();
    }
    inline void setIcon(const QIcon &icon);
 
@@ -99,8 +101,9 @@ class Q_GUI_EXPORT QListWidgetItem
 #endif
 
    inline QFont font() const {
-      return qvariant_cast<QFont>(data(Qt::FontRole));
+      return data(Qt::FontRole).value<QFont>();
    }
+
    inline void setFont(const QFont &font);
 
    inline int textAlignment() const {
@@ -111,29 +114,33 @@ class Q_GUI_EXPORT QListWidgetItem
    }
 
    inline QColor backgroundColor() const {
-      return qvariant_cast<QColor>(data(Qt::BackgroundColorRole));
+      return data(Qt::BackgroundColorRole).value<QColor>();
    }
+
    virtual void setBackgroundColor(const QColor &color) {
       setData(Qt::BackgroundColorRole, color);
    }
 
    inline QBrush background() const {
-      return qvariant_cast<QBrush>(data(Qt::BackgroundRole));
+      return data(Qt::BackgroundRole).value<QBrush>();
    }
+
    inline void setBackground(const QBrush &brush) {
       setData(Qt::BackgroundRole, brush);
    }
 
    inline QColor textColor() const {
-      return qvariant_cast<QColor>(data(Qt::TextColorRole));
+      return data(Qt::TextColorRole).value<QColor>();
    }
+
    inline void setTextColor(const QColor &color) {
       setData(Qt::TextColorRole, color);
    }
 
    inline QBrush foreground() const {
-      return qvariant_cast<QBrush>(data(Qt::ForegroundRole));
+      return data(Qt::ForegroundRole).value<QBrush>();
    }
+
    inline void setForeground(const QBrush &brush) {
       setData(Qt::ForegroundRole, brush);
    }
@@ -146,8 +153,9 @@ class Q_GUI_EXPORT QListWidgetItem
    }
 
    inline QSize sizeHint() const {
-      return qvariant_cast<QSize>(data(Qt::SizeHintRole));
+      return data(Qt::SizeHintRole).value<QSize>();
    }
+
    inline void setSizeHint(const QSize &size) {
       setData(Qt::SizeHintRole, size);
    }
@@ -175,45 +183,42 @@ class Q_GUI_EXPORT QListWidgetItem
    Qt::ItemFlags itemFlags;
 };
 
-inline void QListWidgetItem::setText(const QString &atext)
+inline void QListWidgetItem::setText(const QString &text)
 {
-   setData(Qt::DisplayRole, atext);
+   setData(Qt::DisplayRole, text);
 }
 
-inline void QListWidgetItem::setIcon(const QIcon &aicon)
+inline void QListWidgetItem::setIcon(const QIcon &icon)
 {
-   setData(Qt::DecorationRole, aicon);
+   setData(Qt::DecorationRole, icon);
 }
 
-inline void QListWidgetItem::setStatusTip(const QString &astatusTip)
+inline void QListWidgetItem::setStatusTip(const QString &statusTip)
 {
-   setData(Qt::StatusTipRole, astatusTip);
+   setData(Qt::StatusTipRole, statusTip);
 }
 
 #ifndef QT_NO_TOOLTIP
-inline void QListWidgetItem::setToolTip(const QString &atoolTip)
+inline void QListWidgetItem::setToolTip(const QString &toolTip)
 {
-   setData(Qt::ToolTipRole, atoolTip);
+   setData(Qt::ToolTipRole, toolTip);
 }
 #endif
 
 #ifndef QT_NO_WHATSTHIS
-inline void QListWidgetItem::setWhatsThis(const QString &awhatsThis)
+inline void QListWidgetItem::setWhatsThis(const QString &whatsThis)
 {
-   setData(Qt::WhatsThisRole, awhatsThis);
+   setData(Qt::WhatsThisRole, whatsThis);
 }
 #endif
 
-inline void QListWidgetItem::setFont(const QFont &afont)
+inline void QListWidgetItem::setFont(const QFont &font)
 {
-   setData(Qt::FontRole, afont);
+   setData(Qt::FontRole, font);
 }
-
 
 Q_GUI_EXPORT QDataStream &operator<<(QDataStream &out, const QListWidgetItem &item);
 Q_GUI_EXPORT QDataStream &operator>>(QDataStream &in, QListWidgetItem &item);
-
-
 
 class Q_GUI_EXPORT QListWidget : public QListView
 {
@@ -234,6 +239,10 @@ class Q_GUI_EXPORT QListWidget : public QListView
 
  public:
    explicit QListWidget(QWidget *parent = nullptr);
+
+   QListWidget(const QListWidget &) = delete;
+   QListWidget &operator=(const QListWidget &) = delete;
+
    ~QListWidget();
 
    QListWidgetItem *item(int row) const;
@@ -241,13 +250,17 @@ class Q_GUI_EXPORT QListWidget : public QListView
    void insertItem(int row, QListWidgetItem *item);
    void insertItem(int row, const QString &label);
    void insertItems(int row, const QStringList &labels);
-   inline void addItem(const QString &label) {
+
+   void addItem(const QString &label) {
       insertItem(count(), label);
    }
+
    inline void addItem(QListWidgetItem *item);
-   inline void addItems(const QStringList &labels) {
+
+   void addItems(const QStringList &labels) {
       insertItems(count(), labels);
    }
+
    QListWidgetItem *takeItem(int row);
    int count() const;
 
@@ -324,7 +337,7 @@ class Q_GUI_EXPORT QListWidget : public QListView
    GUI_CS_SIGNAL_2(itemSelectionChanged)
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
    virtual QStringList mimeTypes() const;
    virtual QMimeData *mimeData(const QList<QListWidgetItem *> &items) const;
 
@@ -332,6 +345,7 @@ class Q_GUI_EXPORT QListWidget : public QListView
    virtual bool dropMimeData(int index, const QMimeData *data, Qt::DropAction action);
    virtual Qt::DropActions supportedDropActions() const;
 #endif
+
    QList<QListWidgetItem *> items(const QMimeData *data) const;
 
    QModelIndex indexFromItem(QListWidgetItem *item) const;
@@ -342,7 +356,6 @@ class Q_GUI_EXPORT QListWidget : public QListView
    Qt::SortOrder sortOrder() const;
 
    Q_DECLARE_PRIVATE(QListWidget)
-   Q_DISABLE_COPY(QListWidget)
 
    GUI_CS_SLOT_1(Private, void _q_emitItemPressed(const QModelIndex &index))
    GUI_CS_SLOT_2(_q_emitItemPressed)
@@ -370,7 +383,6 @@ class Q_GUI_EXPORT QListWidget : public QListView
 
    GUI_CS_SLOT_1(Private, void _q_dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight))
    GUI_CS_SLOT_2(_q_dataChanged)
-
 };
 
 void QListWidget::cs_setCurrentRow(int row)
@@ -378,25 +390,25 @@ void QListWidget::cs_setCurrentRow(int row)
    setCurrentRow(row);
 }
 
-void QListWidget::removeItemWidget(QListWidgetItem *aItem)
+void QListWidget::removeItemWidget(QListWidgetItem *item)
 {
-   setItemWidget(aItem, nullptr);
+   setItemWidget(item, nullptr);
 }
 
-void QListWidget::addItem(QListWidgetItem *aitem)
+void QListWidget::addItem(QListWidgetItem *item)
 {
-   insertItem(count(), aitem);
+   insertItem(count(), item);
 }
 
-QListWidgetItem *QListWidget::itemAt(int ax, int ay) const
+QListWidgetItem *QListWidget::itemAt(int x, int y) const
 {
-   return itemAt(QPoint(ax, ay));
+   return itemAt(QPoint(x, y));
 }
 
-void QListWidgetItem::setSelected(bool aselect)
+void QListWidgetItem::setSelected(bool select)
 {
    if (view) {
-      view->setItemSelected(this, aselect);
+      view->setItemSelected(this, select);
    }
 }
 
@@ -405,10 +417,10 @@ bool QListWidgetItem::isSelected() const
    return (view ? view->isItemSelected(this) : false);
 }
 
-void QListWidgetItem::setHidden(bool ahide)
+void QListWidgetItem::setHidden(bool hide)
 {
    if (view) {
-      view->setItemHidden(this, ahide);
+      view->setItemHidden(this, hide);
    }
 }
 
@@ -416,7 +428,6 @@ bool QListWidgetItem::isHidden() const
 {
    return (view ? view->isItemHidden(this) : false);
 }
-
 
 #endif // QT_NO_LISTWIDGET
 

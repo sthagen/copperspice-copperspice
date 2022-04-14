@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -199,6 +199,26 @@ int QMetaObject::enumeratorOffset() const
    return retval;
 }
 
+QMetaEnum QMetaObject::findEnum(std::type_index id)
+{
+   QMetaEnum retval;
+
+   // look up the enum data type
+   auto iter = m_enumsAll().find(id);
+
+   if (iter == m_enumsAll().end()) {
+      // no QMetaEnum for T
+
+   } else  {
+      auto [metaObject, enumName] = iter.value();
+
+      int index = metaObject->indexOfEnumerator(enumName);
+      retval    = metaObject->enumerator(index);
+   }
+
+   return retval;
+}
+
 int QMetaObject::indexOfClassInfo(const QString &name) const
 {
    int retval = -1;
@@ -296,11 +316,11 @@ int QMetaObject::indexOfProperty(const QString &name) const
 {
    int retval = -1;
 
-   for (int x = 0; x < this->propertyCount(); ++x) {
-      QMetaProperty testProperty = this->property(x);
+   for (int index = 0; index < this->propertyCount(); ++index) {
+      QMetaProperty tmpProperty = this->property(index);
 
-      if (testProperty.name() == name)  {
-         retval = x;
+      if (tmpProperty.name() == name)  {
+         retval = index;
          break;
       }
    }
@@ -404,14 +424,14 @@ QObject *QMetaObject::newInstance() const
    int index = this->indexOfConstructor(constructorSig);
 
    if (index == -1)  {
-      return 0;
+      return nullptr;
    }
 
    QMetaMethod metaMethod = this->constructor(index);
-   QObject *retval = 0;
+   QObject *retval = nullptr;
 
    // about to call QMetaMethod::invoke()
-   metaMethod.invoke(0, Qt::DirectConnection, CSReturnArgument<QObject *>(retval));
+   metaMethod.invoke(nullptr, Qt::DirectConnection, CSReturnArgument<QObject *>(retval));
 
    return retval;
 }
@@ -459,16 +479,15 @@ int QMetaObject::propertyOffset() const
    return retval;
 }
 
-QString QMetaObject::tr(const char *text, const char *notes, int n) const
+QString QMetaObject::tr(const char *text, const char *comment, std::optional<int> numArg) const
 {
-   const char *context = csPrintable(className());
-   return QCoreApplication::translate(context, text, notes, QCoreApplication::CodecForTr, n);
+   const char *context = className().constData();
+   return QCoreApplication::translate(context, text, comment, numArg);
 }
 
-QString QMetaObject::trUtf8(const char *text, const char *notes, int n) const
+QString QMetaObject::tr(const QString &text, const QString &comment, std::optional<int> numArg) const
 {
-   const char *context = csPrintable(className());
-   return QCoreApplication::translate(context, text, notes, QCoreApplication::UnicodeUTF8, n);
+   return QCoreApplication::translate(className(), text, comment, numArg);
 }
 
 QMetaProperty QMetaObject::userProperty() const
@@ -699,8 +718,7 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
          ++index;
       }
 
-      // convert return type to "char *" data type
-      returnType = strdup(csPrintable(typeReturn));
+      returnType = typeReturn;
 
 
       // part 3 parse method name
@@ -819,8 +837,8 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
                   bool firstLoop = true;
                   int index = k + 1;
 
-#ifdef CS_Debug
-                  qDebug("Debug (bigArg):  Passed full name %s",    fullName );
+#if defined(CS_INTERNAL_DEBUG)
+                  qDebug("Debug (bigArg):  Passed full name %s",  csPrintable(fullName) );
 #endif
 
                   while (k < tokenMax)  {
@@ -850,7 +868,7 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
                            firstLoop   = false;
                            bigArg      = true;
 
-#ifdef CS_Debug
+#if defined(CS_INTERNAL_DEBUG)
                            qDebug("Debug (bigArg):  Inside 'first loop'  %s", csPrintable(typeArg));
 #endif
 
@@ -968,7 +986,7 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
                   if (bigArg)  {
                      // we are on a comma, var name, right paren, star, ampersand
 
-#ifdef CS_Debug
+#if defined(CS_INTERNAL_DEBUG)
                      // parse the following:   &  *  (  )
                      qDebug("Debug (bigArg):  Args:     %s", csPrintable(typeArg) );
                      qDebug("Debug (bigArg):  NextWord  %s", csPrintable(nextWord) );
@@ -1010,7 +1028,7 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
 
             // D
             if (found_funcPtrVar) {
-               // fall thru
+               // do nothing
 
             } else if (word == "=" || word == ")" || word == ",")  {
                // default name
@@ -1022,10 +1040,11 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
                ++k;
             }
 
-            // E next token could be equal, close paren, comma, left square bracket(array)
+
+            // E next token could be equal, close paren, comma, left square bracket(array), or Zero
             int parenLevel_2 = 0;
 
-            while (true) {
+            while (k < tokens.size())  {
                word = tokens[k];
 
                if (word == "=") {
@@ -1076,19 +1095,29 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
                sigList.push_back(std::move(tmp));
             }
 
-            signature += typeArg;
+            // do not add the '=" for pure virtual
+            if (typeArg == "=" && parenLevel == 0)  {
+               // drop the "= 0"
+
+            } else {
+               signature += typeArg;
+            }
          }
 
-         signature += tokens[k];
+
+         if (k < tokens.size()) {
+            signature += tokens[k];
+         }
 
          if (all_done) {
             break;
          }
       }
 
-#ifdef CS_Debug
+#if defined(CS_INTERNAL_DEBUG)
       const char *space = "                      ";
-      qDebug("QObject:getSignature()  Passed name: %s\n %s Signature: %s \n", fullName, space, csPrintable(signature));
+      qDebug("\nQMetaObject:getSignature()  Passed name: %s\n %s Signature: %s \n",
+            csPrintable(fullName), space, csPrintable(signature));
 #endif
 
       // add sig to the vector
@@ -1098,7 +1127,7 @@ std::tuple<std::vector<QString>, QString, std::vector<QString> > QMetaObject::ge
 
    } catch (std::exception &e) {
       // rethrow
-      std::string msg = "QObject::getSignature() Exception when processing " + std::string(csPrintable(fullName));
+      std::string msg = "QMetaObject::getSignature() Exception when processing " + std::string(csPrintable(fullName));
       std::throw_with_nested(std::logic_error(msg));
 
    }
@@ -1313,7 +1342,7 @@ int QMetaObject::enum_calculate(QString enumData, QMap<QString, int> valueMap)
    QString::const_iterator iter = enumData.begin();
 
    // part 1, decipher tokens from enumData
-   while (iter != enumData.end()) {
+   while (iter != enumData.cend()) {
       QChar32 letter = *iter;
 
       if (letter.isSpace()) {
@@ -1438,16 +1467,15 @@ int QMetaObject::enum_calculate(QString enumData, QMap<QString, int> valueMap)
          QString className = word.mid(0, pos);
          QString enumKey   = word.mid(pos + 2);
 
-         for (auto index = m_enumsAll().begin(); index != m_enumsAll().end(); ++index  )  {
+         //
+         auto &enumMap = m_enumsAll();
 
-            QMetaObject *obj = index.value().first;
+         for (auto [metaObject, enumName] : enumMap)  {
 
-            if ( obj->className() == className )  {
-               QString enumName = index.value().second;
-
+            if (metaObject->className() == className)  {
                // obtain the enum object
-               int x = obj->indexOfEnumerator(enumName);
-               QMetaEnum enumObj = obj->enumerator(x);
+               int index = metaObject->indexOfEnumerator(enumName);
+               QMetaEnum enumObj = metaObject->enumerator(index);
 
                int answer = enumObj.keyToValue(enumKey);
 
@@ -1487,7 +1515,7 @@ int QMetaObject::enum_calculate(QString enumData, QMap<QString, int> valueMap)
       // B
       if (word  == "|")  {
          if (valueStack.size() < 2) {
-            throw std::logic_error("Unable to parse enum data, check enum macros");
+            throw std::logic_error("Unable to parse enum data, check enum macros (|)");
          }
 
          int right = valueStack.takeLast();
@@ -1497,7 +1525,7 @@ int QMetaObject::enum_calculate(QString enumData, QMap<QString, int> valueMap)
 
       } else if (word  == "<<")  {
          if (valueStack.size() < 2) {
-            throw std::logic_error("Unable to parse enum data, check enum macros");
+            throw std::logic_error("Unable to parse enum data, check enum macros (<<)");
          }
 
          int right = valueStack.takeLast();
@@ -1506,7 +1534,7 @@ int QMetaObject::enum_calculate(QString enumData, QMap<QString, int> valueMap)
 
       } else if (word  == "~")  {
          if (valueStack.size() < 1) {
-            throw std::logic_error("Unable to parse enum data, check enum macros");
+            throw std::logic_error("Unable to parse enum data, check enum macros (~)");
          }
 
          int right = valueStack.takeLast();
@@ -1539,7 +1567,10 @@ QMetaClassInfo QMetaObject_X::classInfo(int index) const
 {
    const int count = m_classInfo.size();
 
-   if (index >= count) {
+   if (index < 0) {
+      return QMetaClassInfo();
+
+   } else if (index >= count) {
       // index is out of bounds, look in parent class
       return superClass()->classInfo(index - count);
 
@@ -1567,8 +1598,11 @@ QMetaMethod QMetaObject_X::constructor(int index) const
 {
    const int count = m_constructor.size();
 
-   if (index >= count) {
-      // not sure
+   if (index < 0) {
+      return QMetaMethod();
+
+   } else if (index >= count) {
+      return QMetaMethod();
 
    }  else {
       auto elem = m_constructor.end();
@@ -1593,7 +1627,10 @@ QMetaEnum QMetaObject_X::enumerator(int index) const
 {
    const int count = m_enums.size();
 
-   if (index >= count) {
+   if (index < 0) {
+      return QMetaEnum();
+
+   } else if (index >= count) {
       // index is out of bounds, look in parent class
       return superClass()->enumerator(index - count);
 
@@ -1621,14 +1658,17 @@ QMetaMethod QMetaObject_X::method(int index) const
 {
    const int count = m_methods.size();
 
-   if (index >= count) {
+   if (index < 0) {
+      return QMetaMethod();
+
+   } else if (index >= count) {
       // index is out of bounds, look in parent class
       return superClass()->method(index - count);
 
    }  else {
       auto elem = m_methods.end();
 
-      // decrement iterator (end() is really plus 1, sub it out)
+      // decrement iterator (end() is really plus 1, subtract it out)
       elem -= index + 1;
       return elem.value();
    }
@@ -1650,16 +1690,20 @@ QMetaProperty QMetaObject_X::property(int index) const
 {
    const int count = m_properties.size();
 
-   if (index >= count) {
+   if (index < 0) {
+      return QMetaProperty();
+
+   } else if (index >= count) {
       // index is out of bounds, look in parent class
       return superClass()->property(index - count);
 
    }  else {
-      auto elem = m_properties.end();
+      auto iter = m_properties.end() - 1;
 
-      // decrement iterator (end() is really plus 1, sub it out)
-      elem -= index + 1;
-      return elem.value();
+      // counting from the end
+      iter -= index;
+
+      return iter.value();
    }
 }
 
@@ -1702,7 +1746,7 @@ int QMetaObject_X::register_flag(const QString &enumName, const QString &scope, 
    m_enums.insert(flagName, data);
 
    // used in findEnum()
-   m_enumsAll().insert(id, std::make_pair(this, flagName) );
+   m_enumsAll().insert(id, std::make_pair(this, flagName));
 
    return 0;
 }
@@ -1785,7 +1829,7 @@ void QMetaObject_X::register_enum_data(const QString &args)
 
          QString key = word;
          valueMap.insert(key, value);
-         value++;
+         ++value;
 
          if (letter == '}') {
             break;
@@ -1802,35 +1846,32 @@ void QMetaObject_X::register_enum_data(const QString &args)
    }
 
 
-   // 3 look up enumName to test, is a flag?
-   std::vector<QString> tempName(0);
+   // 3 look up enumName to test if it has a flag
+   std::vector<QString> tmpName;
+   tmpName.push_back(enumName);
 
    auto iter_flag = m_flag.find(enumName);
 
-   if (iter_flag == m_flag.end()) {
-      // save the enumName in the QVector
-      tempName.push_back(enumName);
-
-   } else {
-      while (iter_flag != m_flag.end() && iter_flag.key() == enumName) {
-         tempName.push_back(iter_flag.value());
-         ++iter_flag;
-      }
+   while (iter_flag != m_flag.end() && iter_flag.key() == enumName) {
+      // value is the name of a flag
+      tmpName.push_back(iter_flag.value());
+      ++iter_flag;
    }
 
-   // save enum data in QMap
-   for (uint i = 0; i < tempName.size(); ++i) {
-      auto iter_enum = m_enums.find(tempName.at(i));
+
+   // for each enum name, update value of 'enum value name'/'enum value' in m_enums
+   for (const auto &item : tmpName) {
+      auto iter_enum = m_enums.find(item);
 
       if (iter_enum == m_enums.end()) {
-         throw std::logic_error("Unable to register enum data, verify enum macros");
+         throw std::logic_error("Unable to register enum data, verify enum has been registered");
 
       } else  {
-         QMetaEnum enumObj = iter_enum.value();
-         enumObj.setData(valueMap);
+         // get a reference to the current QMetaEnum
+         QMetaEnum &enumObj = iter_enum.value();
 
-         // update QMetaEnum
-         m_enums.insert( tempName.at(i), enumObj);
+         // update the QMetaEnum value in m_enums
+         enumObj.setData(valueMap);
       }
    }
 }
@@ -1977,105 +2018,101 @@ void QMetaObject_X::register_tag(const QString &name, const QString &method)
 }
 
 // ** internal properties
-int QMetaObject_X::register_property_read(const QString &name, const QString &dataType, JarReadAbstract *readJar)
+void QMetaObject_X::register_property_read(const QString &name, std::type_index returnTypeId,
+         QString (*returnTypeFuncPtr)(), JarReadAbstract *readJar)
 {
    if (name.isEmpty() ) {
-      return 0;
+      return;
    }
 
-   QMetaProperty data;
-   auto item = m_properties.find(name);
+   auto iter = m_properties.find(name);
 
-   if ( item == m_properties.end() )  {
-      // entry not found in QMap, construct new obj then insert
+   if (iter == m_properties.end())  {
+      // entry not found, construct new obj then add to container
 
-      data = QMetaProperty {name, this};
-      m_properties.insert(name, data);
+      QMetaProperty data = QMetaProperty{name, this};
+      data.setReadMethod(returnTypeId, returnTypeFuncPtr, readJar);
+
+      m_properties.insert(name, std::move(data));
 
    } else {
-      // retrieve existing obj
-      data = item.value();
+      // update QMetaProperty in the container
+      iter->setReadMethod(returnTypeId, returnTypeFuncPtr, readJar);
 
    }
-
-   //
-   data.setReadMethod(dataType, readJar);
-
-   // update QMetaProperty
-   m_properties.insert(name, data);
-
-   return 0;
 }
 
-int QMetaObject_X::register_property_write(const QString &name, JarWriteAbstract *method)
+void QMetaObject_X::register_property_write(const QString &name, JarWriteAbstract *method)
 {
    if (name.isEmpty()) {
-      return 0;
+      return;
    }
 
-   QMetaProperty data;
-   auto item = m_properties.find(name);
+   auto iter = m_properties.find(name);
 
-   if ( item == m_properties.end() )  {
-      // entry not found in QMap, construct new obj then insert
+   if (iter == m_properties.end())  {
+      // entry not found, construct new obj then add to container
 
-      data = QMetaProperty {name, this};
+      QMetaProperty data = QMetaProperty {name, this};
+      data.setWriteMethod(method);
+
       m_properties.insert(name, data);
 
    } else {
-      // retrieve existing obj
-      data = item.value();
+      // update QMetaProperty in the container
+      iter->setWriteMethod(method);
 
    }
-
-   //
-   data.setWriteMethod(method);
-
-   // update QMetaProperty
-   m_properties.insert(name, data);
-
-   return 0;
 }
 
-int QMetaObject_X::register_property_bool(const QString &name, JarReadAbstract *method, QMetaProperty::Kind kind)
+void QMetaObject_X::register_property_bool(const QString &name, JarReadAbstract *method, QMetaProperty::Kind kind)
 {
    if (name.isEmpty()) {
-      return 0;
+      return;
    }
 
-   QMetaProperty data;
-   auto item = m_properties.find(name);
+   auto iter = m_properties.find(name);
 
-   if ( item == m_properties.end() )  {
-      // entry not found in QMap, construct new obj then insert
+   if (iter == m_properties.end())  {
+      // entry not found, construct new obj then add to container
 
-      data = QMetaProperty {name, this};
+      QMetaProperty data = QMetaProperty {name, this};
+
+      if (kind == QMetaProperty::DESIGNABLE) {
+         data.setDesignable(method);
+
+      } else if (kind == QMetaProperty::SCRIPTABLE) {
+         data.setScriptable(method);
+
+      } else if (kind == QMetaProperty::STORED) {
+         data.setStored(method);
+
+      } else if (kind == QMetaProperty::USER) {
+         data.setUser(method);
+
+      }
+
       m_properties.insert(name, data);
 
    } else {
-      // retrieve existing obj
-      data = item.value();
+      // update QMetaProperty in the container
 
+      if (kind == QMetaProperty::DESIGNABLE) {
+         iter->setDesignable(method);
+
+      } else if (kind == QMetaProperty::SCRIPTABLE) {
+         iter->setScriptable(method);
+
+      } else if (kind == QMetaProperty::STORED) {
+         iter->setStored(method);
+
+      } else if (kind == QMetaProperty::USER) {
+         iter->setUser(method);
+
+      }
    }
 
-   if (kind == QMetaProperty::DESIGNABLE) {
-      data.setDesignable(method);
-
-   } else if (kind == QMetaProperty::SCRIPTABLE) {
-      data.setScriptable(method);
-
-   } else if (kind == QMetaProperty::STORED) {
-      data.setStored(method);
-
-   } else if (kind == QMetaProperty::USER) {
-      data.setUser(method);
-
-   }
-
-   // update QMetaProperty
-   m_properties.insert(name, data);
-
-   return 0;
+   return;
 }
 
 void QMetaObject_X::register_property_int(const QString &name, int value, QMetaProperty::Kind kind)
@@ -2088,7 +2125,7 @@ void QMetaObject_X::register_property_int(const QString &name, int value, QMetaP
    auto item = m_properties.find(name);
 
    if ( item == m_properties.end() )  {
-      // entry not found in QMap, construct new obj then insert
+      // entry not found, construct new obj then add to container
 
       data = QMetaProperty {name, this};
       m_properties.insert(name, data);
@@ -2099,7 +2136,6 @@ void QMetaObject_X::register_property_int(const QString &name, int value, QMetaP
 
    }
 
-   //
    if (kind == QMetaProperty::REVISION) {
       // int value
       data.setRevision(value);
@@ -2114,7 +2150,7 @@ void QMetaObject_X::register_property_int(const QString &name, int value, QMetaP
 
    }
 
-   // update QMetaProperty
+   // update QMetaProperty in the container
    m_properties.insert(name, data);
 }
 

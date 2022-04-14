@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,12 +40,7 @@ class ExpressionFactory : public QSharedData
  public:
    typedef QExplicitlySharedDataPointer<ExpressionFactory> Ptr;
 
-   /**
-    * @short This constructor cannot be synthesized since we
-    * use the Q_DISABLE_COPY macro.
-    */
-   inline ExpressionFactory() {
-   }
+   ExpressionFactory() = default;
 
    virtual ~ExpressionFactory() {
    }
@@ -133,7 +128,8 @@ class ExpressionFactory : public QSharedData
                                     const QUrl &queryURI,
                                     const QXmlName &initialTemplateName);
  private:
-   Q_DISABLE_COPY(ExpressionFactory)
+   ExpressionFactory(const ExpressionFactory &) = delete;
+   ExpressionFactory &operator=(const ExpressionFactory &) = delete;
 };
 }
 

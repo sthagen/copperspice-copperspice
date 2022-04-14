@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QUNDOSTACK_H
 #define QUNDOSTACK_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qstring.h>
+#include <qobject.h>
+#include <qstring.h>
 #include <QScopedPointer>
-
-
 
 class QAction;
 class QUndoCommandPrivate;
@@ -43,6 +41,10 @@ class Q_GUI_EXPORT QUndoCommand
  public:
    explicit QUndoCommand(QUndoCommand *parent = nullptr);
    explicit QUndoCommand(const QString &text, QUndoCommand *parent = nullptr);
+
+   QUndoCommand(const QUndoCommand &) = delete;
+   QUndoCommand &operator=(const QUndoCommand &) = delete;
+
    virtual ~QUndoCommand();
 
    virtual void undo();
@@ -59,7 +61,6 @@ class Q_GUI_EXPORT QUndoCommand
    const QUndoCommand *child(int index) const;
 
  private:
-   Q_DISABLE_COPY(QUndoCommand)
    friend class QUndoStack;
 };
 
@@ -70,7 +71,6 @@ class Q_GUI_EXPORT QUndoCommand
 class Q_GUI_EXPORT QUndoStack : public QObject
 {
    GUI_CS_OBJECT(QUndoStack)
-   Q_DECLARE_PRIVATE(QUndoStack)
 
    GUI_CS_PROPERTY_READ(active, isActive)
    GUI_CS_PROPERTY_WRITE(active, setActive)
@@ -79,7 +79,12 @@ class Q_GUI_EXPORT QUndoStack : public QObject
 
  public:
    explicit QUndoStack(QObject *parent = nullptr);
+
+   QUndoStack(const QUndoStack &) = delete;
+   QUndoStack &operator=(const QUndoStack &) = delete;
+
    ~QUndoStack();
+
    void clear();
 
    void push(QUndoCommand *cmd);
@@ -142,7 +147,7 @@ class Q_GUI_EXPORT QUndoStack : public QObject
    QScopedPointer<QUndoStackPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QUndoStack)
+   Q_DECLARE_PRIVATE(QUndoStack)
    friend class QUndoGroup;
 };
 

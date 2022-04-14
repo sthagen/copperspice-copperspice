@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,23 +21,17 @@
 *
 ***********************************************************************/
 
-#include "sourcecodeview.h"
+#include <sourcecodeview.h>
 
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QTextCodec>
-#include <QtCore/QTextStream>
-
-#include <QtGui/QTextCharFormat>
-#include <QtGui/QTextBlock>
-#include <QtGui/QTextCursor>
-
-QT_BEGIN_NAMESPACE
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QTextCharFormat>
+#include <QTextBlock>
+#include <QTextCursor>
 
 SourceCodeView::SourceCodeView(QWidget *parent)
-   : QPlainTextEdit(parent),
-     m_isActive(true),
-     m_lineNumToLoad(0)
+   : QPlainTextEdit(parent), m_isActive(true), m_lineNumToLoad(0)
 {
    setReadOnly(true);
 }
@@ -62,15 +56,10 @@ void SourceCodeView::setSourceContext(const QString &fileName, const int lineNum
    }
 }
 
-void SourceCodeView::setCodecName(const QByteArray &codecName)
-{
-   m_codecName = codecName;
-}
-
 void SourceCodeView::setActivated(bool activated)
 {
    m_isActive = activated;
-   if (activated && !m_fileToLoad.isEmpty()) {
+   if (activated && ! m_fileToLoad.isEmpty()) {
       showSourceCode(m_fileToLoad, m_lineNumToLoad);
       m_fileToLoad.clear();
    }
@@ -80,25 +69,26 @@ void SourceCodeView::showSourceCode(const QString &absFileName, const int lineNu
 {
    QString fileText = fileHash.value(absFileName);
 
-   if (fileText.isNull()) { // File not in hash
+   if (fileText.isEmpty()) {
+      // File not in hash
       m_currentFileName.clear();
 
       // Assume fileName is relative to directory
       QFile file(absFileName);
 
-      if (!file.exists()) {
+      if (! file.exists()) {
          clear();
-         appendHtml(tr("<i>File %1 not available</i>").arg(absFileName));
+         appendHtml(tr("<i>File %1 not available</i>").formatArg(absFileName));
          return;
       }
-      if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+
+      if (! file.open(QIODevice::ReadOnly | QIODevice::Text)) {
          clear();
-         appendHtml(tr("<i>File %1 not readable</i>").arg(absFileName));
+         appendHtml(tr("<i>File %1 not readable</i>").formatArg(absFileName));
          return;
       }
-      const QTextCodec *codec = QTextCodec::codecForName(m_codecName);
-      const QByteArray contents = file.readAll();
-      fileText = codec ? codec->toUnicode(contents) : QString::fromUtf8(contents);
+
+      fileText = QString::fromUtf8(file.readAll());
       fileHash.insert(absFileName, fileText);
    }
 
@@ -112,6 +102,7 @@ void SourceCodeView::showSourceCode(const QString &absFileName, const int lineNu
    cursor.setPosition(document()->findBlockByNumber(lineNum - 1).position());
    setTextCursor(cursor);
    centerCursor();
+
    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
 
@@ -121,6 +112,7 @@ void SourceCodeView::showSourceCode(const QString &absFileName, const int lineNu
    // Define custom color for line selection
    const QColor fg = palette().color(QPalette::Highlight);
    const QColor bg = palette().color(QPalette::Base);
+
    QColor col;
    const qreal ratio = 0.25;
    col.setRedF(fg.redF() * ratio + bg.redF() * (1 - ratio));
@@ -132,4 +124,3 @@ void SourceCodeView::showSourceCode(const QString &absFileName, const int lineNu
    setExtraSelections(QList<QTextEdit::ExtraSelection>() << selectedLine);
 }
 
-QT_END_NAMESPACE

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,10 @@
 #ifndef QIMAGEREADER_H
 #define QIMAGEREADER_H
 
-#include <QtCore/qbytearray.h>
-#include <QtCore/qcoreapplication.h>
-#include <QtGui/qimage.h>
-#include <QtGui/qimageiohandler.h>
-
+#include <qbytearray.h>
+#include <qcoreapplication.h>
+#include <qimage.h>
+#include <qimageiohandler.h>
 
 class QColor;
 class QIODevice;
@@ -39,8 +38,6 @@ class QImageReaderPrivate;
 
 class Q_GUI_EXPORT QImageReader
 {
-   Q_DECLARE_TR_FUNCTIONS(QImageReader)
-
  public:
    enum ImageReaderError {
       UnknownError,
@@ -51,12 +48,16 @@ class Q_GUI_EXPORT QImageReader
    };
 
    QImageReader();
-   explicit QImageReader(QIODevice *device, const QByteArray &format = QByteArray());
-   explicit QImageReader(const QString &fileName, const QByteArray &format = QByteArray());
+   explicit QImageReader(QIODevice *device, const QString &format = QString());
+   explicit QImageReader(const QString &fileName, const QString &format = QString());
+
+   QImageReader(const QImageReader &) = delete;
+   QImageReader &operator=(const QImageReader &) = delete;
+
    ~QImageReader();
 
-   void setFormat(const QByteArray &format);
-   QByteArray format() const;
+   void setFormat(const QString &format);
+   QString format() const;
 
    void setAutoDetectImageFormat(bool enabled);
    bool autoDetectImageFormat() const;
@@ -118,15 +119,14 @@ class Q_GUI_EXPORT QImageReader
 
    bool supportsOption(QImageIOHandler::ImageOption option) const;
 
-   static QByteArray imageFormat(const QString &fileName);
-   static QByteArray imageFormat(QIODevice *device);
-   static QList<QByteArray> supportedImageFormats();
-   static QList<QByteArray> supportedMimeTypes();
+   static QString imageFormat(const QString &fileName);
+   static QString imageFormat(QIODevice *device);
+   static QList<QString> supportedImageFormats();
+   static QList<QString> supportedMimeTypes();
 
  private:
-   Q_DISABLE_COPY(QImageReader)
+   Q_DECLARE_TR_FUNCTIONS(QImageReader)
    QImageReaderPrivate *d;
 };
-
 
 #endif

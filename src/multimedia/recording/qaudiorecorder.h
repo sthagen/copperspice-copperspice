@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,7 +29,6 @@
 #include <qmediarecorder.h>
 #include <qmediaobject.h>
 #include <qmediaencodersettings.h>
-#include <qmediaenumdebug.h>
 
 class QSize;
 class QAudioFormat;
@@ -45,6 +44,10 @@ class Q_MULTIMEDIA_EXPORT QAudioRecorder : public QMediaRecorder
 
  public:
    explicit QAudioRecorder(QObject *parent = nullptr);
+
+   QAudioRecorder(const QAudioRecorder &) = delete;
+   QAudioRecorder &operator=(const QAudioRecorder &) = delete;
+
    ~QAudioRecorder();
 
    QStringList audioInputs() const;
@@ -63,7 +66,6 @@ class Q_MULTIMEDIA_EXPORT QAudioRecorder : public QMediaRecorder
    MULTI_CS_SIGNAL_2(availableAudioInputsChanged)
 
  private:
-   Q_DISABLE_COPY(QAudioRecorder)
    Q_DECLARE_PRIVATE(QAudioRecorder)
 };
 

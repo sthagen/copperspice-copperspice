@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -137,33 +137,36 @@ void QScrollArea::setWidget(QWidget *widget)
    }
 
    delete d->widget;
-   d->widget = 0;
+   d->widget = nullptr;
    d->hbar->setValue(0);
    d->vbar->setValue(0);
+
    if (widget->parentWidget() != d->viewport) {
       widget->setParent(d->viewport);
    }
+
    if (!widget->testAttribute(Qt::WA_Resized)) {
       widget->resize(widget->sizeHint());
    }
+
    d->widget = widget;
    d->widget->setAutoFillBackground(true);
    widget->installEventFilter(this);
    d->widgetSize = QSize();
    d->updateScrollBars();
    d->widget->show();
-
 }
-
 
 QWidget *QScrollArea::takeWidget()
 {
    Q_D(QScrollArea);
    QWidget *w = d->widget;
-   d->widget = 0;
+   d->widget = nullptr;
+
    if (w) {
-      w->setParent(0);
+      w->setParent(nullptr);
    }
+
    return w;
 }
 

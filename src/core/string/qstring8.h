@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -76,11 +76,11 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
             return CsString::CsString::iterator::operator[](n);
          }
 
-         bool operator==(iterator other) const {
+         bool operator==(const iterator &other) const {
             return CsString::CsString::iterator::operator==(other);
          }
 
-         bool operator!=(iterator other) const {
+         bool operator!=(const iterator &other) const {
             return CsString::CsString::iterator::operator!=(other);
          }
 
@@ -155,11 +155,11 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
             return CsString::CsString::const_iterator::operator[](n);
          }
 
-         bool operator==(const_iterator other) const {
+         bool operator==(const const_iterator &other) const {
             return CsString::CsString::const_iterator::operator==(other);
          }
 
-         bool operator!=(const_iterator other) const {
+         bool operator!=(const const_iterator &other) const {
             return CsString::CsString::const_iterator::operator!=(other);
          }
 
@@ -219,16 +219,19 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
       using reverse_iterator       = CsString::CsStringReverseIterator<iterator>;
       using const_reverse_iterator = CsString::CsStringReverseIterator<const_iterator>;
 
-      QString8() {};
-      QString8(const QString8 &other) = default;
-      QString8(QString8 &&other) = default;
+      QString8()
+      {
+      }
+
+      QString8(std::nullptr_t) = delete;
 
       QString8(QChar32 c);
       QString8(size_type numOfChars, QChar32 c);
 
       QString8(QChar32::SpecialCharacter c)
          : QString8(QChar32(c))
-      { }
+      {
+      }
 
       QString8(const QChar32 *data, size_type numOfChars = -1)  {
 
@@ -253,13 +256,15 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
 
       QString8(const_iterator begin, const_iterator end)
          : CsString::CsString(begin, end)
-      { }
+      {
+      }
 
       // for an array of chars
       template <int N>
       QString8(const char (&cStr)[N])
          : CsString::CsString(cStr)
-      { }
+      {
+      }
 
 #ifdef CS_STRING_ALLOW_UNSAFE
       QString8(const QByteArray &str)
@@ -286,7 +291,21 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
          : CsString::CsString( str )
       { }
 
+      QString8(const QString8 &other) = default;
+      QString8(QString8 &&other) = default;
+
       ~QString8() = default;
+
+
+#if defined(__cpp_char8_t)
+      // support new data type added in C++20
+
+      QString8(const char8_t *str);
+      QString8(const char8_t *str, size_type size);
+
+      static QString8 fromUtf8(const char8_t *str, size_type numOfChars = -1);
+#endif
+
 
       using CsString::CsString::append;          // internal
       using CsString::CsString::operator=;      // internal
@@ -358,6 +377,10 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
 
       const char *constData() const {
          return reinterpret_cast<const char *>(CsString::CsString::constData());
+      }
+
+      bool contains(char ch, Qt::CaseSensitivity cs = Qt::CaseSensitive) const {
+         return contains(QChar32(ch), cs);
       }
 
       bool contains(QChar32 c, Qt::CaseSensitivity cs = Qt::CaseSensitive) const;
@@ -592,7 +615,7 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
 
       [[nodiscard]] QString8 left(size_type numOfChars) const;
       [[nodiscard]] QStringView8 leftView(size_type numOfChars) const;
-      [[nodiscard]] QString8 leftJustified(size_type width, QChar32 fill = UCHAR(' '), bool trunc = false) const;
+      [[nodiscard]] QString8 leftJustified(size_type width, QChar32 fill = UCHAR(' '), bool truncate = false) const;
 
       size_type length() const {
          return CsString::CsString::size();
@@ -724,9 +747,9 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
          return CsString::CsString::resize(numOfChars, c);
       }
 
-      [[nodiscard]] QString8 right(size_type numOfChars) const;
-      [[nodiscard]] QStringView8 rightView(size_type numOfChars) const;
-      [[nodiscard]] QString8 rightJustified(size_type width, QChar32 fill = UCHAR(' '), bool trunc = false) const;
+      [[nodiscard]] QString8 right(size_type count) const;
+      [[nodiscard]] QStringView8 rightView(size_type count) const;
+      [[nodiscard]] QString8 rightJustified(size_type width, QChar32 fill = UCHAR(' '), bool truncate = false) const;
 
       [[nodiscard]] QString8 simplified() const &;
       [[nodiscard]] QString8 simplified() &&;
@@ -796,25 +819,25 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
 
       // wrappers
       template <typename SP = QStringParser, typename ...Ts>
-      QString8 formatArg(Ts&&... args) const
+      [[nodiscard]] QString8 formatArg(Ts &&... args) const
       {
          return SP::template formatArg<QString8>(*this, std::forward<Ts>(args)...);
       }
 
       template <typename SP = QStringParser, typename ...Ts>
-      QString8 formatArgs(Ts... args) const
+      [[nodiscard]] QString8 formatArgs(Ts &&... args) const
       {
-         return SP::template formatArgs<QString8>(*this, args...);
+         return SP::template formatArgs<QString8>(*this, std::forward<Ts>(args)...);
       }
 
       template <typename V, typename SP = QStringParser>
-      static QString8 number(V value, int base  = 10)
+      [[nodiscard]] static QString8 number(V value, int base  = 10)
       {
          return SP::template number<QString8>(value, base);
       }
 
       template <typename SP = QStringParser>
-      static QString8 number(double value, char format = 'g', int precision = 6)
+      [[nodiscard]] static QString8 number(double value, char format = 'g', int precision = 6)
       {
          return SP::template number<QString8>(value, format, precision);
       }
@@ -928,6 +951,23 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
          return CsString::CsString::crend();
       }
 
+      // storage iterators
+      const_storage_iterator storage_begin() const {
+         return CsString::CsString::storage_begin();
+      }
+
+      const_storage_iterator storage_end() const {
+         return CsString::CsString::storage_end();
+      }
+
+      const_storage_reverse_iterator storage_rbegin() const {
+         return CsString::CsString::storage_rbegin();
+      }
+
+      const_storage_reverse_iterator storage_rend() const {
+         return CsString::CsString::storage_rend();
+      }
+
       // operators
       QString8 &operator=(const QString8 &other) = default;
       QString8 &operator=(QString8 && other) = default;
@@ -988,46 +1028,64 @@ class Q_CORE_EXPORT QString8 : public CsString::CsString
       }
 };
 
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QString8 &);
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QString8 &);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QString8 &str);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QString8 &str);
 
 // free functions, comparisons for string literals
-inline bool operator==(const QString8 &str1, const QString8 &str2)
-{
-   return (static_cast<CsString::CsString>(str1) == static_cast<CsString::CsString>(str2));
-}
-
-// for an array of chars
 template <int N>
-inline bool operator==(const char (&cStr)[N], const QString8 &str)
+inline bool operator==(QStringView8 str1, const char (&str2)[N])
 {
-   return (static_cast<CsString::CsString>(str) == cStr);
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1,
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
 }
 
-// for an array of chars
 template <int N>
-inline bool operator==(const QString8 &str, const char (&cStr)[N])
+inline bool operator==(const char (& str1)[N], QStringView8 str2)
 {
-   return (static_cast<CsString::CsString>(str) == cStr);
+   return std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end(),
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
 }
 
-inline bool operator!=(const QString8 &str1, const QString8 &str2)
-{
-   return ! (str1 == str2);
-}
-
-// for an array of chars
 template <int N>
-inline bool operator!=(const char (&cStr)[N], const QString8 &str)
+inline bool operator==(const QString8 &str1, const char (& str2)[N])
 {
-   return ! (str == cStr);
+   return std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1,
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
 }
 
-// for an array of chars
 template <int N>
-inline bool operator!=(const QString8 &str, const char (&cStr)[N])
+inline bool operator==(const char (& str1)[N], const QString8 &str2)
 {
-   return ! (str == cStr);
+   return std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end(),
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
+}
+
+template <int N>
+inline bool operator!=(QStringView8 str1, const char (&str2)[N])
+{
+   return ! std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1,
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
+}
+
+template <int N>
+inline bool operator!=(const char (& str1)[N], QStringView8 str2)
+{
+   return ! std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end(),
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
+}
+
+template <int N>
+inline bool operator!=(QString8 str1, const char (& str2)[N])
+{
+   return ! std::equal(str1.storage_begin(), str1.storage_end(), str2, str2+N-1,
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
+}
+
+template <int N>
+inline bool operator!=(const char (& str1)[N], QString8 str2)
+{
+   return ! std::equal(str1, str1+N-1, str2.storage_begin(), str2.storage_end(),
+      [] (auto a, auto b) { return static_cast<uint8_t>(a) == static_cast<uint8_t>(b);} );
 }
 
 inline QString8 operator+(const QString8 &str1, const QString8 &str2)
@@ -1043,7 +1101,7 @@ inline QString8::const_iterator operator+(QString8::size_type n, QString8::const
    return iter;
 }
 
-inline QString8 &&operator+(QString8 &&str1, const QString8 &str2)
+inline QString8 operator+(QString8 &&str1, const QString8 &str2)
 {
    str1 += str2;
    return std::move(str1);
@@ -1063,7 +1121,7 @@ inline QString8 operator+(const QString8 &str, QChar32 c)
    return t;
 }
 
-inline QString8 &&operator+(QString8 &&str, QChar32 c)
+inline QString8 operator+(QString8 &&str, QChar32 c)
 {
    str += c;
    return std::move(str);
@@ -1071,27 +1129,27 @@ inline QString8 &&operator+(QString8 &&str, QChar32 c)
 
 // for an array of chars
 template <int N>
-inline const QString8 operator+(const char (&cStr)[N], const QString8 &str)
+inline const QString8 operator+(const char (&cString)[N], const QString8 &str)
 {
    QString8 t(str);
-   t.prepend(cStr);
+   t.prepend(cString);
    return t;
 }
 
 // for an array of chars
 template <int N>
-inline const QString8 operator+(const QString8 &str, const char (&cStr)[N])
+inline const QString8 operator+(const QString8 &str, const char (&cString)[N])
 {
    QString8 t(str);
-   t += cStr;
+   t += cString;
    return t;
 }
 
 // for an array of chars
 template <int N>
-inline QString8 &&operator+(QString8 &&str, const char (&cStr)[N])
+inline QString8 operator+(QString8 &&str, const char (&cString)[N])
 {
-   str += cStr;
+   str += cString;
    return std::move(str);
 }
 
@@ -1102,16 +1160,16 @@ inline bool operator<(const QString8 &str1, const QString8 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator<(const char (&cStr)[N], const QString8 &str)
+inline bool operator<(const char (&cString)[N], const QString8 &str)
 {
-   return ! (static_cast<CsString::CsString>(str) >= cStr);
+   return (QString8(cString) < str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator<(const QString8 &str, const char (&cStr)[N])
+inline bool operator<(const QString8 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString>(str) < cStr);
+   return (str < QString8(cString));
 }
 
 inline bool operator<=(const QString8 &str1, const QString8 &str2)
@@ -1121,16 +1179,16 @@ inline bool operator<=(const QString8 &str1, const QString8 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator<=(const char (&cStr)[N], const QString8 &str)
+inline bool operator<=(const char (&cString)[N], const QString8 &str)
 {
-   return ! (static_cast<CsString::CsString>(str) > cStr);
+   return (QString8(cString) <= str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator<=(const QString8 &str, const char (&cStr)[N])
+inline bool operator<=(const QString8 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString>(str) <= cStr);
+   return (str <= QString8(cString));
 }
 
 inline bool operator>(const QString8 &str1, const QString8 &str2)
@@ -1140,16 +1198,16 @@ inline bool operator>(const QString8 &str1, const QString8 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator>(const char (&cStr)[N], const QString8 &str)
+inline bool operator>(const char (&cString)[N], const QString8 &str)
 {
-   return ! (static_cast<CsString::CsString>(str) <= cStr);
+   return (QString8(cString) > str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator>(const QString8 &str, const char (&cStr)[N])
+inline bool operator>(const QString8 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString>(str) > cStr);
+   return (str > QString8(cString));
 }
 
 inline bool operator>=(const QString8 &str1, const QString8 &str2)
@@ -1159,16 +1217,16 @@ inline bool operator>=(const QString8 &str1, const QString8 &str2)
 
 // for an array of chars
 template <int N>
-inline bool operator>=(const char (&cStr)[N], const QString8 &str)
+inline bool operator>=(const char (&cString)[N], const QString8 &str)
 {
-   return ! (static_cast<CsString::CsString>(str) < cStr);
+   return (QString8(cString) >= str);
 }
 
 // for an array of chars
 template <int N>
-inline bool operator>=(const QString8 &str, const char (&cStr)[N])
+inline bool operator>=(const QString8 &str, const char (&cString)[N])
 {
-   return (static_cast<CsString::CsString>(str) >= cStr);
+   return (str >= QString8(cString));
 }
 
 inline void swap(QString8 &a, QString8 &b) {
@@ -1177,5 +1235,24 @@ inline void swap(QString8 &a, QString8 &b) {
 
 QString8 cs_internal_string_normalize(const QString8 &data, QString8::NormalizationForm mode,
                   QChar32::UnicodeVersion version, int from);
+
+#if defined(__cpp_char8_t)
+   // support new data type added in C++20
+
+   inline QString8::QString8(const char8_t *str)
+   {
+      *this = QString8::fromUtf8(str, -1);
+   }
+
+   inline QString8::QString8(const char8_t *str, size_type size)
+   {
+      *this = QString8::fromUtf8(str, size);
+   }
+
+   inline QString8 QString8::fromUtf8(const char8_t *str, size_type numOfChars)
+   {
+      return CsString::CsString::fromUtf8(str, numOfChars);
+   }
+#endif
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qstring.h>
 
-
-
 class QTextStream;
 class QTextDocument;
 class QTextDocumentFragmentPrivate;
@@ -35,13 +33,12 @@ class QTextCursor;
 
 class Q_GUI_EXPORT QTextDocumentFragment
 {
-
  public:
    QTextDocumentFragment();
    explicit QTextDocumentFragment(const QTextDocument *document);
-   explicit QTextDocumentFragment(const QTextCursor &range);
-   QTextDocumentFragment(const QTextDocumentFragment &rhs);
-   QTextDocumentFragment &operator=(const QTextDocumentFragment &rhs);
+   explicit QTextDocumentFragment(const QTextCursor &cursor);
+   QTextDocumentFragment(const QTextDocumentFragment &other);
+   QTextDocumentFragment &operator=(const QTextDocumentFragment &other);
 
    ~QTextDocumentFragment();
 
@@ -52,11 +49,12 @@ class Q_GUI_EXPORT QTextDocumentFragment
 #ifndef QT_NO_TEXTHTMLPARSER
    QString toHtml(const QByteArray &encoding = QByteArray()) const;
 #endif
+
    static QTextDocumentFragment fromPlainText(const QString &plainText);
 
 #ifndef QT_NO_TEXTHTMLPARSER
-   static QTextDocumentFragment fromHtml(const QString &html);
-   static QTextDocumentFragment fromHtml(const QString &html, const QTextDocument *resourceProvider);
+   static QTextDocumentFragment fromHtml(const QString &text);
+   static QTextDocumentFragment fromHtml(const QString &text, const QTextDocument *resourceProvider);
 #endif
 
  private:

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,13 +22,15 @@
 ***********************************************************************/
 
 #include <qhttpsocketengine_p.h>
-#include <qhttpnetworkreply_p.h>
+
 #include <qtcpsocket.h>
 #include <qhostaddress.h>
 #include <qnetworkinterface.h>
 #include <qelapsedtimer.h>
 #include <qiodevice_p.h>
 #include <qurl.h>
+
+#include <qhttp_networkreply_p.h>
 
 #if ! defined(QT_NO_NETWORKPROXY)
 
@@ -199,7 +201,7 @@ void QHttpSocketEngine::close()
    if (d->socket) {
       d->socket->close();
       delete d->socket;
-      d->socket = 0;
+      d->socket = nullptr;
    }
 }
 
@@ -221,14 +223,15 @@ qint64 QHttpSocketEngine::read(char *data, qint64 maxlen)
 
    if (bytesRead == -1) {
       // If nothing has been read so far, and the direct socket read
-      // failed, return the socket's error. Otherwise, fall through and
-      // return as much as we read so far.
+      // failed, return the socket's error. Otherwise, return what has been read
       close();
-      setError(QAbstractSocket::RemoteHostClosedError,
-               QLatin1String("Remote host closed"));
+
+      setError(QAbstractSocket::RemoteHostClosedError, QLatin1String("Remote host closed"));
       setState(QAbstractSocket::UnconnectedState);
+
       return -1;
    }
+
    return bytesRead;
 }
 
@@ -592,7 +595,8 @@ void QHttpSocketEngine::slotSocketReadNotification()
 
    int statusCode = d->reply->statusCode();
 
-   QAuthenticatorPrivate *priv = 0;
+   QAuthenticatorPrivate *priv = nullptr;
+
    if (statusCode == 200) {
       d->state = Connected;
       setLocalAddress(d->socket->localAddress());
@@ -871,8 +875,8 @@ QHttpSocketEnginePrivate::QHttpSocketEnginePrivate()
    , credentialsSent(false)
    , pendingResponseData(0)
 {
-   socket = 0;
-   reply  = 0;
+   socket = nullptr;
+   reply  = nullptr;
    state  = QHttpSocketEngine::None;
 }
 
@@ -893,7 +897,7 @@ QAbstractSocketEngine *QHttpSocketEngineHandler::createSocketEngine(QAbstractSoc
    }
 
    // we only accept active sockets
-   if (!qobject_cast<QAbstractSocket *>(parent)) {
+   if (!dynamic_cast<QAbstractSocket *>(parent)) {
       return nullptr;
    }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -50,6 +50,10 @@ class QHttpSocketEngine : public QAbstractSocketEngine
    };
 
    QHttpSocketEngine(QObject *parent = nullptr);
+
+   QHttpSocketEngine(const QHttpSocketEngine &) = delete;
+   QHttpSocketEngine &operator=(const QHttpSocketEngine &) = delete;
+
    ~QHttpSocketEngine();
 
    bool initialize(QAbstractSocket::SocketType type, QAbstractSocket::NetworkLayerProtocol protocol = QAbstractSocket::IPv4Protocol) override;
@@ -92,11 +96,11 @@ class QHttpSocketEngine : public QAbstractSocketEngine
    int option(SocketOption option) const override;
    bool setOption(SocketOption option, int value) override;
 
-   bool waitForRead(int msecs = 30000, bool *timedOut = 0) override;
-   bool waitForWrite(int msecs = 30000, bool *timedOut = 0) override;
+   bool waitForRead(int msecs = 30000, bool *timedOut = nullptr) override;
+   bool waitForWrite(int msecs = 30000, bool *timedOut = nullptr) override;
 
    bool waitForReadOrWrite(bool *readyToRead, bool *readyToWrite, bool checkRead, bool checkWrite,
-                  int msecs = 30000, bool *timedOut = 0) override;
+                  int msecs = 30000, bool *timedOut = nullptr) override;
 
    bool isReadNotificationEnabled() const override;
    void setReadNotificationEnabled(bool enable) override;
@@ -124,6 +128,8 @@ class QHttpSocketEngine : public QAbstractSocketEngine
    NET_CS_SLOT_2(slotSocketStateChanged)
 
  private:
+   Q_DECLARE_PRIVATE(QHttpSocketEngine)
+
    NET_CS_SLOT_1(Private, void emitPendingReadNotification())
    NET_CS_SLOT_2(emitPendingReadNotification)
 
@@ -138,14 +144,10 @@ class QHttpSocketEngine : public QAbstractSocketEngine
    void emitConnectionNotification();
 
    bool readHttpHeader();
-   Q_DECLARE_PRIVATE(QHttpSocketEngine)
-   Q_DISABLE_COPY(QHttpSocketEngine)
 };
 
 class QHttpSocketEnginePrivate : public QAbstractSocketEnginePrivate
 {
-   Q_DECLARE_PUBLIC(QHttpSocketEngine)
-
  public:
    QHttpSocketEnginePrivate();
    ~QHttpSocketEnginePrivate();
@@ -167,6 +169,9 @@ class QHttpSocketEnginePrivate : public QAbstractSocketEnginePrivate
    bool connectionNotificationPending;
    bool credentialsSent;
    uint pendingResponseData;
+
+ private:
+   Q_DECLARE_PUBLIC(QHttpSocketEngine)
 };
 
 class QHttpSocketEngineHandler : public QSocketEngineHandler
@@ -178,6 +183,5 @@ class QHttpSocketEngineHandler : public QSocketEngineHandler
    virtual QAbstractSocketEngine *createSocketEngine(qintptr socketDescriptor, QObject *parent) override;
 };
 #endif
-
 
 #endif // QHTTPSOCKETENGINE_H

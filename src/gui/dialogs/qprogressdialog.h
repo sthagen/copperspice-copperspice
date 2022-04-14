@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,9 @@
 #define QPROGRESSDIALOG_H
 
 #include <qdialog.h>
-#include <QElapsedTimer>
-#include <QShortcut>
+#include <qelapsedtimer.h>
+#include <qshortcut.h>
+
 #ifndef QT_NO_PROGRESSDIALOG
 
 class QLabel;
@@ -63,10 +64,13 @@ class Q_GUI_EXPORT QProgressDialog : public QDialog
    GUI_CS_PROPERTY_WRITE(labelText, setLabelText)
 
  public:
-   explicit QProgressDialog(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+   explicit QProgressDialog(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
 
    QProgressDialog(const QString &labelText, const QString &cancelButtonText, int minimum, int maximum,
-      QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+      QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
+   QProgressDialog(const QProgressDialog &) = delete;
+   QProgressDialog &operator=(const QProgressDialog &) = delete;
 
    ~QProgressDialog();
 
@@ -133,8 +137,6 @@ class Q_GUI_EXPORT QProgressDialog : public QDialog
    GUI_CS_SLOT_2(forceShow)
 
  private:
-   Q_DISABLE_COPY(QProgressDialog)
-
    GUI_CS_SLOT_1(Private, void disconnectOnClose())
    GUI_CS_SLOT_2(disconnectOnClose)
 
@@ -159,6 +161,7 @@ class Q_GUI_EXPORT QProgressDialog : public QDialog
 #ifndef QT_NO_SHORTCUT
    QShortcut *escapeShortcut;
 #endif
+
    int  showTime;
    bool shown_once;
    bool cancellation_flag;

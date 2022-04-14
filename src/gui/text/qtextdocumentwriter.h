@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,7 +26,6 @@
 
 #include <qstring.h>
 
-
 class QTextDocumentWriterPrivate;
 class QIODevice;
 class QByteArray;
@@ -35,11 +34,14 @@ class QTextDocumentFragment;
 
 class Q_GUI_EXPORT QTextDocumentWriter
 {
-
  public:
    QTextDocumentWriter();
    QTextDocumentWriter(QIODevice *device, const QByteArray &format);
    explicit QTextDocumentWriter(const QString &fileName, const QByteArray &format = QByteArray());
+
+   QTextDocumentWriter(const QTextDocumentWriter &) = delete;
+   QTextDocumentWriter &operator=(const QTextDocumentWriter &) = delete;
+
    ~QTextDocumentWriter();
 
    void setFormat (const QByteArray &format);
@@ -61,9 +63,7 @@ class Q_GUI_EXPORT QTextDocumentWriter
    static QList<QByteArray> supportedDocumentFormats();
 
  private:
-   Q_DISABLE_COPY(QTextDocumentWriter)
    QTextDocumentWriterPrivate *d;
 };
-
 
 #endif

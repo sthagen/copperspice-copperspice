@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -313,7 +313,7 @@ class QFakeDevice : public QPaintDevice
    }
 
    QPaintEngine *paintEngine() const override {
-      return 0;
+      return nullptr;
    }
 
    int metric(PaintDeviceMetric m) const override {
@@ -566,11 +566,12 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
 
                QFontMetrics fm(fnt);
                QPointF pt(p.x(), p.y() - fm.ascent());
-               qt_format_text(fnt, QRectF(pt, size), flags, /*opt*/0,
-                  str, /*brect=*/0, /*tabstops=*/0, /*...*/0, /*tabarraylen=*/0, painter);
+               qt_format_text(fnt, QRectF(pt, size), flags, nullptr,
+                  str, nullptr, 0, nullptr, 0, painter);
+
             } else {
-               qt_format_text(font, QRectF(p, QSizeF(1, 1)), Qt::TextSingleLine | Qt::TextDontClip, /*opt*/0,
-                  str, /*brect=*/0, /*tabstops=*/0, /*...*/0, /*tabarraylen=*/0, painter);
+               qt_format_text(font, QRectF(p, QSizeF(1, 1)), Qt::TextSingleLine | Qt::TextDontClip, nullptr,
+                  str, nullptr, 0, nullptr, 0, painter);
             }
 
             break;
@@ -580,9 +581,11 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             if (d->formatMajor < 4) {
                s >> ip >> pixmap;
                painter->drawPixmap(ip, pixmap);
+
             } else if (d->formatMajor <= 5) {
                s >> ir >> pixmap;
                painter->drawPixmap(ir, pixmap);
+
             } else {
                QRectF sr;
                if (d->in_memory_only) {
@@ -1088,16 +1091,12 @@ QPictureIO::QPictureIO(const QString &fileName, const QString &format)
 void QPictureIO::init()
 {
    d = new QPictureIOData();
-   d->parameters = 0;
+   d->parameters = nullptr;
    d->quality    = -1; // default quality of the current format
    d->gamma      = 0.0f;
    d->iostat     = 0;
-   d->iodev      = 0;
+   d->iodev      = nullptr;
 }
-
-/*!
-    Destroys the object and all related data.
-*/
 
 QPictureIO::~QPictureIO()
 {
@@ -1169,11 +1168,14 @@ static void cleanup()
    }
 }
 
-void qt_init_picture_handlers()                // initialize picture handlers
+void qt_init_picture_handlers()
 {
+   // initialize picture handlers
    static QAtomicInt done = 0;
 
-   if (done.testAndSetRelaxed(0, 1)) {
+   int expected = 0;
+
+   if (done.compareExchange(expected, 1, std::memory_order_relaxed)) {
       qAddPostRoutine(cleanup);
    }
 }
@@ -1433,7 +1435,7 @@ bool QPictureIO::read()
       if (picture_format.isEmpty()) {
          if (file.isOpen()) {                          // unknown format
             file.close();
-            d->iodev = 0;
+            d->iodev = nullptr;
          }
 
          return false;
@@ -1465,7 +1467,7 @@ bool QPictureIO::read()
 
    if (file.isOpen()) {                                // picture was read using file
       file.close();
-      d->iodev = 0;
+      d->iodev = nullptr;
    }
 
    return d->iostat == 0;                              // picture successfully read?
@@ -1501,7 +1503,7 @@ bool QPictureIO::write()
    (*h->write_picture)(this);
    if (file.isOpen()) {                     // picture was written using file
       file.close();
-      d->iodev = 0;
+      d->iodev = nullptr;
    }
 
    return d->iostat == 0;                   // picture successfully written?

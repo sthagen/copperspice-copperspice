@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #include <qfile.h>
 #include <qtextcodec.h>
 #include <qtimer.h>
-#include <qnetworkrequest.h>
+#include <qnetwork_request.h>
 #include <qxmlstreamreader.h>
 
 #include <qatomicstring_p.h>
@@ -81,14 +81,11 @@ QNetworkReply *AccelTreeResourceLoader::load(const QUrl &uri,
       const NetworkAccessDelegator::Ptr &networkDelegator,
       const ReportContext::Ptr &context, ErrorHandling errorHandling)
 {
-   return load(uri,
-               networkDelegator->managerFor(uri),
-               context, errorHandling);
+   return load(uri, networkDelegator->managerFor(uri), context, errorHandling);
 }
 
 QNetworkReply *AccelTreeResourceLoader::load(const QUrl &uri, QNetworkAccessManager *const networkManager,
       const ReportContext::Ptr &context, ErrorHandling errorHandling)
-
 {
    Q_ASSERT(networkManager);
    Q_ASSERT(uri.isValid());
@@ -100,12 +97,13 @@ QNetworkReply *AccelTreeResourceLoader::load(const QUrl &uri, QNetworkAccessMana
 
    networkLoop.connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &networkLoop,
                        SLOT(error(QNetworkReply::NetworkError)));
+
    networkLoop.connect(reply, SIGNAL(finished()), &networkLoop, SLOT(finished()));
 
    if (networkLoop.exec(QEventLoop::ExcludeUserInputEvents)) {
       const QString errorMessage(escape(reply->errorString()));
 
-      /* Note, we delete reply before we exit this function with error(). */
+      // delete reply before exiting  this function with error()
       delete reply;
 
       const QSourceLocation location(uri);
@@ -114,7 +112,8 @@ QNetworkReply *AccelTreeResourceLoader::load(const QUrl &uri, QNetworkAccessMana
          context->error(errorMessage, ReportContext::FODC0002, location);
       }
 
-      return 0;
+      return nullptr;
+
    } else {
       return reply;
    }
@@ -198,12 +197,13 @@ bool AccelTreeResourceLoader::streamToReceiver(QIODevice *const dev, AccelTreeBu
             receiver->endDocument();
             continue;
          }
+
          case QXmlStreamReader::EntityReference:
-         /* Fallthrough. */
          case QXmlStreamReader::DTD: {
             /* We just ignore any DTD and entity references. */
             continue;
          }
+
          case QXmlStreamReader::Invalid: {
             if (context) {
                context->error(escape(reader.errorString()), ReportContext::FODC0002, QSourceLocation(uri, reader.lineNumber(),
@@ -261,7 +261,8 @@ SequenceType::Ptr AccelTreeResourceLoader::announceDocument(const QUrl &uri, con
    // TODO deal with the usage thingy
    Q_ASSERT(uri.isValid());
    Q_ASSERT(!uri.isRelative());
-   Q_UNUSED(uri); /* Needed when compiling in release mode. */
+
+   (void) uri;
 
    return CommonSequenceTypes::ZeroOrOneDocumentNode;
 }
@@ -340,7 +341,7 @@ bool AccelTreeResourceLoader::retrieveUnparsedText(const QUrl &uri,
 
 bool AccelTreeResourceLoader::isUnparsedTextAvailable(const QUrl &uri, const QString &encoding)
 {
-   return retrieveUnparsedText(uri, encoding, ReportContext::Ptr(), 0);
+   return retrieveUnparsedText(uri, encoding, ReportContext::Ptr(), nullptr);
 }
 
 Item AccelTreeResourceLoader::openUnparsedText(const QUrl &uri, const QString &encoding,
@@ -385,7 +386,8 @@ void AccelTreeResourceLoader::clear(const QUrl &uri)
 
 void QPatternist::NetworkLoop::error(QNetworkReply::NetworkError code)
 {
-   Q_UNUSED(code);
+   (void) code;
+
    m_hasReceivedError = true;
    exit(1);
 }

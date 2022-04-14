@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,10 @@
 #ifndef QUNDOSTACK_P_H
 #define QUNDOSTACK_P_H
 
-#include <QtCore/qlist.h>
-#include <QtCore/qstring.h>
-#include <QtGui/qaction.h>
+#include <qlist.h>
+#include <qstring.h>
+#include <qaction.h>
 #include <qundostack.h>
-
 
 class QUndoCommand;
 class QUndoGroup;
@@ -50,7 +49,11 @@ class QUndoStackPrivate
    Q_DECLARE_PUBLIC(QUndoStack)
 
  public:
-   QUndoStackPrivate() : index(0), clean_index(0), group(0), undo_limit(0) {}
+   QUndoStackPrivate()
+      : index(0), clean_index(0), group(nullptr), undo_limit(0)
+   {
+   }
+
    virtual ~QUndoStackPrivate() {}
 
    QList<QUndoCommand *> command_list;

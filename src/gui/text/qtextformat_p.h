@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,15 +28,14 @@
 #include <qmultihash.h>
 #include <qvector.h>
 
-
 class Q_GUI_EXPORT QTextFormatCollection
 {
  public:
    QTextFormatCollection() {}
    ~QTextFormatCollection();
 
-   QTextFormatCollection(const QTextFormatCollection &rhs);
-   QTextFormatCollection &operator=(const QTextFormatCollection &rhs);
+   QTextFormatCollection(const QTextFormatCollection &other);
+   QTextFormatCollection &operator=(const QTextFormatCollection &other);
 
    QTextFormat objectFormat(int objectIndex) const {
       return format(objectFormatIndex(objectIndex));

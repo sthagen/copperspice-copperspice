@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,22 +25,23 @@
 #include <qdatastream.h>
 #include <qdebug.h>
 
-QDataStream &operator<<(QDataStream &s, const QPoint &p)
+QDataStream &operator<<(QDataStream &stream, const QPoint &point)
 {
-   s << (qint32)p.x() << (qint32)p.y();
+   stream << (qint32)point.x() << (qint32)point.y();
 
-   return s;
+   return stream;
 }
 
-QDataStream &operator>>(QDataStream &s, QPoint &p)
+QDataStream &operator>>(QDataStream &stream, QPoint &point)
 {
    qint32 x, y;
-   s >> x;
-   p.rx() = x;
-   s >> y;
-   p.ry() = y;
+   stream >> x;
 
-   return s;
+   point.rx() = x;
+   stream >> y;
+   point.ry() = y;
+
+   return stream;
 }
 
 int QPoint::manhattanLength() const
@@ -65,18 +66,21 @@ qreal QPointF::manhattanLength() const
    return qAbs(x()) + qAbs(y());
 }
 
-QDataStream &operator<<(QDataStream &s, const QPointF &p)
+QDataStream &operator<<(QDataStream &stream, const QPointF &pointF)
 {
-   s << double(p.x()) << double(p.y());
-   return s;
+   stream << double(pointF.x()) << double(pointF.y());
+
+   return stream;
 }
 
-QDataStream &operator>>(QDataStream &s, QPointF &p)
+QDataStream &operator>>(QDataStream &stream, QPointF &pointF)
 {
    double x, y;
-   s >> x;
-   s >> y;
-   p.setX(qreal(x));
-   p.setY(qreal(y));
-   return s;
+   stream >> x;
+   stream >> y;
+
+   pointF.setX(qreal(x));
+   pointF.setY(qreal(y));
+
+   return stream;
 }

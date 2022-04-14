@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,15 +27,10 @@
 #include "qderivedstring_p.h"
 #include "qxsdschematypesfactory_p.h"
 
-QT_BEGIN_NAMESPACE
-
 using namespace QPatternist;
 
 XsdSchemaContext::XsdSchemaContext(const NamePool::Ptr &namePool)
-   : m_namePool(namePool)
-   , m_networkAccessManager(0)
-   , m_uriResolver(0)
-   , m_messageHandler(0)
+   : m_namePool(namePool), m_networkAccessManager(nullptr), m_uriResolver(nullptr), m_messageHandler(nullptr)
 {
 }
 
@@ -518,5 +513,3 @@ QHash<SchemaType::Ptr, XsdFacet::Hash> XsdSchemaContext::setupBuiltinTypesFacetL
 
    return hash;
 }
-
-QT_END_NAMESPACE

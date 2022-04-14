@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,18 +29,19 @@
 #include <qmutex.h>
 #include <qmap.h>
 
-typedef QExplicitlySharedDataPointer<QNetworkConfigurationPrivate> QNetworkConfigurationPrivatePointer;
+using QNetworkConfigurationPrivatePointer = QExplicitlySharedDataPointer<QNetworkConfigurationPrivate>;
 
 class QNetworkConfigurationPrivate : public QSharedData
 {
  public:
-   QNetworkConfigurationPrivate() :
-      mutex(QMutex::Recursive),
-      type(QNetworkConfiguration::Invalid),
-      purpose(QNetworkConfiguration::UnknownPurpose),
-      bearerType(QNetworkConfiguration::BearerUnknown),
-      isValid(false), roamingSupported(false) {
+   QNetworkConfigurationPrivate()
+      : type(QNetworkConfiguration::Invalid), purpose(QNetworkConfiguration::UnknownPurpose),
+      bearerType(QNetworkConfiguration::BearerUnknown), isValid(false), roamingSupported(false)
+   {
    }
+
+   QNetworkConfigurationPrivate(const QNetworkConfigurationPrivate &) = delete;
+   QNetworkConfigurationPrivate &operator=(const QNetworkConfigurationPrivate &) = delete;
 
    virtual ~QNetworkConfigurationPrivate() {
       //release pointers to member configurations
@@ -49,7 +50,7 @@ class QNetworkConfigurationPrivate : public QSharedData
 
    QMap<unsigned int, QNetworkConfigurationPrivatePointer> serviceNetworkMembers;
 
-   mutable QMutex mutex;
+   mutable QRecursiveMutex mutex;
 
    QString name;
    QString id;
@@ -61,11 +62,6 @@ class QNetworkConfigurationPrivate : public QSharedData
 
    bool isValid;
    bool roamingSupported;
-
- private:
-   Q_DISABLE_COPY(QNetworkConfigurationPrivate)
 };
-
-Q_DECLARE_METATYPE(QNetworkConfigurationPrivatePointer)
 
 #endif

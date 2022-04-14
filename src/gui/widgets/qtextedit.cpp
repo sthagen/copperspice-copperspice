@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -95,8 +95,7 @@ class QTextEditControl : public QTextControl
 };
 
 QTextEditPrivate::QTextEditPrivate()
-   : control(0),
-     autoFormatting(QTextEdit::AutoNone), tabChangesFocus(false),
+   : control(nullptr), autoFormatting(QTextEdit::AutoNone), tabChangesFocus(false),
      lineWrap(QTextEdit::WidgetWidth), lineWrapColumnOrWidth(0),
      wordWrap(QTextOption::WrapAtWordBoundaryOrAnywhere), clickCausedFocus(0),
      textFormat(Qt::AutoText)
@@ -975,22 +974,14 @@ void QTextEdit::keyReleaseEvent(QKeyEvent *e)
    e->ignore();
 }
 
-/*!
-    Loads the resource specified by the given \a type and \a name.
-
-    This function is an extension of QTextDocument::loadResource().
-
-    \sa QTextDocument::loadResource()
-*/
 QVariant QTextEdit::loadResource(int type, const QUrl &name)
 {
-   Q_UNUSED(type);
-   Q_UNUSED(name);
+   (void) type;
+   (void) name;
+
    return QVariant();
 }
 
-/*! \reimp
-*/
 void QTextEdit::resizeEvent(QResizeEvent *e)
 {
    Q_D(QTextEdit);

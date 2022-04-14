@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,10 +33,12 @@ class QPlatformOffscreenSurfacePrivate;
 
 class Q_GUI_EXPORT QPlatformOffscreenSurface : public QPlatformSurface
 {
-   Q_DECLARE_PRIVATE(QPlatformOffscreenSurface)
-
  public:
    explicit QPlatformOffscreenSurface(QOffscreenSurface *offscreenSurface);
+
+   QPlatformOffscreenSurface(const QPlatformOffscreenSurface &) = delete;
+   QPlatformOffscreenSurface &operator=(const QPlatformOffscreenSurface &) = delete;
+
    virtual ~QPlatformOffscreenSurface();
 
    QOffscreenSurface *offscreenSurface() const;
@@ -50,8 +52,7 @@ class Q_GUI_EXPORT QPlatformOffscreenSurface : public QPlatformSurface
    QScopedPointer<QPlatformOffscreenSurfacePrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QPlatformOffscreenSurface)
+   Q_DECLARE_PRIVATE(QPlatformOffscreenSurface)
 };
-
 
 #endif

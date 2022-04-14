@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,13 +24,13 @@
 #ifndef QCOMPLETER_H
 #define QCOMPLETER_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qpoint.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qabstractitemmodel.h>
-#include <QtCore/qrect.h>
+#include <qabstractitemmodel.h>
 #include <qitemselection.h>
-#include <QScopedPointer>
+#include <qobject.h>
+#include <qpoint.h>
+#include <qrect.h>
+#include <qstring.h>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_COMPLETER
 
@@ -45,18 +45,25 @@ class Q_GUI_EXPORT QCompleter : public QObject
 
    GUI_CS_PROPERTY_READ(completionPrefix, completionPrefix)
    GUI_CS_PROPERTY_WRITE(completionPrefix, setCompletionPrefix)
+
    GUI_CS_PROPERTY_READ(modelSorting, modelSorting)
    GUI_CS_PROPERTY_WRITE(modelSorting, setModelSorting)
+
    GUI_CS_PROPERTY_READ(completionMode, completionMode)
    GUI_CS_PROPERTY_WRITE(completionMode, setCompletionMode)
+
    GUI_CS_PROPERTY_READ(completionColumn, completionColumn)
    GUI_CS_PROPERTY_WRITE(completionColumn, setCompletionColumn)
+
    GUI_CS_PROPERTY_READ(completionRole, completionRole)
    GUI_CS_PROPERTY_WRITE(completionRole, setCompletionRole)
+
    GUI_CS_PROPERTY_READ(maxVisibleItems, maxVisibleItems)
    GUI_CS_PROPERTY_WRITE(maxVisibleItems, setMaxVisibleItems)
+
    GUI_CS_PROPERTY_READ(caseSensitivity, caseSensitivity)
    GUI_CS_PROPERTY_WRITE(caseSensitivity, setCaseSensitivity)
+
    GUI_CS_PROPERTY_READ(wrapAround, wrapAround)
    GUI_CS_PROPERTY_WRITE(wrapAround, setWrapAround)
 
@@ -77,15 +84,18 @@ class Q_GUI_EXPORT QCompleter : public QObject
    QCompleter(QAbstractItemModel *model, QObject *parent = nullptr);
 
 #ifndef QT_NO_STRINGLISTMODEL
-   QCompleter(const QStringList &completions, QObject *parent = nullptr);
+   QCompleter(const QStringList &list, QObject *parent = nullptr);
 #endif
+
+   QCompleter(const QCompleter &) = delete;
+   QCompleter &operator=(const QCompleter &) = delete;
 
    ~QCompleter();
 
    void setWidget(QWidget *widget);
    QWidget *widget() const;
 
-   void setModel(QAbstractItemModel *c);
+   void setModel(QAbstractItemModel *model);
    QAbstractItemModel *model() const;
 
    void setCompletionMode(CompletionMode mode);
@@ -149,12 +159,11 @@ class Q_GUI_EXPORT QCompleter : public QObject
    GUI_CS_SIGNAL_OVERLOAD(highlighted, (const QModelIndex &), index)
 
  protected:
-   bool eventFilter(QObject *o, QEvent *e) override;
-   bool event(QEvent *) override;
+   bool eventFilter(QObject *object, QEvent *event) override;
+   bool event(QEvent *event) override;
    QScopedPointer<QCompleterPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QCompleter)
    Q_DECLARE_PRIVATE(QCompleter)
 
    GUI_CS_SLOT_1(Private, void _q_complete(const QModelIndex &un_named_arg1))
@@ -168,10 +177,8 @@ class Q_GUI_EXPORT QCompleter : public QObject
 
    GUI_CS_SLOT_1(Private, void _q_fileSystemModelDirectoryLoaded(const QString &un_named_arg1))
    GUI_CS_SLOT_2(_q_fileSystemModelDirectoryLoaded)
-
 };
 
 #endif // QT_NO_COMPLETER
-
 
 #endif // QCOMPLETER_H

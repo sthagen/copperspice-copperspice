@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QPRINTENGINE_H
 #define QPRINTENGINE_H
 
-#include <QtCore/qvariant.h>
-#include <QtGui/qprinter.h>
+#include <qvariant.h>
+#include <qprinter.h>
 
 #ifndef QT_NO_PRINTER
 
@@ -79,7 +79,7 @@ class Q_GUI_EXPORT QPrintEngine
    virtual bool newPage() = 0;
    virtual bool abort() = 0;
 
-   virtual int metric(QPaintDevice::PaintDeviceMetric) const = 0;
+   virtual int metric(QPaintDevice::PaintDeviceMetric id) const = 0;
 
    virtual QPrinter::PrinterState printerState() const = 0;
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QSHORTCUT_H
 #define QSHORTCUT_H
 
-#include <QtGui/qwidget.h>
-#include <QtGui/qkeysequence.h>
+#include <qwidget.h>
+#include <qkeysequence.h>
 #include <QScopedPointer>
 
 
@@ -89,7 +89,7 @@ class Q_GUI_EXPORT QShortcut : public QObject
    GUI_CS_SIGNAL_2(activatedAmbiguously)
 
  protected:
-   bool event(QEvent *e) override;
+   bool event(QEvent *event) override;
    QScopedPointer<QShortcutPrivate> d_ptr;
 
 };

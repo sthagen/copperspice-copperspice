@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,6 +45,9 @@ class Q_SCRIPT_EXPORT QScriptContext
       URIError
    };
 
+   QScriptContext(const QScriptContext &) = delete;
+   QScriptContext &operator=(const QScriptContext &) = delete;
+
    ~QScriptContext();
 
    QScriptContext *parentContext() const;
@@ -81,13 +84,12 @@ class Q_SCRIPT_EXPORT QScriptContext
    QString toString() const;
 
  private:
-   QScriptContext();
-
-   QScriptContextPrivate *d_ptr;
-
    Q_DECLARE_PRIVATE(QScriptContext)
-   Q_DISABLE_COPY(QScriptContext)
+
+   QScriptContext();
+   QScriptContextPrivate *d_ptr;
 };
 
+CS_DECLARE_METATYPE(QScriptContext)
 
 #endif

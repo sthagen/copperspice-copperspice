@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,29 +40,45 @@ class Q_GUI_EXPORT QPalette
 
  public:
    // order dependent, serialization format depends on it
-   enum ColorGroup { Active,
-                     Disabled,
-                     Inactive,
-                     NColorGroups,
-                     Current,
-                     All,
-                     Normal = Active };
-
-   enum ColorRole { WindowText, Button, Light, Midlight, Dark, Mid,
-      Text, BrightText, ButtonText, Base, Window, Shadow,
-      Highlight,
-      HighlightedText,
-      Link,
-      LinkVisited,
-      AlternateBase,
-      NoRole,
-      ToolTipBase,
-      ToolTipText,
-      PlaceholderText = Text,
-      NColorRoles     = ToolTipText + 1,
-      Foreground      = WindowText,
-      Background      = Window
+   enum ColorGroup {
+      Active,
+      Disabled,
+      Inactive,
+      NColorGroups,
+      Current,
+      All,
+      Normal = Active
    };
+
+   GUI_CS_REGISTER_ENUM(
+      enum ColorRole {
+         WindowText,
+         Button,
+         Light,
+         Midlight,
+         Dark,
+         Mid,
+         Text,
+         BrightText,
+         ButtonText,
+         Base,
+         Window,
+         Shadow,
+         Highlight,
+         HighlightedText,
+         Link,
+         LinkVisited,
+         AlternateBase,
+         NoRole,
+         ToolTipBase,
+         ToolTipText,
+         NColorRoles     = ToolTipText + 1,   // must be the last unique value
+
+         PlaceholderText = Text,
+         Foreground      = WindowText,
+         Background      = Window
+      };
+   )
 
    QPalette();
 
@@ -77,9 +93,11 @@ class Q_GUI_EXPORT QPalette
    QPalette(const QColor &windowText, const QColor &window, const QColor &light,
       const QColor &dark, const QColor &mid, const QColor &text, const QColor &base);
 
-   QPalette(const QPalette &palette);
+   QPalette(const QPalette &other);
 
-   QPalette(QPalette &&other) : d(other.d) {
+   QPalette(QPalette &&other)
+      : d(other.d)
+   {
       resolve_mask  = other.resolve_mask;
       current_group = other.current_group;
       other.d = nullptr;
@@ -87,7 +105,7 @@ class Q_GUI_EXPORT QPalette
 
    ~QPalette();
 
-   QPalette &operator=(const QPalette &palette);
+   QPalette &operator=(const QPalette &other);
 
    inline QPalette &operator=(QPalette &&other) {
       resolve_mask  = other.resolve_mask;
@@ -109,36 +127,35 @@ class Q_GUI_EXPORT QPalette
       return static_cast<ColorGroup>(current_group);
    }
 
-   void setCurrentColorGroup(ColorGroup cg) {
-      current_group = cg;
+   void setCurrentColorGroup(ColorGroup group) {
+      current_group = group;
    }
 
-   inline const QColor &color(ColorGroup cg, ColorRole cr) const {
-      return brush(cg, cr).color();
+   inline const QColor &color(ColorGroup group, ColorRole role) const {
+      return brush(group, role).color();
    }
 
-   const QBrush &brush(ColorGroup cg, ColorRole cr) const;
+   const QBrush &brush(ColorGroup group, ColorRole role) const;
 
-   inline void setColor(ColorGroup cg, ColorRole cr, const QColor &color);
-   inline void setColor(ColorRole cr, const QColor &color);
-   inline void setBrush(ColorRole cr, const QBrush &brush);
+   inline void setColor(ColorGroup group, ColorRole role, const QColor &color);
+   inline void setColor(ColorRole role, const QColor &color);
+   inline void setBrush(ColorRole role, const QBrush &brush);
 
-   bool isBrushSet(ColorGroup cg, ColorRole cr) const;
-   void setBrush(ColorGroup cg, ColorRole cr, const QBrush &brush);
+   bool isBrushSet(ColorGroup group, ColorRole role) const;
+   void setBrush(ColorGroup group, ColorRole role, const QBrush &brush);
 
-   void setColorGroup(ColorGroup cr, const QBrush &windowText, const QBrush &button,
+   void setColorGroup(ColorGroup group, const QBrush &windowText, const QBrush &button,
       const QBrush &light, const QBrush &dark, const QBrush &mid,
-      const QBrush &text, const QBrush &bright_text, const QBrush &base,
-      const QBrush &window);
+      const QBrush &text, const QBrush &bright_text, const QBrush &base, const QBrush &window);
 
-   bool isEqual(ColorGroup cr1, ColorGroup cr2) const;
+   bool isEqual(ColorGroup group1, ColorGroup group2) const;
 
-   inline const QColor &color(ColorRole cr) const {
-      return color(Current, cr);
+   inline const QColor &color(ColorRole role) const {
+      return color(Current, role);
    }
 
-   inline const QBrush &brush(ColorRole cr) const {
-      return brush(Current, cr);
+   inline const QBrush &brush(ColorRole role) const {
+      return brush(Current, role);
    }
 
    inline const QBrush &foreground() const {
@@ -223,16 +240,16 @@ class Q_GUI_EXPORT QPalette
       return brush(LinkVisited);
    }
 
-   bool operator==(const QPalette &p) const;
-   inline bool operator!=(const QPalette &p) const {
-      return !(operator==(p));
+   bool operator==(const QPalette &other) const;
+   inline bool operator!=(const QPalette &other) const {
+      return !(operator==(other));
    }
 
-   bool isCopyOf(const QPalette &p) const;
+   bool isCopyOf(const QPalette &other) const;
 
    qint64 cacheKey() const;
 
-   QPalette resolve(const QPalette &) const;
+   QPalette resolve(const QPalette &other) const;
 
    uint resolve() const {
       return resolve_mask;
@@ -270,26 +287,26 @@ class Q_GUI_EXPORT QPalette
    uint current_group;
    uint resolve_mask;
 
-   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &s, const QPalette &p);
+   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QPalette &palette);
 };
 
-inline void QPalette::setColor(ColorGroup acg, ColorRole acr, const QColor &acolor)
+inline void QPalette::setColor(ColorGroup group, ColorRole role, const QColor &color)
 {
-   setBrush(acg, acr, QBrush(acolor));
+   setBrush(group, role, QBrush(color));
 }
 
-inline void QPalette::setColor(ColorRole acr, const QColor &acolor)
+inline void QPalette::setColor(ColorRole role, const QColor &color)
 {
-   setColor(All, acr, acolor);
+   setColor(All, role, color);
 }
 
-inline void QPalette::setBrush(ColorRole acr, const QBrush &abrush)
+inline void QPalette::setBrush(ColorRole role, const QBrush &brush)
 {
-   setBrush(All, acr, abrush);
+   setBrush(All, role, brush);
 }
 
-Q_GUI_EXPORT QDataStream &operator<<(QDataStream &ds, const QPalette &p);
-Q_GUI_EXPORT QDataStream &operator>>(QDataStream &ds, QPalette &p);
-Q_GUI_EXPORT QDebug operator<<(QDebug, const QPalette &);
+Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QPalette &palette);
+Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QPalette &palette);
+Q_GUI_EXPORT QDebug operator<<(QDebug, const QPalette &palette);
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,7 +48,11 @@
 #include <qmacstyle.h>
 #endif
 
-Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, loader, (QStyleInterface_ID, "/styles", Qt::CaseInsensitive))
+static QFactoryLoader *loader()
+{
+   static QFactoryLoader retval(QStyleInterface_ID, "/styles", Qt::CaseInsensitive);
+   return &retval;
+}
 
 QStyle *QStyleFactory::create(const QString &key)
 {

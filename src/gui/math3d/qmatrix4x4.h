@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -270,17 +270,17 @@ QGenericMatrix<N, M, qreal> QMatrix4x4::toGenericMatrix() const
    return result;
 }
 
-inline const qreal &QMatrix4x4::operator()(int aRow, int aColumn) const
+inline const qreal &QMatrix4x4::operator()(int row, int column) const
 {
-   Q_ASSERT(aRow >= 0 && aRow < 4 && aColumn >= 0 && aColumn < 4);
-   return m[aColumn][aRow];
+   Q_ASSERT(row >= 0 && row < 4 && column >= 0 && column < 4);
+   return m[column][row];
 }
 
-inline qreal &QMatrix4x4::operator()(int aRow, int aColumn)
+inline qreal &QMatrix4x4::operator()(int row, int column)
 {
-   Q_ASSERT(aRow >= 0 && aRow < 4 && aColumn >= 0 && aColumn < 4);
+   Q_ASSERT(row >= 0 && row < 4 && column >= 0 && column < 4);
    flagBits = General;
-   return m[aColumn][aRow];
+   return m[column][row];
 }
 
 #ifndef QT_NO_VECTOR4D

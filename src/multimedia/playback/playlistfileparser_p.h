@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef PLAYLISTFILEPARSER_P_H
 #define PLAYLISTFILEPARSER_P_H
 
-#include <qnetworkrequest.h>
+#include <qnetwork_request.h>
 
 class QPlaylistFileParserPrivate;
 
@@ -33,8 +33,6 @@ class Q_MULTIMEDIA_EXPORT QPlaylistFileParser : public QObject
    MULTI_CS_OBJECT(QPlaylistFileParser)
 
  public:
-   QPlaylistFileParser(QObject *parent = nullptr);
-
    enum FileType {
       UNKNOWN,
       M3U,
@@ -49,7 +47,12 @@ class Q_MULTIMEDIA_EXPORT QPlaylistFileParser : public QObject
       NetworkError
    };
 
-   static FileType findPlaylistType(const QString &uri, const QString &mime, const void *data, quint32 size);
+   QPlaylistFileParser(QObject *parent = nullptr);
+
+   QPlaylistFileParser(const QPlaylistFileParser &) = delete;
+   QPlaylistFileParser &operator=(const QPlaylistFileParser &) = delete;
+
+   static FileType findPlaylistType(const QString &uri, const QString &mime, const QByteArray &data);
 
    void start(const QNetworkRequest &request, bool utf8 = false);
    void stop();
@@ -62,7 +65,6 @@ class Q_MULTIMEDIA_EXPORT QPlaylistFileParser : public QObject
    MULTI_CS_SIGNAL_2(error, err, errorMsg)
 
  private:
-   Q_DISABLE_COPY(QPlaylistFileParser)
    Q_DECLARE_PRIVATE(QPlaylistFileParser)
 
    QPlaylistFileParserPrivate *d_ptr;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,7 +33,7 @@
 class QPersistentModelIndexData
 {
  public:
-   QPersistentModelIndexData() : model(0) {}
+   QPersistentModelIndexData() : model(nullptr) {}
    QPersistentModelIndexData(const QModelIndex &idx) : index(idx), model(idx.model()) {}
    QModelIndex index;
    QAtomicInt ref;
@@ -49,7 +49,8 @@ class Q_CORE_EXPORT QAbstractItemModelPrivate
  public:
    QAbstractItemModelPrivate()
       : roleNames(defaultRoleNames())
-   {}
+   {
+   }
 
    virtual ~QAbstractItemModelPrivate();
 
@@ -77,7 +78,7 @@ class Q_CORE_EXPORT QAbstractItemModelPrivate
    bool allowMove(const QModelIndex &srcParent, int srcFirst, int srcLast,
                   const QModelIndex &destinationParent, int destinationChild, Qt::Orientation orientation);
 
-   inline QModelIndex createIndex(int row, int column, void *data = 0) const {
+   inline QModelIndex createIndex(int row, int column, void *data = nullptr) const {
       return q_func()->createIndex(row, column, data);
    }
 
@@ -89,10 +90,10 @@ class Q_CORE_EXPORT QAbstractItemModelPrivate
       return (index.row() >= 0) && (index.column() >= 0) && (index.model() == q_func());
    }
 
-   inline void invalidatePersistentIndexes() {
-      for (QPersistentModelIndexData * data : persistent.m_indexes) {
+   void invalidatePersistentIndexes() {
+      for (QPersistentModelIndexData *data : persistent.m_indexes) {
          data->index = QModelIndex();
-         data->model = 0;
+         data->model = nullptr;
       }
 
       persistent.m_indexes.clear();
@@ -105,7 +106,7 @@ class Q_CORE_EXPORT QAbstractItemModelPrivate
          QPersistentModelIndexData *data = *it;
          persistent.m_indexes.erase(it);
          data->index = QModelIndex();
-         data->model = 0;
+         data->model = nullptr;
       }
    }
 

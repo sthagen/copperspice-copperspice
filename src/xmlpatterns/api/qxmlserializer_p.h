@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,16 +24,15 @@
 #ifndef QXMLSERIALIZER_P_H
 #define QXMLSERIALIZER_P_H
 
-#include <QtCore/QIODevice>
-#include <QtCore/QStack>
-#include <QtCore/QTextCodec>
-#include <QtXmlPatterns/QXmlQuery>
-#include <QtXmlPatterns/QXmlNamePool>
-#include <QtXmlPatterns/QXmlSerializer>
-#include "qnamepool_p.h"
-#include "qabstractxmlreceiver_p.h"
+#include <QIODevice>
+#include <QStack>
+#include <QTextCodec>
+#include <QXmlQuery>
+#include <QXmlNamePool>
+#include <QXmlSerializer>
 
-QT_BEGIN_NAMESPACE
+#include <qnamepool_p.h>
+#include <qabstractxmlreceiver_p.h>
 
 class QXmlSerializerPrivate : public QAbstractXmlReceiverPrivate
 {
@@ -92,6 +91,6 @@ void QXmlSerializerPrivate::write(const char c)
 {
    device->putChar(c);
 }
-QT_END_NAMESPACE
+
 
 #endif

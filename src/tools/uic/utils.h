@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,11 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "ui4.h"
-#include <QtCore/QString>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+#include <ui4.h>
 
-QT_BEGIN_NAMESPACE
+#include <qset.h>
+#include <qlist.h>
+#include <qstring.h>
 
 inline bool toBool(const QString &str)
 {
@@ -102,25 +101,24 @@ inline QString fixString(const QString &str, const QString &indent)
 
 inline QHash<QString, DomProperty *> propertyMap(const QList<DomProperty *> &properties)
 {
-   QHash<QString, DomProperty *> map;
+   QHash<QString, DomProperty *> retval;
 
-   for (int i = 0; i < properties.size(); ++i) {
-      DomProperty *p = properties.at(i);
-      map.insert(p->attributeName(), p);
+   for (auto item : properties) {
+      retval.insert(item->attributeName(), item);
    }
 
-   return map;
+   return retval;
 }
 
-inline QStringList unique(const QStringList &lst)
+inline QStringList unique(const QStringList &list)
 {
-   QHash<QString, bool> h;
-   for (int i = 0; i < lst.size(); ++i) {
-      h.insert(lst.at(i), true);
+   QSet<QString> retval;
+
+   for (auto item : list) {
+      retval.insert(item);
    }
-   return h.keys();
+
+   return retval.toList();
 }
 
-QT_END_NAMESPACE
-
-#endif // UTILS_H
+#endif

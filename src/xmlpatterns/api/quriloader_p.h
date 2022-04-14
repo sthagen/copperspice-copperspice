@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,29 +24,27 @@
 #ifndef QURILOADER_P_H
 #define QURILOADER_P_H
 
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtXmlPatterns/QXmlName>
-#include "qnamepool_p.h"
-#include "qvariableloader_p.h"
+#include <qnetaccess_manager.h>
+#include <qxmlname.h>
 
-QT_BEGIN_NAMESPACE
+#include <qnamepool_p.h>
+#include <qvariableloader_p.h>
 
 namespace QPatternist {
+
 class URILoader : public QNetworkAccessManager
 {
  public:
    URILoader(QObject *const parent, const NamePool::Ptr &np, const VariableLoader::Ptr &variableLoader);
 
-   QNetworkReply *createRequest(Operation op, const QNetworkRequest &req, QIODevice *outgoingData = 0) override;
+   QNetworkReply *createRequest(Operation op, const QNetworkRequest &req, QIODevice *outgoingData = nullptr) override;
 
  private:
    const QString             m_variableNS;
    const NamePool::Ptr       m_namePool;
    const VariableLoader::Ptr m_variableLoader;
-
 };
-}
 
-QT_END_NAMESPACE
+}
 
 #endif

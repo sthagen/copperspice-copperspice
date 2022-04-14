@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -41,8 +41,11 @@ class Q_CORE_EXPORT QDirIterator
    QDirIterator(const QDir &dir, IteratorFlags flags = NoIteratorFlags);
    QDirIterator(const QString &path, IteratorFlags flags = NoIteratorFlags);
 
-   QDirIterator(const QString &path, QDir::Filters filter, IteratorFlags flags = NoIteratorFlags);
+   QDirIterator(const QString &path, QDir::Filters filters, IteratorFlags flags = NoIteratorFlags);
    QDirIterator(const QString &path, const QStringList &nameFilters, QDir::Filters filters = QDir::NoFilter, IteratorFlags flags = NoIteratorFlags);
+
+   QDirIterator(const QDirIterator &) = delete;
+   QDirIterator &operator=(const QDirIterator &) = delete;
 
    ~QDirIterator();
 
@@ -55,8 +58,6 @@ class Q_CORE_EXPORT QDirIterator
    QString path() const;
 
  private:
-   Q_DISABLE_COPY(QDirIterator)
-
    QScopedPointer<QDirIteratorPrivate> d;
    friend class QDir;
 };

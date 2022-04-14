@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -42,7 +42,7 @@ class Q_MULTIMEDIA_EXPORT QMediaPlaylistSourceControl : public QMediaControl
    MULTI_CS_SIGNAL_2(playlistChanged, playlist)
 
  protected:
-   QMediaPlaylistSourceControl(QObject *parent = 0);
+   QMediaPlaylistSourceControl(QObject *parent = nullptr);
 };
 
 #define QMediaPlaylistSourceControl_iid "com.copperspice.CS.mediaPlayListSourceControl/1.0"

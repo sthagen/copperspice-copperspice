@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,8 @@
 #ifndef QGLBUFFER_H
 #define QGLBUFFER_H
 
-#include <QtCore/qscopedpointer.h>
-#include <QtOpenGL/qgl.h>
+#include <qscopedpointer.h>
+#include <qgl.h>
 
 class QGLBufferPrivate;
 
@@ -88,7 +88,7 @@ class Q_OPENGL_EXPORT QGLBuffer
 
    void allocate(const void *data, int count);
    inline void allocate(int count) {
-      allocate(0, count);
+      allocate(nullptr, count);
    }
 
    void *map(QGLBuffer::Access access);

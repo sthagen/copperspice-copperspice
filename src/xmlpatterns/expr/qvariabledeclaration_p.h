@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -113,8 +113,10 @@ class VariableDeclaration : public QSharedData
    bool canSourceRewrite;
 
  private:
-   Expression::Ptr                 m_expression;
-   Q_DISABLE_COPY(VariableDeclaration)
+   Expression::Ptr m_expression;
+
+   VariableDeclaration(const VariableDeclaration &) = delete;
+   VariableDeclaration &operator=(const VariableDeclaration &) = delete;
 };
 
 /**

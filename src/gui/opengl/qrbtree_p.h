@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -25,15 +25,26 @@
 #ifndef QRBTREE_P_H
 #define QRBTREE_P_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 template <class T>
 struct QRBTree
 {
     struct Node
     {
-        inline Node() : parent(0), left(0), right(0), red(true) { }
-        inline ~Node() {if (left) delete left; if (right) delete right;}
+        Node()
+           : parent(nullptr), left(nullptr), right(nullptr), red(true)
+        {
+        }
+
+        inline ~Node() {
+          if (left)
+            delete left;
+
+          if (right)
+            delete right;
+        }
+
         T data;
         Node *parent;
         Node *left;
@@ -41,7 +52,11 @@ struct QRBTree
         bool red;
     };
 
-    inline QRBTree() : root(0), freeList(0) { }
+    QRBTree()
+       : root(nullptr), freeList(nullptr)
+    {
+    }
+
     inline ~QRBTree();
 
     inline void clear();
@@ -62,6 +77,8 @@ struct QRBTree
     int order(Node *left, Node *right);
     inline bool validate() const;
 
+    Node *root;
+
 private:
     void rotateLeft(Node *node);
     void rotateRight(Node *node);
@@ -79,9 +96,6 @@ private:
     // 'node' must be black. rebalance will reduce the depth of black nodes by one in the sibling tree.
     void rebalance(Node *node);
 
-public:
-    Node *root;
-private:
     Node *freeList;
 };
 
@@ -92,7 +106,8 @@ inline QRBTree<T>::~QRBTree()
     while (freeList) {
         // Avoid recursively calling the destructor, as this list may become large.
         Node *next = freeList->right;
-        freeList->right = 0;
+        freeList->right = nullptr;
+
         delete freeList;
         freeList = next;
     }
@@ -101,9 +116,11 @@ inline QRBTree<T>::~QRBTree()
 template <class T>
 inline void QRBTree<T>::clear()
 {
-    if (root)
+    if (root) {
         delete root;
-    root = 0;
+    }
+
+    root = nullptr;
 }
 
 template <class T>
@@ -331,7 +348,10 @@ void QRBTree<T>::detach(Node *node) // call this before removing a node.
     ref = child;
     if (child)
         child->parent = node->parent;
-    node->left = node->right = node->parent = 0;
+
+    node->parent = nullptr;
+    node->left   = nullptr;
+    node->right  = nullptr;
 }
 
 // 'node' must be black. rebalance will reduce the depth of black nodes by one in the sibling tree.
@@ -485,7 +505,7 @@ inline void QRBTree<T>::deleteNode(Node *&node)
     detach(node);
     node->right = freeList;
     freeList = node;
-    node = 0;
+    node = nullptr;
 }
 
 template <class T>
@@ -494,7 +514,11 @@ inline typename QRBTree<T>::Node *QRBTree<T>::newNode()
     if (freeList) {
         Node *node = freeList;
         freeList = freeList->right;
-        node->parent = node->left = node->right = 0;
+
+        node->parent = nullptr;
+        node->left   = nullptr;
+        node->right  = nullptr;
+
         node->red = true;
         return node;
     }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,25 +39,7 @@ class QImageIOHandlerPrivate;
 
 class Q_GUI_EXPORT QImageIOHandler
 {
-   Q_DECLARE_PRIVATE(QImageIOHandler)
-
  public:
-   QImageIOHandler();
-   virtual ~QImageIOHandler();
-
-   void setDevice(QIODevice *device);
-   QIODevice *device() const;
-
-   void setFormat(const QByteArray &format);
-   void setFormat(const QByteArray &format) const;
-   QByteArray format() const;
-
-   virtual QByteArray name() const;
-
-   virtual bool canRead() const = 0;
-   virtual bool read(QImage *image) = 0;
-   virtual bool write(const QImage &image);
-
    enum ImageOption {
       Size,
       ClipRect,
@@ -82,19 +64,38 @@ class Q_GUI_EXPORT QImageIOHandler
    };
 
    enum Transformation {
-      TransformationNone = 0,
-      TransformationMirror = 1,
-      TransformationFlip = 2,
+      TransformationNone      = 0,
+      TransformationMirror    = 1,
+      TransformationFlip      = 2,
       TransformationRotate180 = TransformationMirror | TransformationFlip,
-      TransformationRotate90 = 4,
+      TransformationRotate90  = 4,
       TransformationMirrorAndRotate90 = TransformationMirror | TransformationRotate90,
-      TransformationFlipAndRotate90 = TransformationFlip | TransformationRotate90,
-      TransformationRotate270 = TransformationRotate180 | TransformationRotate90
+      TransformationFlipAndRotate90   = TransformationFlip | TransformationRotate90,
+      TransformationRotate270         = TransformationRotate180 | TransformationRotate90
    };
 
    using Transformations = QFlags<Transformation>;
 
-   virtual QVariant option(ImageOption option) const;
+   QImageIOHandler();
+
+   QImageIOHandler(const QImageIOHandler &) = delete;
+   QImageIOHandler &operator=(const QImageIOHandler &) = delete;
+
+   virtual ~QImageIOHandler();
+
+   void setDevice(QIODevice *device);
+   QIODevice *device() const;
+
+   void setFormat(const QString &format);
+   QString format() const;
+
+   virtual QString name() const;
+
+   virtual bool canRead() = 0;
+   virtual bool read(QImage *image) = 0;
+   virtual bool write(const QImage &image);
+
+   virtual QVariant option(ImageOption option);
    virtual void setOption(ImageOption option, const QVariant &value);
    virtual bool supportsOption(ImageOption option) const;
 
@@ -102,7 +103,7 @@ class Q_GUI_EXPORT QImageIOHandler
    virtual bool jumpToNextImage();
    virtual bool jumpToImage(int imageNumber);
    virtual int loopCount() const;
-   virtual int imageCount() const;
+   virtual int imageCount();
    virtual int nextImageDelay() const;
    virtual int currentImageNumber() const;
    virtual QRect currentImageRect() const;
@@ -112,7 +113,7 @@ class Q_GUI_EXPORT QImageIOHandler
    QScopedPointer<QImageIOHandlerPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QImageIOHandler)
+   Q_DECLARE_PRIVATE(QImageIOHandler)
 };
 
 class Q_GUI_EXPORT QImageIOPlugin : public QObject
@@ -124,18 +125,16 @@ class Q_GUI_EXPORT QImageIOPlugin : public QObject
    virtual ~QImageIOPlugin();
 
    enum Capability {
-      CanRead = 0x1,
-      CanWrite = 0x2,
+      CanRead            = 0x1,
+      CanWrite           = 0x2,
       CanReadIncremental = 0x4
    };
    using Capabilities = QFlags<Capability>;
 
-   virtual Capabilities capabilities(QIODevice *device, const QByteArray &format) const = 0;
-   virtual QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const = 0;
+   virtual Capabilities capabilities(QIODevice *device, const QString &format) const = 0;
+   virtual QImageIOHandler *create(QIODevice *device, const QString &format = QString()) const = 0;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QImageIOPlugin::Capabilities)
-
-
 
 #endif

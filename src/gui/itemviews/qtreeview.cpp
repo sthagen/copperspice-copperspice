@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,7 +35,7 @@
 #include <qevent.h>
 #include <qpen.h>
 #include <qdebug.h>
-#include <QMetaMethod>
+#include <qmetamethod.h>
 
 #ifndef QT_NO_ACCESSIBILITY
 #include <qaccessible.h>
@@ -155,7 +155,7 @@ void QTreeView::setHeader(QHeaderView *header)
    d->header->setParent(this);
    d->header->d_func()->setAllowUserMoveOfSection0(false);
 
-   if (!d->header->model()) {
+   if (! d->header->model()) {
       d->header->setModel(d->model);
 
       if (d->selectionModel) {
@@ -163,11 +163,11 @@ void QTreeView::setHeader(QHeaderView *header)
       }
    }
 
-   connect(d->header, SIGNAL(sectionResized(int, int, int)),   this, SLOT(columnResized(int, int, int)));
-   connect(d->header, SIGNAL(sectionMoved(int, int, int)),     this, SLOT(columnMoved()));
-   connect(d->header, SIGNAL(sectionCountChanged(int, int)),   this, SLOT(columnCountChanged(int, int)));
-   connect(d->header, SIGNAL(sectionHandleDoubleClicked(int)), this, SLOT(resizeColumnToContents(int)));
-   connect(d->header, SIGNAL(geometriesChanged()),             this, SLOT(updateGeometries()));
+   connect(d->header, &QHeaderView::sectionResized,             this, &QTreeView::columnResized);
+   connect(d->header, &QHeaderView::sectionMoved,               this, &QTreeView::columnMoved);
+   connect(d->header, &QHeaderView::sectionCountChanged,        this, &QTreeView::columnCountChanged);
+   connect(d->header, &QHeaderView::sectionHandleDoubleClicked, this, &QTreeView::resizeColumnToContents);
+   connect(d->header, &QHeaderView::geometriesChanged,          this, &QTreeView::updateGeometries);
 
    setSortingEnabled(d->sortingEnabled);
    d->updateGeometry();
@@ -549,19 +549,19 @@ void QTreeView::setExpanded(const QModelIndex &index, bool expanded)
 void QTreeView::setSortingEnabled(bool enable)
 {
    Q_D(QTreeView);
+
    header()->setSortIndicatorShown(enable);
    header()->setSectionsClickable(enable);
+
    if (enable) {
-      //sortByColumn has to be called before we connect or set the sortingEnabled flag
+      // sortByColumn has to be called before we connect or set the sortingEnabled flag
       // because otherwise it will not call sort on the model.
       sortByColumn(header()->sortIndicatorSection(), header()->sortIndicatorOrder());
 
-      connect(header(), SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)),
-         this, SLOT(_q_sortIndicatorChanged(int, Qt::SortOrder)), Qt::UniqueConnection);
+      connect(header(),    &QHeaderView::sortIndicatorChanged, this, &QTreeView::_q_sortIndicatorChanged, Qt::UniqueConnection);
 
    } else {
-      disconnect(header(), SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)),
-         this, SLOT(_q_sortIndicatorChanged(int, Qt::SortOrder)));
+      disconnect(header(), &QHeaderView::sortIndicatorChanged, this, &QTreeView::_q_sortIndicatorChanged);
    }
 
    d->sortingEnabled = enable;
@@ -1198,7 +1198,7 @@ void QTreeView::drawTree(QPainter *painter, const QRegion &region) const
 /// ### move to QObject
 static inline bool ancestorOf(QObject *widget, QObject *other)
 {
-   for (QObject *parent = other; parent != 0; parent = parent->parent()) {
+   for (QObject *parent = other; parent != nullptr; parent = parent->parent()) {
       if (parent == widget) {
          return true;
       }
@@ -1433,9 +1433,8 @@ void QTreeView::drawRow(QPainter *painter, const QStyleOptionViewItem &option, c
          }
       }
 
-      /* Prior to Qt 4.3, the background of the branch (in selected state and
-         alternate row color was provided by the view. For backward compatibility,
-         this is now delegated to the style using PE_PanelViewItemRow which
+      /* background of the branch (in selected state and alternate row color was provided by the view.
+         For backward compatibility this is now delegated to the style using PE_PanelViewItemRow which
          does the appropriate fill */
 
       if (d->isTreePosition(headerSection)) {
@@ -1636,7 +1635,7 @@ void QTreeView::mousePressEvent(QMouseEvent *event)
    Q_D(QTreeView);
    bool handled = false;
 
-   if (style()->styleHint(QStyle::SH_ListViewExpand_SelectMouseType, 0, this) == QEvent::MouseButtonPress) {
+   if (style()->styleHint(QStyle::SH_ListViewExpand_SelectMouseType, nullptr, this) == QEvent::MouseButtonPress) {
       handled = d->expandOrCollapseItemAtPos(event->pos());
    }
 
@@ -1660,7 +1659,7 @@ void QTreeView::mouseReleaseEvent(QMouseEvent *event)
          setState(QAbstractItemView::NoState);
       }
 
-      if (style()->styleHint(QStyle::SH_ListViewExpand_SelectMouseType, 0, this) == QEvent::MouseButtonRelease) {
+      if (style()->styleHint(QStyle::SH_ListViewExpand_SelectMouseType, nullptr, this) == QEvent::MouseButtonRelease) {
          d->expandOrCollapseItemAtPos(event->pos());
       }
    }
@@ -1705,7 +1704,7 @@ void QTreeView::mouseDoubleClickEvent(QMouseEvent *event)
          return;   // the double click triggered editing
       }
 
-      if (! style()->styleHint(QStyle::SH_ItemView_ActivateItemOnSingleClick, 0, this)) {
+      if (! style()->styleHint(QStyle::SH_ItemView_ActivateItemOnSingleClick, nullptr, this)) {
          emit activated(persistent);
       }
 
@@ -2020,7 +2019,7 @@ QModelIndex QTreeView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifie
             d->collapse(vi, true);
             d->moveCursorUpdatedView = true;
          } else {
-            bool descend = style()->styleHint(QStyle::SH_ItemView_ArrowKeysNavigateIntoChildren, 0, this);
+            bool descend = style()->styleHint(QStyle::SH_ItemView_ArrowKeysNavigateIntoChildren, nullptr, this);
             if (descend) {
                QModelIndex par = current.parent();
                if (par.isValid() && par != rootIndex()) {
@@ -2062,7 +2061,7 @@ QModelIndex QTreeView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifie
             d->moveCursorUpdatedView = true;
 
          } else {
-            bool descend = style()->styleHint(QStyle::SH_ItemView_ArrowKeysNavigateIntoChildren, 0, this);
+            bool descend = style()->styleHint(QStyle::SH_ItemView_ArrowKeysNavigateIntoChildren, nullptr, this);
             if (descend) {
                QModelIndex idx = d->modelIndex(d->below(vi));
                if (idx.parent() == current) {
@@ -2543,7 +2542,7 @@ void QTreeView::expandToDepth(int depth)
    bool someSignalEnabled = isSignalConnected(QMetaMethod::fromSignal(&QTreeView::collapsed));
    someSignalEnabled |= isSignalConnected(QMetaMethod::fromSignal(&QTreeView::expanded));
 
-   if (!signalsBlocked() && someSignalEnabled) {
+   if (! signalsBlocked() && someSignalEnabled) {
       // emit signals
       QSet<QPersistentModelIndex> collapsedIndexes = old_expandedIndexes - d->expandedIndexes;
       QSet<QPersistentModelIndex>::const_iterator i = collapsedIndexes.constBegin();
@@ -2800,6 +2799,7 @@ bool QTreeView::isIndexHidden(const QModelIndex &index) const
 void QTreeViewPrivate::initialize()
 {
    Q_Q(QTreeView);
+
    updateIndentationFromStyle();
    updateStyledFrameWidths();
 
@@ -2815,8 +2815,8 @@ void QTreeViewPrivate::initialize()
    q->setHeader(header);
 
 #ifndef QT_NO_ANIMATION
-   animationsEnabled = q->style()->styleHint(QStyle::SH_Widget_Animate, 0, q);
-   QObject::connect(&animatedOperation, SIGNAL(finished()), q, SLOT(_q_endAnimatedOperation()));
+   animationsEnabled = q->style()->styleHint(QStyle::SH_Widget_Animate, nullptr, q);
+   QObject::connect(&animatedOperation, &QVariantAnimation::finished, q, &QTreeView::_q_endAnimatedOperation);
 #endif
 
 }
@@ -3151,7 +3151,7 @@ void QTreeViewPrivate::layout(int i, bool recursiveExpanding, bool afterIsUninit
    int last     = 0;
    int children = 0;
 
-   QTreeViewItem *item = 0;
+   QTreeViewItem *item = nullptr;
 
    for (int j = first; j < first + count; ++j) {
       current = model->index(j - first, 0, parent);
@@ -3837,7 +3837,7 @@ int QTreeViewPrivate::accessibleTree2Index(const QModelIndex &index) const
 void QTreeViewPrivate::updateIndentationFromStyle()
 {
    Q_Q(const QTreeView);
-   indent = q->style()->pixelMetric(QStyle::PM_TreeViewIndentation, 0, q);
+   indent = q->style()->pixelMetric(QStyle::PM_TreeViewIndentation, nullptr, q);
 }
 
 void QTreeView::currentChanged(const QModelIndex &current, const QModelIndex &previous)

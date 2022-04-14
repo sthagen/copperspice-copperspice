@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -581,7 +581,8 @@ QList<QGlyphRun> QTextLayout::glyphRuns(int from, int length) const
             const QGlyphRun &glyphRun = glyphRuns.at(j);
             QRawFont rawFont = glyphRun.rawFont();
 
-            QFontEngine *fontEngine = rawFont.d->fontEngine;
+            QFontEngine *fontEngine = rawFont.m_fontPrivate->fontEngine;
+
             QGlyphRun::GlyphRunFlags flags = glyphRun.flags();
             QPair<QFontEngine *, int> key(fontEngine, int(flags));
 
@@ -796,13 +797,7 @@ void QTextLayout::draw(QPainter *p, const QPointF &pos, const QVector<FormatRang
    }
 }
 
-void QTextLayout::drawCursor(QPainter *p, const QPointF &pos, int cursorPosition) const
-{
-   drawCursor(p, pos, cursorPosition, 1);
-}
-
-
-void QTextLayout::drawCursor(QPainter *p, const QPointF &pos, int cursorPosition, int width) const
+void QTextLayout::drawCursor(QPainter *painter, const QPointF &pos, int cursorPosition, int width) const
 {
    if (d->lines.isEmpty()) {
       return;
@@ -858,23 +853,23 @@ void QTextLayout::drawCursor(QPainter *p, const QPointF &pos, int cursorPosition
    }
 
    qreal y = position.y() + (sl.y + sl.base() - base).toReal();
-   bool toggleAntialiasing = !(p->renderHints() & QPainter::Antialiasing)
-      && (p->transform().type() > QTransform::TxTranslate);
+   bool toggleAntialiasing = ! (painter->renderHints() & QPainter::Antialiasing)
+         && (painter->transform().type() > QTransform::TxTranslate);
 
    if (toggleAntialiasing) {
-      p->setRenderHint(QPainter::Antialiasing);
+      painter->setRenderHint(QPainter::Antialiasing);
    }
 
-   p->fillRect(QRectF(x, y, qreal(width), (base + descent).toReal()), p->pen().brush());
+   painter->fillRect(QRectF(x, y, qreal(width), (base + descent).toReal()), painter->pen().brush());
    if (toggleAntialiasing) {
-      p->setRenderHint(QPainter::Antialiasing, false);
+      painter->setRenderHint(QPainter::Antialiasing, false);
    }
 
    if (d->layoutData->hasBidi) {
       const int arrow_extent = 4;
       int sign = rightToLeft ? -1 : 1;
-      p->drawLine(QLineF(x, y, x + (sign * arrow_extent / 2), y + arrow_extent / 2));
-      p->drawLine(QLineF(x, y + arrow_extent, x + (sign * arrow_extent / 2), y + arrow_extent / 2));
+      painter->drawLine(QLineF(x, y, x + (sign * arrow_extent / 2), y + arrow_extent / 2));
+      painter->drawLine(QLineF(x, y + arrow_extent, x + (sign * arrow_extent / 2), y + arrow_extent / 2));
    }
 
    return;
@@ -982,21 +977,18 @@ void QTextLine::setLineWidth(qreal width)
    layout_helper(INT_MAX);
 }
 
-void QTextLine::setNumColumns(int numColumns)
+void QTextLine::setNumColumns(int numColumns, std::optional<qreal> alignmentWidth)
 {
    QScriptLine &line = m_textEngine->lines[index];
-   line.width        = QFIXED_MAX;
+
+   if (alignmentWidth.has_value()) {
+      line.width        = QFixed::fromReal(alignmentWidth.value());
+   } else {
+      line.width        = QFIXED_MAX;
+   }
+
    line.length       = 0;
    line.textWidth    = 0;
-   layout_helper(numColumns);
-}
-
-void QTextLine::setNumColumns(int numColumns, qreal alignmentWidth)
-{
-   QScriptLine &line = m_textEngine->lines[index];
-   line.width     = QFixed::fromReal(alignmentWidth);
-   line.length    = 0;
-   line.textWidth = 0;
    layout_helper(numColumns);
 }
 
@@ -1004,7 +996,7 @@ namespace {
 
 struct LineBreakHelper {
    LineBreakHelper()
-      : glyphCount(0), maxGlyphs(0), m_currentPosition(0), fontEngine(0), logClusters(0),
+      : glyphCount(0), maxGlyphs(0), m_currentPosition(0), fontEngine(nullptr), logClusters(nullptr),
         manualWrap(false), whiteSpaceOrObject(true) {
    }
 
@@ -1054,7 +1046,7 @@ struct LineBreakHelper {
 
    inline void calculateRightBearing(glyph_t glyph) {
       qreal rb;
-      fontEngine->getGlyphBearings(glyph, 0, &rb);
+      fontEngine->getGlyphBearings(glyph, nullptr, &rb);
       rightBearing = qMin(QFixed::fromReal(rb), QFixed(0));
    }
 
@@ -1118,27 +1110,33 @@ inline bool LineBreakHelper::checkFullOtherwiseExtend(QScriptLine &line)
 static void addNextCluster(int &pos, int end, QScriptLine &line, int &glyphCount,
    const QScriptItem &current, const QGlyphLayout &glyphs, const ushort *logClusters)
 {
-   int x_index = logClusters[pos];
+   int currentCluster = logClusters[pos];
 
    do {
       // at the first next cluster
       ++pos;
       ++line.length;
-
-   } while (pos < end && logClusters[pos] == x_index);
+   } while (pos < end && currentCluster == logClusters[pos]);
 
    do {
       // calculate the textWidth for the rest of the current cluster
 
-      if (! glyphs.attributes[x_index].dontPrint) {
-         line.textWidth += glyphs.advances[x_index];
+      if (! glyphs.attributes[currentCluster].dontPrint) {
+         line.textWidth += glyphs.advances[currentCluster];
       }
 
-      ++x_index;
+      ++currentCluster;
 
-   } while (x_index < current.num_glyphs && ! glyphs.attributes[x_index].clusterStart);
+   } while (currentCluster < current.num_glyphs && ! glyphs.attributes[currentCluster].clusterStart);
 
-   Q_ASSERT((pos == end && x_index == current.num_glyphs) || logClusters[pos] == x_index);
+   if (pos == end) {
+      // extra unprocessed glyphs
+      Q_ASSERT(currentCluster == current.num_glyphs);
+
+   } else {
+      // out of sync (example: on cluster 2 and glyph 3 )
+      Q_ASSERT(currentCluster == logClusters[pos]);
+   }
 
    ++glyphCount;
 }
@@ -1542,14 +1540,13 @@ static void setPenAndDrawBackground(QPainter *p, const QPen &defaultPen, const Q
    if (c.style() != Qt::NoBrush) {
       p->setPen(QPen(c, 0));
    }
-
 }
 
 static QGlyphRun glyphRunWithInfo(QFontEngine *fontEngine, const QGlyphLayout &glyphLayout, const QPointF &pos,
    const QGlyphRun::GlyphRunFlags &flags, const QFixed &selectionX, const QFixed &selectionWidth,
    int glyphsStart, int glyphsEnd, unsigned short *logClusters, int textPosition, int textLength)
 {
-   Q_ASSERT(logClusters != 0);
+   Q_ASSERT(logClusters != nullptr);
 
    QGlyphRun glyphRun;
 
@@ -1568,11 +1565,11 @@ static QGlyphRun glyphRunWithInfo(QFontEngine *fontEngine, const QGlyphLayout &g
    }
 
    d->textRangeStart = rangeStart;
-   d->textRangeEnd = rangeEnd;
+   d->textRangeEnd   = rangeEnd;
 
    // Make a font for this particular engine
    QRawFont font;
-   QRawFontPrivate *fontD = QRawFontPrivate::get(font);
+   std::shared_ptr<QRawFontPrivate> fontD = QRawFontPrivate::get(font);
    fontD->setFontEngine(fontEngine);
 
    QVarLengthArray<glyph_t> glyphsArray;
@@ -1595,8 +1592,7 @@ static QGlyphRun glyphRunWithInfo(QFontEngine *fontEngine, const QGlyphLayout &g
       renderFlags |= QTextItem::RightToLeft;
    }
 
-   fontEngine->getGlyphPositions(glyphLayout, QTransform(), renderFlags, glyphsArray,
-      positionsArray);
+   fontEngine->getGlyphPositions(glyphLayout, QTransform(), renderFlags, glyphsArray, positionsArray);
    Q_ASSERT(glyphsArray.size() == positionsArray.size());
 
    qreal fontHeight = font.ascent() + font.descent();
@@ -2185,10 +2181,18 @@ qreal QTextLine::cursorToX(int *cursorPos, Edge edge) const
       int end     = qMin(lineEnd, si->position + max) - si->position;
 
       if (reverse) {
-         int glyph_end = end == max ? si->num_glyphs : logClusters[end];
+         int glyph_end;
+
+         if (end == max) {
+             glyph_end  = si->num_glyphs;
+         } else {
+            glyph_end = logClusters[end];
+         }
+
          int glyph_start = glyph_pos;
+
          if (visual && ! rtl && ! (lastLine && itm == (visualOrder[nItems - 1] + firstItem))) {
-            glyph_start++;
+            ++glyph_start;
          }
 
          for (int i = glyph_end - 1; i >= glyph_start; i--) {
@@ -2196,17 +2200,19 @@ qreal QTextLine::cursorToX(int *cursorPos, Edge edge) const
          }
 
       } else {
-         int start = qMax(line.from - si->position, 0);
+         int start       = qMax(line.from - si->position, 0);
          int glyph_start = logClusters[start];
-         int glyph_end = glyph_pos;
+         int glyph_end   = glyph_pos;
+
          if (! visual || ! rtl || (lastLine && itm == visualOrder[0] + firstItem)) {
-            glyph_end--;
+            --glyph_end;
          }
 
          for (int i = glyph_start; i <= glyph_end; i++) {
             x += glyphs.effectiveAdvance(i);
          }
       }
+
       x += m_textEngine->offsetInLigature(si, pos, end, glyph_pos);
    }
 

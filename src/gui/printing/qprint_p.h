@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,8 +32,6 @@
 #if (defined Q_OS_DARWIN && ! defined Q_OS_IOS) || (defined Q_OS_UNIX && ! defined QT_NO_CUPS)
 #include <cups/ppd.h>  // Use for type defs only, do not want to actually link in main module
 #endif
-
-QT_BEGIN_NAMESPACE
 
 #ifndef QT_NO_PRINTER
 
@@ -270,6 +268,5 @@ public:
 };
 
 #endif // QT_NO_PRINTER
-
 
 #endif // QPRINT_P_H

@@ -1,9 +1,9 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
 *
-* This file is part of CopperSpice.
+* This file is part of CsString.
 *
 * CsString is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
@@ -250,7 +250,7 @@ auto CsStringIterator<E,A>::codePointEnd() const -> v_iter
    return m_iter + E::walk(1, m_iter);
 }
 
-// reverse iterator defreference needs to return by value
+// reverse iterator dereference needs to return by value
 template <typename T>
 class CsStringReverseIterator : public std::reverse_iterator<T>
 {

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -44,7 +44,6 @@ class QDebug;
 class Q_GUI_EXPORT QScreen : public QObject
 {
    GUI_CS_OBJECT(QScreen)
-   Q_DECLARE_PRIVATE(QScreen)
 
    GUI_CS_PROPERTY_READ(name, name)
    GUI_CS_PROPERTY_CONSTANT(name)
@@ -112,6 +111,9 @@ class Q_GUI_EXPORT QScreen : public QObject
    GUI_CS_PROPERTY_NOTIFY(refreshRate, refreshRateChanged)
 
  public:
+   QScreen(const QScreen &) = delete;
+   QScreen &operator=(const QScreen &) = delete;
+
    ~QScreen();
    QPlatformScreen *handle() const;
 
@@ -158,7 +160,7 @@ class Q_GUI_EXPORT QScreen : public QObject
    bool isPortrait(Qt::ScreenOrientation orientation) const;
    bool isLandscape(Qt::ScreenOrientation orientation) const;
 
-   QPixmap grabWindow(WId window, int x = 0, int y = 0, int w = -1, int h = -1);
+   QPixmap grabWindow(WId window, int x = 0, int y = 0, int width = -1, int height = -1);
 
    qreal refreshRate() const;
 
@@ -193,9 +195,8 @@ class Q_GUI_EXPORT QScreen : public QObject
    QScopedPointer<QScreenPrivate> d_ptr;
 
  private:
+   Q_DECLARE_PRIVATE(QScreen)
    explicit QScreen(QPlatformScreen *screen);
-
-   Q_DISABLE_COPY(QScreen)
 
    friend class QApplicationPrivate;
    friend class QPlatformIntegration;

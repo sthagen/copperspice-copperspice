@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,14 +29,13 @@
 #include <qset.h>
 #include <qobject.h>
 
-class QGstreamerPlayerServicePlugin
-   : public QMediaServiceProviderPlugin, public QMediaServiceFeaturesInterface,
+class QGstreamerPlayerServicePlugin : public QMediaServiceProviderPlugin, public QMediaServiceFeaturesInterface,
      public QMediaServiceSupportedFormatsInterface
 {
    CS_OBJECT_MULTIPLE(QGstreamerPlayerServicePlugin, QMediaServiceProviderPlugin)
 
    CS_PLUGIN_IID(QMediaServiceProviderInterface_ID)
-   CS_PLUGIN_KEY(QMediaPlayerControl_Key)
+   CS_PLUGIN_KEY(Q_MEDIASERVICE_MEDIAPLAYER)
 
    CS_INTERFACES(QMediaServiceFeaturesInterface, QMediaServiceSupportedFormatsInterface)
 

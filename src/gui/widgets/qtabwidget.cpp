@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,8 +39,6 @@
 #include <qtabbar.h>
 #include <qtoolbutton.h>
 
-
-
 class QTabWidgetPrivate : public QWidgetPrivate
 {
    Q_DECLARE_PUBLIC(QTabWidget)
@@ -67,13 +65,14 @@ class QTabWidgetPrivate : public QWidgetPrivate
 };
 
 QTabWidgetPrivate::QTabWidgetPrivate()
-   : tabs(0), stack(0), dirty(true),
+   : tabs(nullptr), stack(nullptr), dirty(true),
      pos(QTabWidget::North), shape(QTabWidget::Rounded),
-     leftCornerWidget(0), rightCornerWidget(0)
-{}
+     leftCornerWidget(nullptr), rightCornerWidget(nullptr)
+{ }
 
 QTabWidgetPrivate::~QTabWidgetPrivate()
-{}
+{
+}
 
 void QTabWidgetPrivate::init()
 {
@@ -82,10 +81,12 @@ void QTabWidgetPrivate::init()
    stack = new QStackedWidget(q);
    stack->setObjectName(QLatin1String("qt_tabwidget_stackedwidget"));
    stack->setLineWidth(0);
-   // hack so that QMacStyle::layoutSpacing() can detect tab widget pages
+
+   // do this so QMacStyle::layoutSpacing() can detect tab widget pages
    stack->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred, QSizePolicy::TabWidget));
 
-   QObject::connect(stack, SIGNAL(widgetRemoved(int)), q, SLOT(_q_removeTab(int)));
+   QObject::connect(stack, &QStackedWidget::widgetRemoved, q, &QTabWidget::_q_removeTab);
+
    QTabBar *tabBar = new QTabBar(q);
    tabBar->setObjectName(QLatin1String("qt_tabwidget_tabbar"));
    tabBar->setDrawBase(false);
@@ -93,16 +94,17 @@ void QTabWidgetPrivate::init()
 
    q->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding,
          QSizePolicy::TabWidget));
+
 #ifdef QT_KEYPAD_NAVIGATION
    if (QApplication::keypadNavigationEnabled()) {
       q->setFocusPolicy(Qt::NoFocus);
    } else
 #endif
       q->setFocusPolicy(Qt::TabFocus);
+
    q->setFocusProxy(tabs);
    q->setTabPosition(static_cast<QTabWidget::TabPosition> (q->style()->styleHint(
-            QStyle::SH_TabWidget_DefaultTabPosition, 0, q )));
-
+            QStyle::SH_TabWidget_DefaultTabPosition, nullptr, q )));
 }
 
 bool QTabWidget::hasHeightForWidth() const
@@ -113,12 +115,13 @@ bool QTabWidget::hasHeightForWidth() const
    if (!has && d->stack) {
       has = d->stack->hasHeightForWidth();
    }
+
    return has;
 }
 
 void QTabWidget::initStyleOption(QStyleOptionTabWidgetFrame *option) const
 {
-   if (!option) {
+   if (! option) {
       return;
    }
 
@@ -128,10 +131,10 @@ void QTabWidget::initStyleOption(QStyleOptionTabWidgetFrame *option) const
    if (documentMode()) {
       option->lineWidth = 0;
    } else {
-      option->lineWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth, 0, this);
+      option->lineWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, this);
    }
 
-   int exth = style()->pixelMetric(QStyle::PM_TabBarBaseHeight, 0, this);
+   int exth = style()->pixelMetric(QStyle::PM_TabBarBaseHeight, nullptr, this);
    QSize t(0, d->stack->frameWidth());
    if (d->tabs->isVisibleTo(const_cast<QTabWidget *>(this))) {
       t = d->tabs->sizeHint();
@@ -189,19 +192,13 @@ void QTabWidget::initStyleOption(QStyleOptionTabWidgetFrame *option) const
    option->selectedTabRect = selectedTabRect;
 }
 
-/*!
-    Constructs a tabbed widget with parent \a parent.
-*/
 QTabWidget::QTabWidget(QWidget *parent)
-   : QWidget(*new QTabWidgetPrivate, parent, 0)
+   : QWidget(*new QTabWidgetPrivate, parent, Qt::EmptyFlag)
 {
    Q_D(QTabWidget);
    d->init();
 }
 
-/*!
-    Destroys the tabbed widget.
-*/
 QTabWidget::~QTabWidget()
 {
 }
@@ -211,40 +208,16 @@ int QTabWidget::addTab(QWidget *child, const QString &label)
    return insertTab(-1, child, label);
 }
 
-
-/*!
-    \fn int QTabWidget::addTab(QWidget *page, const QIcon &icon, const QString &label)
-    \overload
-
-    Adds a tab with the given \a page, \a icon, and \a label to the tab
-    widget, and returns the index of the tab in the tab bar.
-
-    This function is the same as addTab(), but with an additional \a
-    icon.
-*/
 int QTabWidget::addTab(QWidget *child, const QIcon &icon, const QString &label)
 {
    return insertTab(-1, child, icon, label);
 }
-
 
 int QTabWidget::insertTab(int index, QWidget *w, const QString &label)
 {
    return insertTab(index, w, QIcon(), label);
 }
 
-
-/*!
-    \fn int QTabWidget::insertTab(int index, QWidget *page, const QIcon& icon, const QString &label)
-    \overload
-
-    Inserts a tab with the given \a label, \a page, and \a icon into
-    the tab widget at the specified \a index, and returns the index of the
-    inserted tab in the tab bar.
-
-    This function is the same as insertTab(), but with an additional
-    \a icon.
-*/
 int QTabWidget::insertTab(int index, QWidget *w, const QIcon &icon, const QString &label)
 {
    Q_D(QTabWidget);
@@ -259,7 +232,6 @@ int QTabWidget::insertTab(int index, QWidget *w, const QIcon &icon, const QStrin
    return index;
 }
 
-
 void QTabWidget::setTabText(int index, const QString &label)
 {
    Q_D(QTabWidget);
@@ -267,13 +239,11 @@ void QTabWidget::setTabText(int index, const QString &label)
    setUpLayout();
 }
 
-
 QString QTabWidget::tabText(int index) const
 {
    Q_D(const QTabWidget);
    return d->tabs->tabText(index);
 }
-
 
 void QTabWidget::setTabIcon(int index, const QIcon &icon)
 {
@@ -282,13 +252,11 @@ void QTabWidget::setTabIcon(int index, const QIcon &icon)
    setUpLayout();
 }
 
-
 QIcon QTabWidget::tabIcon(int index) const
 {
    Q_D(const QTabWidget);
    return d->tabs->tabIcon(index);
 }
-
 
 bool QTabWidget::isTabEnabled(int index) const
 {
@@ -326,9 +294,6 @@ void QTabWidget::setCornerWidget(QWidget *widget, Qt::Corner corner)
    setUpLayout();
 }
 
-/*!
-    Returns the widget shown in the \a corner of the tab widget or 0.
-*/
 QWidget *QTabWidget::cornerWidget(Qt::Corner corner) const
 {
    Q_D(const QTabWidget);
@@ -338,12 +303,6 @@ QWidget *QTabWidget::cornerWidget(Qt::Corner corner) const
    return d->leftCornerWidget;
 }
 
-/*!
-   Removes the tab at position \a index from this stack of widgets.
-   The page widget itself is not deleted.
-
-   \sa addTab(), insertTab()
-*/
 void QTabWidget::removeTab(int index)
 {
    Q_D(QTabWidget);
@@ -352,42 +311,17 @@ void QTabWidget::removeTab(int index)
    }
 }
 
-/*!
-    Returns a pointer to the page currently being displayed by the tab
-    dialog. The tab dialog does its best to make sure that this value
-    is never 0 (but if you try hard enough, it can be).
-
-    \sa currentIndex(), setCurrentWidget()
-*/
-
 QWidget *QTabWidget::currentWidget() const
 {
    Q_D(const QTabWidget);
    return d->stack->currentWidget();
 }
 
-/*!
-    Makes \a widget the current widget. The \a widget used must be a page in
-    this tab widget.
-
-    \sa addTab(), setCurrentIndex(), currentWidget()
- */
 void QTabWidget::setCurrentWidget(QWidget *widget)
 {
    Q_D(const QTabWidget);
    d->tabs->setCurrentIndex(indexOf(widget));
 }
-
-
-/*!
-    \property QTabWidget::currentIndex
-    \brief the index position of the current tab page
-
-    The current index is -1 if there is no current widget.
-
-    By default, this property contains a value of -1 because there are initially
-    no tabs in the widget.
-*/
 
 int QTabWidget::currentIndex() const
 {
@@ -401,27 +335,17 @@ void QTabWidget::setCurrentIndex(int index)
    d->tabs->setCurrentIndex(index);
 }
 
-
-/*!
-    Returns the index position of the page occupied by the widget \a
-    w, or -1 if the widget cannot be found.
-*/
 int QTabWidget::indexOf(QWidget *w) const
 {
    Q_D(const QTabWidget);
    return d->stack->indexOf(w);
 }
 
-
-/*!
-    \reimp
-*/
 void QTabWidget::resizeEvent(QResizeEvent *e)
 {
    QWidget::resizeEvent(e);
    setUpLayout();
 }
-
 
 void QTabWidget::setTabBar(QTabBar *tb)
 {
@@ -432,53 +356,46 @@ void QTabWidget::setTabBar(QTabBar *tb)
       tb->setParent(this);
       tb->show();
    }
+
    delete d->tabs;
    d->tabs = tb;
    setFocusProxy(d->tabs);
 
-   connect(d->tabs, SIGNAL(currentChanged(int)),      this, SLOT(_q_showTab(int)));
-   connect(d->tabs, SIGNAL(tabMoved(int, int)),       this, SLOT(_q_tabMoved(int, int)));
-   connect(d->tabs, SIGNAL(tabBarClicked(int)),       this, SLOT(tabBarClicked(int)));
-   connect(d->tabs, SIGNAL(tabBarDoubleClicked(int)), this, SLOT(tabBarDoubleClicked(int)));
+   connect(d->tabs, &QTabBar::currentChanged,      this, &QTabWidget::_q_showTab);
+   connect(d->tabs, &QTabBar::tabMoved,            this, &QTabWidget::_q_tabMoved);
+   connect(d->tabs, &QTabBar::tabBarClicked,       this, &QTabWidget::tabBarClicked);
+   connect(d->tabs, &QTabBar::tabBarDoubleClicked, this, &QTabWidget::tabBarDoubleClicked);
 
 
    if (d->tabs->tabsClosable()) {
-      connect(d->tabs, SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
+      connect(d->tabs, &QTabBar::tabCloseRequested, this, &QTabWidget::tabCloseRequested);
    }
 
    tb->setExpanding(!documentMode());
    setUpLayout();
 }
 
-
-/*!
-    Returns the current QTabBar.
-
-    \sa setTabBar()
-*/
 QTabBar *QTabWidget::tabBar() const
 {
    Q_D(const QTabWidget);
    return d->tabs;
 }
 
-/*!
-    Ensures that the selected tab's page is visible and appropriately
-    sized.
-*/
-
 void QTabWidgetPrivate::_q_showTab(int index)
 {
    Q_Q(QTabWidget);
+
    if (index < stack->count() && index >= 0) {
       stack->setCurrentIndex(index);
    }
+
    emit q->currentChanged(index);
 }
 
 void QTabWidgetPrivate::_q_removeTab(int index)
 {
    Q_Q(QTabWidget);
+
    tabs->removeTab(index);
    q->setUpLayout();
    q->tabRemoved(index);
@@ -493,11 +410,6 @@ void QTabWidgetPrivate::_q_tabMoved(int from, int to)
    stack->blockSignals(false);
 }
 
-/*
-    Set up the layout.
-    Get subrect from the current style, and set the geometry for the
-    stack widget, tab bar and corner widgets.
-*/
 void QTabWidget::setUpLayout(bool onlyCheck)
 {
    Q_D(QTabWidget);
@@ -537,9 +449,6 @@ void QTabWidget::setUpLayout(bool onlyCheck)
    updateGeometry();
 }
 
-/*!
-    \internal
-*/
 static inline QSize basicSize(
    bool horizontal, const QSize &lc, const QSize &rc, const QSize &s, const QSize &t)
 {
@@ -550,9 +459,6 @@ static inline QSize basicSize(
          qMax(s.height(), t.height() + rc.height() + lc.height()));
 }
 
-/*!
-    \reimp
-*/
 QSize QTabWidget::sizeHint() const
 {
    Q_D(const QTabWidget);
@@ -589,12 +495,6 @@ QSize QTabWidget::sizeHint() const
       .expandedTo(QApplication::globalStrut());
 }
 
-
-/*!
-    \reimp
-
-    Returns a suitable minimum size for the tab widget.
-*/
 QSize QTabWidget::minimumSizeHint() const
 {
    Q_D(const QTabWidget);
@@ -623,7 +523,6 @@ QSize QTabWidget::minimumSizeHint() const
    return style()->sizeFromContents(QStyle::CT_TabWidget, &opt, sz, this)
       .expandedTo(QApplication::globalStrut());
 }
-
 
 int QTabWidget::heightForWidth(int width) const
 {
@@ -675,10 +574,6 @@ int QTabWidget::heightForWidth(int width) const
    return (contentSize + padding).expandedTo(QApplication::globalStrut()).height();
 }
 
-
-/*!
-    \reimp
- */
 void QTabWidget::showEvent(QShowEvent *)
 {
    setUpLayout();
@@ -708,41 +603,25 @@ void QTabWidgetPrivate::updateTabBarPosition()
    q->setUpLayout();
 }
 
-/*!
-    \property QTabWidget::tabPosition
-    \brief the position of the tabs in this tab widget
-
-    Possible values for this property are described by the TabPosition
-    enum.
-
-    By default, this property is set to \l North.
-
-    \sa TabPosition
-*/
 QTabWidget::TabPosition QTabWidget::tabPosition() const
 {
    Q_D(const QTabWidget);
+
    return d->pos;
 }
 
 void QTabWidget::setTabPosition(TabPosition pos)
 {
    Q_D(QTabWidget);
+
    if (d->pos == pos) {
       return;
    }
+
    d->pos = pos;
    d->updateTabBarPosition();
 }
 
-/*!
-    \property QTabWidget::tabsClosable
-    \brief whether close buttons are automatically added to each tab.
-
-    \since 4.5
-
-    \sa QTabBar::tabsClosable()
-*/
 bool QTabWidget::tabsClosable() const
 {
    return tabBar()->tabsClosable();
@@ -755,11 +634,13 @@ void QTabWidget::setTabsClosable(bool closeable)
    }
 
    tabBar()->setTabsClosable(closeable);
+
    if (closeable) {
-      connect(tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
+      connect(tabBar(), &QTabBar::tabCloseRequested,    this, &QTabWidget::tabCloseRequested);
    } else {
-      disconnect(tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
+      disconnect(tabBar(), &QTabBar::tabCloseRequested, this, &QTabWidget::tabCloseRequested);
    }
+
    setUpLayout();
 }
 
@@ -772,7 +653,6 @@ void QTabWidget::setMovable(bool movable)
 {
    tabBar()->setMovable(movable);
 }
-
 
 QTabWidget::TabShape QTabWidget::tabShape() const
 {
@@ -790,9 +670,6 @@ void QTabWidget::setTabShape(TabShape s)
    d->updateTabBarPosition();
 }
 
-/*!
-    \reimp
- */
 bool QTabWidget::event(QEvent *ev)
 {
    if (ev->type() == QEvent::LayoutRequest) {
@@ -801,9 +678,6 @@ bool QTabWidget::event(QEvent *ev)
    return QWidget::event(ev);
 }
 
-/*!
-    \reimp
- */
 void QTabWidget::changeEvent(QEvent *ev)
 {
    if (ev->type() == QEvent::StyleChange
@@ -816,18 +690,16 @@ void QTabWidget::changeEvent(QEvent *ev)
    QWidget::changeEvent(ev);
 }
 
-
-/*!
-    \reimp
- */
 void QTabWidget::keyPressEvent(QKeyEvent *e)
 {
    Q_D(QTabWidget);
+
    if (((e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) &&
          count() > 1 && e->modifiers() & Qt::ControlModifier)
 #ifdef QT_KEYPAD_NAVIGATION
       || QApplication::keypadNavigationEnabled() && (e->key() == Qt::Key_Left || e->key() == Qt::Key_Right) && count() > 1
 #endif
+
    ) {
       int pageCount = d->tabs->count();
       int page = currentIndex();
@@ -841,13 +713,16 @@ void QTabWidget::keyPressEvent(QKeyEvent *e)
 
       for (int pass = 0; pass < pageCount; ++pass) {
          page += dx;
+
          if (page < 0
 #ifdef QT_KEYPAD_NAVIGATION
             && !e->isAutoRepeat()
 #endif
          ) {
             page = count() - 1;
+
          } else if (page >= pageCount
+
 #ifdef QT_KEYPAD_NAVIGATION
             && !e->isAutoRepeat()
 #endif
@@ -875,7 +750,6 @@ QWidget *QTabWidget::widget(int index) const
    return d->stack->widget(index);
 }
 
-
 int QTabWidget::count() const
 {
    Q_D(const QTabWidget);
@@ -883,29 +757,18 @@ int QTabWidget::count() const
 }
 
 #ifndef QT_NO_TOOLTIP
-/*!
-    Sets the tab tool tip for the page at position \a index to \a tip.
-
-    \sa  tabToolTip()
-*/
 void QTabWidget::setTabToolTip(int index, const QString &tip)
 {
    Q_D(QTabWidget);
    d->tabs->setTabToolTip(index, tip);
 }
 
-/*!
-    Returns the tab tool tip for the page at position \a index or
-    an empty string if no tool tip has been set.
-
-    \sa setTabToolTip()
-*/
 QString QTabWidget::tabToolTip(int index) const
 {
    Q_D(const QTabWidget);
    return d->tabs->tabToolTip(index);
 }
-#endif // QT_NO_TOOLTIP
+#endif
 
 #ifndef QT_NO_WHATSTHIS
 void QTabWidget::setTabWhatsThis(int index, const QString &text)
@@ -914,34 +777,30 @@ void QTabWidget::setTabWhatsThis(int index, const QString &text)
    d->tabs->setTabWhatsThis(index, text);
 }
 
-
 QString QTabWidget::tabWhatsThis(int index) const
 {
    Q_D(const QTabWidget);
    return d->tabs->tabWhatsThis(index);
 }
-#endif // QT_NO_WHATSTHIS
+#endif
 
 void QTabWidget::tabInserted(int index)
 {
-
+   (void) index;
 }
 
 void QTabWidget::tabRemoved(int index)
 {
-
+   (void) index;
 }
 
-/*!
-    \fn void QTabWidget::paintEvent(QPaintEvent *event)
-
-    Paints the tab widget's tab bar in response to the paint \a event.
-*/
 void QTabWidget::paintEvent(QPaintEvent *)
 {
    Q_D(QTabWidget);
+
    if (documentMode()) {
       QStylePainter p(this, tabBar());
+
       if (QWidget *w = cornerWidget(Qt::TopLeftCorner)) {
          QStyleOptionTabBarBase opt;
          QTabBarPrivate::initStyleBaseOption(&opt, tabBar(), w->size());
@@ -966,17 +825,6 @@ void QTabWidget::paintEvent(QPaintEvent *)
    p.drawPrimitive(QStyle::PE_FrameTabWidget, opt);
 }
 
-/*!
-    \property QTabWidget::iconSize
-    \brief The size for icons in the tab bar
-    \since 4.2
-
-    The default value is style-dependent. This is the maximum size
-    that the icons will have. Icons are not scaled up if they are of
-    smaller size.
-
-    \sa QTabBar::iconSize
-*/
 QSize QTabWidget::iconSize() const
 {
    return d_func()->tabs->iconSize();
@@ -1059,6 +907,5 @@ void QTabWidget::_q_tabMoved(int un_named_arg1, int un_named_arg2)
    Q_D(QTabWidget);
    d->_q_tabMoved(un_named_arg1, un_named_arg2);
 }
-
 
 #endif //QT_NO_TABWIDGET

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -90,7 +90,7 @@ class QSystemTrayIconSys : public QWidget
 };
 
 QSystemTrayIconSys::QSystemTrayIconSys(QSystemTrayIcon *qIn)
-   : QWidget(0, Qt::Window | Qt::FramelessWindowHint | Qt::BypassWindowManagerHint), q(qIn)
+   : QWidget(nullptr, Qt::Window | Qt::FramelessWindowHint | Qt::BypassWindowManagerHint), q(qIn)
 {
    setObjectName(QString("QSystemTrayIconSys"));
    setToolTip(q->toolTip());
@@ -255,15 +255,16 @@ void QSystemTrayIconSys::resizeEvent(QResizeEvent *event)
 }
 
 QSystemTrayIconPrivate::QSystemTrayIconPrivate()
-   : sys(0),
-     qpa_sys(QGuiApplicationPrivate::platformTheme()->createPlatformSystemTrayIcon()),
+   : sys(nullptr), qpa_sys(QGuiApplicationPrivate::platformTheme()->createPlatformSystemTrayIcon()),
      visible(false)
 {
 }
+
 QSystemTrayIconPrivate::~QSystemTrayIconPrivate()
 {
    delete qpa_sys;
 }
+
 void QSystemTrayIconPrivate::install_sys()
 {
    if (qpa_sys) {
@@ -304,7 +305,7 @@ void QSystemTrayIconPrivate::remove_sys()
    QBalloonTip::hideBalloon();
    sys->hide(); // this should do the trick, but...
    delete sys; // wm may resize system tray only for DestroyEvents
-   sys = 0;
+   sys = nullptr;
 }
 
 void QSystemTrayIconPrivate::updateIcon_sys()
@@ -349,7 +350,7 @@ bool QSystemTrayIconPrivate::isSystemTrayAvailable_sys()
 
    // no QPlatformSystemTrayIcon so fall back to default xcb platform behavior
    const QString platform = QGuiApplication::platformName();
-   if (platform.compare(QLatin1String("xcb"), Qt::CaseInsensitive) == 0) {
+   if (platform.compare("xcb", Qt::CaseInsensitive) == 0) {
       return locateSystemTray();
    }
    return false;

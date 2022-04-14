@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,7 +34,7 @@ class DSServicePlugin
    CS_OBJECT_MULTIPLE(DSServicePlugin, QMediaServiceProviderPlugin)
 
    CS_PLUGIN_IID(QMediaServiceProviderInterface_ID)
-   CS_PLUGIN_KEY(QMediaPlayerControl_Key)
+   CS_PLUGIN_KEY(QString(Q_MEDIASERVICE_MEDIAPLAYER) + ", " + Q_MEDIASERVICE_CAMERA)
 
    CS_INTERFACES(QMediaServiceSupportedDevicesInterface, QMediaServiceDefaultDeviceInterface, QMediaServiceFeaturesInterface)
 

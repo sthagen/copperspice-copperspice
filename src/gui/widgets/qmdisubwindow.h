@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,8 +26,6 @@
 
 #include <qwidget.h>
 
-
-
 #ifndef QT_NO_MDIAREA
 
 class QMenu;
@@ -51,14 +49,18 @@ class Q_GUI_EXPORT QMdiSubWindow : public QWidget
 
  public:
    enum SubWindowOption {
-      AllowOutsideAreaHorizontally = 0x1, // internal
-      AllowOutsideAreaVertically = 0x2, // internal
+      AllowOutsideAreaHorizontally = 0x1,    // internal
+      AllowOutsideAreaVertically = 0x2,      // internal
       RubberBandResize = 0x4,
       RubberBandMove = 0x8
    };
    using SubWindowOptions = QFlags<SubWindowOption>;
 
-   QMdiSubWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+   QMdiSubWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
+
+   QMdiSubWindow(const  QMdiSubWindow &) = delete;
+   QMdiSubWindow &operator=(const  QMdiSubWindow &) = delete;
+
    ~QMdiSubWindow();
 
    QSize sizeHint() const override;
@@ -73,7 +75,7 @@ class Q_GUI_EXPORT QMdiSubWindow : public QWidget
    bool isShaded() const;
 
    void setOption(SubWindowOption option, bool on = true);
-   bool testOption(SubWindowOption) const;
+   bool testOption(SubWindowOption option) const;
 
    void setKeyboardSingleStep(int step);
    int keyboardSingleStep() const;
@@ -128,7 +130,6 @@ class Q_GUI_EXPORT QMdiSubWindow : public QWidget
    void childEvent(QChildEvent *childEvent) override;
 
  private:
-   Q_DISABLE_COPY(QMdiSubWindow)
    Q_DECLARE_PRIVATE(QMdiSubWindow)
 
    GUI_CS_SLOT_1(Private, void _q_updateStaysOnTopHint())
@@ -151,8 +152,6 @@ class Q_GUI_EXPORT QMdiSubWindow : public QWidget
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QMdiSubWindow::SubWindowOptions)
 
-
-
 #endif // QT_NO_MDIAREA
 
-#endif // QMDISUBWINDOW_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2016-2022 Barbara Geller
+* Copyright (c) 2016-2022 Ansel Sermersheim
 *
 * This file is part of CsSignal.
 *
@@ -26,8 +26,8 @@
 #include <vector>
 
 #include "cs_macro.h"
-#include "rcu_guarded.hpp"
-#include "rcu_list.hpp"
+#include "cs_rcu_guarded.h"
+#include "cs_rcu_list.h"
 
 namespace CsSignal {
 
@@ -96,7 +96,7 @@ class LIB_SIG_EXPORT SlotBase
       static SignalBase *&get_threadLocal_currentSender();
 
       // list of possible Senders for this Receiver
-      mutable LibG::SharedList<const SignalBase *> m_possibleSenders;
+      mutable libguarded::SharedList<const SignalBase *> m_possibleSenders;
 
       virtual bool compareThreads() const;
       virtual void queueSlot(PendingSlot data, ConnectionKind type);

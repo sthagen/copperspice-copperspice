@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,7 +37,8 @@
 #endif
 
 #ifdef Q_OS_WIN
-#define QT_SOCKLEN_T int
+
+#define QT_SOCKLEN_T    int
 #define QT_SOCKOPTLEN_T int
 
 #  ifndef WSAID_WSARECVMSG
@@ -72,10 +73,11 @@ union qt_sockaddr {
    sockaddr_in6 a6;
 };
 
+class QSocketNotifier;
 class QNativeSocketEnginePrivate;
 
 #ifndef QT_NO_NETWORKINTERFACE
-class QNetworkInterface;
+   class QNetworkInterface;
 #endif
 
 class QNativeSocketEngine : public QAbstractSocketEngine
@@ -84,6 +86,10 @@ class QNativeSocketEngine : public QAbstractSocketEngine
 
  public:
    QNativeSocketEngine(QObject *parent = nullptr);
+
+   QNativeSocketEngine(const QNativeSocketEngine &) = delete;
+   QNativeSocketEngine &operator=(const QNativeSocketEngine &) = delete;
+
    ~QNativeSocketEngine();
 
    bool initialize(QAbstractSocket::SocketType type, QAbstractSocket::NetworkLayerProtocol protocol =
@@ -115,7 +121,7 @@ class QNativeSocketEngine : public QAbstractSocketEngine
    bool setMulticastInterface(const QNetworkInterface &iface) override;
 #endif
 
-   qint64 readDatagram(char *data, qint64 maxlen, QIpPacketHeader * = 0,
+   qint64 readDatagram(char *data, qint64 maxlen, QIpPacketHeader * = nullptr,
                   PacketHeaderOptions = WantNone) override;
 
    qint64 writeDatagram(const char *data, qint64 len, const QIpPacketHeader &) override;
@@ -134,10 +140,10 @@ class QNativeSocketEngine : public QAbstractSocketEngine
    int option(SocketOption option) const override;
    bool setOption(SocketOption option, int value) override;
 
-   bool waitForRead(int msecs = 30000, bool *timedOut = 0) override;
-   bool waitForWrite(int msecs = 30000, bool *timedOut = 0) override;
+   bool waitForRead(int msecs = 30000, bool *timedOut = nullptr) override;
+   bool waitForWrite(int msecs = 30000, bool *timedOut = nullptr) override;
    bool waitForReadOrWrite(bool *readyToRead, bool *readyToWrite, bool checkRead, bool checkWrite,
-                           int msecs = 30000, bool *timedOut = 0) override;
+                           int msecs = 30000, bool *timedOut = nullptr) override;
 
    bool isReadNotificationEnabled() const override;
    void setReadNotificationEnabled(bool enable) override;
@@ -151,16 +157,10 @@ class QNativeSocketEngine : public QAbstractSocketEngine
 
  private:
    Q_DECLARE_PRIVATE(QNativeSocketEngine)
-   Q_DISABLE_COPY(QNativeSocketEngine)
 };
-
-
-class QSocketNotifier;
 
 class QNativeSocketEnginePrivate : public QAbstractSocketEnginePrivate
 {
-   Q_DECLARE_PUBLIC(QNativeSocketEngine)
-
  public:
    QNativeSocketEnginePrivate();
    ~QNativeSocketEnginePrivate();
@@ -276,7 +276,12 @@ class QNativeSocketEnginePrivate : public QAbstractSocketEnginePrivate
 
             *sockAddrSize = sizeof(sockaddr_in);
         }
-    }
+   }
+
+   bool check_valid_socketlayer(const char *function) const;
+
+ private:
+   Q_DECLARE_PUBLIC(QNativeSocketEngine)
 };
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,9 +27,9 @@
 #include <qnetworksession_impl.h>
 
 #include <qnetworkconfiguration_p.h>
-#include <QtNetwork/qnetworksession.h>
+#include <qnetworksession.h>
 
-#include <QtCore/qdebug.h>
+#include <qdebug.h>
 
 #include <QtDBus/QtDBus>
 #include <QtDBus/QDBusConnection>
@@ -292,8 +292,10 @@ void QConnmanEngine::propertyChangedContext(const QString &path,const QString &i
 
     QMutexLocker locker(&mutex);
     if(item == "Services") {
-        QDBusArgument arg = qvariant_cast<QDBusArgument>(value.variant());
-        QStringList list = qdbus_cast<QStringList>(arg);
+        QVariant variant  = value.variant();
+        QDBusArgument arg = variant.value<QDBusArgument>();
+
+        QStringList list  = qdbus_cast<QStringList>(arg);
 
         if(list.count() > accessPointConfigurations.count()) {
             for(const QString service : list) {
@@ -303,8 +305,12 @@ void QConnmanEngine::propertyChangedContext(const QString &path,const QString &i
     }
 
     if(item == "Technologies") {
-        QDBusArgument arg = qvariant_cast<QDBusArgument>(value.variant());
+
+        QVariant variant  = value.variant();
+        QDBusArgument arg = variant.value<QDBusArgument>();
+
         QStringList newlist = qdbus_cast<QStringList>(arg);
+
         if(newlist.count() > 0) {
             QMap<QString,QConnmanTechnologyInterface *> oldtech = technologies;
 
@@ -319,8 +325,9 @@ void QConnmanEngine::propertyChangedContext(const QString &path,const QString &i
             }
         }
     }
+
     if(item == "State") {
-// qDebug() << value.variant();
+       // qDebug() << value.variant();
     }
 }
 

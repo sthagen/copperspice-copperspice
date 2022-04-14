@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -73,7 +73,7 @@ QStandardItemPrivate::~QStandardItemPrivate()
    for (it = children.constBegin(); it != children.constEnd(); ++it) {
       QStandardItem *child = *it;
       if (child) {
-         child->d_func()->setModel(0);
+         child->d_func()->setModel(nullptr);
       }
       delete child;
    }
@@ -108,8 +108,7 @@ void QStandardItemPrivate::setChild(int row, int column, QStandardItem *item,
 {
    Q_Q(QStandardItem);
    if (item == q) {
-      qWarning("QStandardItem::setChild: Can't make an item a child of itself %p",
-         item);
+      qWarning("QStandardItem::setChild: Unable to make an item a child of itself %p", item);
       return;
    }
    if ((row < 0) || (column < 0)) {
@@ -134,7 +133,7 @@ void QStandardItemPrivate::setChild(int row, int column, QStandardItem *item,
       emit model->layoutAboutToBeChanged();
    }
    if (item) {
-      if (item->d_func()->parent == 0) {
+      if (item->d_func()->parent == nullptr) {
          item->d_func()->setParentAndModel(q, model);
       } else {
          qWarning("QStandardItem::setChild: Ignoring duplicate insertion of item %p",
@@ -143,7 +142,7 @@ void QStandardItemPrivate::setChild(int row, int column, QStandardItem *item,
       }
    }
    if (oldItem) {
-      oldItem->d_func()->setModel(0);
+      oldItem->d_func()->setModel(nullptr);
    }
 
    delete oldItem;
@@ -181,7 +180,7 @@ void QStandardItemPrivate::childDeleted(QStandardItem *child)
 {
    int index = childIndex(child);
    Q_ASSERT(index != -1);
-   children.replace(index, 0);
+   children.replace(index, nullptr);
 }
 
 /*!
@@ -333,9 +332,7 @@ void QStandardItemPrivate::setModel(QStandardItemModel *mod)
   \internal
 */
 QStandardItemModelPrivate::QStandardItemModelPrivate()
-   : root(new QStandardItem),
-     itemPrototype(0),
-     sortRole(Qt::DisplayRole)
+   : root(new QStandardItem), itemPrototype(nullptr), sortRole(Qt::DisplayRole)
 {
    root->setFlags(Qt::ItemIsDropEnabled);
 }
@@ -402,7 +399,7 @@ bool QStandardItemPrivate::insertRows(int row, const QList<QStandardItem *> &ite
       rows += count;
       int index = childIndex(row, 0);
       if (index != -1) {
-         children.insert(index, columnCount() * count, 0);
+         children.insert(index, columnCount() * count, nullptr);
       }
    }
    for (int i = 0; i < items.count(); ++i) {
@@ -434,7 +431,7 @@ bool QStandardItemPrivate::insertRows(int row, int count, const QList<QStandardI
       rows += count;
       int index = childIndex(row, 0);
       if (index != -1) {
-         children.insert(index, columnCount() * count, 0);
+         children.insert(index, columnCount() * count, nullptr);
       }
    }
    if (!items.isEmpty()) {
@@ -443,12 +440,12 @@ bool QStandardItemPrivate::insertRows(int row, int count, const QList<QStandardI
       for (int i = 0; i < limit; ++i) {
          QStandardItem *item = items.at(i);
          if (item) {
-            if (item->d_func()->parent == 0) {
+            if (item->d_func()->parent == nullptr) {
                item->d_func()->setParentAndModel(q, model);
             } else {
                qWarning("QStandardItem::insertRows: Ignoring duplicate insertion of item %p",
                   item);
-               item = 0;
+               item = nullptr;
             }
          }
          children.replace(index, item);
@@ -480,7 +477,7 @@ bool QStandardItemPrivate::insertColumns(int column, int count, const QList<QSta
       columns += count;
       int index = childIndex(0, column);
       for (int row = 0; row < rowCount(); ++row) {
-         children.insert(index, count, 0);
+         children.insert(index, count, nullptr);
          index += columnCount();
       }
    }
@@ -489,12 +486,11 @@ bool QStandardItemPrivate::insertColumns(int column, int count, const QList<QSta
       for (int i = 0; i < limit; ++i) {
          QStandardItem *item = items.at(i);
          if (item) {
-            if (item->d_func()->parent == 0) {
+            if (item->d_func()->parent == nullptr) {
                item->d_func()->setParentAndModel(q, model);
             } else {
-               qWarning("QStandardItem::insertColumns: Ignoring duplicate insertion of item %p",
-                  item);
-               item = 0;
+               qWarning("QStandardItem::insertColumns: Ignoring duplicate insertion of item %p", item);
+               item = nullptr;
             }
          }
          int r = i / count;
@@ -515,7 +511,7 @@ bool QStandardItemPrivate::insertColumns(int column, int count, const QList<QSta
 void QStandardItemModelPrivate::itemChanged(QStandardItem *item)
 {
    Q_Q(QStandardItemModel);
-   if (item->d_func()->parent == 0) {
+   if (item->d_func()->parent == nullptr) {
       // Header item
       int idx = columnHeaderItems.indexOf(item);
       if (idx != -1) {
@@ -585,7 +581,7 @@ void QStandardItemModelPrivate::rowsInserted(QStandardItem *parent,
 {
    Q_Q(QStandardItemModel);
    if (parent == root.data()) {
-      rowHeaderItems.insert(row, count, 0);
+      rowHeaderItems.insert(row, count, nullptr);
    }
    q->endInsertRows();
 }
@@ -598,7 +594,7 @@ void QStandardItemModelPrivate::columnsInserted(QStandardItem *parent,
 {
    Q_Q(QStandardItemModel);
    if (parent == root.data()) {
-      columnHeaderItems.insert(column, count, 0);
+      columnHeaderItems.insert(column, count, nullptr);
    }
    q->endInsertColumns();
 }
@@ -614,7 +610,7 @@ void QStandardItemModelPrivate::rowsRemoved(QStandardItem *parent,
       for (int i = row; i < row + count; ++i) {
          QStandardItem *oldItem = rowHeaderItems.at(i);
          if (oldItem) {
-            oldItem->d_func()->setModel(0);
+            oldItem->d_func()->setModel(nullptr);
          }
          delete oldItem;
       }
@@ -634,7 +630,7 @@ void QStandardItemModelPrivate::columnsRemoved(QStandardItem *parent,
       for (int i = column; i < column + count; ++i) {
          QStandardItem *oldItem = columnHeaderItems.at(i);
          if (oldItem) {
-            oldItem->d_func()->setModel(0);
+            oldItem->d_func()->setModel(nullptr);
          }
          delete oldItem;
       }
@@ -736,7 +732,7 @@ QStandardItem *QStandardItem::parent() const
    if (!d->model || (d->model->d_func()->root.data() != d->parent)) {
       return d->parent;
    }
-   return 0;
+   return nullptr;
 }
 
 void QStandardItem::setData(const QVariant &value, int role)
@@ -1006,7 +1002,7 @@ void QStandardItem::removeRows(int row, int count)
    for (int j = i; j < n + i; ++j) {
       QStandardItem *oldItem = d->children.at(j);
       if (oldItem) {
-         oldItem->d_func()->setModel(0);
+         oldItem->d_func()->setModel(nullptr);
       }
       delete oldItem;
    }
@@ -1037,7 +1033,7 @@ void QStandardItem::removeColumns(int column, int count)
       for (int j = i; j < i + count; ++j) {
          QStandardItem *oldItem = d->children.at(j);
          if (oldItem) {
-            oldItem->d_func()->setModel(0);
+            oldItem->d_func()->setModel(nullptr);
          }
          delete oldItem;
       }
@@ -1065,7 +1061,7 @@ QStandardItem *QStandardItem::child(int row, int column) const
    Q_D(const QStandardItem);
    int index = d->childIndex(row, column);
    if (index == -1) {
-      return 0;
+      return nullptr;
    }
    return d->children.at(index);
 }
@@ -1073,14 +1069,14 @@ QStandardItem *QStandardItem::child(int row, int column) const
 QStandardItem *QStandardItem::takeChild(int row, int column)
 {
    Q_D(QStandardItem);
-   QStandardItem *item = 0;
+   QStandardItem *item = nullptr;
    int index = d->childIndex(row, column);
    if (index != -1) {
       item = d->children.at(index);
       if (item) {
-         item->d_func()->setParentAndModel(0, 0);
+         item->d_func()->setParentAndModel(nullptr, nullptr);
       }
-      d->children.replace(index, 0);
+      d->children.replace(index, nullptr);
    }
    return item;
 }
@@ -1104,7 +1100,7 @@ QList<QStandardItem *> QStandardItem::takeRow(int row)
       for (int column = 0; column < col_count; ++column) {
          QStandardItem *ch = d->children.at(index + column);
          if (ch) {
-            ch->d_func()->setParentAndModel(0, 0);
+            ch->d_func()->setParentAndModel(nullptr, nullptr);
          }
          items.append(ch);
       }
@@ -1132,7 +1128,7 @@ QList<QStandardItem *> QStandardItem::takeColumn(int column)
       int index = d->childIndex(row, column);
       QStandardItem *ch = d->children.at(index);
       if (ch) {
-         ch->d_func()->setParentAndModel(0, 0);
+         ch->d_func()->setParentAndModel(nullptr, nullptr);
       }
       d->children.remove(index);
       items.prepend(ch);
@@ -1171,7 +1167,8 @@ bool QStandardItem::operator<(const QStandardItem &other) const
 
       case QVariant::ULongLong:
          return l.toULongLong() < r.toULongLong();
-      case QMetaType::Float:
+
+      case QVariant::Float:
          return l.toFloat() < r.toFloat();
 
       case QVariant::Double:
@@ -1314,19 +1311,23 @@ void QStandardItemModel::clear()
 QStandardItem *QStandardItemModel::itemFromIndex(const QModelIndex &index) const
 {
    Q_D(const QStandardItemModel);
+
    if ((index.row() < 0) || (index.column() < 0) || (index.model() != this)) {
-      return 0;
+      return nullptr;
    }
+
    QStandardItem *parent = static_cast<QStandardItem *>(index.internalPointer());
-   if (parent == 0) {
-      return 0;
+   if (parent == nullptr) {
+      return nullptr;
    }
+
    QStandardItem *item = parent->child(index.row(), index.column());
    // lazy part
-   if (item == 0) {
+   if (item == nullptr) {
       item = d->createItem();
       parent->d_func()->setChild(index.row(), index.column(), item);
    }
+
    return item;
 }
 
@@ -1385,7 +1386,7 @@ void QStandardItemModel::setHorizontalHeaderItem(int column, QStandardItem *item
    }
 
    if (item) {
-      if (item->model() == 0) {
+      if (item->model() == nullptr) {
          item->d_func()->setModel(this);
       } else {
          qWarning("QStandardItem::setHorizontalHeaderItem: Ignoring duplicate insertion of item %p",
@@ -1395,7 +1396,7 @@ void QStandardItemModel::setHorizontalHeaderItem(int column, QStandardItem *item
    }
 
    if (oldItem) {
-      oldItem->d_func()->setModel(0);
+      oldItem->d_func()->setModel(nullptr);
    }
    delete oldItem;
 
@@ -1407,7 +1408,7 @@ QStandardItem *QStandardItemModel::horizontalHeaderItem(int column) const
 {
    Q_D(const QStandardItemModel);
    if ((column < 0) || (column >= columnCount())) {
-      return 0;
+      return nullptr;
    }
    return d->columnHeaderItems.at(column);
 }
@@ -1428,7 +1429,7 @@ void QStandardItemModel::setVerticalHeaderItem(int row, QStandardItem *item)
    }
 
    if (item) {
-      if (item->model() == 0) {
+      if (item->model() == nullptr) {
          item->d_func()->setModel(this);
       } else {
          qWarning("QStandardItem::setVerticalHeaderItem: Ignoring duplicate insertion of item %p",
@@ -1438,7 +1439,7 @@ void QStandardItemModel::setVerticalHeaderItem(int row, QStandardItem *item)
    }
 
    if (oldItem) {
-      oldItem->d_func()->setModel(0);
+      oldItem->d_func()->setModel(nullptr);
    }
    delete oldItem;
 
@@ -1450,7 +1451,7 @@ QStandardItem *QStandardItemModel::verticalHeaderItem(int row) const
 {
    Q_D(const QStandardItemModel);
    if ((row < 0) || (row >= rowCount())) {
-      return 0;
+      return nullptr;
    }
    return d->rowHeaderItems.at(row);
 }
@@ -1653,12 +1654,12 @@ QStandardItem *QStandardItemModel::takeHorizontalHeaderItem(int column)
 {
    Q_D(QStandardItemModel);
    if ((column < 0) || (column >= columnCount())) {
-      return 0;
+      return nullptr;
    }
    QStandardItem *headerItem = d->columnHeaderItems.at(column);
    if (headerItem) {
-      headerItem->d_func()->setParentAndModel(0, 0);
-      d->columnHeaderItems.replace(column, 0);
+      headerItem->d_func()->setParentAndModel(nullptr, nullptr);
+      d->columnHeaderItems.replace(column, nullptr);
    }
    return headerItem;
 }
@@ -1676,13 +1677,15 @@ QStandardItem *QStandardItemModel::takeVerticalHeaderItem(int row)
 {
    Q_D(QStandardItemModel);
    if ((row < 0) || (row >= rowCount())) {
-      return 0;
+      return nullptr;
    }
+
    QStandardItem *headerItem = d->rowHeaderItems.at(row);
    if (headerItem) {
-      headerItem->d_func()->setParentAndModel(0, 0);
-      d->rowHeaderItems.replace(row, 0);
+      headerItem->d_func()->setParentAndModel(nullptr, nullptr);
+      d->rowHeaderItems.replace(row, nullptr);
    }
+
    return headerItem;
 }
 
@@ -1736,10 +1739,12 @@ Qt::ItemFlags QStandardItemModel::flags(const QModelIndex &index) const
    if (!d->indexValid(index)) {
       return d->root->flags();
    }
+
    QStandardItem *item = d->itemFromIndex(index);
    if (item) {
       return item->flags();
    }
+
    return Qt::ItemIsSelectable
       | Qt::ItemIsEnabled
       | Qt::ItemIsEditable
@@ -1760,17 +1765,19 @@ bool QStandardItemModel::hasChildren(const QModelIndex &parent) const
 QVariant QStandardItemModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
    Q_D(const QStandardItemModel);
-   if ((section < 0)
-      || ((orientation == Qt::Horizontal) && (section >= columnCount()))
-      || ((orientation == Qt::Vertical) && (section >= rowCount()))) {
+
+   if ((section < 0) || ((orientation == Qt::Horizontal) && (section >= columnCount()))
+            || ((orientation == Qt::Vertical) && (section >= rowCount()))) {
       return QVariant();
    }
-   QStandardItem *headerItem = 0;
+
+   QStandardItem *headerItem = nullptr;
    if (orientation == Qt::Horizontal) {
       headerItem = d->columnHeaderItems.at(section);
    } else if (orientation == Qt::Vertical) {
       headerItem = d->rowHeaderItems.at(section);
    }
+
    return headerItem ? headerItem->data(role)
       : QAbstractItemModel::headerData(section, orientation, role);
 }
@@ -1792,13 +1799,12 @@ QModelIndex QStandardItemModel::index(int row, int column, const QModelIndex &pa
 {
    Q_D(const QStandardItemModel);
    QStandardItem *parentItem = d->itemFromIndex(parent);
-   if ((parentItem == 0)
-      || (row < 0)
-      || (column < 0)
-      || (row >= parentItem->rowCount())
-      || (column >= parentItem->columnCount())) {
+
+   if ((parentItem == nullptr) || (row < 0) || (column < 0)
+            || (row >= parentItem->rowCount()) || (column >= parentItem->columnCount())) {
       return QModelIndex();
    }
+
    return createIndex(row, column, parentItem);
 }
 
@@ -1808,10 +1814,12 @@ QModelIndex QStandardItemModel::index(int row, int column, const QModelIndex &pa
 bool QStandardItemModel::insertColumns(int column, int count, const QModelIndex &parent)
 {
    Q_D(QStandardItemModel);
+
    QStandardItem *item = parent.isValid() ? itemFromIndex(parent) : d->root.data();
-   if (item == 0) {
+   if (item == nullptr) {
       return false;
    }
+
    return item->d_func()->insertColumns(column, count, QList<QStandardItem *>());
 }
 
@@ -1821,10 +1829,12 @@ bool QStandardItemModel::insertColumns(int column, int count, const QModelIndex 
 bool QStandardItemModel::insertRows(int row, int count, const QModelIndex &parent)
 {
    Q_D(QStandardItemModel);
+
    QStandardItem *item = parent.isValid() ? itemFromIndex(parent) : d->root.data();
-   if (item == 0) {
+   if (item == nullptr) {
       return false;
    }
+
    return item->d_func()->insertRows(row, count, QList<QStandardItem *>());
 }
 
@@ -1860,11 +1870,15 @@ QModelIndex QStandardItemModel::parent(const QModelIndex &child) const
 bool QStandardItemModel::removeColumns(int column, int count, const QModelIndex &parent)
 {
    Q_D(QStandardItemModel);
+
    QStandardItem *item = d->itemFromIndex(parent);
-   if ((item == 0) || (count < 1) || (column < 0) || ((column + count) > item->columnCount())) {
+
+   if ((item == nullptr) || (count < 1) || (column < 0) || ((column + count) > item->columnCount())) {
       return false;
    }
+
    item->removeColumns(column, count);
+
    return true;
 }
 
@@ -1874,11 +1888,15 @@ bool QStandardItemModel::removeColumns(int column, int count, const QModelIndex 
 bool QStandardItemModel::removeRows(int row, int count, const QModelIndex &parent)
 {
    Q_D(QStandardItemModel);
+
    QStandardItem *item = d->itemFromIndex(parent);
-   if ((item == 0) || (count < 1) || (row < 0) || ((row + count) > item->rowCount())) {
+
+   if ((item == nullptr) || (count < 1) || (row < 0) || ((row + count) > item->rowCount())) {
       return false;
    }
+
    item->removeRows(row, count);
+
    return true;
 }
 
@@ -1901,7 +1919,7 @@ bool QStandardItemModel::setData(const QModelIndex &index, const QVariant &value
       return false;
    }
    QStandardItem *item = itemFromIndex(index);
-   if (item == 0) {
+   if (item == nullptr) {
       return false;
    }
    item->setData(value, role);
@@ -1914,31 +1932,39 @@ bool QStandardItemModel::setData(const QModelIndex &index, const QVariant &value
 bool QStandardItemModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
 {
    Q_D(QStandardItemModel);
+
    if ((section < 0)
       || ((orientation == Qt::Horizontal) && (section >= columnCount()))
       || ((orientation == Qt::Vertical) && (section >= rowCount()))) {
       return false;
    }
-   QStandardItem *headerItem = 0;
+
+   QStandardItem *headerItem = nullptr;
+
    if (orientation == Qt::Horizontal) {
       headerItem = d->columnHeaderItems.at(section);
-      if (headerItem == 0) {
+
+      if (headerItem == nullptr) {
          headerItem = d->createItem();
          headerItem->d_func()->setModel(this);
          d->columnHeaderItems.replace(section, headerItem);
       }
+
    } else if (orientation == Qt::Vertical) {
       headerItem = d->rowHeaderItems.at(section);
-      if (headerItem == 0) {
+
+      if (headerItem == nullptr) {
          headerItem = d->createItem();
          headerItem->d_func()->setModel(this);
          d->rowHeaderItems.replace(section, headerItem);
       }
    }
+
    if (headerItem) {
       headerItem->setData(value, role);
       return true;
    }
+
    return false;
 }
 
@@ -1948,7 +1974,7 @@ bool QStandardItemModel::setHeaderData(int section, Qt::Orientation orientation,
 bool QStandardItemModel::setItemData(const QModelIndex &index, const QMap<int, QVariant> &roles)
 {
    QStandardItem *item = itemFromIndex(index);
-   if (item == 0) {
+   if (item == nullptr) {
       return false;
    }
    item->d_func()->setItemData(roles);
@@ -1979,13 +2005,14 @@ QMimeData *QStandardItemModel::mimeData(const QModelIndexList &indexes) const
 {
    QMimeData *data = QAbstractItemModel::mimeData(indexes);
    if (!data) {
-      return 0;
+      return nullptr;
    }
 
    QString format = QLatin1String("application/x-qstandarditemmodeldatalist");
    if (!mimeTypes().contains(format)) {
       return data;
    }
+
    QByteArray encoded;
    QDataStream stream(&encoded, QIODevice::WriteOnly);
 
@@ -2000,7 +2027,7 @@ QMimeData *QStandardItemModel::mimeData(const QModelIndexList &indexes) const
          stack.push(item);
       } else {
          qWarning() << "QStandardItemModel::mimeData: No item associated with invalid index";
-         return 0;
+         return nullptr;
       }
    }
 

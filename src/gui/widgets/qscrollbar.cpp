@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -80,7 +80,7 @@ void QScrollBarPrivate::setTransient(bool value)
    if (transient != value) {
       transient = value;
       if (q->isVisible()) {
-         if (q->style()->styleHint(QStyle::SH_ScrollBar_Transient, 0, q)) {
+         if (q->style()->styleHint(QStyle::SH_ScrollBar_Transient, nullptr, q)) {
             q->update();
          }
       } else if (!transient) {
@@ -92,7 +92,7 @@ void QScrollBarPrivate::setTransient(bool value)
 void QScrollBarPrivate::flash()
 {
    Q_Q(QScrollBar);
-   if (!flashed && q->style()->styleHint(QStyle::SH_ScrollBar_Transient, 0, q)) {
+   if (!flashed && q->style()->styleHint(QStyle::SH_ScrollBar_Transient, nullptr, q)) {
       flashed = true;
       if (!q->isVisible()) {
          q->show();
@@ -182,11 +182,10 @@ void QScrollBar::initStyleOption(QStyleOptionSlider *option) const
       option->state |= QStyle::State_Horizontal;
    }
 
-   if ((d->flashed || !d->transient) && style()->styleHint(QStyle::SH_ScrollBar_Transient, 0, this)) {
+   if ((d->flashed || !d->transient) && style()->styleHint(QStyle::SH_ScrollBar_Transient, nullptr, this)) {
       option->state |= QStyle::State_On;
    }
 }
-
 
 #define HORIZONTAL (d_func()->orientation == Qt::Horizontal)
 #define VERTICAL !HORIZONTAL
@@ -209,17 +208,6 @@ QScrollBar::QScrollBar(QWidget *parent)
    d_func()->init();
 }
 
-/*!
-    Constructs a scroll bar with the given \a orientation.
-
-    The \a parent argument is passed to the QWidget constructor.
-
-    The \l {QAbstractSlider::minimum} {minimum} defaults to 0, the
-    \l {QAbstractSlider::maximum} {maximum} to 99, with a
-    \l {QAbstractSlider::singleStep} {singleStep} size of 1 and a
-    \l {QAbstractSlider::pageStep} {pageStep} size of 10, and an
-    initial \l {QAbstractSlider::value} {value} of 0.
-*/
 QScrollBar::QScrollBar(Qt::Orientation orientation, QWidget *parent)
    : QAbstractSlider(*new QScrollBarPrivate, parent)
 {
@@ -227,11 +215,6 @@ QScrollBar::QScrollBar(Qt::Orientation orientation, QWidget *parent)
    d_func()->init();
 }
 
-
-
-/*!
-    Destroys the scroll bar.
-*/
 QScrollBar::~QScrollBar()
 {
 }
@@ -242,57 +225,71 @@ void QScrollBarPrivate::init()
    invertedControls = true;
    pressedControl = hoverControl = QStyle::SC_None;
    pointerOutsidePressedControl = false;
-   transient = q->style()->styleHint(QStyle::SH_ScrollBar_Transient, 0, q);
+   transient = q->style()->styleHint(QStyle::SH_ScrollBar_Transient, nullptr, q);
    flashed = false;
    flashTimer = 0;
    q->setFocusPolicy(Qt::NoFocus);
+
    QSizePolicy sp(QSizePolicy::Minimum, QSizePolicy::Fixed, QSizePolicy::Slider);
+
    if (orientation == Qt::Vertical) {
       sp.transpose();
    }
+
    q->setSizePolicy(sp);
    q->setAttribute(Qt::WA_WState_OwnSizePolicy, false);
    q->setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
 #ifndef QT_NO_CONTEXTMENU
-/*! \reimp */
+
 void QScrollBar::contextMenuEvent(QContextMenuEvent *event)
 {
-   if (!style()->styleHint(QStyle::SH_ScrollBar_ContextMenu, 0, this)) {
+   if (! style()->styleHint(QStyle::SH_ScrollBar_ContextMenu, nullptr, this)) {
       QAbstractSlider::contextMenuEvent(event);
-      return ;
+      return;
    }
 
 #ifndef QT_NO_MENU
    bool horiz = HORIZONTAL;
    QPointer<QMenu> menu = new QMenu(this);
    QAction *actScrollHere = menu->addAction(tr("Scroll here"));
+
    menu->addSeparator();
-   QAction *actScrollTop =  menu->addAction(horiz ? tr("Left edge") : tr("Top"));
+   QAction *actScrollTop    =  menu->addAction(horiz ? tr("Left edge") : tr("Top"));
    QAction *actScrollBottom = menu->addAction(horiz ? tr("Right edge") : tr("Bottom"));
+
    menu->addSeparator();
    QAction *actPageUp = menu->addAction(horiz ? tr("Page left") : tr("Page up"));
    QAction *actPageDn = menu->addAction(horiz ? tr("Page right") : tr("Page down"));
+
    menu->addSeparator();
    QAction *actScrollUp = menu->addAction(horiz ? tr("Scroll left") : tr("Scroll up"));
    QAction *actScrollDn = menu->addAction(horiz ? tr("Scroll right") : tr("Scroll down"));
    QAction *actionSelected = menu->exec(event->globalPos());
    delete menu;
-   if (actionSelected == 0)
-      /* do nothing */ ;
-   else if (actionSelected == actScrollHere) {
+
+   if (actionSelected == nullptr) {
+      /* do nothing */
+
+   } else if (actionSelected == actScrollHere) {
       setValue(d_func()->pixelPosToRangeValue(horiz ? event->pos().x() : event->pos().y()));
+
    } else if (actionSelected == actScrollTop) {
       triggerAction(QAbstractSlider::SliderToMinimum);
+
    } else if (actionSelected == actScrollBottom) {
       triggerAction(QAbstractSlider::SliderToMaximum);
+
    } else if (actionSelected == actPageUp) {
       triggerAction(QAbstractSlider::SliderPageStepSub);
+
    } else if (actionSelected == actPageDn) {
       triggerAction(QAbstractSlider::SliderPageStepAdd);
+
    } else if (actionSelected == actScrollUp) {
       triggerAction(QAbstractSlider::SliderSingleStepSub);
+
    } else if (actionSelected == actScrollDn) {
       triggerAction(QAbstractSlider::SliderSingleStepAdd);
    }
@@ -311,6 +308,7 @@ QSize QScrollBar::sizeHint() const
    int scrollBarExtent = style()->pixelMetric(QStyle::PM_ScrollBarExtent, &opt, this);
    int scrollBarSliderMin = style()->pixelMetric(QStyle::PM_ScrollBarSliderMin, &opt, this);
    QSize size;
+
    if (opt.orientation == Qt::Horizontal) {
       size = QSize(scrollBarExtent * 2 + scrollBarSliderMin, scrollBarExtent);
    } else {
@@ -318,7 +316,7 @@ QSize QScrollBar::sizeHint() const
    }
 
    return style()->sizeFromContents(QStyle::CT_ScrollBar, &opt, size, this)
-      .expandedTo(QApplication::globalStrut());
+               .expandedTo(QApplication::globalStrut());
 }
 
 /*!\reimp */
@@ -342,12 +340,14 @@ bool QScrollBar::event(QEvent *event)
             d_func()->updateHoverControl(he->pos());
          }
          break;
+
       case QEvent::StyleChange:
-         d_func()->setTransient(style()->styleHint(QStyle::SH_ScrollBar_Transient, 0, this));
+         d_func()->setTransient(style()->styleHint(QStyle::SH_ScrollBar_Transient, nullptr, this));
          break;
+
       case QEvent::Timer:
          if (static_cast<QTimerEvent *>(event)->timerId() == d->flashTimer) {
-            if (d->flashed && style()->styleHint(QStyle::SH_ScrollBar_Transient, 0, this)) {
+            if (d->flashed && style()->styleHint(QStyle::SH_ScrollBar_Transient, nullptr, this)) {
                d->flashed = false;
                update();
             }
@@ -355,6 +355,7 @@ bool QScrollBar::event(QEvent *event)
             d->flashTimer = 0;
          }
          break;
+
       default:
          break;
    }
@@ -424,8 +425,7 @@ void QScrollBar::mousePressEvent(QMouseEvent *e)
       d->stopRepeatAction();
    }
 
-   bool midButtonAbsPos = style()->styleHint(QStyle::SH_ScrollBar_MiddleClickAbsolutePosition,
-         0, this);
+   bool midButtonAbsPos = style()->styleHint(QStyle::SH_ScrollBar_MiddleClickAbsolutePosition, nullptr, this);
    QStyleOptionSlider opt;
    initStyleOption(&opt);
 
@@ -438,8 +438,7 @@ void QScrollBar::mousePressEvent(QMouseEvent *e)
    d->pressedControl = style()->hitTestComplexControl(QStyle::CC_ScrollBar, &opt, e->pos(), this);
    d->pointerOutsidePressedControl = false;
 
-   QRect sr = style()->subControlRect(QStyle::CC_ScrollBar, &opt,
-         QStyle::SC_ScrollBarSlider, this);
+   QRect sr = style()->subControlRect(QStyle::CC_ScrollBar, &opt, QStyle::SC_ScrollBarSlider, this);
    QPoint click = e->pos();
    QPoint pressValue = click - sr.center() + sr.topLeft();
 

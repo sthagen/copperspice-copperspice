@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,7 +28,7 @@
 #include <qregularexpression.h>
 #include <qunicodetables_p.h>
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
 #include <qt_windows.h>
 #endif
 
@@ -44,26 +44,6 @@ static QString16 cs_internal_decompose(QString16::const_iterator first_iter, QSt
 
 static QString16 cs_internal_canonicalOrder(const QString16 &str, QChar32::UnicodeVersion version);
 static QString16 cs_internal_compose(const QString16 &str, QChar32::UnicodeVersion version);
-
-struct UCS2Pair {
-   ushort u1;
-   ushort u2;
-};
-
-struct UCS2SurrogatePair {
-   UCS2Pair p1;
-   UCS2Pair p2;
-};
-
-inline bool operator<(ushort u1, const UCS2Pair &ligature)
-{
-   return u1 < ligature.u1;
-}
-
-inline bool operator<(const UCS2Pair &ligature, ushort u1)
-{
-   return ligature.u1 < u1;
-}
 
 #if ! defined(CSTR_LESS_THAN)
 #define CSTR_LESS_THAN       1
@@ -132,9 +112,9 @@ QString16::const_iterator QString16::cs_internal_find_fast(const QString16 &str,
 
       if (iter->toCaseFolded16() == QString16(strFolded[0]))  {
          auto text_iter    = iter + 1;
-         auto pattern_iter = strFolded.begin() + 1;
+         auto pattern_iter = strFolded.cbegin() + 1;
 
-         while (text_iter != iter_end && pattern_iter != str.cend())  {
+         while (text_iter != iter_end && pattern_iter != strFolded.cend())  {
 
             if (text_iter->toCaseFolded16() == QString16(*pattern_iter))  {
                ++text_iter;
@@ -146,7 +126,7 @@ QString16::const_iterator QString16::cs_internal_find_fast(const QString16 &str,
             }
          }
 
-         if (pattern_iter == strFolded.end()) {
+         if (pattern_iter == strFolded.cend()) {
             // found a match
             return iter;
          }
@@ -209,9 +189,9 @@ QString16::const_iterator QString16::cs_internal_rfind_fast(const QString16 &str
 
       if (iter->toCaseFolded16() == QString16(strFolded[0]))  {
          auto text_iter    = iter + 1;
-         auto pattern_iter = strFolded.begin() + 1;
+         auto pattern_iter = strFolded.cbegin() + 1;
 
-         while (text_iter != iter_end && pattern_iter != str.cend())  {
+         while (text_iter != iter_end && pattern_iter != strFolded.cend())  {
 
             if (text_iter->toCaseFolded16() == QString16(*pattern_iter))  {
                ++text_iter;
@@ -223,7 +203,7 @@ QString16::const_iterator QString16::cs_internal_rfind_fast(const QString16 &str
             }
          }
 
-         if (pattern_iter == strFolded.end()) {
+         if (pattern_iter == strFolded.cend()) {
             // found a match
             return iter;
          }
@@ -239,8 +219,19 @@ QString16::const_iterator QString16::cs_internal_rfind_fast(const QString16 &str
 void QString16::chop(size_type numOfChars)
 {
    if (numOfChars > 0) {
-      auto iter = end() - numOfChars;
-      erase(iter, end());
+      auto iter = cend();
+
+      for (size_type cnt = 0; cnt < numOfChars; ++cnt) {
+
+         if (iter == cbegin()) {
+            clear();
+            return;
+         }
+
+         --iter;
+      }
+
+      erase(iter, cend());
    }
 }
 
@@ -587,14 +578,14 @@ QString16 QString16::fromLatin1(const char *str, size_type numOfChars)
    } else if (numOfChars == -1)  {
 
       for (size_type i = 0; str[i] != 0; ++i) {
-         const char32_t value = str[i];
+         const char32_t value = static_cast<uint8_t>(str[i]);
          retval.append(value);
       }
 
    } else {
 
       for (size_type i = 0; i < numOfChars; ++i) {
-         const char32_t value = str[i];
+         const char32_t value = static_cast<uint8_t>(str[i]);
          retval.append(value);
       }
    }
@@ -612,34 +603,14 @@ QString16 QString16::fromUtf8(const char *str, size_type numOfChars)
    return CsString::CsString_utf16::fromUtf8(str, numOfChars);
 }
 
-QString16 QString16::fromUtf16(const char16_t *str, size_type numOfChars)
+QString16 QString16::fromUtf8(const QString8 &str)
 {
-   if (str == nullptr) {
-      return QString16();
-   }
-
-   if (numOfChars < 0) {
-      numOfChars = 0;
-
-      while (str[numOfChars] != 0) {
-         ++numOfChars;
-      }
-   }
-
-   // broom - partial, pending surrogates
-
-   QString16 retval;
-
-   for (int i = 0; i < numOfChars; ++i) {
-      retval.append(static_cast<char32_t>(str[i]));
-   }
-
-   return retval;
+   return fromUtf8(str.constData(), str.size_storage());
 }
 
-QString16 QString16::fromUtf16(const QString16 &str)
+QString16 QString16::fromUtf16(const char16_t *str, size_type numOfChars)
 {
-   return fromUtf16((const char16_t *)str.constData(), str.size_storage());
+   return CsString::CsString_utf16::fromUtf16(str, numOfChars);
 }
 
 QString16 QString16::fromStdWString(const std::wstring &str, size_type numOfChars)
@@ -655,7 +626,7 @@ QString16 QString16::fromStdWString(const std::wstring &str, size_type numOfChar
             break;
          }
 
-         retval.push_back(ch);
+         retval.push_back(static_cast<char32_t>(ch));
          --numOfChars;
       }
    }
@@ -757,12 +728,9 @@ int QString16::localeAwareCompare(QStringView16 str1, QStringView16 str2)
       return 1;
    }
 
-#if defined(Q_OS_WIN32)
-   QString16 tmp1(str1.begin(), str1.end());
-   QString16 tmp2(str2.begin(), str2.end());
-
-   int retval = CompareString(GetUserDefaultLCID(), 0, (wchar_t *)tmp1.constData(), tmp1.size_storage(),
-        (wchar_t *)tmp2.constData(), tmp2.size_storage());
+#if defined(Q_OS_WIN)
+   int retval = CompareString(GetUserDefaultLCID(), 0, (wchar_t *)str1.charData(), str1.size_storage(),
+        (wchar_t *)str2.charData(), str2.size_storage());
 
    switch (retval) {
       case CSTR_LESS_THAN:
@@ -964,10 +932,10 @@ QString16 &QString16::replace(const QString16 &before, const QString16 &after, Q
       return *this;
    }
 
-   auto iter     = indexOfFast(before, begin(), cs);
+   auto iter     = indexOfFast(before, cbegin(), cs);
    size_type len = before.size();
 
-   while (iter != end()) {
+   while (iter != cend()) {
       auto last = iter + len;
 
       iter = erase(iter, last);
@@ -1093,7 +1061,7 @@ QString16 &QString16::replace(const QRegularExpression16 &regExp, const QString1
    static QRegularExpression16 regSplit("(.*?)(\\\\[0-9])");
    bool noCapture = true;
 
-   auto iter = after.indexOfFast('\\');
+   auto iter = after.indexOfFast(u'\\');
 
    if (iter != after.end() && iter != after.end() - 1) {
       splitMatch = regSplit.match(after);
@@ -1150,34 +1118,34 @@ QString16 &QString16::replace(const QRegularExpression16 &regExp, const QString1
 
          for (const auto &item : list) {
 
-            if (item == "\\0") {
+            if (item == u"\\0") {
                iter = CsString::CsString_utf16::insert(iter, saveCapture[0]);
 
-            } else if (item == "\\1") {
+            } else if (item == u"\\1") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[1]);
 
-            } else if (item == "\\2") {
+            } else if (item == u"\\2") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[2]);
 
-            } else if (item == "\\3") {
+            } else if (item == u"\\3") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[3]);
 
-            } else if (item == "\\4") {
+            } else if (item == u"\\4") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[4]);
 
-            } else if (item == "\\5") {
+            } else if (item == u"\\5") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[5]);
 
-            } else if (item == "\\6") {
+            } else if (item == u"\\6") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[6]);
 
-            } else if (item == "\\7") {
+            } else if (item == u"\\7") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[7]);
 
-            } else if (item == "\\8") {
+            } else if (item == u"\\8") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[8]);
 
-            } else if (item == "\\9") {
+            } else if (item == u"\\9") {
                   iter = CsString::CsString_utf16::insert(iter, saveCapture[9]);
 
             } else {
@@ -1595,7 +1563,7 @@ QString16 QString16::toHtmlEscaped() const
       if (c == UCHAR('<'))         {
          retval.append("&lt;");
 
-      } else if (c== UCHAR('>'))  {
+      } else if (c == UCHAR('>'))  {
          retval.append("&gt;");
 
       } else if (c == UCHAR('&'))  {
@@ -1682,24 +1650,24 @@ void QString16::truncate(size_type length)
 }
 
 // data stream
-QDataStream &operator>>(QDataStream &in, QString16 &str)
+QDataStream &operator>>(QDataStream &stream, QString16 &str)
 {
    char *tmp;
    uint len;
 
-   in.readBytes(tmp, len);
+   stream.readBytes(tmp, len);
    str = QString16::fromUtf16(reinterpret_cast<const char16_t *>(tmp), len/2);
    delete [] tmp;
 
-   return in;
+   return stream;
 }
 
-QDataStream &operator<<(QDataStream &out, const QString16 &str)
+QDataStream &operator<<(QDataStream &stream, const QString16 &str)
 {
    const char *tmp = reinterpret_cast<const char *>(str.constData());
 
-   out.writeBytes(tmp, str.size_storage() * 2);
-   return out;
+   stream.writeBytes(tmp, str.size_storage() * 2);
+   return stream;
 }
 
 // normalization functions
@@ -1823,7 +1791,7 @@ bool cs_internal_quickCheck(QString16::const_iterator &first_iter, QString16::co
 }
 
 // buffer has to have a length of 3, required for Hangul decomposition
-static const char32_t * cs_internal_decompose_2(uint ucs4, int *length, int *tag, char32_t *buffer)
+static const char32_t * cs_internal_decompose_2(char32_t ucs4, int *length, int *tag, char32_t *buffer)
 {
     if (ucs4 >= Hangul_Constants::Hangul_SBase && ucs4 < Hangul_Constants::Hangul_SBase + Hangul_Constants::Hangul_SCount) {
         // compute Hangul syllable decomposition as per UAX #15
@@ -1843,7 +1811,7 @@ static const char32_t * cs_internal_decompose_2(uint ucs4, int *length, int *tag
     if (index == 0xffff) {
         *length = 0;
         *tag    = QChar32::NoDecomposition;
-        return 0;
+        return nullptr;
     }
 
     const char32_t *decomposition = QUnicodeTables::uc_decomposition_map + index;
@@ -1951,8 +1919,10 @@ QString16 cs_internal_canonicalOrder(const QString16 &str, QChar32::UnicodeVersi
    return retval;
 }
 
-static char32_t inline cs_internal_ligature(uint u1, uint u2)
+static char32_t inline cs_internal_ligature(char32_t u1, char32_t u2)
 {
+   char32_t retval = U'\0';
+
    if (u1 >= Hangul_Constants::Hangul_LBase && u1 <= Hangul_Constants::Hangul_SBase + Hangul_Constants::Hangul_SCount) {
      // compute Hangul syllable composition as per UAX #15
      // hangul L-V pair
@@ -1979,21 +1949,22 @@ static char32_t inline cs_internal_ligature(uint u1, uint u2)
 
    const unsigned short index = GET_LIGATURE_INDEX(u2);
    if (index == 0xffff) {
-      return 0;
+      return retval;
    }
 
    const char32_t *ligatures = QUnicodeTables::uc_ligature_map + index;
-   ushort length = *ligatures++;
 
-   // broom - review ligature
-   const UCS2Pair *data = reinterpret_cast<const UCS2Pair *>(ligatures);
-   const UCS2Pair *r    = std::lower_bound(data, data + length, ushort(u1));
+   uint32_t length = *ligatures;
+   ++ligatures;
 
-   if (r != data + length && r->u1 == ushort(u1)) {
-     return r->u2;
+   for (uint32_t i = 0; i < length *2; i += 2)  {
+      if (ligatures[i] == u1) {
+         retval = ligatures[i + 1];
+         break;
+      }
    }
 
-   return 0;
+   return retval;
 }
 
 static QString16 cs_internal_compose(const QString16 &str, QChar32::UnicodeVersion version)
@@ -2007,12 +1978,12 @@ static QString16 cs_internal_compose(const QString16 &str, QChar32::UnicodeVersi
    QString16::const_iterator iterBeg = last_iter;
    QString16::const_iterator iterEnd = last_iter;
 
-   uint codePointBeg = 0;           // starting code point value
+   char32_t codePointBeg = 0;       // starting code point value
    int lastCombining = 255;         // to prevent combining > lastCombining
 
    for (auto iter = first_iter; iter != last_iter; ++iter) {
-      QChar32 uc   = *iter;
-      uint ucValue = uc.unicode();
+      QChar32 uc = *iter;
+      char32_t  ucValue = uc.unicode();
 
       const QUnicodeTables::Properties *p = QUnicodeTables::properties(ucValue);
 
@@ -2032,7 +2003,7 @@ static QString16 cs_internal_compose(const QString16 &str, QChar32::UnicodeVersi
          // form ligature with prior code point
          char32_t ligature = cs_internal_ligature(codePointBeg, ucValue);
 
-         if (ligature) {
+         if (ligature != U'\0') {
             codePointBeg = ligature;
 
             retval.chop(1);

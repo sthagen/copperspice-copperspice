@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,7 +21,9 @@
 *
 ***********************************************************************/
 
-// Copyright (C) 2013 Laszlo Papp <lpapp@kde.org>
+/*****************************************************
+** Copyright (c) 2013 Laszlo Papp <lpapp@kde.org>
+*****************************************************/
 
 #ifndef QCOMMANDLINEPARSER_H
 #define QCOMMANDLINEPARSER_H
@@ -39,6 +41,10 @@ class Q_CORE_EXPORT QCommandLineParser
 
  public:
    QCommandLineParser();
+
+   QCommandLineParser(const QCommandLineParser &) = delete;
+   QCommandLineParser &operator=(const QCommandLineParser &) = delete;
+
    ~QCommandLineParser();
 
    enum SingleDashWordOptionMode {
@@ -47,7 +53,7 @@ class Q_CORE_EXPORT QCommandLineParser
    };
    void setSingleDashWordOptionMode(SingleDashWordOptionMode parsingMode);
 
-   bool addOption(const QCommandLineOption &commandLineOption);
+   bool addOption(const QCommandLineOption &option);
 
    QCommandLineOption addVersionOption();
    QCommandLineOption addHelpOption();
@@ -63,8 +69,8 @@ class Q_CORE_EXPORT QCommandLineParser
    QString errorText() const;
 
    bool isSet(const QString &name) const;
-   QString value(const QString &name) const;
-   QStringList values(const QString &name) const;
+   QString value(const QString &optionName) const;
+   QStringList values(const QString &optionName) const;
 
    bool isSet(const QCommandLineOption &option) const;
    QString value(const QCommandLineOption &option) const;
@@ -78,8 +84,6 @@ class Q_CORE_EXPORT QCommandLineParser
    QString helpText() const;
 
  private:
-   Q_DISABLE_COPY(QCommandLineParser)
-
    QCommandLineParserPrivate *const d;
 };
 

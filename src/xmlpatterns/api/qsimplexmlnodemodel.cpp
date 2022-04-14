@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,8 +32,6 @@
 #include "qsimplexmlnodemodel.h"
 #include "qsingletoniterator_p.h"
 
-QT_BEGIN_NAMESPACE
-
 using namespace QPatternist;
 
 class QSimpleXmlNodeModelPrivate : public QAbstractXmlNodeModelPrivate
@@ -60,7 +58,8 @@ QString QSimpleXmlNodeModel::stringValue(const QXmlNodeModelIndex &node) const
 
    if (k == QXmlNodeModelIndex::Element || k == QXmlNodeModelIndex::Attribute) {
       const QVariant &candidate = typedValue(node);
-      if (candidate.isNull()) {
+
+      if (! candidate.isValid()) {
          return QString();
       } else {
          return AtomicValue::toXDM(candidate).stringValue();
@@ -116,7 +115,4 @@ QVector<QXmlNodeModelIndex> QSimpleXmlNodeModel::nodesByIdref(const QXmlName &id
    Q_UNUSED(idref);
    return QVector<QXmlNodeModelIndex>();
 }
-
-QT_END_NAMESPACE
-
 

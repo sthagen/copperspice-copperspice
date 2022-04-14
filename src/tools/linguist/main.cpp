@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,39 +21,37 @@
 *
 ***********************************************************************/
 
-#include "mainwindow.h"
-#include "globals.h"
+#include <mainwindow.h>
+#include <globals.h>
 
-#include <QtCore/QFile>
-#include <QtCore/QLibraryInfo>
-#include <QtCore/QLocale>
-#include <QtCore/QSettings>
-#include <QtCore/QTextCodec>
-#include <QtCore/QTranslator>
+#include <QFile>
+#include <QLibraryInfo>
+#include <QLocale>
+#include <QSettings>
+#include <QTextCodec>
+#include <QTranslator>
 
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QPixmap>
-#include <QtGui/QSplashScreen>
-
-#ifdef Q_OS_DARWIN
-#include <QtCore/QUrl>
-#include <QtGui/QFileOpenEvent>
-#endif
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QPixmap>
 
 #ifdef Q_OS_DARWIN
+#include <QUrl>
+#include <QFileOpenEvent>
+
 class ApplicationEventFilter : public QObject
 {
-   Q_OBJECT
+   CS_OBJECT(ApplicationEventFilter)
 
  public:
    ApplicationEventFilter()
-      : m_mainWindow(0) {
+      : m_mainWindow(nullptr) {
    }
 
    void setMainWindow(MainWindow *mw) {
       m_mainWindow = mw;
-      if (!m_filesToOpen.isEmpty() && m_mainWindow) {
+
+      if (! m_filesToOpen.isEmpty() && m_mainWindow) {
          m_mainWindow->openFiles(m_filesToOpen);
          m_filesToOpen.clear();
       }
@@ -64,13 +62,15 @@ class ApplicationEventFilter : public QObject
       if (object == qApp && event->type() == QEvent::FileOpen) {
          QFileOpenEvent *e = static_cast<QFileOpenEvent *>(event);
          QString file = e->url().toLocalFile();
-         if (!m_mainWindow) {
+
+         if (! m_mainWindow) {
             m_filesToOpen << file;
          } else {
             m_mainWindow->openFiles(QStringList() << file);
          }
          return true;
       }
+
       return QObject::eventFilter(object, event);
    }
 
@@ -93,18 +93,25 @@ int main(int argc, char **argv)
 #endif
 
    QStringList files;
-   QString resourceDir = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-   QStringList args = app.arguments();
+   QStringList argList = app.arguments();
 
-   for (int i = 1; i < args.count(); ++i) {
-      QString argument = args.at(i);
-      if (argument == QLatin1String("-resourcedir")) {
-         if (i + 1 < args.count()) {
-            resourceDir = QFile::decodeName(args.at(++i).toLocal8Bit());
+   // remove first entry which is the program name
+   argList.removeFirst();
+
+   QString resourceDir = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+
+   while (! argList.isEmpty()) {
+      QString argument = argList.takeFirst();
+
+      if (argument == "-resourcedir") {
+         if (argList.isEmpty()) {
+            // show warning
+
          } else {
-            // issue a warning
+            resourceDir = argList.takeFirst();
          }
-      } else if (!files.contains(argument)) {
+
+      } else if (! files.contains(argument)) {
          files.append(argument);
       }
    }
@@ -113,34 +120,23 @@ int main(int argc, char **argv)
    QTranslator qtTranslator;
    QString sysLocale = QLocale::system().name();
 
-   if (translator.load(QLatin1String("linguist_") + sysLocale, resourceDir)) {
+   if (translator.load(QString("linguist_") + sysLocale, resourceDir)) {
       app.installTranslator(&translator);
-      if (qtTranslator.load(QLatin1String("qt_") + sysLocale, resourceDir)) {
+
+      if (qtTranslator.load(QString("cs_") + sysLocale, resourceDir)) {
          app.installTranslator(&qtTranslator);
       } else {
          app.removeTranslator(&translator);
       }
    }
 
-   app.setOrganizationName(QLatin1String("CopperSpice"));
-   app.setApplicationName(QLatin1String("Linguist"));
+   app.setOrganizationName("CopperSpice");
+   app.setApplicationName("Linguist");
 
    QSettings config;
 
    QWidget tmp;
    tmp.restoreGeometry(config.value(settingPath("Geometry/WindowGeometry")).toByteArray());
-
-   QSplashScreen *splash = 0;
-   int screenId = QApplication::desktop()->screenNumber(tmp.geometry().center());
-   splash = new QSplashScreen(QApplication::desktop()->screen(screenId),
-                              QPixmap(QLatin1String(":/images/splash.png")));
-
-   if (QApplication::desktop()->isVirtualDesktop()) {
-      QRect srect(0, 0, splash->width(), splash->height());
-      splash->move(QApplication::desktop()->availableGeometry(screenId).center() - srect.center());
-   }
-   splash->setAttribute(Qt::WA_DeleteOnClose);
-   splash->show();
 
    MainWindow mw;
 
@@ -149,7 +145,6 @@ int main(int argc, char **argv)
 #endif
 
    mw.show();
-   splash->finish(&mw);
    QApplication::restoreOverrideCursor();
 
    mw.openFiles(files, true);

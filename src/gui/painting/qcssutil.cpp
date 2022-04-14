@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -182,7 +182,8 @@ void qDrawEdge(QPainter *p, qreal x1, qreal y1, qreal x2, qreal y2, qreal dw1, q
             || (style == BorderStyle_Inset && (edge == BottomEdge || edge == RightEdge))) {
             c = c.color().lighter();
          }
-      // fall through!
+         [[fallthrough]];
+
       case BorderStyle_Solid: {
          p->setPen(Qt::NoPen);
          p->setBrush(c);
@@ -214,6 +215,7 @@ void qDrawEdge(QPainter *p, qreal x1, qreal y1, qreal x2, qreal y2, qreal dw1, q
          }
          break;
       }
+
       case BorderStyle_Dotted:
       case BorderStyle_Dashed:
       case BorderStyle_DotDash:

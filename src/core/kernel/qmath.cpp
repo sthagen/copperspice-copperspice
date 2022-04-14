@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,9 +21,7 @@
 *
 ***********************************************************************/
 
-#include <QtCore/qmath.h>
-
-QT_BEGIN_NAMESPACE
+#include <qmath.h>
 
 const qreal qt_sine_table[QT_SINE_TABLE_SIZE] = {
    qreal(0.0),
@@ -284,4 +282,3 @@ const qreal qt_sine_table[QT_SINE_TABLE_SIZE] = {
    qreal(-0.024541228522912448)
 };
 
-QT_END_NAMESPACE

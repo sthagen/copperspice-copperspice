@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -86,8 +86,10 @@ void QMediaNetworkPlaylistProviderPrivate::_q_handleNewItem(const QVariant &cont
    QUrl url;
    if (content.type() == QVariant::Url) {
       url = content.toUrl();
+
    } else if (content.type() == QVariant::Map) {
-      url = content.toMap()[QLatin1String("url")].toUrl();
+      url = content.toMap()["url"].toUrl();
+
    } else {
       return;
    }
@@ -100,11 +102,9 @@ QMediaNetworkPlaylistProvider::QMediaNetworkPlaylistProvider(QObject *parent)
 {
    d_func()->q_ptr = this;
 
-   connect(&d_func()->parser, SIGNAL(newItem(QVariant)), this, SLOT(_q_handleNewItem(QVariant)));
-   connect(&d_func()->parser, SIGNAL(finished()),        this, SLOT(loaded()));
-
-   connect(&d_func()->parser, SIGNAL(error(QPlaylistFileParser::ParserError, QString)),
-      this, SLOT(_q_handleParserError(QPlaylistFileParser::ParserError, QString)));
+   connect(&d_func()->parser, &QPlaylistFileParser::newItem,  this, &QMediaNetworkPlaylistProvider::_q_handleNewItem);
+   connect(&d_func()->parser, &QPlaylistFileParser::finished, this, &QMediaNetworkPlaylistProvider::loaded);
+   connect(&d_func()->parser, &QPlaylistFileParser::error,    this, &QMediaNetworkPlaylistProvider::_q_handleParserError);
 }
 
 QMediaNetworkPlaylistProvider::~QMediaNetworkPlaylistProvider()

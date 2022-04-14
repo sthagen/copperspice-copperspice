@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,12 @@
 #ifndef QGRAPH_P_H
 #define QGRAPH_P_H
 
-#include <QtCore/QHash>
-#include <QtCore/QQueue>
-#include <QtCore/QString>
-#include <QtCore/QDebug>
-#include <float.h>
+#include <qhash.h>
+#include <qqueue.h>
+#include <qstring.h>
+#include <qdebug.h>
 
+#include <float.h>
 
 template <typename Vertex, typename EdgeData>
 class Graph
@@ -110,7 +110,7 @@ class Graph
 
    EdgeData *edgeData(Vertex *first, Vertex *second) {
       QHash<Vertex *, EdgeData *> *row = m_graph.value(first);
-      return row ? row->value(second) : 0;
+      return row ? row->value(second) : nullptr;
    }
 
    void createEdge(Vertex *first, Vertex *second, EdgeData *data) {

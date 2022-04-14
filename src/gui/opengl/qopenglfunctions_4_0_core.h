@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -29,7 +29,7 @@
 
 #if !defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_2)
 
-#include <QOpenGLVersionFunctions>
+#include <qopengl_versionfunctions.h>
 #include <qopenglcontext.h>
 
 class Q_GUI_EXPORT QOpenGLFunctions_4_0_Core : public QAbstractOpenGLFunctions

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,6 +25,16 @@
 #define QT_MAC_P_H
 
 #include <qmacdefines_mac.h>
+#include <qglobal.h>
+#include <qvariant.h>
+#include <qmimedata.h>
+#include <qpointer.h>
+#include <qpainter.h>
+
+#include <qcore_mac_p.h>
+
+class QWidget;
+class QDragMoveEvent;
 
 #ifdef __OBJC__
 #include <Cocoa/Cocoa.h>
@@ -32,18 +42,7 @@
 #endif
 
 #include <CoreServices/CoreServices.h>
-
-#include <qglobal.h>
-#include <qvariant.h>
-#include <qmimedata.h>
-#include <qpointer.h>
-#include <qcore_mac_p.h>
-#include <qpainter.h>
-
-#include <Carbon/Carbon.h>         // consider removing
-
-class QWidget;
-class QDragMoveEvent;
+#include <Carbon/Carbon.h>               // consider removing
 
 enum {
    // AE types
@@ -67,13 +66,18 @@ enum {
 class QMacSmartQuickDrawRegion
 {
    RgnHandle qdRgn;
-   Q_DISABLE_COPY(QMacSmartQuickDrawRegion)
 
  public:
-   explicit QMacSmartQuickDrawRegion(RgnHandle rgn) : qdRgn(rgn) {}
+   explicit QMacSmartQuickDrawRegion(RgnHandle rgn)
+      : qdRgn(rgn)
+   {
+   }
+
+   QMacSmartQuickDrawRegion(const QMacSmartQuickDrawRegion &) = delete;
+   QMacSmartQuickDrawRegion &operator=(const QMacSmartQuickDrawRegion &) = delete;
 
    ~QMacSmartQuickDrawRegion() {
-      extern void qt_mac_dispose_rgn(RgnHandle); // qregion_mac.cpp
+      extern void qt_mac_dispose_rgn(RgnHandle);           // qregion_mac.cpp
       qt_mac_dispose_rgn(qdRgn);
    }
 
@@ -82,61 +86,67 @@ class QMacSmartQuickDrawRegion
    }
 };
 
-QString qt_mac_removeMnemonics(const QString &original); // implemented in qmacstyle_mac.cpp
+QString qt_mac_removeMnemonics(const QString &original);   // implemented in qmacstyle_mac.cpp
 
 class QMacCGContext
 {
    CGContextRef context;
 
  public:
-   QMacCGContext(QPainter *p); // qpaintengine_mac.mm
+   QMacCGContext(QPainter *p);                             // implemented in qmacstyle_mac.cpp
 
-   inline QMacCGContext() {
-      context = 0;
+   QMacCGContext() {
+      context = nullptr;
    }
 
-   inline QMacCGContext(const QPaintDevice *pdev) {
+   QMacCGContext(const QPaintDevice *pdev) {
       extern CGContextRef qt_mac_cg_context(const QPaintDevice *);
       context = qt_mac_cg_context(pdev);
    }
 
-   inline QMacCGContext(CGContextRef cg, bool takeOwnership = false) {
+   QMacCGContext(CGContextRef cg, bool takeOwnership = false) {
       context = cg;
-      if (!takeOwnership) {
+      if (! takeOwnership) {
          CGContextRetain(context);
       }
    }
 
-   inline QMacCGContext(const QMacCGContext &copy) : context(0) {
+   QMacCGContext(const QMacCGContext &copy)
+      : context(nullptr) {
       *this = copy;
    }
-   inline ~QMacCGContext() {
+
+   ~QMacCGContext() {
       if (context) {
          CGContextRelease(context);
       }
    }
 
-   inline bool isNull() const {
+   bool isNull() const {
       return context;
    }
-   inline operator CGContextRef() {
+
+   operator CGContextRef() {
       return context;
    }
-   inline QMacCGContext &operator=(const QMacCGContext &copy) {
+
+   QMacCGContext &operator=(const QMacCGContext &copy) {
       if (context) {
          CGContextRelease(context);
       }
+
       context = copy.context;
       CGContextRetain(context);
       return *this;
    }
 
-   inline QMacCGContext &operator=(CGContextRef cg) {
+   QMacCGContext &operator=(CGContextRef cg) {
       if (context) {
          CGContextRelease(context);
       }
+
       context = cg;
-      CGContextRetain(context); //we do not take ownership
+      CGContextRetain(context);    // do not take ownership
       return *this;
    }
 };
@@ -144,11 +154,11 @@ class QMacCGContext
 class QMacInternalPasteboardMime;
 class QMimeData;
 
-extern QPaintDevice *qt_mac_safe_pdev;                      // qapplication_mac.cpp
+extern QPaintDevice *qt_mac_safe_pdev;                          // implemented in qmacstyle_mac.cpp
 
-extern OSWindowRef qt_mac_window_for(const QWidget *);      // qwidget_mac.mm
-extern OSViewRef qt_mac_nativeview_for(const QWidget *);    // qwidget_mac.mm
-extern QPoint qt_mac_nativeMapFromParent(const QWidget *child, const QPoint &pt); //qwidget_mac.mm
+extern OSWindowRef qt_mac_window_for(const QWidget *);          // implemented in qwidget_mac.mm
+extern OSViewRef qt_mac_nativeview_for(const QWidget *);
+extern QPoint qt_mac_nativeMapFromParent(const QWidget *child, const QPoint &pt);
 
 #ifdef check
 # undef check

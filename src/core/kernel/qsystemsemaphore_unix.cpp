@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -48,8 +48,6 @@
 #endif
 
 //#define QSYSTEMSEMAPHORE_DEBUG
-
-QT_BEGIN_NAMESPACE
 
 QSystemSemaphorePrivate::QSystemSemaphorePrivate() :
 #ifndef QT_POSIX_IPC
@@ -317,6 +315,7 @@ bool QSystemSemaphorePrivate::modifySemaphore(int count)
 
    if (count > 0) {
       int cnt = count;
+
       do {
          if (sem_post(semaphore) == -1) {
             setErrorString(QLatin1String("QSystemSemaphore::modifySemaphore (sem_post)"));
@@ -332,6 +331,7 @@ bool QSystemSemaphorePrivate::modifySemaphore(int count)
          }
          --cnt;
       } while (cnt > 0);
+
    } else {
       int res;
       EINTR_LOOP(res, sem_wait(semaphore));
@@ -352,7 +352,5 @@ bool QSystemSemaphorePrivate::modifySemaphore(int count)
 
    return true;
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_SYSTEMSEMAPHORE

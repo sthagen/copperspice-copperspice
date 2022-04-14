@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -281,17 +281,13 @@ QTextFrameLayoutData *QTextFrame::layoutData() const
    return d->layoutData;
 }
 
-/*!
-  \internal
-*/
+
 void QTextFrame::setLayoutData(QTextFrameLayoutData *data)
 {
    Q_D(QTextFrame);
    delete d->layoutData;
    d->layoutData = data;
 }
-
-
 
 void QTextFramePrivate::fragmentAdded(QChar type, uint fragment)
 {
@@ -313,7 +309,8 @@ void QTextFramePrivate::fragmentAdded(QChar type, uint fragment)
 
 void QTextFramePrivate::fragmentRemoved(QChar type, uint fragment)
 {
-   Q_UNUSED(fragment); // --release warning
+   (void) fragment;
+
    if (type == QTextBeginningOfFrame) {
       Q_ASSERT(fragment_start == fragment);
       fragment_start = 0;
@@ -357,7 +354,7 @@ void QTextFramePrivate::remove_me()
    parentFrame->d_func()->childFrames.removeAt(index);
 
    childFrames.clear();
-   parentFrame = 0;
+   parentFrame = nullptr;
 }
 
 
@@ -383,10 +380,10 @@ QTextFrame::iterator QTextFrame::end() const
 */
 QTextFrame::iterator::iterator()
 {
-   f = 0;
-   b = 0;
-   e = 0;
-   cf = 0;
+   f  = nullptr;
+   b  = 0;
+   e  = 0;
+   cf = nullptr;
    cb = 0;
 }
 
@@ -395,10 +392,10 @@ QTextFrame::iterator::iterator()
 */
 QTextFrame::iterator::iterator(QTextFrame *frame, int block, int begin, int end)
 {
-   f = frame;
-   b = begin;
-   e = end;
-   cf = 0;
+   f  = frame;
+   b  = begin;
+   e  = end;
+   cf = nullptr;
    cb = block;
 }
 
@@ -407,9 +404,9 @@ QTextFrame::iterator::iterator(QTextFrame *frame, int block, int begin, int end)
 */
 QTextFrame::iterator::iterator(const iterator &other)
 {
-   f = other.f;
-   b = other.b;
-   e = other.e;
+   f  = other.f;
+   b  = other.b;
+   e  = other.e;
    cf = other.cf;
    cb = other.cb;
 }
@@ -465,7 +462,8 @@ QTextFrame::iterator &QTextFrame::iterator::operator++()
    if (cf) {
       int end = cf->lastPosition() + 1;
       cb = map.findNode(end);
-      cf = 0;
+      cf = nullptr;
+
    } else if (cb) {
       cb = map.next(cb);
       if (cb == e) {
@@ -505,7 +503,7 @@ QTextFrame::iterator &QTextFrame::iterator::operator--()
    if (cf) {
       int start = cf->firstPosition() - 1;
       cb = map.findNode(start);
-      cf = 0;
+      cf = nullptr;
 
    } else {
       if (cb == b) {
@@ -542,8 +540,9 @@ QTextBlockUserData::~QTextBlockUserData()
 
 bool QTextBlock::isValid() const
 {
-   return p != 0 && p->blockMap().isValid(n);
+   return p != nullptr && p->blockMap().isValid(n);
 }
+
 int QTextBlock::position() const
 {
    if (! p || !n) {
@@ -576,7 +575,7 @@ bool QTextBlock::contains(int position) const
 QTextLayout *QTextBlock::layout() const
 {
    if (!p || !n) {
-      return 0;
+      return nullptr;
    }
 
    const QTextBlockData *b = p->blockMap().fragment(n);
@@ -742,15 +741,16 @@ QVector<QTextLayout::FormatRange> QTextBlock::textFormats() const
 
    return formats;
 }
+
 const QTextDocument *QTextBlock::document() const
 {
-   return p ? p->document() : 0;
+   return p ? p->document() : nullptr;
 }
 
 QTextList *QTextBlock::textList() const
 {
    if (! isValid()) {
-      return 0;
+      return nullptr;
    }
 
    const QTextBlockFormat fmt = blockFormat();
@@ -762,10 +762,11 @@ QTextList *QTextBlock::textList() const
 QTextBlockUserData *QTextBlock::userData() const
 {
    if (! p || ! n) {
-      return 0;
+      return nullptr;
    }
 
    const QTextBlockData *b = p->blockMap().fragment(n);
+
    return b->userData;
 }
 
@@ -779,14 +780,10 @@ void QTextBlock::setUserData(QTextBlockUserData *data)
    if (data != b->userData) {
       delete b->userData;
    }
+
    b->userData = data;
 }
 
-/*!
-    \since 4.1
-
-    Returns the integer value previously set with setUserState() or -1.
-*/
 int QTextBlock::userState() const
 {
    if (!p || !n) {
@@ -797,12 +794,6 @@ int QTextBlock::userState() const
    return b->userState;
 }
 
-/*!
-    \since 4.1
-
-    Stores the specified \a state integer value in the text block. This may be
-    useful for example in a syntax highlighter to store a text parsing state.
-*/
 void QTextBlock::setUserState(int state)
 {
    if (!p || !n) {
@@ -813,13 +804,6 @@ void QTextBlock::setUserState(int state)
    b->userState = state;
 }
 
-/*!
-    \since 4.4
-
-    Returns the blocks revision.
-
-    \sa setRevision(), QTextDocument::revision()
-*/
 int QTextBlock::revision() const
 {
    if (!p || !n) {
@@ -830,13 +814,6 @@ int QTextBlock::revision() const
    return b->revision;
 }
 
-/*!
-    \since 4.4
-
-    Sets a blocks revision to \a rev.
-
-    \sa revision(), QTextDocument::revision()
-*/
 void QTextBlock::setRevision(int rev)
 {
    if (!p || !n) {
@@ -847,13 +824,6 @@ void QTextBlock::setRevision(int rev)
    b->revision = rev;
 }
 
-/*!
-    \since 4.4
-
-    Returns true if the block is visible; otherwise returns false.
-
-    \sa setVisible()
-*/
 bool QTextBlock::isVisible() const
 {
    if (!p || !n) {

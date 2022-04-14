@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,24 +29,25 @@
 
 #ifndef QT_NO_ANIMATION
 
-QT_BEGIN_NAMESPACE
-
 class QSequentialAnimationGroupPrivate : public QAnimationGroupPrivate
 {
    Q_DECLARE_PUBLIC(QSequentialAnimationGroup)
 
  public:
    QSequentialAnimationGroupPrivate()
-      : currentAnimation(0), currentAnimationIndex(-1), lastLoop(0) {
+      : currentAnimation(nullptr), currentAnimationIndex(-1), lastLoop(0) {
    }
 
-
    struct AnimationIndex {
-      AnimationIndex() : index(0), timeOffset(0) {}
+      AnimationIndex()
+         : index(0), timeOffset(0)
+      {}
+
       // index points to the animation at timeOffset, skipping 0 duration animations.
       // Note that the index semantic is slightly different depending on the direction.
-      int index; // the index of the animation in timeOffset
-      int timeOffset; // time offset when the animation at index starts.
+
+      int index;       // the index of the animation in timeOffset
+      int timeOffset;  // time offset when the animation at index starts.
    };
 
    int animationActualTotalDuration(int index) const;
@@ -58,7 +59,14 @@ class QSequentialAnimationGroupPrivate : public QAnimationGroupPrivate
    void animationInsertedAt(int index) override;
    void animationRemoved(int index, QAbstractAnimation *anim) override;
 
+   void restart();
    bool atEnd() const;
+
+   // handle time changes
+   void rewindForwards(const AnimationIndex &newAnimationIndex);
+   void advanceForwards(const AnimationIndex &newAnimationIndex);
+
+   void _q_uncontrolledAnimationFinished();
 
    QAbstractAnimation *currentAnimation;
    int currentAnimationIndex;
@@ -67,18 +75,9 @@ class QSequentialAnimationGroupPrivate : public QAnimationGroupPrivate
    // it helps seeking and even going forward
    QList<int> actualDuration;
 
-   void restart();
    int lastLoop;
-
-   // handle time changes
-   void rewindForwards(const AnimationIndex &newAnimationIndex);
-   void advanceForwards(const AnimationIndex &newAnimationIndex);
-
-   void _q_uncontrolledAnimationFinished();
 };
-
-QT_END_NAMESPACE
 
 #endif //QT_NO_ANIMATION
 
-#endif //QSEQUENTIALANIMATIONGROUP_P_H
+#endif

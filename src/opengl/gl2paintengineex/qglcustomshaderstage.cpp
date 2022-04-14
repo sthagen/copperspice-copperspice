@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,10 @@
 class QGLCustomShaderStagePrivate
 {
  public:
-   QGLCustomShaderStagePrivate() :
-      m_manager(0) {}
+   QGLCustomShaderStagePrivate()
+      : m_manager(nullptr)
+   {
+   }
 
    QPointer<QGLEngineShaderManager> m_manager;
    QString m_source;
@@ -44,6 +46,7 @@ QGLCustomShaderStage::QGLCustomShaderStage()
 QGLCustomShaderStage::~QGLCustomShaderStage()
 {
    Q_D(QGLCustomShaderStage);
+
    if (d->m_manager) {
       d->m_manager->removeCustomStage();
       d->m_manager->sharedShaders->cleanupCustomStage(this);
@@ -56,7 +59,7 @@ void QGLCustomShaderStage::setUniformsDirty()
 {
    Q_D(QGLCustomShaderStage);
    if (d->m_manager) {
-      d->m_manager->setDirty();   // ### Probably a bit overkill
+      d->m_manager->setDirty();
    }
 }
 
@@ -93,8 +96,8 @@ void QGLCustomShaderStage::removeFromPainter(QPainter *p)
    // Just set the stage to null, don't call removeCustomStage().
    // This should leave the program in a compiled/linked state
    // if the next custom shader stage is this one again.
-   d->m_manager->setCustomStage(0);
-   d->m_manager = 0;
+   d->m_manager->setCustomStage(nullptr);
+   d->m_manager = nullptr;
 }
 
 QString QGLCustomShaderStage::source() const
@@ -108,7 +111,7 @@ QString QGLCustomShaderStage::source() const
 void QGLCustomShaderStage::setInactive()
 {
    Q_D(QGLCustomShaderStage);
-   d->m_manager = 0;
+   d->m_manager = nullptr;
 }
 
 void QGLCustomShaderStage::setSource(const QString &s)

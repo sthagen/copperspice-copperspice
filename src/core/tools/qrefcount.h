@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -57,10 +57,13 @@ class RefCount
 
    bool setSharable(bool sharable) {
       Q_ASSERT(!isShared());
+
       if (sharable) {
-         return atomic.testAndSetRelaxed(0, 1);
+         int expected = 0;
+         return atomic.compareExchange(expected, 1, std::memory_order_relaxed);
       } else {
-         return atomic.testAndSetRelaxed(1, 0);
+         int expected = 1;
+         return atomic.compareExchange(expected, 0, std::memory_order_relaxed);
       }
    }
 

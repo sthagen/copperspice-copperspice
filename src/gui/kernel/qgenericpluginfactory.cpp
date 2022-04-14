@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,13 +28,18 @@
 #include <qgenericplugin.h>
 #include <qdebug.h>
 
-#if ! defined(Q_OS_WIN32) || defined(QT_SHARED)
-   Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, loader, (QGenericPluginInterface_ID, "/generic", Qt::CaseInsensitive))
+#if ! defined(Q_OS_WIN) || defined(QT_SHARED)
+   static QFactoryLoader *loader()
+   {
+      static QFactoryLoader retval(QGenericPluginInterface_ID, "/generic", Qt::CaseInsensitive);
+      return &retval;
+   }
+
 #endif
 
 QObject *QGenericPluginFactory::create(const QString &key, const QString &specification)
 {
-#if (! defined(Q_OS_WIN32) || defined(QT_SHARED))
+#if (! defined(Q_OS_WIN) || defined(QT_SHARED))
    const QString driver = key.toLower();
 
    if (QObject *object = cs_load_plugin<QObject, QGenericPlugin>(loader(), driver, specification)) {
@@ -49,7 +54,7 @@ QStringList QGenericPluginFactory::keys()
 {
    QStringList list;
 
-#if ! defined(Q_OS_WIN32) || defined(QT_SHARED)
+#if ! defined(Q_OS_WIN) || defined(QT_SHARED)
    auto keySet = loader()->keySet();
    list.append(keySet.toList());
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -46,7 +46,8 @@
 #include <qunicodetools_p.h>
 
 #if ! defined(CS_BUILDING_CUPS)
-#include <qharfbuzz_gui_p.h>
+// Harfbuzz used in qtextengine.cpp and qfontengine.cpp
+#include <qharfbuzz_p.h>
 #endif
 
 #include <stdlib.h>
@@ -156,11 +157,12 @@ struct QGlyphAttributes {
 static_assert(sizeof(QGlyphAttributes) == 1, "Type mismatch");
 
 #if defined(CS_BUILDING_CUPS)
+   struct hb_face_t;
+   struct hb_font_t;
+
    using glyph_t = uint32_t;
 
-   using qt_destroy_func_ptr        = void *;
-   using qt_get_font_table_func_ptr = void *;
-
+   using cs_fontTable_func_ptr = bool (*)(void *, uint, uchar *, uint *);
 #endif
 
 struct QGlyphLayout {
@@ -168,7 +170,9 @@ struct QGlyphLayout {
       + sizeof(QGlyphAttributes) + sizeof(QGlyphJustification);
 
    inline QGlyphLayout()
-      : numGlyphs(0) {}
+      : numGlyphs(0)
+   {
+   }
 
    inline explicit QGlyphLayout(char *address, int totalGlyphs) {
       offsets    = reinterpret_cast<QFixedPoint *>(address);
@@ -278,7 +282,7 @@ class QTextItemInt : public QTextItem
 {
  public:
    inline QTextItemInt()
-      : justified(false), underlineStyle(QTextCharFormat::NoUnderline), logClusters(0), f(0), fontEngine(0) {
+      : justified(false), underlineStyle(QTextCharFormat::NoUnderline), logClusters(nullptr), f(nullptr), fontEngine(nullptr) {
    }
 
    QTextItemInt(const QScriptItem &si, QFont *font, const QTextCharFormat &format = QTextCharFormat());
@@ -518,7 +522,7 @@ class Q_GUI_EXPORT QTextEngine
       if (block.docHandle()) {
          return block.docHandle()->formatCollection();
       }
-      return specialData ? specialData->formatCollection.data() : 0;
+      return specialData ? specialData->formatCollection.data() : nullptr;
    }
 
    QTextCharFormat format(const QScriptItem *si) const;
@@ -620,8 +624,8 @@ class Q_GUI_EXPORT QTextEngine
       mutable int prevLength;
 
       inline void reset() {
-         prevFontEngine = 0;
-         prevScaledFontEngine = 0;
+         prevFontEngine = nullptr;
+         prevScaledFontEngine = nullptr;
          prevScript = -1;
          prevPosition = -1;
          prevLength = -1;
@@ -655,9 +659,8 @@ class Q_GUI_EXPORT QTextEngine
    void shapeText(int item) const;
 
 #if ! defined(CS_BUILDING_CUPS)
-   int shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str,
-      QFontEngine *fontEngine, const QVector<uint> &itemBoundaries,
-      bool kerningEnabled,  bool hasLetterSpacing) const;
+   int shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, QFontEngine *fontEngine,
+            const QVector<uint> &itemBoundaries, bool kerningEnabled, bool hasLetterSpacing) const;
 #endif
 
    int endOfLine(int lineNum);

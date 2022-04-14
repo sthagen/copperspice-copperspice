@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,18 +40,18 @@ class QPrintDialogPrivate : public QAbstractPrintDialogPrivate
    Q_DECLARE_PUBLIC(QPrintDialog)
 
  public:
-    QPrintDialogPrivate() : printInfo(0), printPanel(0)
-       {}
+   QPrintDialogPrivate()
+      : printInfo(nullptr), printPanel(nullptr)
+   {
+   }
 
    void openCocoaPrintPanel(Qt::WindowModality modality);
    void closeCocoaPrintPanel();
 
-
    inline QPrintDialog *printDialog() { return q_func(); }
 
-
-    NSPrintInfo *printInfo;
-    NSPrintPanel *printPanel;
+   NSPrintInfo *printInfo;
+   NSPrintPanel *printPanel;
 };
 
 
@@ -77,7 +77,7 @@ class QPrintDialogPrivate : public QAbstractPrintDialogPrivate
 - (void)printPanelDidEnd: (NSPrintPanel *)printPanel
               returnCode: (int)returnCode contextInfo: (void *)contextInfo
 {
-   Q_UNUSED(printPanel);
+    (void) printPanel;
 
     QPrintDialog *dialog = static_cast<QPrintDialog *>(contextInfo);
     QPrinter *printer = dialog->printer();
@@ -175,7 +175,6 @@ class QPrintDialogPrivate : public QAbstractPrintDialogPrivate
 }
 @end
 
-
 void QPrintDialogPrivate::openCocoaPrintPanel(Qt::WindowModality modality)
 {
    Q_Q(QPrintDialog);
@@ -249,9 +248,9 @@ void QPrintDialogPrivate::openCocoaPrintPanel(Qt::WindowModality modality)
 void QPrintDialogPrivate::closeCocoaPrintPanel()
 {
     [printInfo release];
-    printInfo = 0;
+    printInfo  = nullptr;
     [printPanel release];
-    printPanel = 0;
+    printPanel = nullptr;
 }
 
 static bool warnIfNotNative(QPrinter *printer)
@@ -274,7 +273,7 @@ QPrintDialog::QPrintDialog(QPrinter *printer, QWidget *parent)
 }
 
 QPrintDialog::QPrintDialog(QWidget *parent)
-   : QAbstractPrintDialog(*(new QPrintDialogPrivate), 0, parent)
+   : QAbstractPrintDialog(*(new QPrintDialogPrivate), nullptr, parent)
 {
    Q_D(QPrintDialog);
    if (!warnIfNotNative(d->printer)) {
@@ -312,7 +311,7 @@ void QPrintDialog::setVisible(bool visible)
 {
    Q_D(QPrintDialog);
 
-   bool isCurrentlyVisible = (d->printPanel != 0);
+   bool isCurrentlyVisible = (d->printPanel != nullptr);
 
    if (!visible == !isCurrentlyVisible) {
       return;

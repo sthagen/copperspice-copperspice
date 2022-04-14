@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,8 +40,8 @@ class QFocusFramePrivate : public QWidgetPrivate
 
  public:
    QFocusFramePrivate(QObject *q) {
-      widget      = 0;
-      frameParent = 0;
+      widget      = nullptr;
+      frameParent = nullptr;
       CSInternalEvents::set_m_sendChildEvents(q, false);
       showFrameAboveWidget = false;
    }
@@ -97,13 +97,6 @@ void QFocusFramePrivate::updateSize()
    }
 }
 
-/*!
-    Initialize \a option with the values from this QFocusFrame. This method is useful
-    for subclasses when they need a QStyleOption, but don't want to fill
-    in all the information themselves.
-
-    \sa QStyleOption::initFrom()
-*/
 void QFocusFrame::initStyleOption(QStyleOption *option) const
 {
    if (!option) {
@@ -113,38 +106,24 @@ void QFocusFrame::initStyleOption(QStyleOption *option) const
    option->initFrom(this);
 }
 
-
 QFocusFrame::QFocusFrame(QWidget *parent)
-   : QWidget(*new QFocusFramePrivate(this), parent, 0)
+   : QWidget(*new QFocusFramePrivate(this), parent, Qt::EmptyFlag)
 {
    setAttribute(Qt::WA_TransparentForMouseEvents);
    setFocusPolicy(Qt::NoFocus);
    setAttribute(Qt::WA_NoChildEventsForParent, true);
-   setAttribute(Qt::WA_AcceptDrops, style()->styleHint(QStyle::SH_FocusFrame_AboveWidget, 0, this));
+   setAttribute(Qt::WA_AcceptDrops, style()->styleHint(QStyle::SH_FocusFrame_AboveWidget, nullptr, this));
 }
-
-/*!
-    Destructor.
-*/
 
 QFocusFrame::~QFocusFrame()
 {
 }
 
-/*!
-  QFocusFrame will track changes to \a widget and resize itself automatically.
-  If the monitored widget's parent changes, QFocusFrame will follow the widget
-  and place itself around the widget automatically. If the monitored widget is deleted,
-  QFocusFrame will set it to zero.
-
-  \sa QFocusFrame::widget()
-*/
-
 void QFocusFrame::setWidget(QWidget *widget)
 {
    Q_D(QFocusFrame);
 
-   if (style()->styleHint(QStyle::SH_FocusFrame_AboveWidget, 0, this)) {
+   if (style()->styleHint(QStyle::SH_FocusFrame_AboveWidget, nullptr, this)) {
       d->showFrameAboveWidget = true;
    } else {
       d->showFrameAboveWidget = false;
@@ -164,11 +143,13 @@ void QFocusFrame::setWidget(QWidget *widget)
          p = p->parentWidget();
       } while (p);
    }
+
    if (widget && !widget->isWindow() && widget->parentWidget()->windowType() != Qt::SubWindow) {
       d->widget = widget;
       d->widget->installEventFilter(this);
       QWidget *p = widget->parentWidget();
-      QWidget *prev = 0;
+      QWidget *prev = nullptr;
+
       if (d->showFrameAboveWidget) {
          // Find the right parent for the focus frame.
          while (p) {
@@ -184,6 +165,7 @@ void QFocusFrame::setWidget(QWidget *widget)
                   d->frameParent = prev;
                }
                break;
+
             } else {
                p->installEventFilter(this);
                prev = p;
@@ -194,8 +176,9 @@ void QFocusFrame::setWidget(QWidget *widget)
          d->frameParent = p;
       }
       d->update();
+
    } else {
-      d->widget = 0;
+      d->widget = nullptr;
       hide();
    }
 }
@@ -212,7 +195,6 @@ QWidget *QFocusFrame::widget() const
    Q_D(const QFocusFrame);
    return d->widget;
 }
-
 
 /*! \reimp */
 void QFocusFrame::paintEvent(QPaintEvent *)
@@ -243,39 +225,47 @@ bool QFocusFrame::eventFilter(QObject *o, QEvent *e)
          case QEvent::Resize:
             d->updateSize();
             break;
+
          case QEvent::Hide:
          case QEvent::StyleChange:
             hide();
             break;
+
          case QEvent::ParentChange:
             if (d->showFrameAboveWidget) {
                QWidget *w = d->widget;
-               setWidget(0);
+               setWidget(nullptr);
                setWidget(w);
             } else {
                d->update();
             }
             break;
+
          case QEvent::Show:
             d->update();
             show();
             break;
+
          case QEvent::PaletteChange:
             setPalette(d->widget->palette());
             break;
+
          case QEvent::ZOrderChange:
-            if (style()->styleHint(QStyle::SH_FocusFrame_AboveWidget, 0, this)) {
+            if (style()->styleHint(QStyle::SH_FocusFrame_AboveWidget, nullptr, this)) {
                raise();
             } else {
                stackUnder(d->widget);
             }
             break;
+
          case QEvent::Destroy:
-            setWidget(0);
+            setWidget(nullptr);
             break;
+
          default:
             break;
       }
+
    } else if (d->showFrameAboveWidget) {
       // Handle changes in the parent widgets we are monitoring.
       switch (e->type()) {
@@ -283,13 +273,16 @@ bool QFocusFrame::eventFilter(QObject *o, QEvent *e)
          case QEvent::Resize:
             d->updateSize();
             break;
+
          case QEvent::ZOrderChange:
             raise();
             break;
+
          default:
             break;
       }
    }
+
    return false;
 }
 

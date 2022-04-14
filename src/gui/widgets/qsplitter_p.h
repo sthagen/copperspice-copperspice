@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,23 +27,18 @@
 #include <qframe_p.h>
 #include <qrubberband.h>
 
-
-
 static const uint Default = 2;
 
 class QSplitterLayoutStruct
 {
-
  public:
-   QRect rect;
-   int sizer;
-   uint collapsed : 1;
-   uint collapsible : 2;
-   QWidget *widget;
-   QSplitterHandle *handle;
+   QSplitterLayoutStruct()
+      : sizer(-1), collapsed(false), collapsible(Default), widget(nullptr), handle(nullptr)
+   {
+   }
 
-   QSplitterLayoutStruct() : sizer(-1), collapsed(false), collapsible(Default), widget(0), handle(0) {}
-   ~QSplitterLayoutStruct() {
+   ~QSplitterLayoutStruct()
+   {
       delete handle;
    }
 
@@ -53,6 +48,13 @@ class QSplitterLayoutStruct
    int pick(const QSize &size, Qt::Orientation orient) {
       return (orient == Qt::Horizontal) ? size.width() : size.height();
    }
+
+   QRect rect;
+   int sizer;
+   uint collapsed : 1;
+   uint collapsible : 2;
+   QWidget *widget;
+   QSplitterHandle *handle;
 };
 
 class QSplitterPrivate : public QFramePrivate
@@ -60,8 +62,12 @@ class QSplitterPrivate : public QFramePrivate
    Q_DECLARE_PUBLIC(QSplitter)
 
  public:
-   QSplitterPrivate() : rubberBand(0), opaque(true), firstShow(true),
-      childrenCollapsible(true), compatMode(false), handleWidth(-1), blockChildAdd(false), opaqueResizeSet(false) {}
+   QSplitterPrivate()
+      : rubberBand(nullptr), opaque(true), firstShow(true), childrenCollapsible(true),
+        compatMode(false), handleWidth(-1), blockChildAdd(false), opaqueResizeSet(false)
+   {
+   }
+
    ~QSplitterPrivate();
 
    QPointer<QRubberBand> rubberBand;
@@ -113,7 +119,6 @@ class QSplitterPrivate : public QFramePrivate
    int findWidgetJustBeforeOrJustAfter(int index, int delta, int &collapsibleSize) const;
    void updateHandles();
    void setSizes_helper(const QList<int> &sizes, bool clampNegativeSize = false);
-
 };
 
 class QSplitterHandlePrivate : public QWidgetPrivate
@@ -121,7 +126,10 @@ class QSplitterHandlePrivate : public QWidgetPrivate
    Q_DECLARE_PUBLIC(QSplitterHandle)
 
  public:
-   QSplitterHandlePrivate() : s(0), orient(Qt::Horizontal), mouseOffset(0), opaq(false), hover(false), pressed(false) {}
+   QSplitterHandlePrivate()
+      : s(nullptr), orient(Qt::Horizontal), mouseOffset(0), opaq(false), hover(false), pressed(false)
+   {
+   }
 
    inline int pick(const QPoint &pos) const {
       return orient == Qt::Horizontal ? pos.x() : pos.y();

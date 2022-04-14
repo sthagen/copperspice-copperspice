@@ -21,19 +21,16 @@
 #ifndef QWEBVIEW_H
 #define QWEBVIEW_H
 
-#include "qwebkitglobal.h"
-#include "qwebpage.h"
-#include <QtGui/qwidget.h>
-#include <QtGui/qicon.h>
-#include <QtGui/qpainter.h>
-#include <QtCore/qurl.h>
-#include <QtNetwork/qnetworkaccessmanager.h>
+#include <qwebkitglobal.h>
+#include <qwebpage.h>
+#include <qwidget.h>
+#include <qicon.h>
+#include <qpainter.h>
+#include <qurl.h>
+#include <qnetaccess_manager.h>
 
-QT_BEGIN_NAMESPACE
 class QNetworkRequest;
 class QPrinter;
-QT_END_NAMESPACE
-
 class QWebPage;
 class QWebViewPrivate;
 class QWebNetworkRequest;

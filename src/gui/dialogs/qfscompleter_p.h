@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,19 +34,20 @@ class QFSCompleter :  public QCompleter
 {
  public:
    explicit QFSCompleter(QFileSystemModel *model, QObject *parent = nullptr)
-      : QCompleter(model, parent), proxyModel(0), sourceModel(model) {
+      : QCompleter(model, parent), proxyModel(nullptr), sourceModel(model) {
 #if defined(Q_OS_WIN)
       setCaseSensitivity(Qt::CaseInsensitive);
 #endif
    }
+
    QString pathFromIndex(const QModelIndex &index) const override;
    QStringList splitPath(const QString &path) const override;
 
    QAbstractProxyModel *proxyModel;
    QFileSystemModel *sourceModel;
 };
-#endif // QT_NO_FSCOMPLETER
 
+#endif // QT_NO_FSCOMPLETER
 
 #endif
 

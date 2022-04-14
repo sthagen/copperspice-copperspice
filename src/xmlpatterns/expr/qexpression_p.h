@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -723,7 +723,8 @@ class Expression : public QSharedData, public CppCastingHelper<Expression>, publ
     */
    Expression::Ptr constantPropagate(const StaticContext::Ptr &context) const;
 
-   Q_DISABLE_COPY(Expression)
+   Expression(const Expression &) = delete;
+   Expression &operator=(const Expression &) = delete;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Expression::Properties)

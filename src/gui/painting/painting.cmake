@@ -6,8 +6,6 @@ list(APPEND GUI_PUBLIC_INCLUDES
    QColormap
    QConicalGradient
    QGradient
-   QGradientStop
-   QGradientStops
    QLinearGradient
    QMatrix
    QPaintDevice
@@ -38,8 +36,6 @@ list(APPEND GUI_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qconicalgradient.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qdrawutil.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qgradient.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/painting/qgradientstop.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/painting/qgradientstops.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qlineargradient.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qmatrix.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qpaintdevice.h
@@ -68,7 +64,6 @@ list(APPEND GUI_PRIVATE_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qcolor_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qcosmeticstroker_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qcssutil_p.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/painting/qdatabuffer_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qdrawhelper_neon_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qdrawhelper_p.h
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qdrawhelper_x86_p.h
@@ -145,6 +140,14 @@ target_sources(CsGui
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qbackingstore.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/painting/qwidgetbackingstore.cpp
 )
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+   target_sources(CsGui
+      PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/painting/qdrawhelper_neon.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/painting/qdrawhelper_neon_asm.S
+   )
+endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
    list(APPEND EXTRA_GUI_LIBS

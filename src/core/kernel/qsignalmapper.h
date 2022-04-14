@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QSIGNALMAPPER_H
 #define QSIGNALMAPPER_H
 
-#include <QtCore/qobject.h>
-#include <QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_SIGNALMAPPER
 class QSignalMapperPrivate;
@@ -39,6 +37,10 @@ class Q_CORE_EXPORT QSignalMapper : public QObject
 
  public:
    explicit QSignalMapper(QObject *parent = nullptr);
+
+   QSignalMapper(const QSignalMapper &) = delete;
+   QSignalMapper &operator=(const QSignalMapper &) = delete;
+
    ~QSignalMapper();
 
    void setMapping(QObject *sender, int id);
@@ -52,17 +54,17 @@ class Q_CORE_EXPORT QSignalMapper : public QObject
    QObject *mapping(QWidget *widget) const;
    QObject *mapping(QObject *object) const;
 
-   CORE_CS_SIGNAL_1(Public, void mapped(int un_named_arg1))
-   CORE_CS_SIGNAL_OVERLOAD(mapped, (int), un_named_arg1)
+   CORE_CS_SIGNAL_1(Public, void mapped(int index))
+   CORE_CS_SIGNAL_OVERLOAD(mapped, (int), index)
 
-   CORE_CS_SIGNAL_1(Public, void mapped(const QString &un_named_arg1))
-   CORE_CS_SIGNAL_OVERLOAD(mapped, (const QString &), un_named_arg1)
+   CORE_CS_SIGNAL_1(Public, void mapped(const QString &text))
+   CORE_CS_SIGNAL_OVERLOAD(mapped, (const QString &), text)
 
-   CORE_CS_SIGNAL_1(Public, void mapped(QWidget *un_named_arg1))
-   CORE_CS_SIGNAL_OVERLOAD(mapped, (QWidget *), un_named_arg1)
+   CORE_CS_SIGNAL_1(Public, void mapped(QWidget *widget))
+   CORE_CS_SIGNAL_OVERLOAD(mapped, (QWidget *), widget)
 
-   CORE_CS_SIGNAL_1(Public, void mapped(QObject *un_named_arg1))
-   CORE_CS_SIGNAL_OVERLOAD(mapped, (QObject *), un_named_arg1)
+   CORE_CS_SIGNAL_1(Public, void mapped(QObject *object))
+   CORE_CS_SIGNAL_OVERLOAD(mapped, (QObject *), object)
 
    CORE_CS_SLOT_1(Public, void map())
    CORE_CS_SLOT_OVERLOAD(map, ())
@@ -74,14 +76,10 @@ class Q_CORE_EXPORT QSignalMapper : public QObject
    QScopedPointer<QSignalMapperPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QSignalMapper)
-
    CORE_CS_SLOT_1(Private, void _q_senderDestroyed())
    CORE_CS_SLOT_2(_q_senderDestroyed)
 };
 
 #endif // QT_NO_SIGNALMAPPER
 
-QT_END_NAMESPACE
-
-#endif // QSIGNALMAPPER_H
+#endif

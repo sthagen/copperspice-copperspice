@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -272,7 +272,7 @@ void QHighDpiScaling::updateHighDpiScaling()
       int i = 0;
 
       for (const QByteArray &spec : env.split(';')) {
-         QScreen *screen = 0;
+         QScreen *screen = nullptr;
          int equalsPos = spec.lastIndexOf('=');
          double factor = 0;
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,6 +38,10 @@ class Q_OPENGL_EXPORT QGraphicsShaderEffect : public QGraphicsEffect
 
  public:
    QGraphicsShaderEffect(QObject *parent = nullptr);
+
+   QGraphicsShaderEffect(const QGraphicsShaderEffect &) = delete;
+   QGraphicsShaderEffect &operator=(const QGraphicsShaderEffect &) = delete;
+
    virtual ~QGraphicsShaderEffect();
 
    QByteArray pixelShaderFragment() const;
@@ -50,11 +54,9 @@ class Q_OPENGL_EXPORT QGraphicsShaderEffect : public QGraphicsEffect
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsShaderEffect)
-   Q_DISABLE_COPY(QGraphicsShaderEffect)
 
    friend class QGLCustomShaderEffectStage;
 };
-
 
 #endif // QT_NO_GRAPHICSEFFECT
 

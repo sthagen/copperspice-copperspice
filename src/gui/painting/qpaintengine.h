@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -126,56 +126,6 @@ class Q_GUI_EXPORT QPaintEngine
       PolylineMode
    };
 
-   explicit QPaintEngine(PaintEngineFeatures features = PaintEngineFeatures());
-   virtual ~QPaintEngine();
-
-   bool isActive() const {
-      return active;
-   }
-
-   void setActive(bool newState) {
-      active = newState;
-   }
-
-   virtual bool begin(QPaintDevice *pdev) = 0;
-   virtual bool end() = 0;
-
-   virtual void updateState(const QPaintEngineState &state) = 0;
-
-   virtual void drawRects(const QRect *rects, int rectCount);
-   virtual void drawRects(const QRectF *rects, int rectCount);
-
-   virtual void drawLines(const QLine *lines, int lineCount);
-   virtual void drawLines(const QLineF *lines, int lineCount);
-
-   virtual void drawEllipse(const QRectF &r);
-   virtual void drawEllipse(const QRect &r);
-
-   virtual void drawPath(const QPainterPath &path);
-
-   virtual void drawPoints(const QPointF *points, int pointCount);
-   virtual void drawPoints(const QPoint *points, int pointCount);
-
-   virtual void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode);
-   virtual void drawPolygon(const QPoint *points, int pointCount, PolygonDrawMode mode);
-
-   virtual void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr) = 0;
-   virtual void drawTextItem(const QPointF &p, const QTextItem &textItem);
-   virtual void drawTiledPixmap(const QRectF &r, const QPixmap &pixmap, const QPointF &s);
-   virtual void drawImage(const QRectF &r, const QImage &pm, const QRectF &sr,
-      Qt::ImageConversionFlags flags = Qt::AutoColor);
-
-   void setPaintDevice(QPaintDevice *device);
-   QPaintDevice *paintDevice() const;
-
-   void setSystemClip(const QRegion &baseClip);
-   QRegion systemClip() const;
-
-   void setSystemRect(const QRect &rect);
-   QRect systemRect() const;
-
-   virtual QPoint coordinateOffset() const;
-
    enum Type {
       X11,
       Windows,
@@ -197,6 +147,60 @@ class Q_GUI_EXPORT QPaintEngine
       User = 50,    // first user type id
       MaxUser = 100 // last user type id
    };
+
+   explicit QPaintEngine(PaintEngineFeatures options = PaintEngineFeatures());
+
+   QPaintEngine(const QPaintEngine &) = delete;
+   QPaintEngine &operator=(const QPaintEngine &) = delete;
+
+   virtual ~QPaintEngine();
+
+   bool isActive() const {
+      return active;
+   }
+
+   void setActive(bool state) {
+      active = state;
+   }
+
+   virtual bool begin(QPaintDevice *pdev) = 0;
+   virtual bool end() = 0;
+
+   virtual void updateState(const QPaintEngineState &state) = 0;
+
+   virtual void drawRects(const QRect *rectPtr, int rectCount);
+   virtual void drawRects(const QRectF *rectPtr, int rectCount);
+
+   virtual void drawLines(const QLine *linePtr, int lineCount);
+   virtual void drawLines(const QLineF *linePtr, int lineCount);
+
+   virtual void drawEllipse(const QRectF &rect);
+   virtual void drawEllipse(const QRect &rect);
+
+   virtual void drawPath(const QPainterPath &path);
+
+   virtual void drawPoints(const QPointF *pointPtr, int pointCount);
+   virtual void drawPoints(const QPoint *pointPtr, int pointCount);
+
+   virtual void drawPolygon(const QPointF *pointPtr, int pointCount, PolygonDrawMode mode);
+   virtual void drawPolygon(const QPoint *pointPtr, int pointCount, PolygonDrawMode mode);
+
+   virtual void drawPixmap(const QRectF &rect, const QPixmap &pixmap, const QRectF &srcRect) = 0;
+   virtual void drawTextItem(const QPointF &point, const QTextItem &textItem);
+   virtual void drawTiledPixmap(const QRectF &rect, const QPixmap &pixmap, const QPointF &point);
+   virtual void drawImage(const QRectF &rect, const QImage &image, const QRectF &srcRect,
+         Qt::ImageConversionFlags flags = Qt::AutoColor);
+
+   void setPaintDevice(QPaintDevice *device);
+   QPaintDevice *paintDevice() const;
+
+   void setSystemClip(const QRegion &baseClip);
+   QRegion systemClip() const;
+
+   void setSystemRect(const QRect &rect);
+   QRect systemRect() const;
+
+   virtual QPoint coordinateOffset() const;
    virtual Type type() const = 0;
 
    inline void fix_neg_rect(int *x, int *y, int *w, int *h);
@@ -236,8 +240,6 @@ class Q_GUI_EXPORT QPaintEngine
    bool autoDestruct() const {
       return selfDestruct;
    }
-
-   Q_DISABLE_COPY(QPaintEngine)
 
    friend class QPainterReplayer;
    friend class QFontEngineBox;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,13 +36,13 @@
 #if ! defined(QT_NO_STYLE_GTK)
 
 #include <qcoreevent.h>
-#include <QtCore/QFile>
-#include <QtCore/QStringList>
-#include <QtCore/QTextStream>
-#include <QtCore/QHash>
-#include <QtCore/QUrl>
-#include <QtCore/QLibrary>
-#include <QtCore/QDebug>
+#include <QFile>
+#include <QStringList>
+#include <QTextStream>
+#include <QHash>
+#include <QUrl>
+#include <QLibrary>
+#include <QDebug>
 
 #include <qgtk2painter_p.h>
 
@@ -50,14 +50,14 @@
 #include <qiconloader_p.h>
 #include <qplatform_fontdatabase.h>
 
-#include <QtGui/QMenu>
-#include <QtGui/QStyle>
-#include <QtGui/QApplication>
-#include <QtGui/QPixmapCache>
-#include <QtGui/QStatusBar>
-#include <QtGui/QMenuBar>
-#include <QtGui/QToolBar>
-#include <QtGui/QToolButton>
+#include <QMenu>
+#include <QStyle>
+#include <QApplication>
+#include <QPixmapCache>
+#include <QStatusBar>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QToolButton>
 
 #ifndef Q_OS_DARWIN
 // X11 Includes:
@@ -188,10 +188,8 @@ Ptr_gnome_vfs_init QGtkStylePrivate::gnome_vfs_init = 0;
 typedef int (*x11ErrorHandler)(Display *, XErrorEvent *);
 #endif
 
-Q_DECLARE_METATYPE(QGtkStylePrivate *);
 static void gtkStyleSetCallback(GtkWidget *)
 {
-   qRegisterMetaType<QGtkStylePrivate *>();
    // We have to let this function return and complete the event
    // loop to ensure that all gtk widgets have been styled before updating
    QMetaObject::invokeMethod(styleScheduler(), "updateTheme", Qt::QueuedConnection);

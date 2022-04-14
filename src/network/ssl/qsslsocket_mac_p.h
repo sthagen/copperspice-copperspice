@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,22 +24,24 @@
 #ifndef QSSLSOCKET_MAC_P_H
 #define QSSLSOCKET_MAC_P_H
 
-#include <qabstractsocket.h>
-#include <qsslsocket_p.h>
-
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 #include <qstring.h>
 #include <qlist.h>
 
+#include <qabstractsocket.h>
+#include <qsslsocket_p.h>
+
 #include <Security/Security.h>
 #include <Security/SecureTransport.h>
-
-
 
 class QSecureTransportContext
 {
  public:
     explicit QSecureTransportContext(SSLContextRef context);
+
+    QSecureTransportContext(const QSecureTransportContext &) = delete;
+    QSecureTransportContext &operator=(const QSecureTransportContext &) = delete;
+
     ~QSecureTransportContext();
 
     operator SSLContextRef () const;
@@ -47,16 +49,16 @@ class QSecureTransportContext
 
  private:
     SSLContextRef context;
-
-    Q_DISABLE_COPY(QSecureTransportContext)
 };
 
 class QSslSocketBackendPrivate : public QSslSocketPrivate
 {
-    Q_DECLARE_PUBLIC(QSslSocket)
-
  public:
     QSslSocketBackendPrivate();
+
+    QSslSocketBackendPrivate(const QSslSocketBackendPrivate &) = delete;
+    QSslSocketBackendPrivate &operator=(const QSslSocketBackendPrivate &) = delete;
+
     virtual ~QSslSocketBackendPrivate();
 
     // Final-overriders (QSslSocketPrivate):
@@ -77,11 +79,14 @@ class QSslSocketBackendPrivate : public QSslSocketPrivate
     static QSslCipher QSslCipher_from_SSLCipherSuite(SSLCipherSuite cipher);
 
  private:
+    Q_DECLARE_PUBLIC(QSslSocket)
+
     // SSL context management/properties:
     bool initSslContext();
     void destroySslContext();
     bool setSessionCertificate(QString &errorDescription, QAbstractSocket::SocketError &errorCode);
     bool setSessionProtocol();
+
     // Aux. functions to do a verification during handshake phase:
     bool canIgnoreTrustVerificationFailure() const;
     bool verifySessionProtocol() const;
@@ -91,10 +96,6 @@ class QSslSocketBackendPrivate : public QSslSocketPrivate
     bool startHandshake();
 
     QSecureTransportContext context;
-
-    Q_DISABLE_COPY(QSslSocketBackendPrivate)
 };
-
-
 
 #endif

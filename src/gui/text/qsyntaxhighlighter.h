@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,12 @@
 #ifndef QSYNTAXHIGHLIGHTER_H
 #define QSYNTAXHIGHLIGHTER_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 #ifndef QT_NO_SYNTAXHIGHLIGHTER
 
-#include <QtCore/qobject.h>
-#include <QtGui/qtextobject.h>
+#include <qobject.h>
+#include <qtextobject.h>
 #include <QScopedPointer>
 
 class QTextDocument;
@@ -47,6 +47,10 @@ class Q_GUI_EXPORT QSyntaxHighlighter : public QObject
  public:
    explicit QSyntaxHighlighter(QObject *parent);
    explicit QSyntaxHighlighter(QTextDocument *parent);
+
+   QSyntaxHighlighter(const QSyntaxHighlighter &) = delete;
+   QSyntaxHighlighter &operator=(const QSyntaxHighlighter &) = delete;
+
    virtual ~QSyntaxHighlighter();
 
    void setDocument(QTextDocument *doc);
@@ -64,7 +68,7 @@ class Q_GUI_EXPORT QSyntaxHighlighter : public QObject
    void setFormat(int start, int count, const QTextCharFormat &format);
    void setFormat(int start, int count, const QColor &color);
    void setFormat(int start, int count, const QFont &font);
-   QTextCharFormat format(int pos) const;
+   QTextCharFormat format(int position) const;
 
    int previousBlockState() const;
    int currentBlockState() const;
@@ -78,8 +82,6 @@ class Q_GUI_EXPORT QSyntaxHighlighter : public QObject
    QScopedPointer<QSyntaxHighlighterPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QSyntaxHighlighter)
-
    GUI_CS_SLOT_1(Private, void _q_reformatBlocks(int from, int charsRemoved, int charsAdded))
    GUI_CS_SLOT_2(_q_reformatBlocks)
 
@@ -90,4 +92,4 @@ class Q_GUI_EXPORT QSyntaxHighlighter : public QObject
 
 #endif // QT_NO_SYNTAXHIGHLIGHTER
 
-#endif // QSYNTAXHIGHLIGHTER_H
+#endif

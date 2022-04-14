@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -145,8 +145,8 @@ class QMultiHash
          : m_iter(std::move(iter)) {
       }
 
-      const_iterator(iterator iter)
-         : m_iter(std::move(iter.m_iter)) {
+      const_iterator(iterator other)
+         : m_iter(std::move(other.m_iter)) {
       }
 
       const Key &key() const {
@@ -212,14 +212,12 @@ class QMultiHash
       friend class QMultiHash<Key, Val, Hash, KeyEqual>;
 
       // free functions
-      friend bool operator==(iterator iter1, const_iterator iter2)
-      {
-         return (iter2 == iter1);
+      friend bool operator==(iterator iter1, const_iterator iter2) {
+         return iter2.operator==(iter1);
       }
 
-      friend bool operator!=(iterator iter1, const_iterator iter2)
-      {
-         return (iter2 != iter1);
+      friend bool operator!=(iterator iter1, const_iterator iter2) {
+         return iter2.operator!=(iter1);
       }
 
     private:
@@ -237,7 +235,9 @@ class QMultiHash
    using hasher          = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::hasher;
    using key_equal       = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::key_equal;
 
-   using allocator_type         = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::allocator_type;
+   using allocator_type  = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::allocator_type;
+
+   static constexpr int bucket_count = 1;
 
    // iterator and const_iterator are classes
 
@@ -253,9 +253,9 @@ class QMultiHash
    QMultiHash(const QMultiHash<Key, Val, Hash, KeyEqual> &other) = default;
    QMultiHash(QMultiHash<Key, Val, Hash, KeyEqual> &&other) = default;
 
-   QMultiHash(std::initializer_list<std::pair<Key, Val> > list, const Hash & hash = Hash(),
+   QMultiHash(std::initializer_list<std::pair<const Key, Val> > list, const Hash & hash = Hash(),
                   const KeyEqual &key_equal = KeyEqual())
-      : m_data(list, hash, key_equal) {}
+      : m_data(list, bucket_count, hash, key_equal) {}
 
    explicit QMultiHash(const Hash & hash, const KeyEqual &key_equal = KeyEqual())
       : m_data(hash, key_equal) {}
@@ -367,6 +367,10 @@ class QMultiHash
       return find(key, value);
    }
 
+   iterator insert(const std::pair<const Key, Val> &data) {
+      return m_data.insert(data);
+   }
+
    iterator insert(const Key &key, const Val &value) {
       return insertMulti(key, value);
    }
@@ -439,7 +443,7 @@ class QMultiHash
    }
 
    Val value(const Key &key) const {
-     auto iter = m_data.find(key);
+      auto iter = m_data.find(key);
 
       if (iter == m_data.end()) {
          // key was not found
@@ -498,7 +502,7 @@ class QMultiHash
    }
 
    inline const_iterator cbegin() const {
-      return m_data.begin();;
+      return m_data.begin();
    }
 
    inline const_iterator constBegin() const {
@@ -532,15 +536,12 @@ typename QMultiHash<Key, Val, Hash, KeyEqual>::size_type QMultiHash<Key, Val, Ha
 {
    size_type retval = 0;
 
-   typename QMultiHash<Key, Val, Hash, KeyEqual>::const_iterator iter(constFind(key));
-   typename QMultiHash<Key, Val, Hash, KeyEqual>::const_iterator end(QMultiHash<Key, Val, Hash, KeyEqual>::constEnd());
+   auto range = m_data.equal_range(key);
 
-   while (iter != end && iter.key() == key) {
-      if (iter.value() == value) {
+   for (auto iter = range.first; iter != range.second; ++iter) {
+      if (iter->second == value) {
          ++retval;
       }
-
-      ++iter;
    }
 
    return retval;
@@ -553,7 +554,7 @@ const Key QMultiHash<Key, Val, Hash, KeyEqual>::key(const Val &value) const
 }
 
 template <typename Key, typename Val, typename Hash, typename KeyEqual>
-const Key QMultiHash<Key, Val, Hash, KeyEqual>::key(const Val &value, const Key &defaultValue) const
+const Key QMultiHash<Key, Val, Hash, KeyEqual>::key(const Val &value, const Key &defaultKey) const
 {
    const_iterator iter = begin();
 
@@ -565,7 +566,7 @@ const Key QMultiHash<Key, Val, Hash, KeyEqual>::key(const Val &value, const Key 
       ++iter;
    }
 
-   return defaultValue;
+   return defaultKey;
 }
 
 template <typename Key, typename Val, typename Hash, typename KeyEqual>
@@ -604,12 +605,12 @@ typename QMultiHash<Key, Val, Hash, KeyEqual>::size_type QMultiHash<Key, Val, Ha
 {
    size_type retval = 0;
 
-   typename QMultiHash<Key, Val>::iterator iter(find(key));
-   typename QMultiHash<Key, Val>::iterator end(QMultiHash<Key, Val, Hash, KeyEqual>::end());
+   auto range = m_data.equal_range(key);
+   auto iter  = range.first;
 
-   while (iter != end && iter.key() == key) {
-      if (iter.value() == value) {
-         iter = erase(iter);
+   while (iter != range.second) {
+      if (iter->second == value) {
+         iter = m_data.erase(iter);
          ++retval;
 
       } else {
@@ -674,14 +675,14 @@ class QMultiHashIterator
    typedef const_iterator Item;
 
  public:
-   QMultiHashIterator(const QMultiHash<Key, Val, Hash, KeyEqual> &container)
-      : c(&container), i(c->constBegin()), n(c->constEnd()) {}
+   QMultiHashIterator(const QMultiHash<Key, Val, Hash, KeyEqual> &hash)
+      : c(&hash), i(c->constBegin()), n(c->constEnd()) {}
 
    ~QMultiHashIterator()
    { }
 
-   QMultiHashIterator &operator=(const QMultiHash<Key, Val, Hash, KeyEqual> &container) {
-      c = container;
+   QMultiHashIterator &operator=(const QMultiHash<Key, Val, Hash, KeyEqual> &hash) {
+      c = hash;
       i = c->constBegin();
       n = c->constEnd();
       return *this;
@@ -734,18 +735,18 @@ class QMultiHashIterator
       return n.key();
    }
 
-   bool findNext(const Val &t) {
+   bool findNext(const Val &value) {
       while ((n = i) != c->constEnd()) {
-         if (*i++ == t) {
+         if (*i++ == value) {
             return true;
          }
       }
       return false;
    }
 
-   bool findPrevious(const Val &t) {
+   bool findPrevious(const Val &value) {
       while (i != c->constBegin()) {
-         if (*(n = --i) == t) {
+         if (*(n = --i) == value) {
             return true;
          }
       }
@@ -772,14 +773,14 @@ class QMutableMultiHashIterator
    typedef iterator Item;
 
  public:
-   QMutableMultiHashIterator(QMultiHash<Key, Val, Hash, KeyEqual> &container)
-      : c(&container), i(c->begin()), n(c->end())  { }
+   QMutableMultiHashIterator(QMultiHash<Key, Val, Hash, KeyEqual> &hash)
+      : c(&hash), i(c->begin()), n(c->end())  { }
 
    ~QMutableMultiHashIterator()
    { }
 
-   QMutableMultiHashIterator &operator=(QMultiHash<Key, Val, Hash, KeyEqual> &container) {
-      c = & container;
+   QMutableMultiHashIterator &operator=(QMultiHash<Key, Val, Hash, KeyEqual> &hash) {
+      c = & hash;
       i = c->begin();
       n = c->end();
 
@@ -830,9 +831,9 @@ class QMutableMultiHashIterator
       }
    }
 
-   void setValue(const Val &t) {
+   void setValue(const Val &value) {
       if (const_iterator(n) != c->constEnd()) {
-         *n = t;
+         *n = value;
       }
    }
 
@@ -851,9 +852,9 @@ class QMutableMultiHashIterator
       return n.key();
    }
 
-   bool findNext(const Val &t) {
+   bool findNext(const Val &value) {
       while (const_iterator(n = i) != c->constEnd()) {
-         if (*i++ == t) {
+         if (*i++ == value) {
             return true;
          }
       }
@@ -861,9 +862,9 @@ class QMutableMultiHashIterator
       return false;
    }
 
-   bool findPrevious(const Val &t) {
+   bool findPrevious(const Val &value) {
       while (const_iterator(i) != c->constBegin()) {
-         if (*(n = --i) == t) {
+         if (*(n = --i) == value) {
             return true;
          }
       }

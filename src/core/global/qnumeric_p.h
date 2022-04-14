@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #define QNUMERIC_P_H
 
 #include <qglobal.h>
-
-QT_BEGIN_NAMESPACE
 
 #if ! defined(Q_CC_MIPS)
 
@@ -257,6 +255,5 @@ static inline bool qt_is_finite(float d)
    }
 }
 
-QT_END_NAMESPACE
 
-#endif // QNUMERIC_P_H
+#endif

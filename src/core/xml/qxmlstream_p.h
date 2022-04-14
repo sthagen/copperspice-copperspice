@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -152,12 +152,12 @@ class QXmlStreamReader_Table
 };
 
 const char *const QXmlStreamReader_Table::spell [] = {
-   "end of file", 0, " ", "<", ">", "&", "#", "\'", "\"", "[",
+   "end of file", nullptr, " ", "<", ">", "&", "#", "\'", "\"", "[",
    "]", "(", ")", "|", "=", "%", "/", ":", ";", ",",
    "-", "+", "*", ".", "?", "!", "[a-zA-Z]", "[0-9]", "[CDATA[", "DOCTYPE",
    "ELEMENT", "ATTLIST", "ENTITY", "NOTATION", "SYSTEM", "PUBLIC", "NDATA", "REQUIRED", "IMPLIED", "FIXED",
-   "EMPTY", "ANY", "PCDATA", 0, 0, 0, 0, "CDATA", "ID", "IDREF",
-   "IDREFS", "ENTITIES", "NMTOKEN", "NMTOKENS", "<?xml", "version", 0
+   "EMPTY", "ANY", "PCDATA", nullptr, nullptr, nullptr, nullptr, "CDATA", "ID", "IDREF",
+   "IDREFS", "ENTITIES", "NMTOKEN", "NMTOKENS", "<?xml", "version", nullptr
 };
 
 const short QXmlStreamReader_Table::lhs [] = {
@@ -897,7 +897,7 @@ class QXmlStreamReaderPrivate : public QXmlStreamReader_Table, public QXmlStream
    int fastScanLiteralContent();
    int fastScanSpace();
    int fastScanContentCharList();
-   int fastScanName(int *prefix = 0);
+   int fastScanName(int *prefix = nullptr);
    inline int fastScanNMTOKEN();
 
    bool parse();
@@ -1041,7 +1041,8 @@ bool QXmlStreamReaderPrivate::parse()
          dtdPublicId.clear();
          dtdSystemId.clear();
 
-      // fall through
+         [[fallthrough]];
+
       case QXmlStreamReader::Comment:
       case QXmlStreamReader::Characters:
          isCDATA = false;
@@ -1076,7 +1077,8 @@ bool QXmlStreamReaderPrivate::parse()
             return false;
          }
 
-      // fall through
+         [[fallthrough]];
+
       default:
          clearTextBuffer();
    }
@@ -1113,16 +1115,19 @@ bool QXmlStreamReaderPrivate::parse()
 
                case '\r':
                   token = SPACE;
+
                   if (cu == '\r') {
                      if ((token_char = filterCarriageReturn())) {
                         ++lineNumber;
                         lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.begin());
                         break;
                      }
+
                   } else {
                      break;
                   }
-               // fall through
+                  [[fallthrough]];
+
                case '\0': {
                   token = EOF_SYMBOL;
                   if (!tagsDone && ! inParseEntity) {
@@ -1135,82 +1140,107 @@ bool QXmlStreamReaderPrivate::parse()
 
                }
                break;
+
                case '\n':
                   ++lineNumber;
                   lastLineStart = characterOffset + (readBuffer_Iter - readBuffer.begin());
+                  [[fallthrough]];
+
                case ' ':
                case '\t':
                   token = SPACE;
                   break;
+
                case '&':
                   token = AMPERSAND;
                   break;
+
                case '#':
                   token = HASH;
                   break;
+
                case '\'':
                   token = QUOTE;
                   break;
+
                case '\"':
                   token = DBLQUOTE;
                   break;
+
                case '<':
                   token = LANGLE;
                   break;
+
                case '>':
                   token = RANGLE;
                   break;
+
                case '[':
                   token = LBRACK;
                   break;
+
                case ']':
                   token = RBRACK;
                   break;
+
                case '(':
                   token = LPAREN;
                   break;
+
                case ')':
                   token = RPAREN;
                   break;
+
                case '|':
                   token = PIPE;
                   break;
                case '=':
                   token = EQ;
                   break;
+
                case '%':
                   token = PERCENT;
                   break;
+
                case '/':
                   token = SLASH;
                   break;
+
                case ':':
                   token = COLON;
                   break;
                case ';':
                   token = SEMICOLON;
                   break;
+
                case ',':
                   token = COMMA;
                   break;
+
                case '-':
                   token = DASH;
                   break;
+
                case '+':
                   token = PLUS;
                   break;
+
                case '*':
                   token = STAR;
                   break;
+
                case '.':
                   token = DOT;
                   break;
+
                case '?':
                   token = QUESTIONMARK;
                   break;
+
                case '!':
                   token = BANG;
                   break;
+
                case '0':
                case '1':
                case '2':
@@ -1223,6 +1253,7 @@ bool QXmlStreamReaderPrivate::parse()
                case '9':
                   token = DIGIT;
                   break;
+
                default:
                   if (cu < 0x20) {
                      token = NOTOKEN;
@@ -1331,7 +1362,7 @@ bool QXmlStreamReaderPrivate::parse()
             case 18:
                dtdName = symString(3);
 
-            // fall through
+               [[fallthrough]];
 
             case 19:
             case 20:
@@ -1500,7 +1531,7 @@ bool QXmlStreamReaderPrivate::parse()
                   raiseWellFormedError(QXmlStream::tr("NDATA in parameter entity declaration."));
                }
             }
-            //fall through
+            [[fallthrough]];
 
             case 94:
             case 95: {
@@ -1632,7 +1663,7 @@ bool QXmlStreamReaderPrivate::parse()
 
             case 129:
                isWhitespace = false;
-            // fall through
+               [[fallthrough]];
 
             case 130:
                sym(1).len += fastScanContentCharList();
@@ -1830,7 +1861,7 @@ bool QXmlStreamReaderPrivate::parse()
 
             case 236:
                isEmptyElement = true;
-            // fall through
+               [[fallthrough]];
 
             case 237:
                setType(QXmlStreamReader::StartElement);

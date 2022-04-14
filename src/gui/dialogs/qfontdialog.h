@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QFONTDIALOG_H
 #define QFONTDIALOG_H
 
-#include <QtGui/qwindowdefs.h>
-#include <QtGui/qdialog.h>
-#include <QtGui/qfont.h>
-
-
+#include <qwindowdefs.h>
+#include <qdialog.h>
+#include <qfont.h>
 
 #ifndef QT_NO_FONTDIALOG
 
@@ -57,11 +55,14 @@ class Q_GUI_EXPORT QFontDialog : public QDialog
       MonospacedFonts     = 0x00000010,
       ProportionalFonts   = 0x00000020
    };
-
    using FontDialogOptions = QFlags<FontDialogOption>;
 
    explicit QFontDialog(QWidget *parent = nullptr);
    explicit QFontDialog(const QFont &initial, QWidget *parent = nullptr);
+
+   QFontDialog(const QFontDialog &) = delete;
+   QFontDialog &operator=(const QFontDialog &) = delete;
+
    ~QFontDialog();
 
    void setCurrentFont(const QFont &font);
@@ -97,8 +98,6 @@ class Q_GUI_EXPORT QFontDialog : public QDialog
    bool eventFilter(QObject *object, QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QFontDialog)
-
    GUI_CS_SLOT_1(Private, void _q_sizeChanged(const QString &un_named_arg1))
    GUI_CS_SLOT_2(_q_sizeChanged)
 
@@ -116,9 +115,6 @@ class Q_GUI_EXPORT QFontDialog : public QDialog
 
    GUI_CS_SLOT_1(Private, void _q_updateSample())
    GUI_CS_SLOT_2(_q_updateSample)
-
-
-
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFontDialog::FontDialogOptions)

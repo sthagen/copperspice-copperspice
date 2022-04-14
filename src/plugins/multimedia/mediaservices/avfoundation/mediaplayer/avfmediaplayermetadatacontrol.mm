@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,7 +29,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 AVFMediaPlayerMetaDataControl::AVFMediaPlayerMetaDataControl(AVFMediaPlayerSession *session, QObject *parent)
-   : QMetaDataReaderControl(parent), m_session(session), m_asset(0)
+   : QMetaDataReaderControl(parent), m_session(session), m_asset(nullptr)
 {
    QObject::connect(m_session, &AVFMediaPlayerSession::mediaStatusChanged, this, &AVFMediaPlayerMetaDataControl::updateTags);
 }
@@ -129,7 +129,7 @@ void AVFMediaPlayerMetaDataControl::updateTags()
          if (! value.isEmpty()) {
             m_tags.insert(key, value);
 
-            if (value != oldTags.value(key)) {
+            if (value != oldTags.value(key).toString()) {
                changed = true;
                metaDataChanged(key, value);
             }

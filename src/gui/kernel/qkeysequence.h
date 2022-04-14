@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,8 +31,8 @@
 #ifndef QT_NO_SHORTCUT
 
 class QKeySequence;
-Q_GUI_EXPORT QDataStream &operator<<(QDataStream &in, const QKeySequence &ks);
-Q_GUI_EXPORT QDataStream &operator>>(QDataStream &out, QKeySequence &ks);
+Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QKeySequence &ks);
+Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QKeySequence &ks);
 
 class QVariant;
 class QKeySequencePrivate;
@@ -127,9 +127,12 @@ class Q_GUI_EXPORT QKeySequence
    QKeySequence();
    QKeySequence(const QString &key, SequenceFormat format  = NativeText);
    QKeySequence(int k1, int k2 = 0, int k3 = 0, int k4 = 0);
-   QKeySequence(const QKeySequence &ks);
    QKeySequence(StandardKey key);
+
+   QKeySequence(const QKeySequence &other);
+
    ~QKeySequence();
+
 
    int count() const;
    bool isEmpty() const;
@@ -152,7 +155,8 @@ class Q_GUI_EXPORT QKeySequence
 
    operator QVariant() const;
 
-   int operator[](uint i) const;
+   int operator[](uint index) const;
+
    QKeySequence &operator=(const QKeySequence &other);
 
    inline QKeySequence &operator=(QKeySequence &&other) {
@@ -169,7 +173,8 @@ class Q_GUI_EXPORT QKeySequence
       return !(*this == other);
    }
 
-   bool operator< (const QKeySequence &ks) const;
+   bool operator< (const QKeySequence &other) const;
+
    inline bool operator> (const QKeySequence &other) const {
       return other < *this;
    }
@@ -193,8 +198,8 @@ class Q_GUI_EXPORT QKeySequence
 
    QKeySequencePrivate *d;
 
-   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &in, const QKeySequence &ks);
-   friend Q_GUI_EXPORT QDataStream &operator>>(QDataStream &in, QKeySequence &ks);
+   friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QKeySequence &ks);
+   friend Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QKeySequence &ks);
    friend Q_GUI_EXPORT uint qHash(const QKeySequence &key, uint seed);
    friend class QShortcutMap;
    friend class QShortcut;

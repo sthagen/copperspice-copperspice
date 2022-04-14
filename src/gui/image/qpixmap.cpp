@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -77,7 +77,7 @@ void QPixmap::doInit(int w, int h, int type)
    if ((w > 0 && h > 0) || type == QPlatformPixmap::BitmapType) {
       data = QPlatformPixmap::create(w, h, (QPlatformPixmap::PixelType) type);
    } else {
-      data = 0;
+      data = nullptr;
    }
 }
 
@@ -124,7 +124,7 @@ QPixmap::QPixmap(QPlatformPixmap *d)
 {
 }
 
-QPixmap::QPixmap(const QString &fileName, const char *format, Qt::ImageConversionFlags flags)
+QPixmap::QPixmap(const QString &fileName, const QString &format, Qt::ImageConversionFlags flags)
    : QPaintDevice()
 {
    doInit(0, 0, QPlatformPixmap::PixmapType);
@@ -409,7 +409,7 @@ QBitmap QPixmap::createMaskFromColor(const QColor &maskColor, Qt::MaskMode mode)
    return QBitmap::fromImage(image.createMaskFromColor(maskColor.rgba(), mode));
 }
 
-bool QPixmap::load(const QString &fileName, const char *format, Qt::ImageConversionFlags flags)
+bool QPixmap::load(const QString &fileName, const QString &format, Qt::ImageConversionFlags flags)
 {
    if (! fileName.isEmpty()) {
       QFileInfo info(fileName);
@@ -452,9 +452,9 @@ bool QPixmap::load(const QString &fileName, const char *format, Qt::ImageConvers
    return false;
 }
 
-bool QPixmap::loadFromData(const uchar *buf, uint len, const char *format, Qt::ImageConversionFlags flags)
+bool QPixmap::loadFromData(const uchar *buf, uint len, const QString &format, Qt::ImageConversionFlags flags)
 {
-   if (len == 0 || buf == 0) {
+   if (len == 0 || buf == nullptr) {
       data.reset();
       return false;
    }
@@ -470,7 +470,7 @@ bool QPixmap::loadFromData(const uchar *buf, uint len, const char *format, Qt::I
    return false;
 }
 
-bool QPixmap::save(const QString &fileName, const char *format, int quality) const
+bool QPixmap::save(const QString &fileName, const QString &format, int quality) const
 {
    if (isNull()) {
       return false;   // nothing to save
@@ -480,7 +480,7 @@ bool QPixmap::save(const QString &fileName, const char *format, int quality) con
    return doImageIO(&writer, quality);
 }
 
-bool QPixmap::save(QIODevice *device, const char *format, int quality) const
+bool QPixmap::save(QIODevice *device, const QString &format, int quality) const
 {
    if (isNull()) {
       return false;   // nothing to save
@@ -506,9 +506,10 @@ bool QPixmap::doImageIO(QImageWriter *writer, int quality) const
 
 void QPixmap::fill(const QPaintDevice *device, const QPoint &p)
 {
-   Q_UNUSED(device)
-   Q_UNUSED(p)
-   qWarning("this function is deprecated, ignored");
+   (void) device;
+   (void) p;
+
+   qWarning("This method has been deprecated.");
 }
 
 void QPixmap::fill(const QColor &color)
@@ -698,7 +699,7 @@ int QPixmap::metric(PaintDeviceMetric metric) const
 */
 QPaintEngine *QPixmap::paintEngine() const
 {
-   return data ? data->paintEngine() : 0;
+   return data ? data->paintEngine() : nullptr;
 }
 
 QBitmap QPixmap::mask() const

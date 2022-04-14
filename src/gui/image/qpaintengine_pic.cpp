@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -56,14 +56,14 @@ QPicturePaintEngine::QPicturePaintEngine()
    : QPaintEngine(*(new QPicturePaintEnginePrivate), AllFeatures)
 {
    Q_D(QPicturePaintEngine);
-   d->pt = 0;
+   d->pt = nullptr;
 }
 
 QPicturePaintEngine::QPicturePaintEngine(QPaintEnginePrivate &dptr)
    : QPaintEngine(dptr, AllFeatures)
 {
    Q_D(QPicturePaintEngine);
-   d->pt = 0;
+   d->pt = nullptr;
 }
 
 QPicturePaintEngine::~QPicturePaintEngine()
@@ -73,9 +73,11 @@ QPicturePaintEngine::~QPicturePaintEngine()
 bool QPicturePaintEngine::begin(QPaintDevice *pd)
 {
    Q_D(QPicturePaintEngine);
+
 #ifdef QT_PICTURE_DEBUG
    qDebug() << "QPicturePaintEngine::begin()";
 #endif
+
    Q_ASSERT(pd);
    QPicture *pic = static_cast<QPicture *>(pd);
 

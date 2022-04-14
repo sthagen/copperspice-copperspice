@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,8 +36,9 @@
 
 QFileInfoGatherer::QFileInfoGatherer(QObject *parent)
    : QThread(parent), abort(false),
+
 #ifndef QT_NO_FILESYSTEMWATCHER
-     watcher(0),
+     watcher(nullptr),
 #endif
      m_iconProvider(&defaultProvider)
 {
@@ -73,6 +74,8 @@ void QFileInfoGatherer::setResolveSymlinks(bool enable)
 {
 #ifdef Q_OS_WIN
    m_resolveSymlinks = enable;
+#else
+   (void) enable;
 #endif
 }
 
@@ -114,11 +117,10 @@ void QFileInfoGatherer::fetchExtendedInformation(const QString &path, const QStr
    this->files.push(files);
 
    condition.wakeAll();
+
 #ifndef QT_NO_FILESYSTEMWATCHER
-   if (files.isEmpty()
-      && !path.isEmpty()
-      && !path.startsWith(QLatin1String("//")) /*don't watch UNC path*/) {
-      if (!watcher->directories().contains(path)) {
+   if (files.isEmpty() && ! path.isEmpty() && ! path.startsWith("//") ) {
+      if (! watcher->directories().contains(path)) {
          watcher->addPath(path);
       }
    }
@@ -223,12 +225,12 @@ static QString translateDriveName(const QFileInfo &drive)
    QString driveName = drive.absoluteFilePath();
 
 #if defined(Q_OS_WIN)
-   if (driveName.startsWith(QLatin1Char('/'))) {
+   if (driveName.startsWith('/')) {
       // UNC host
       return drive.fileName();
    }
 
-   if (driveName.endsWith(QLatin1Char('/'))) {
+   if (driveName.endsWith('/')) {
       driveName.chop(1);
    }
 #endif

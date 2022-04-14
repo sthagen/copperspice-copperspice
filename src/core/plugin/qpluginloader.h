@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -42,6 +42,10 @@ class Q_CORE_EXPORT QPluginLoader : public QObject
  public:
    explicit QPluginLoader(QObject *parent = nullptr);
    explicit QPluginLoader(const QString &fileName, QObject *parent = nullptr);
+
+   QPluginLoader(const QPluginLoader &) = delete;
+   QPluginLoader &operator=(const QPluginLoader &) = delete;
+
    ~QPluginLoader();
 
    QObject *instance();
@@ -62,8 +66,6 @@ class Q_CORE_EXPORT QPluginLoader : public QObject
    QLibrary::LoadHints loadHints() const;
 
  private:
-   Q_DISABLE_COPY(QPluginLoader)
-
    QLibraryHandle *mp_handle;
    bool mp_loaded;
 };

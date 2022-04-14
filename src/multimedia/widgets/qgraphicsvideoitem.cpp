@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -32,23 +32,17 @@
 
 #include <qpaintervideosurface_p.h>
 
-
 #if ! defined(QT_NO_OPENGL) && ! defined(QT_OPENGL_ES_1_CL) && ! defined(QT_OPENGL_ES_1)
-#include <QtOpenGL/qgl.h>
+#include <qgl.h>
 #endif
 
 class QGraphicsVideoItemPrivate
 {
  public:
    QGraphicsVideoItemPrivate()
-      : q_ptr(0)
-      , surface(0)
-      , mediaObject(0)
-      , service(0)
-      , rendererControl(0)
-      , aspectRatioMode(Qt::KeepAspectRatio)
-      , updatePaintDevice(true)
-      , rect(0.0, 0.0, 320, 240) {
+      : q_ptr(nullptr), surface(nullptr), mediaObject(nullptr), service(nullptr), rendererControl(nullptr),
+        aspectRatioMode(Qt::KeepAspectRatio), updatePaintDevice(true), rect(0.0, 0.0, 320, 240)
+   {
    }
 
    QGraphicsVideoItem *q_ptr;
@@ -77,13 +71,14 @@ void QGraphicsVideoItemPrivate::clearService()
 {
    if (rendererControl) {
       surface->stop();
-      rendererControl->setSurface(0);
+      rendererControl->setSurface(nullptr);
       service->releaseControl(rendererControl);
-      rendererControl = 0;
+      rendererControl = nullptr;
    }
+
    if (service) {
-      QObject::disconnect(service, SIGNAL(destroyed()), q_ptr, SLOT(_q_serviceDestroyed()));
-      service = 0;
+      QObject::disconnect(service, &QMediaService::destroyed, q_ptr, &QGraphicsVideoItem::_q_serviceDestroyed);
+      service = nullptr;
    }
 }
 
@@ -95,9 +90,11 @@ void QGraphicsVideoItemPrivate::updateRects()
       //this is necessary for item to receive the
       //first paint event and configure video surface.
       boundingRect = rect;
+
    } else if (aspectRatioMode == Qt::IgnoreAspectRatio) {
       boundingRect = rect;
       sourceRect = QRectF(0, 0, 1, 1);
+
    } else if (aspectRatioMode == Qt::KeepAspectRatio) {
       QSizeF size = nativeSize;
       size.scale(rect.size(), Qt::KeepAspectRatio);
@@ -106,6 +103,7 @@ void QGraphicsVideoItemPrivate::updateRects()
       boundingRect.moveCenter(rect.center());
 
       sourceRect = QRectF(0, 0, 1, 1);
+
    } else if (aspectRatioMode == Qt::KeepAspectRatioByExpanding) {
       boundingRect = rect;
 
@@ -143,8 +141,8 @@ void QGraphicsVideoItemPrivate::_q_updateNativeSize()
 
 void QGraphicsVideoItemPrivate::_q_serviceDestroyed()
 {
-   rendererControl = 0;
-   service = 0;
+   rendererControl = nullptr;
+   service         = nullptr;
 
    surface->stop();
 }
@@ -152,20 +150,17 @@ void QGraphicsVideoItemPrivate::_q_serviceDestroyed()
 QGraphicsVideoItem::QGraphicsVideoItem(QGraphicsItem *parent)
    : QGraphicsObject(parent), d_ptr(new QGraphicsVideoItemPrivate)
 {
-   d_ptr->q_ptr = this;
+   d_ptr->q_ptr   = this;
    d_ptr->surface = new QPainterVideoSurface;
 
-   qRegisterMetaType<QVideoSurfaceFormat>();
-
-   connect(d_ptr->surface, SIGNAL(frameChanged()), this, SLOT(_q_present()));
-   connect(d_ptr->surface, SIGNAL(surfaceFormatChanged(QVideoSurfaceFormat)),
-      this, SLOT(_q_updateNativeSize()), Qt::QueuedConnection);
+   connect(d_ptr->surface, &QPainterVideoSurface::frameChanged,         this, &QGraphicsVideoItem::_q_present);
+   connect(d_ptr->surface, &QPainterVideoSurface::surfaceFormatChanged, this, &QGraphicsVideoItem::_q_updateNativeSize, Qt::QueuedConnection);
 }
 
 QGraphicsVideoItem::~QGraphicsVideoItem()
 {
    if (d_ptr->rendererControl) {
-      d_ptr->rendererControl->setSurface(0);
+      d_ptr->rendererControl->setSurface(nullptr);
       d_ptr->service->releaseControl(d_ptr->rendererControl);
    }
 
@@ -178,9 +173,6 @@ QMediaObject *QGraphicsVideoItem::mediaObject() const
    return d_func()->mediaObject;
 }
 
-/*!
-  \internal
-*/
 bool QGraphicsVideoItem::setMediaObject(QMediaObject *object)
 {
    Q_D(QGraphicsVideoItem);
@@ -190,7 +182,6 @@ bool QGraphicsVideoItem::setMediaObject(QMediaObject *object)
    }
 
    d->clearService();
-
    d->mediaObject = object;
 
    if (d->mediaObject) {
@@ -200,18 +191,19 @@ bool QGraphicsVideoItem::setMediaObject(QMediaObject *object)
          QMediaControl *control = d->service->requestControl(QVideoRendererControl_iid);
 
          if (control) {
-            d->rendererControl = qobject_cast<QVideoRendererControl *>(control);
+            d->rendererControl = dynamic_cast<QVideoRendererControl *>(control);
 
             if (d->rendererControl) {
                // do not set the surface untill the item is painted
                // at least once and the surface is configured
-               if (!d->updatePaintDevice) {
+               if (! d->updatePaintDevice) {
                   d->rendererControl->setSurface(d->surface);
+
                } else {
                   update(boundingRect());
                }
 
-               connect(d->service, SIGNAL(destroyed()), this, SLOT(_q_serviceDestroyed()));
+               connect(d->service, &QMediaService::destroyed, this, &QGraphicsVideoItem::_q_serviceDestroyed);
 
                return true;
             }
@@ -222,14 +214,10 @@ bool QGraphicsVideoItem::setMediaObject(QMediaObject *object)
       }
    }
 
-   d->mediaObject = 0;
+   d->mediaObject = nullptr;
+
    return false;
 }
-
-/*!
-    \property QGraphicsVideoItem::aspectRatioMode
-    \brief how a video is scaled to fit the graphics item's size.
-*/
 
 Qt::AspectRatioMode QGraphicsVideoItem::aspectRatioMode() const
 {
@@ -244,14 +232,6 @@ void QGraphicsVideoItem::setAspectRatioMode(Qt::AspectRatioMode mode)
    d->updateRects();
 }
 
-/*!
-    \property QGraphicsVideoItem::offset
-    \brief the video item's offset.
-
-    QGraphicsVideoItem will draw video using the offset for its top left
-    corner.
-*/
-
 QPointF QGraphicsVideoItem::offset() const
 {
    return d_func()->rect.topLeft();
@@ -264,14 +244,6 @@ void QGraphicsVideoItem::setOffset(const QPointF &offset)
    d->rect.moveTo(offset);
    d->updateRects();
 }
-
-/*!
-    \property QGraphicsVideoItem::size
-    \brief the video item's size.
-
-    QGraphicsVideoItem will draw video scaled to fit size according to its
-    fillMode.
-*/
 
 QSizeF QGraphicsVideoItem::size() const
 {
@@ -286,49 +258,35 @@ void QGraphicsVideoItem::setSize(const QSizeF &size)
    d->updateRects();
 }
 
-/*!
-    \property QGraphicsVideoItem::nativeSize
-    \brief the native size of the video.
-*/
-
 QSizeF QGraphicsVideoItem::nativeSize() const
 {
    return d_func()->nativeSize;
 }
 
-/*!
-    \fn QGraphicsVideoItem::nativeSizeChanged(const QSizeF &size)
-
-    Signals that the native \a size of the video has changed.
-*/
-
-/*!
-    \reimp
-*/
 QRectF QGraphicsVideoItem::boundingRect() const
 {
    return d_func()->boundingRect;
 }
 
-/*!
-    \reimp
-*/
-void QGraphicsVideoItem::paint(
-   QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void QGraphicsVideoItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+   (void) option;
+
    Q_D(QGraphicsVideoItem);
 
    if (d->surface && d->updatePaintDevice) {
       d->updatePaintDevice = false;
 
-#if ! defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_1_CL) && !defined(QT_OPENGL_ES_1)
+#if ! defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_1_CL) && ! defined(QT_OPENGL_ES_1)
       if (widget) {
-         connect(widget, SIGNAL(destroyed()), d->surface, SLOT(viewportDestroyed()));
+         connect(widget, &QWidget::destroyed, d->surface, &QPainterVideoSurface::viewportDestroyed);
       }
 
       d->surface->setGLContext(const_cast<QGLContext *>(QGLContext::currentContext()));
+
       if (d->surface->supportedShaderTypes() & QPainterVideoSurface::GlslShader) {
          d->surface->setShaderType(QPainterVideoSurface::GlslShader);
+
       } else {
          d->surface->setShaderType(QPainterVideoSurface::FragmentProgramShader);
       }
@@ -345,17 +303,11 @@ void QGraphicsVideoItem::paint(
    }
 }
 
-/*!
-    \internal
-*/
 QVariant QGraphicsVideoItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
    return QGraphicsItem::itemChange(change, value);
 }
 
-/*!
-  \internal
-*/
 void QGraphicsVideoItem::timerEvent(QTimerEvent *event)
 {
    QGraphicsObject::timerEvent(event);

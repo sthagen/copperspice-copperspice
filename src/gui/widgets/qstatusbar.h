@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,7 +30,7 @@
 
 class QStatusBarPrivate;
 
-class Q_GUI_EXPORT QStatusBar: public QWidget
+class Q_GUI_EXPORT QStatusBar : public QWidget
 {
    GUI_CS_OBJECT(QStatusBar)
 
@@ -39,6 +39,10 @@ class Q_GUI_EXPORT QStatusBar: public QWidget
 
  public:
    explicit QStatusBar(QWidget *parent = nullptr);
+
+   QStatusBar(const QStatusBar &) = delete;
+   QStatusBar &operator=(const QStatusBar &) = delete;
+
    virtual ~QStatusBar();
 
    void addWidget(QWidget *widget, int stretch = 0);
@@ -52,30 +56,29 @@ class Q_GUI_EXPORT QStatusBar: public QWidget
 
    QString currentMessage() const;
 
-   GUI_CS_SLOT_1(Public, void showMessage(const QString &text, int timeout = 0))
+   GUI_CS_SLOT_1(Public, void showMessage(const QString &msg, int timeout = 0))
    GUI_CS_SLOT_2(showMessage)
 
    GUI_CS_SLOT_1(Public, void clearMessage())
    GUI_CS_SLOT_2(clearMessage)
 
-   GUI_CS_SIGNAL_1(Public, void messageChanged(const QString &text))
-   GUI_CS_SIGNAL_2(messageChanged, text)
+   GUI_CS_SIGNAL_1(Public, void messageChanged(const QString &msg))
+   GUI_CS_SIGNAL_2(messageChanged, msg)
 
  protected:
-   void showEvent(QShowEvent *) override;
-   void paintEvent(QPaintEvent *) override;
-   void resizeEvent(QResizeEvent *) override;
+   void showEvent(QShowEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
 
-   // ### Qt5/consider making reformat() and hideOrShow() private
+   // ### Qt5, consider making reformat() and hideOrShow() private
    void reformat();
    void hideOrShow();
-   bool event(QEvent *) override;
+   bool event(QEvent *event) override;
 
  private:
-   Q_DISABLE_COPY(QStatusBar)
    Q_DECLARE_PRIVATE(QStatusBar)
 };
 
 #endif // QT_NO_STATUSBAR
 
-#endif // QSTATUSBAR_H
+#endif

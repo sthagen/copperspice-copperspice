@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,8 +27,6 @@
 #include <qelapsedtimer.h>
 #include <qthread_p.h>
 
-
-
 class QEventLoopPrivate
 {
    Q_DECLARE_PUBLIC(QEventLoop)
@@ -45,9 +43,6 @@ class QEventLoopPrivate
 
 };
 
-/*!
-    Constructs an event loop object with the given \a parent.
-*/
 QEventLoop::QEventLoop(QObject *parent)
    : QObject(parent), d_ptr(new QEventLoopPrivate)
 {
@@ -74,7 +69,7 @@ bool QEventLoop::processEvents(ProcessEventsFlags flags)
    }
 
    if (flags & DeferredDeletion) {
-      QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+      QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
    }
 
    return threadData->eventDispatcher.load()->processEvents(flags);
@@ -125,7 +120,7 @@ int QEventLoop::exec(ProcessEventsFlags flags)
 
       QEventLoop *eventLoop = threadData->eventLoops.pop();
       Q_ASSERT_X(eventLoop == this, "QEventLoop::exec()", "internal error");
-      Q_UNUSED(eventLoop); // --release warning
+      Q_UNUSED(eventLoop);
 
       d->inExec = false;
       --threadData->loopLevel;
@@ -138,7 +133,7 @@ int QEventLoop::exec(ProcessEventsFlags flags)
 
    QEventLoop *eventLoop = threadData->eventLoops.pop();
    Q_ASSERT_X(eventLoop == this, "QEventLoop::exec()", "internal error");
-   Q_UNUSED(eventLoop); // --release warning
+   Q_UNUSED(eventLoop);
 
    d->inExec = false;
    --threadData->loopLevel;
@@ -158,7 +153,7 @@ void QEventLoop::processEvents(ProcessEventsFlags flags, int maxTime)
    start.start();
 
    if (flags & DeferredDeletion) {
-      QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+      QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
    }
 
    while (processEvents(flags & ~WaitForMoreEvents)) {
@@ -167,7 +162,7 @@ void QEventLoop::processEvents(ProcessEventsFlags flags, int maxTime)
       }
 
       if (flags & DeferredDeletion) {
-         QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+         QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
       }
    }
 }

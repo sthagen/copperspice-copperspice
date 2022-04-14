@@ -23,7 +23,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -75,7 +75,7 @@ ImageBufferData::ImageBufferData(const IntSize& size)
     brush.setColor(Qt::black);
     painter->setBrush(brush);
     painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
-    
+
     m_image = StillImage::createForRendering(&m_pixmap);
 }
 
@@ -408,12 +408,12 @@ String ImageBuffer::toDataURL(const String& mimeType, const double* quality) con
     buffer.open(QBuffer::WriteOnly);
 
     if (quality && *quality >= 0.0 && *quality <= 1.0) {
-        if (!m_data.m_pixmap.save(&buffer, mimeType.substring(sizeof "image").utf8().data(), *quality * 100 + 0.5)) {
+        if (!m_data.m_pixmap.save(&buffer, mimeType.substring(sizeof "image"), *quality * 100 + 0.5)) {
             buffer.close();
             return "data:,";
         }
     } else {
-        if (!m_data.m_pixmap.save(&buffer, mimeType.substring(sizeof "image").utf8().data(), 100)) {
+        if (!m_data.m_pixmap.save(&buffer, mimeType.substring(sizeof "image"), 100)) {
             buffer.close();
             return "data:,";
         }

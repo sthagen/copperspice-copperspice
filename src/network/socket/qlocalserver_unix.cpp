@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,8 +36,6 @@
 #include <qdebug.h>
 #include <qdir.h>
 #include <qdatetime.h>
-
-QT_BEGIN_NAMESPACE
 
 void QLocalServerPrivate::init()
 {
@@ -233,7 +231,7 @@ void QLocalServerPrivate::closeServer()
    if (socketNotifier) {
       socketNotifier->setEnabled(false); // Otherwise, closed socket is checked before deleter runs
       socketNotifier->deleteLater();
-      socketNotifier = 0;
+      socketNotifier = nullptr;
    }
 
    if (-1 != listenSocket) {
@@ -283,7 +281,7 @@ void QLocalServerPrivate::waitForNewConnection(int msec, bool *timedOut)
    timeout.tv_nsec = (msec % 1000) * 1000 * 1000;
 
    int result = -1;
-   result = qt_safe_select(listenSocket + 1, &readfds, 0, 0, (msec == -1) ? 0 : &timeout);
+   result = qt_safe_select(listenSocket + 1, &readfds, nullptr, nullptr, (msec == -1) ? nullptr : &timeout);
    if (-1 == result) {
       setError(QLatin1String("QLocalServer::waitForNewConnection"));
       closeServer();
@@ -329,7 +327,5 @@ void QLocalServerPrivate::setError(const QString &function)
 #endif
    }
 }
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_LOCALSERVER

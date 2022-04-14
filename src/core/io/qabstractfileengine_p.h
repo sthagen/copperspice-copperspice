@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,20 +24,19 @@
 #ifndef QABSTRACTFILEENGINE_P_H
 #define QABSTRACTFILEENGINE_P_H
 
-#include <QtCore/qabstractfileengine.h>
-#include <QtCore/qfile.h>
-
-QT_BEGIN_NAMESPACE
+#include <qabstractfileengine.h>
+#include <qfile.h>
 
 class QAbstractFileEnginePrivate
 {
  public:
-   inline QAbstractFileEnginePrivate() : fileError(QFile::UnspecifiedError) 
+   QAbstractFileEnginePrivate()
+      : fileError(QFile::UnspecifiedError)
    {
    }
 
-   inline virtual ~QAbstractFileEnginePrivate()
-   { 
+   virtual ~QAbstractFileEnginePrivate()
+   {
    }
 
    QFile::FileError fileError;
@@ -49,6 +48,4 @@ class QAbstractFileEnginePrivate
 
 QAbstractFileEngine *qt_custom_file_engine_handler_create(const QString &path);
 
-QT_END_NAMESPACE
-
-#endif // QABSTRACTFILEENGINE_P_H
+#endif

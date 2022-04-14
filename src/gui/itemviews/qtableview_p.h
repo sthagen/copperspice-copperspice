@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -107,12 +107,10 @@ class QTableViewPrivate : public QAbstractItemViewPrivate
 
  public:
    QTableViewPrivate()
-      : showGrid(true), gridStyle(Qt::SolidLine),
-        rowSectionAnchor(-1), columnSectionAnchor(-1),
-        columnResizeTimerID(0), rowResizeTimerID(0),
-        horizontalHeader(0), verticalHeader(0),
-        sortingEnabled(false), geometryRecursionBlock(false),
-        visualCursor(QPoint()) {
+      : showGrid(true), gridStyle(Qt::SolidLine), rowSectionAnchor(-1), columnSectionAnchor(-1),
+        columnResizeTimerID(0), rowResizeTimerID(0), horizontalHeader(nullptr), verticalHeader(nullptr),
+        sortingEnabled(false), geometryRecursionBlock(false), visualCursor(QPoint())
+   {
       wrapItemText = true;
 
 #ifndef QT_NO_DRAGANDDROP

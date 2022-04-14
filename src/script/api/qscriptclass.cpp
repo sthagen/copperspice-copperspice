@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,13 +21,13 @@
 *
 ***********************************************************************/
 
-#include "qscriptclass.h"
-#include "qscriptstring.h"
-
+#include <qscriptclass.h>
+#include <qscriptstring.h>
 
 class QScriptClassPrivate
 {
    Q_DECLARE_PUBLIC(QScriptClass)
+
  public:
    QScriptClassPrivate() {}
    virtual ~QScriptClassPrivate() {}
@@ -141,15 +141,15 @@ QString QScriptClass::name() const
 
   \sa property()
 */
-QScriptClass::QueryFlags QScriptClass::queryProperty(
-   const QScriptValue &object, const QScriptString &name,
-   QueryFlags flags, uint *id)
+QScriptClass::QueryFlags QScriptClass::queryProperty(const QScriptValue &object,
+            const QScriptString &name, QueryFlags flags, uint *id)
 {
    Q_UNUSED(object);
    Q_UNUSED(name);
    Q_UNUSED(flags);
    Q_UNUSED(id);
-   return 0;
+
+   return Qt::EmptyFlag;
 }
 
 /*!
@@ -163,8 +163,7 @@ QScriptClass::QueryFlags QScriptClass::queryProperty(
 
   \sa setProperty(), propertyFlags()
 */
-QScriptValue QScriptClass::property(const QScriptValue &object,
-   const QScriptString &name, uint id)
+QScriptValue QScriptClass::property(const QScriptValue &object, const QScriptString &name, uint id)
 {
    Q_UNUSED(object);
    Q_UNUSED(name);
@@ -189,7 +188,8 @@ QScriptValue::PropertyFlags QScriptClass::propertyFlags(
    Q_UNUSED(object);
    Q_UNUSED(name);
    Q_UNUSED(id);
-   return 0;
+
+   return Qt::EmptyFlag;
 }
 
 void QScriptClass::setProperty(QScriptValue &object, const QScriptString &name,
@@ -204,7 +204,7 @@ void QScriptClass::setProperty(QScriptValue &object, const QScriptString &name,
 QScriptClassPropertyIterator *QScriptClass::newIterator(const QScriptValue &object)
 {
    Q_UNUSED(object);
-   return 0;
+   return nullptr;
 }
 
 bool QScriptClass::supportsExtension(Extension extension) const

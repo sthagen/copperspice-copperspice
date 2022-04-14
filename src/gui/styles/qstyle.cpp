@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -63,7 +63,7 @@ static int unpackControlTypes(QSizePolicy::ControlTypes controls, QSizePolicy::C
 }
 
 QStyle::QStyle()
-   : QObject(0), d_ptr(new QStylePrivate)
+   : QObject(nullptr), d_ptr(new QStylePrivate)
 {
    d_ptr->q_ptr = this;
    Q_D(QStyle);
@@ -77,7 +77,7 @@ QStyle::QStyle()
     Constructs a style object.
 */
 QStyle::QStyle(QStylePrivate &dd)
-   : QObject(0), d_ptr(&dd)
+   : QObject(nullptr), d_ptr(&dd)
 {
    d_ptr->q_ptr = this;
    Q_D(QStyle);
@@ -341,10 +341,8 @@ int QStyle::combinedLayoutSpacing(QSizePolicy::ControlTypes controls1,
    return result;
 }
 
-
 QDebug operator<<(QDebug debug, QStyle::State state)
 {
-
    return operator<< <QStyle::StateFlag>(debug, state);
 }
 
@@ -353,7 +351,6 @@ const QStyle *QStyle::proxy() const
    Q_D(const QStyle);
    return d->proxyStyle;
 }
-
 
 void QStyle::setProxy(QStyle *style)
 {

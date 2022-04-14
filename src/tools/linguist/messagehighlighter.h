@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,13 @@
 #ifndef MESSAGEHIGHLIGHTER_H
 #define MESSAGEHIGHLIGHTER_H
 
-#include <QtGui/QSyntaxHighlighter>
+#include <qtextedit.h>
+#include <qsyntaxhighlighter.h>
 
-QT_BEGIN_NAMESPACE
-
-/* Message highlighter based on HtmlSyntaxHighlighter from designer */
+// Message highlighter based on HtmlSyntaxHighlighter from designer
 class MessageHighlighter : public QSyntaxHighlighter
 {
-   Q_OBJECT
+   CS_OBJECT(MessageHighlighter)
 
  public:
    MessageHighlighter(QTextEdit *textEdit);
@@ -60,6 +59,4 @@ class MessageHighlighter : public QSyntaxHighlighter
    QTextCharFormat m_formats[LastConstruct + 1];
 };
 
-QT_END_NAMESPACE
-
-#endif // MESSAGEHIGHLIGHTER_H
+#endif

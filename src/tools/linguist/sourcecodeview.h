@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,18 +28,16 @@
 #include <QHash>
 #include <QPlainTextEdit>
 
-QT_BEGIN_NAMESPACE
-
 class SourceCodeView : public QPlainTextEdit
 {
-   Q_OBJECT
+   CS_OBJECT(SourceCodeView)
+
  public:
    SourceCodeView(QWidget *parent = nullptr);
    void setSourceContext(const QString &fileName, const int lineNum);
-   void setCodecName(const QByteArray &codecName);
 
- public slots:
-   void setActivated(bool activated);
+   CS_SLOT_1(Public, void setActivated(bool activated))
+   CS_SLOT_2(setActivated)
 
  private:
    void showSourceCode(const QString &fileName, const int lineNum);
@@ -48,11 +46,8 @@ class SourceCodeView : public QPlainTextEdit
    QString m_fileToLoad;
    int m_lineNumToLoad;
    QString m_currentFileName;
-   QByteArray m_codecName;
 
    QHash<QString, QString> fileHash;
 };
 
-QT_END_NAMESPACE
-
-#endif // SOURCECODEVIEW_H
+#endif

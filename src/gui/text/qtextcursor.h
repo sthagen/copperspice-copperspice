@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,7 +45,6 @@ class QTextBlock;
 
 class Q_GUI_EXPORT QTextCursor
 {
-
  public:
    QTextCursor();
 
@@ -54,7 +53,7 @@ class Q_GUI_EXPORT QTextCursor
    explicit QTextCursor(QTextFrame *frame);
    explicit QTextCursor(const QTextBlock &block);
    explicit QTextCursor(QTextCursorPrivate *d);
-   QTextCursor(const QTextCursor &cursor);
+   QTextCursor(const QTextCursor &other);
 
    ~QTextCursor();
 
@@ -116,7 +115,7 @@ class Q_GUI_EXPORT QTextCursor
       PreviousRow
    };
 
-   bool movePosition(MoveOperation op, MoveMode = MoveAnchor, int n = 1);
+   bool movePosition(MoveOperation operation, MoveMode mode = MoveAnchor, int n = 1);
 
    bool visualNavigation() const;
    void setVisualNavigation(bool b);
@@ -201,12 +200,12 @@ class Q_GUI_EXPORT QTextCursor
    void joinPreviousEditBlock();
    void endEditBlock();
 
-   bool operator!=(const QTextCursor &rhs) const;
-   bool operator<(const QTextCursor &rhs) const;
-   bool operator<=(const QTextCursor &rhs) const;
-   bool operator==(const QTextCursor &rhs) const;
-   bool operator>=(const QTextCursor &rhs) const;
-   bool operator>(const QTextCursor &rhs) const;
+   bool operator!=(const QTextCursor &other) const;
+   bool operator<(const QTextCursor &other)  const;
+   bool operator<=(const QTextCursor &other) const;
+   bool operator==(const QTextCursor &other) const;
+   bool operator>=(const QTextCursor &other) const;
+   bool operator>(const QTextCursor &other)  const;
 
    bool isCopyOf(const QTextCursor &other) const;
 
@@ -224,5 +223,6 @@ class Q_GUI_EXPORT QTextCursor
    friend class QTextControlPrivate;
 };
 
+CS_DECLARE_METATYPE(QTextCursor)
 
 #endif

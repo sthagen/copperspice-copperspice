@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,11 +28,11 @@
 
 static const int dragImageMaxChars = 26;
 
-QCocoaDrag::QCocoaDrag() :
-   m_drag(0)
+QCocoaDrag::QCocoaDrag()
+   : m_drag(nullptr)
 {
-   m_lastEvent = 0;
-   m_lastView = 0;
+   m_lastEvent = nullptr;
+   m_lastView  = nullptr;
 }
 
 QCocoaDrag::~QCocoaDrag()
@@ -53,7 +53,7 @@ QMimeData *QCocoaDrag::platformDropData()
       return m_drag->mimeData();
    }
 
-   return 0;
+   return nullptr;
 }
 
 Qt::DropAction QCocoaDrag::defaultAction(Qt::DropActions possibleActions,
@@ -139,7 +139,8 @@ Qt::DropAction QCocoaDrag::drag(QDrag *o)
 
    [nsimage release];
 
-   m_drag = 0;
+   m_drag = nullptr;
+
    return m_executed_drop_action;
 }
 

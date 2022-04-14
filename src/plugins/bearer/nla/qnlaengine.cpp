@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -332,7 +332,7 @@ DWORD QNlaThread::parseBlob(NLA_BLOB *blob, QNetworkConfigurationPrivate *cpPriv
         break;
     case NLA_INTERFACE:
         cpPriv->state = QNetworkConfiguration::Active;
-        if (QNlaEngine *engine = qobject_cast<QNlaEngine *>(parent())) {
+        if (QNlaEngine *engine = dynamic_cast<QNlaEngine *>(parent())) {
             engine->configurationInterface[cpPriv->id.toUInt()] =
                 QString::fromLatin1(blob->data.interfaceData.adapterName);
         }
@@ -406,7 +406,7 @@ QNetworkConfigurationPrivate *QNlaThread::parseQuerySet(const WSAQUERYSET *query
         } while (offset != 0 && offset < querySet->lpBlob->cbSize);
     }
 
-    if (QNlaEngine *engine = qobject_cast<QNlaEngine *>(parent())) {
+    if (QNlaEngine *engine = dynamic_cast<QNlaEngine *>(parent())) {
         const QString interface = engine->getInterfaceFromId(cpPriv->id);
         cpPriv->bearerType = qGetInterfaceType(interface);
     }

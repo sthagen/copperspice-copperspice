@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,17 +28,15 @@
 #include <qnetworksession.h>
 #include <qnetworkconfigmanager.h>
 
-#include <QtCore/qobject.h>
-#include <QtCore/qglobal.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qhash.h>
-#include <QtCore/qsharedpointer.h>
-#include <QtCore/qmutex.h>
+#include <qobject.h>
+#include <qglobal.h>
+#include <qlist.h>
+#include <qstring.h>
+#include <qhash.h>
+#include <qsharedpointer.h>
+#include <qmutex.h>
 
 #ifndef QT_NO_BEARERMANAGEMENT
-
-QT_BEGIN_NAMESPACE
 
 class QNetworkConfiguration;
 
@@ -83,10 +81,8 @@ class Q_NETWORK_EXPORT QBearerEngine : public QObject
    QHash<QString, QNetworkConfigurationPrivatePointer> snapConfigurations;
    QHash<QString, QNetworkConfigurationPrivatePointer> userChoiceConfigurations;
 
-   mutable QMutex mutex;
+   mutable QRecursiveMutex mutex;
 };
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_BEARERMANAGEMENT
 

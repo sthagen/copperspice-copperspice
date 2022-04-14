@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -99,15 +99,15 @@ const QPicture *QLabel::picture() const
 
 #endif
 
-QLabel::QLabel(QWidget *parent, Qt::WindowFlags f)
-   : QFrame(*new QLabelPrivate(), parent, f)
+QLabel::QLabel(QWidget *parent, Qt::WindowFlags flags)
+   : QFrame(*new QLabelPrivate(), parent, flags)
 {
    Q_D(QLabel);
    d->init();
 }
 
-QLabel::QLabel(const QString &text, QWidget *parent, Qt::WindowFlags f)
-   : QFrame(*new QLabelPrivate(), parent, f)
+QLabel::QLabel(const QString &text, QWidget *parent, Qt::WindowFlags flags)
+   : QFrame(*new QLabelPrivate(), parent, flags)
 {
    Q_D(QLabel);
    d->init();
@@ -139,7 +139,7 @@ void QLabel::setText(const QString &text)
    }
 
    QTextControl *oldControl = d->control;
-   d->control = 0;
+   d->control = nullptr;
 
    d->clearContents();
    d->text        = text;
@@ -153,7 +153,7 @@ void QLabel::setText(const QString &text)
       d->ensureTextControl();
    } else {
       delete d->control;
-      d->control = 0;
+      d->control = nullptr;
    }
 
    if (d->isRichText) {
@@ -460,7 +460,7 @@ void QLabel::setTextInteractionFlags(Qt::TextInteractionFlags flags)
       d->ensureTextControl();
    } else {
       delete d->control;
-      d->control = 0;
+      d->control = nullptr;
    }
 
    if (d->control) {
@@ -572,20 +572,16 @@ void QLabel::mouseMoveEvent(QMouseEvent *ev)
    d->sendControlEvent(ev);
 }
 
-/*!\reimp
-*/
 void QLabel::mouseReleaseEvent(QMouseEvent *ev)
 {
    Q_D(QLabel);
    d->sendControlEvent(ev);
 }
 
-/*!\reimp
-*/
 void QLabel::contextMenuEvent(QContextMenuEvent *ev)
 {
 #ifdef QT_NO_CONTEXTMENU
-   Q_UNUSED(ev);
+   (void) ev;
 #else
    Q_D(QLabel);
    if (!d->isTextLabel) {
@@ -731,7 +727,8 @@ void QLabel::paintEvent(QPaintEvent *)
 #endif
          if (d->control) {
 #ifndef QT_NO_SHORTCUT
-            const bool underline = (bool)style->styleHint(QStyle::SH_UnderlineShortcut, 0, this, 0);
+            const bool underline = (bool)style->styleHint(QStyle::SH_UnderlineShortcut, nullptr, this, nullptr);
+
             if (d->shortcutId != 0
                && underline != d->shortcutCursor.charFormat().fontUnderline()) {
                QTextCharFormat fmt;
@@ -963,23 +960,23 @@ void QLabel::setMovie(QMovie *movie)
 void QLabelPrivate::clearContents()
 {
    delete control;
-   control = 0;
+   control = nullptr;
    isTextLabel = false;
    hasShortcut = false;
 
 #ifndef QT_NO_PICTURE
    delete picture;
-   picture = 0;
+   picture = nullptr;
 #endif
 
    delete scaledpixmap;
-   scaledpixmap = 0;
+   scaledpixmap = nullptr;
 
    delete cachedimage;
-   cachedimage = 0;
+   cachedimage = nullptr;
 
    delete pixmap;
-   pixmap = 0;
+   pixmap = nullptr;
 
    text.clear();
 
@@ -997,7 +994,7 @@ void QLabelPrivate::clearContents()
       QObject::disconnect(movie.data(), &QMovie::resized, q, &QLabel::_q_movieResized);
       QObject::disconnect(movie.data(), &QMovie::updated, q, &QLabel::_q_movieUpdated);
    }
-   movie = 0;
+   movie = nullptr;
 #endif
 
 #ifndef QT_NO_CURSOR
@@ -1012,7 +1009,6 @@ void QLabelPrivate::clearContents()
    onAnchor = false;
 #endif
 }
-
 
 #ifndef QT_NO_MOVIE
 QMovie *QLabel::movie() const
@@ -1083,9 +1079,10 @@ void QLabel::setScaledContents(bool enable)
 
    if (!enable) {
       delete d->scaledpixmap;
-      d->scaledpixmap = 0;
+      d->scaledpixmap = nullptr;
+
       delete d->cachedimage;
-      d->cachedimage = 0;
+      d->cachedimage = nullptr;
    }
    update(contentsRect());
 }
@@ -1227,9 +1224,7 @@ void QLabelPrivate::ensureTextControl() const
       control->setPalette(q->palette());
       control->setFocus(q->hasFocus());
 
-      QObject::connect(control, &QTextControl::updateRequest,  q,
-                  static_cast<void (QLabel::*)()>(&QLabel::update));
-
+      QObject::connect(control, &QTextControl::updateRequest,  q, cs_mp_cast<>(&QLabel::update));
       QObject::connect(control, &QTextControl::linkHovered,    q, &QLabel::_q_linkHovered);
       QObject::connect(control, &QTextControl::linkActivated,  q, &QLabel::linkActivated);
 
@@ -1318,7 +1313,7 @@ QMenu *QLabelPrivate::createStandardContextMenu(const QPoint &pos)
    }
 
    if (linkToCopy.isEmpty() && !control) {
-      return 0;
+      return nullptr;
    }
 
    return control->createStandardContextMenu(p, q_func());

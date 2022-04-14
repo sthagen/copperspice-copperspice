@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -50,7 +50,7 @@ class QMediaPlaylistNavigatorPrivate
    Q_DECLARE_NON_CONST_PUBLIC(QMediaPlaylistNavigator)
  public:
    QMediaPlaylistNavigatorPrivate()
-      : playlist(0), currentPos(-1), lastValidPos(-1),
+      : playlist(nullptr), currentPos(-1), lastValidPos(-1),
         playbackMode(QMediaPlaylist::Sequential), randomPositionsOffset(-1)
    { }
 

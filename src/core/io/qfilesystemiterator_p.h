@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QFILESYSTEMITERATOR_P_H
 #define QFILESYSTEMITERATOR_P_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 #ifndef QT_NO_FILESYSTEMITERATOR
 
@@ -34,13 +34,9 @@
 #include <qfilesystementry_p.h>
 #include <qfilesystemmetadata_p.h>
 
-// Platform-specific headers
-#if defined(Q_OS_WIN)
-#else
-#include <QtCore/qscopedpointer.h>
+#if ! defined(Q_OS_WIN)
+#include <qscopedpointer.h>
 #endif
-
-QT_BEGIN_NAMESPACE
 
 class QFileSystemIterator
 {
@@ -48,15 +44,18 @@ class QFileSystemIterator
    QFileSystemIterator(const QFileSystemEntry &entry, QDir::Filters filters, const QStringList &nameFilters,
          QDirIterator::IteratorFlags flags = QDirIterator::FollowSymlinks | QDirIterator::Subdirectories);
 
+   QFileSystemIterator(const QFileSystemIterator &) = delete;
+   QFileSystemIterator &operator=(const QFileSystemIterator &) = delete;
+
    ~QFileSystemIterator();
 
    bool advance(QFileSystemEntry &fileEntry, QFileSystemMetaData &metaData);
 
  private:
-   QFileSystemEntry::NativePath nativePath;
+   QString nativePath;
 
 #if defined(Q_OS_WIN)
-   QFileSystemEntry::NativePath dirPath;
+   QString dirPath;
    HANDLE findFileHandle;
    QStringList uncShares;
    bool uncFallback;
@@ -68,12 +67,8 @@ class QFileSystemIterator
 
    int lastError;
 #endif
-
-   Q_DISABLE_COPY(QFileSystemIterator)
 };
-
-QT_END_NAMESPACE
 
 #endif // QT_NO_FILESYSTEMITERATOR
 
-#endif // include guard
+#endif

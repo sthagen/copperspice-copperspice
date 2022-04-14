@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -439,10 +439,11 @@ static bool read_dib_body(QDataStream &s, const BMP_INFOHDR &bi, int offset, int
                            *p++ = tmp >> 4;
                         }
                         if ((((c & 3) + 1) & 2) == 2) {
-                           d->getChar(0);   // align on word boundary
+                           d->getChar(nullptr);   // align on word boundary
                         }
                         x += c;
                   }
+
             } else {                        // encoded mode
                if (p + b > endp) {
                   b = endp - p;
@@ -520,7 +521,7 @@ static bool read_dib_body(QDataStream &s, const BMP_INFOHDR &bi, int offset, int
                            return false;
                         }
                         if ((b & 1) == 1) {
-                           d->getChar(0);   // align on word boundary
+                           d->getChar(nullptr);   // align on word boundary
                         }
                         x += b;
                         p += b;
@@ -728,7 +729,7 @@ QBmpHandler::QBmpHandler(InternalFormat fmt)
 {
 }
 
-QByteArray QBmpHandler::formatName() const
+QString QBmpHandler::formatName() const
 {
    return m_format == BmpFormat ? "bmp" : "dib";
 }
@@ -758,7 +759,7 @@ bool QBmpHandler::readHeader()
    return true;
 }
 
-bool QBmpHandler::canRead() const
+bool QBmpHandler::canRead()
 {
    if (m_format == BmpFormat && state == Ready && !canRead(device())) {
       return false;
@@ -890,7 +891,7 @@ bool QBmpHandler::supportsOption(ImageOption option) const
       || option == ImageFormat;
 }
 
-QVariant QBmpHandler::option(ImageOption option) const
+QVariant QBmpHandler::option(ImageOption option)
 {
    if (option == Size) {
       if (state == Error) {
@@ -928,15 +929,13 @@ QVariant QBmpHandler::option(ImageOption option) const
 
 void QBmpHandler::setOption(ImageOption option, const QVariant &value)
 {
-   Q_UNUSED(option);
-   Q_UNUSED(value);
+   (void) option;
+   (void) value;
 }
 
-QByteArray QBmpHandler::name() const
+QString QBmpHandler::name() const
 {
    return formatName();
 }
-
-
 
 #endif // QT_NO_IMAGEFORMAT_BMP

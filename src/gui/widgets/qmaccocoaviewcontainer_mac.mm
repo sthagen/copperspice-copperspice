@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,11 +31,7 @@
 
 #include <qwidget_p.h>
 
-
-
-
 namespace {
-// TODO use QtMacExtras copy of this function when available.
 
 inline QPlatformNativeInterface::FP_Integration resolvePlatformFunction(const QByteArray &functionName)
 {
@@ -51,6 +47,7 @@ inline QPlatformNativeInterface::FP_Integration resolvePlatformFunction(const QB
 }
 
 } //namespsace
+
 class QMacCocoaViewContainerPrivate : public QWidgetPrivate
 {
    Q_DECLARE_PUBLIC(QMacCocoaViewContainer)
@@ -63,7 +60,7 @@ class QMacCocoaViewContainerPrivate : public QWidgetPrivate
 };
 
 QMacCocoaViewContainerPrivate::QMacCocoaViewContainerPrivate()
-   : nsview(0)
+   : nsview(nullptr)
 {
 }
 
@@ -73,7 +70,7 @@ QMacCocoaViewContainerPrivate::~QMacCocoaViewContainerPrivate()
 }
 
 QMacCocoaViewContainer::QMacCocoaViewContainer(NSView *view, QWidget *parent)
-   : QWidget(*new QMacCocoaViewContainerPrivate, parent, 0)
+   : QWidget(*new QMacCocoaViewContainerPrivate, parent, Qt::EmptyFlag)
 {
     if (view) {
         setCocoaView(view);
@@ -83,28 +80,16 @@ QMacCocoaViewContainer::QMacCocoaViewContainer(NSView *view, QWidget *parent)
    setAttribute(Qt::WA_NativeWindow);
 }
 
-/*!
-    Destroy the QMacCocoaViewContainer and release the wrapped view.
-*/
 QMacCocoaViewContainer::~QMacCocoaViewContainer()
 {
 }
 
-/*!
-    Returns the NSView that has been set on this container.  The returned view
-    has been autoreleased, so you will need to retain it if you want to make
-    use of it.
-*/
 NSView *QMacCocoaViewContainer::cocoaView() const
 {
    Q_D(const QMacCocoaViewContainer);
-    return d->nsview;
+   return d->nsview;
 }
 
-/*!
-    Sets the NSView to contain to be \a cocoaViewToWrap and retains it. If this
-    container already had a view set, it will release the previously set view.
-*/
 void QMacCocoaViewContainer::setCocoaView(NSView *view)
 {
     Q_D(QMacCocoaViewContainer);
@@ -122,4 +107,3 @@ void QMacCocoaViewContainer::setCocoaView(NSView *view)
 
     [oldView release];
 }
-

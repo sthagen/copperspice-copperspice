@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,7 +30,7 @@
 #endif
 
 #ifdef QT_SECURETRANSPORT
-#include "qsslsocket_mac_p.h"
+#include <qsslsocket_mac_p.h>
 #endif
 
 #include <qsslconfiguration_p.h>
@@ -75,7 +75,7 @@ QSslSocket::~QSslSocket()
    qDebug() << "QSslSocket::~QSslSocket(), this =" << (void *)this;
 #endif
    delete d->plainSocket;
-   d->plainSocket = 0;
+   d->plainSocket = nullptr;
 }
 
 void QSslSocket::resume()
@@ -886,16 +886,9 @@ qint64 QSslSocket::writeData(const char *data, qint64 len)
     \internal
 */
 QSslSocketPrivate::QSslSocketPrivate()
-   : initialized(false)
-   , mode(QSslSocket::UnencryptedMode)
-   , autoStartHandshake(false)
-   , connectionEncrypted(false)
-   , shutdown(false)
-   , ignoreAllSslErrors(false)
-   , readyReadEmittedPointer(0)
-   , allowRootCertOnDemandLoading(true)
-   , plainSocket(0)
-   , paused(false)
+   : initialized(false), mode(QSslSocket::UnencryptedMode), autoStartHandshake(false), connectionEncrypted(false),
+     shutdown(false), ignoreAllSslErrors(false), readyReadEmittedPointer(nullptr), allowRootCertOnDemandLoading(true),
+     plainSocket(nullptr), paused(false)
 {
    QSslConfigurationPrivate::deepCopyDefaultConfiguration(&configuration);
 }
@@ -1107,6 +1100,7 @@ void QSslConfigurationPrivate::deepCopyDefaultConfiguration(QSslConfigurationPri
 void QSslSocketPrivate::createPlainSocket(QIODevice::OpenMode openMode)
 {
    Q_Q(QSslSocket);
+
    q->setOpenMode(openMode); // <- from QIODevice
    q->setSocketState(QAbstractSocket::UnconnectedState);
    q->setSocketError(QAbstractSocket::UnknownSocketError);
@@ -1123,25 +1117,16 @@ void QSslSocketPrivate::createPlainSocket(QIODevice::OpenMode openMode)
    plainSocket->setProperty("_q_networksession", q->property("_q_networksession"));
 #endif
 
-   q->connect(plainSocket, SIGNAL(connected()), q, SLOT(_q_connectedSlot()), Qt::DirectConnection);
-
-   q->connect(plainSocket, SIGNAL(hostFound()), q, SLOT(_q_hostFoundSlot()), Qt::DirectConnection);
-
-   q->connect(plainSocket, SIGNAL(disconnected()), q, SLOT(_q_disconnectedSlot()), Qt::DirectConnection);
-
-   q->connect(plainSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
-              q, SLOT(_q_stateChangedSlot(QAbstractSocket::SocketState)), Qt::DirectConnection);
-
-   q->connect(plainSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-              q, SLOT(_q_errorSlot(QAbstractSocket::SocketError)), Qt::DirectConnection);
-
-   q->connect(plainSocket, SIGNAL(readyRead()), q, SLOT(_q_readyReadSlot()), Qt::DirectConnection);
-
-   q->connect(plainSocket, SIGNAL(bytesWritten(qint64)), q, SLOT(_q_bytesWrittenSlot(qint64)), Qt::DirectConnection);
+   q->connect(plainSocket, &QTcpSocket::connected,    q, &QSslSocket::_q_connectedSlot, Qt::DirectConnection);
+   q->connect(plainSocket, &QTcpSocket::hostFound,    q, &QSslSocket::_q_hostFoundSlot, Qt::DirectConnection);
+   q->connect(plainSocket, &QTcpSocket::disconnected, q, &QSslSocket::_q_disconnectedSlot, Qt::DirectConnection);
+   q->connect(plainSocket, &QTcpSocket::stateChanged, q, &QSslSocket::_q_stateChangedSlot, Qt::DirectConnection);
+   q->connect(plainSocket, &QTcpSocket::error,        q, &QSslSocket::_q_errorSlot, Qt::DirectConnection);
+   q->connect(plainSocket, &QTcpSocket::readyRead,    q, &QSslSocket::_q_readyReadSlot, Qt::DirectConnection);
+   q->connect(plainSocket, &QTcpSocket::bytesWritten, q, &QSslSocket::_q_bytesWrittenSlot, Qt::DirectConnection);
 
 #ifndef QT_NO_NETWORKPROXY
-   q->connect(plainSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *)),
-              q, SLOT(proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *)));
+   q->connect(plainSocket, &QTcpSocket::proxyAuthenticationRequired, q, &QSslSocket::proxyAuthenticationRequired);
 #endif
 
    buffer.clear();
@@ -1173,12 +1158,14 @@ bool QSslSocketPrivate::isPaused() const
 {
    return paused;
 }
+
 bool QSslSocketPrivate::bind(const QHostAddress &address, quint16 port, QAbstractSocket::BindMode mode)
 {
-   // this function is called from QAbstractSocket::bind
+   // called from QAbstractSocket::bind
    if (!initialized) {
       init();
    }
+
    initialized = false;
 
 #ifdef QSSLSOCKET_DEBUG

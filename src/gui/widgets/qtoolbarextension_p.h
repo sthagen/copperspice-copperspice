@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,7 +38,7 @@ class QToolBarExtension : public QToolButton
  public:
    explicit QToolBarExtension(QWidget *parent);
 
-   void paintEvent(QPaintEvent *) override;
+   void paintEvent(QPaintEvent *event) override;
    QSize sizeHint() const override;
 
    GUI_CS_SLOT_1(Public, void setOrientation(Qt::Orientation o))

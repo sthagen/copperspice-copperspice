@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,6 +25,7 @@
 #define QSCRIPTVALUE_P_H
 
 #include <qshareddata.h>
+
 #include "wtf/Platform.h"
 #include "JSValue.h"
 
@@ -35,12 +36,7 @@ class QScriptValue;
 
 class QScriptValuePrivate : public QSharedData
 {
-   Q_DISABLE_COPY(QScriptValuePrivate)
-
  public:
-   inline void *operator new (size_t, QScriptEnginePrivate *);
-   inline void operator delete (void *);
-
    enum Type {
       JavaScriptCore,
       Number,
@@ -48,7 +44,14 @@ class QScriptValuePrivate : public QSharedData
    };
 
    inline QScriptValuePrivate(QScriptEnginePrivate *);
+
+   QScriptValuePrivate(const QScriptValuePrivate &) = delete;
+   QScriptValuePrivate &operator=(const QScriptValuePrivate &) = delete;
+
    inline ~QScriptValuePrivate();
+
+   inline void *operator new (size_t, QScriptEnginePrivate *);
+   inline void operator delete (void *);
 
    inline void initFrom(JSC::JSValue value);
    inline void initFrom(qsreal value);
@@ -67,7 +70,7 @@ class QScriptValuePrivate : public QSharedData
 
    static inline QScriptEnginePrivate *getEngine(const QScriptValue &q) {
       if (! q.d_ptr) {
-         return 0;
+         return nullptr;
       }
       return q.d_ptr->engine;
    }
@@ -112,7 +115,7 @@ class QScriptValuePrivate : public QSharedData
 };
 
 inline QScriptValuePrivate::QScriptValuePrivate(QScriptEnginePrivate *e)
-   : engine(e), prev(0), next(0)
+   : engine(e), prev(nullptr), next(nullptr)
 {
 }
 

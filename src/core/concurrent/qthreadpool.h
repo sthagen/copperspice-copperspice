@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,10 @@
 #ifndef QTHREADPOOL_H
 #define QTHREADPOOL_H
 
-#include <QtCore/qglobal.h>
-#include <QtCore/qthread.h>
-#include <QtCore/qrunnable.h>
-#include <QScopedPointer>
-
+#include <qglobal.h>
+#include <qthread.h>
+#include <qrunnable.h>
+#include <qscopedpointer.h>
 
 class QThreadPoolPrivate;
 

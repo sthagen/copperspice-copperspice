@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QFILESYSTEMWATCHER_H
 #define QFILESYSTEMWATCHER_H
 
-#include <QtCore/qobject.h>
-#include <QScopedPointer>
+#include <qobject.h>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_FILESYSTEMWATCHER
-
-QT_BEGIN_NAMESPACE
 
 class QFileSystemWatcherPrivate;
 
@@ -40,13 +38,14 @@ class Q_CORE_EXPORT QFileSystemWatcher : public QObject
 
  public:
    QFileSystemWatcher(QObject *parent = nullptr);
-   QFileSystemWatcher(const QStringList &paths, QObject *parent = nullptr);
+   QFileSystemWatcher(const QStringList &pathList, QObject *parent = nullptr);
+
    ~QFileSystemWatcher();
 
-   void addPath(const QString &file);
-   void addPaths(const QStringList &files);
-   void removePath(const QString &file);
-   void removePaths(const QStringList &files);
+   void addPath(const QString &path);
+   void addPaths(const QStringList &pathList);
+   void removePath(const QString &path);
+   void removePaths(const QStringList &pathList);
 
    QStringList files() const;
    QStringList directories() const;
@@ -69,8 +68,6 @@ class Q_CORE_EXPORT QFileSystemWatcher : public QObject
 
 };
 
-QT_END_NAMESPACE
-
 #endif // QT_NO_FILESYSTEMWATCHER
 
-#endif // QFILESYSTEMWATCHER_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,18 +24,15 @@
 #ifndef QHOSTINFO_H
 #define QHOSTINFO_H
 
-#include <QtCore/qlist.h>
-#include <QtCore/qscopedpointer.h>
-#include <QtNetwork/qhostaddress.h>
-
-QT_BEGIN_NAMESPACE
+#include <qlist.h>
+#include <qscopedpointer.h>
+#include <qhostaddress.h>
 
 class QObject;
 class QHostInfoPrivate;
 
 class Q_NETWORK_EXPORT QHostInfo
 {
-
  public:
    enum HostInfoError {
       NoError,
@@ -43,13 +40,18 @@ class Q_NETWORK_EXPORT QHostInfo
       UnknownError
    };
 
-   explicit QHostInfo(int lookupId = -1);
-   QHostInfo(const QHostInfo &d);
-   QHostInfo &operator=(const QHostInfo &d);
+   explicit QHostInfo(int id = -1);
+
+   QHostInfo(const QHostInfo &other);
+   QHostInfo(QHostInfo &&other);
+
    ~QHostInfo();
 
+   QHostInfo &operator=(const QHostInfo &other);
+   QHostInfo &operator=(QHostInfo &&other);
+
    QString hostName() const;
-   void setHostName(const QString &name);
+   void setHostName(const QString &hostName);
 
    QList<QHostAddress> addresses() const;
    void setAddresses(const QList<QHostAddress> &addresses);
@@ -58,13 +60,13 @@ class Q_NETWORK_EXPORT QHostInfo
    void setError(HostInfoError error);
 
    QString errorString() const;
-   void setErrorString(const QString &errorString);
+   void setErrorString(const QString &errorStr);
 
    void setLookupId(int id);
    int lookupId() const;
 
    static int lookupHost(const QString &name, QObject *receiver, const  QString &member);
-   static void abortHostLookup(int lookupId);
+   static void abortHostLookup(int id);
 
    static QHostInfo fromName(const QString &name);
    static QString localHostName();
@@ -74,6 +76,4 @@ class Q_NETWORK_EXPORT QHostInfo
    QScopedPointer<QHostInfoPrivate> d;
 };
 
-QT_END_NAMESPACE
-
-#endif // QHOSTINFO_H
+#endif

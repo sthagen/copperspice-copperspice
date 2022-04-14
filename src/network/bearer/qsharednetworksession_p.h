@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,8 +33,6 @@
 
 #ifndef QT_NO_BEARERMANAGEMENT
 
-QT_BEGIN_NAMESPACE
-
 uint qHash(const QNetworkConfiguration &config);
 
 class QSharedNetworkSessionManager
@@ -47,9 +45,7 @@ class QSharedNetworkSessionManager
    QHash<QNetworkConfiguration, QWeakPointer<QNetworkSession> > sessions;
 };
 
-QT_END_NAMESPACE
-
 #endif // QT_NO_BEARERMANAGEMENT
 
-#endif //QSHAREDNETWORKSESSIONPRIVATE_H
+#endif
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,6 +23,7 @@
 
 #include <qplatformdefs.h>
 #include <qfilesystemwatcher.h>
+
 #include <qfilesystemwatcher_kqueue_p.h>
 #include <qcore_unix_p.h>
 
@@ -39,8 +40,6 @@
 #include <sys/time.h>
 #include <fcntl.h>
 
-QT_BEGIN_NAMESPACE
-
 // #define KEVENT_DEBUG
 #ifdef KEVENT_DEBUG
 #  define DEBUG qDebug
@@ -52,7 +51,7 @@ QKqueueFileSystemWatcherEngine *QKqueueFileSystemWatcherEngine::create()
 {
    int kqfd = kqueue();
    if (kqfd == -1) {
-      return 0;
+      return nullptr;
    }
    return new QKqueueFileSystemWatcherEngine(kqfd);
 }
@@ -78,8 +77,8 @@ QKqueueFileSystemWatcherEngine::QKqueueFileSystemWatcherEngine(int kqfd)
           0,
           0,
           0);
-   if (kevent(kqfd, &kev, 1, 0, 0, 0) == -1) {
-      perror("QKqueueFileSystemWatcherEngine: cannot watch pipe, kevent returned");
+   if (kevent(kqfd, &kev, 1, nullptr, 0, nullptr) == -1) {
+      perror("QKqueueFileSystemWatcherEngine: can not watch pipe, kevent returned");
       return;
    }
 }
@@ -158,7 +157,7 @@ QStringList QKqueueFileSystemWatcherEngine::addPaths(const QStringList &paths,
                 NOTE_DELETE | NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB | NOTE_RENAME | NOTE_REVOKE,
                 0,
                 0);
-         if (kevent(kqfd, &kev, 1, 0, 0, 0) == -1) {
+         if (kevent(kqfd, &kev, 1, nullptr, 0, nullptr) == -1) {
             perror("QKqueueFileSystemWatcherEngine::addPaths: kevent");
             ::close(fd);
             continue;
@@ -241,7 +240,7 @@ void QKqueueFileSystemWatcherEngine::run()
       int r;
       struct kevent kev;
       DEBUG() << "QKqueueFileSystemWatcherEngine: waiting for kevents...";
-      EINTR_LOOP(r, kevent(kqfd, 0, 0, &kev, 1, 0));
+      EINTR_LOOP(r, kevent(kqfd, nullptr, 0, &kev, 1, nullptr));
       if (r < 0)
       {
          perror("QKqueueFileSystemWatcherEngine: error during kevent wait");
@@ -327,6 +326,5 @@ void QKqueueFileSystemWatcherEngine::run()
    }
 }
 
-#endif //QT_NO_FILESYSTEMWATCHER
+#endif // QT_NO_FILESYSTEMWATCHER
 
-QT_END_NAMESPACE

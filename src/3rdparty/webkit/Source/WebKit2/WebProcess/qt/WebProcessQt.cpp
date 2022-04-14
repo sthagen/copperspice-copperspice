@@ -25,10 +25,10 @@
 
 #include "config.h"
 #include "WebProcess.h"
-
 #include "WebProcessCreationParameters.h"
 #include <WebCore/RuntimeEnabledFeatures.h>
-#include <QNetworkAccessManager>
+
+#include <qnetaccess_manager.h>
 
 namespace WebKit {
 

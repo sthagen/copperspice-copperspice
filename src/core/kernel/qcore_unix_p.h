@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -117,7 +117,7 @@ inline void qt_ignore_sigpipe()
         memset(&noaction, 0, sizeof(noaction));
 
         noaction.sa_handler = SIG_IGN;
-        ::sigaction(SIGPIPE, &noaction, 0);
+        ::sigaction(SIGPIPE, &noaction, nullptr);
 
         atom.store(true);
     }
@@ -141,8 +141,9 @@ static inline int qt_safe_open(const char *pathname, int flags, mode_t mode = 07
    }
    return fd;
 }
+
 #undef QT_OPEN
-#define QT_OPEN         qt_safe_open
+#define QT_OPEN  qt_safe_open
 
 
 
@@ -312,8 +313,7 @@ static inline key_t qt_safe_ftok(const QByteArray &filename, int proj_id)
     return ::ftok(filename.constData(), qHash(filename, proj_id));
 }
 
-#endif // !QT_NO_SHAREDMEMORY
-#endif // !QT_POSIX_IPC
-QT_END_NAMESPACE
+#endif // QT_NO_SHAREDMEMORY
+#endif // QT_POSIX_IPC
 
 #endif

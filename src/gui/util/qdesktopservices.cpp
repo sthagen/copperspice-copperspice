@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,21 +30,24 @@
 #include <qhash.h>
 #include <qobject.h>
 #include <qcoreapplication.h>
-#include <qguiapplication_p.h>
 #include <qurl.h>
 #include <qmutex.h>
 #include <qplatform_services.h>
 #include <qplatform_integration.h>
 #include <qdir.h>
 
+#include <qguiapplication_p.h>
+
 class QOpenUrlHandlerRegistry : public QObject
 {
    GUI_CS_OBJECT(QOpenUrlHandlerRegistry)
 
  public:
-   inline QOpenUrlHandlerRegistry() : mutex(QMutex::Recursive) {}
+   QOpenUrlHandlerRegistry()
+   {
+   }
 
-   QMutex mutex;
+   QRecursiveMutex mutex;
 
    struct Handler {
       QObject *receiver;
@@ -63,6 +66,7 @@ Q_GLOBAL_STATIC(QOpenUrlHandlerRegistry, handlerRegistry)
 void QOpenUrlHandlerRegistry::handlerDestroyed(QObject *handler)
 {
    HandlerHash::iterator it = handlers.begin();
+
    while (it != handlers.end()) {
       if (it->receiver == handler) {
          it = handlers.erase(it);
@@ -75,7 +79,8 @@ void QOpenUrlHandlerRegistry::handlerDestroyed(QObject *handler)
 bool QDesktopServices::openUrl(const QUrl &url)
 {
    QOpenUrlHandlerRegistry *registry = handlerRegistry();
-   QMutexLocker locker(&registry->mutex);
+   QRecursiveMutexLocker locker(&registry->mutex);
+
    static bool insideOpenUrlHandler = false;
 
    if (! insideOpenUrlHandler) {
@@ -90,43 +95,47 @@ bool QDesktopServices::openUrl(const QUrl &url)
       }
    }
 
-   if (!url.isValid()) {
+   if (! url.isValid()) {
       return false;
    }
 
    QPlatformIntegration *platformIntegration = QGuiApplicationPrivate::platformIntegration();
-   if (!platformIntegration) {
+   if (! platformIntegration) {
       return false;
    }
 
    QPlatformServices *platformServices = platformIntegration->services();
-   if (!platformServices) {
-      qWarning("The platform plugin does not support services.");
+
+   if (! platformServices) {
+      qWarning("Platform plugin does not support services.");
       return false;
    }
-   return url.scheme() == QLatin1String("file") ?
+
+   return url.scheme() == "file" ?
       platformServices->openDocument(url) : platformServices->openUrl(url);
 }
 
 void QDesktopServices::setUrlHandler(const QString &scheme, QObject *receiver, const char *method)
 {
    QOpenUrlHandlerRegistry *registry = handlerRegistry();
-   QMutexLocker locker(&registry->mutex);
-   if (!receiver) {
+   QRecursiveMutexLocker locker(&registry->mutex);
+
+   if (! receiver) {
       registry->handlers.remove(scheme.toLower());
       return;
    }
+
    QOpenUrlHandlerRegistry::Handler h;
    h.receiver = receiver;
    h.name = method;
    registry->handlers.insert(scheme.toLower(), h);
-   QObject::connect(receiver, SIGNAL(destroyed(QObject *)),
-      registry, SLOT(handlerDestroyed(QObject *)));
+
+   QObject::connect(receiver, &QObject::destroyed, registry, &QOpenUrlHandlerRegistry::handlerDestroyed);
 }
 
 void QDesktopServices::unsetUrlHandler(const QString &scheme)
 {
-   setUrlHandler(scheme, 0, 0);
+   setUrlHandler(scheme, nullptr, nullptr);
 }
 
 extern Q_CORE_EXPORT QString qt_applicationName_noFallback();
@@ -143,23 +152,21 @@ QString QDesktopServices::storageLocationImpl(QStandardPaths::StandardLocation t
 
 #if defined(Q_OS_WIN) || defined(Q_OS_DARWIN)
       QString result = baseDir;
-      if (!QCoreApplication::organizationName().isEmpty()) {
-         result += QLatin1Char('/') + QCoreApplication::organizationName();
+      if (! QCoreApplication::organizationName().isEmpty()) {
+         result += '/' + QCoreApplication::organizationName();
       }
 
-      if (!compatAppName.isEmpty()) {
-         result += QLatin1Char('/') + compatAppName;
+      if (! compatAppName.isEmpty()) {
+         result += '/' + compatAppName;
       }
 
       return result;
 
 #elif defined(Q_OS_UNIX)
-      return baseDir + QLatin1String("/data/")
-         + QCoreApplication::organizationName() + QLatin1Char('/')
-         + compatAppName;
+      return baseDir + "/data/" + QCoreApplication::organizationName() + '/' + compatAppName;
 #endif
    }
 
    return QStandardPaths::writableLocation(type);
 }
-#endif // QT_NO_DESKTOPSERVICES
+#endif

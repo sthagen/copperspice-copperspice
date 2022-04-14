@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,7 +33,10 @@ class QAccessibleWidgetPrivate;
 class Q_GUI_EXPORT QAccessibleWidget : public QAccessibleObject, public QAccessibleActionInterface
 {
  public:
-   explicit QAccessibleWidget(QWidget *widget, QAccessible::Role r = QAccessible::Client, const QString &name = QString());
+   explicit QAccessibleWidget(QWidget *widget, QAccessible::Role role = QAccessible::Client, const QString &name = QString());
+
+   QAccessibleWidget(const QAccessibleWidget &) = delete;
+   QAccessibleWidget &operator=(const QAccessibleWidget &) = delete;
 
    bool isValid() const override;
    QWindow *window() const override;
@@ -68,12 +71,12 @@ class Q_GUI_EXPORT QAccessibleWidget : public QAccessibleObject, public QAccessi
    QObject *parentObject() const;
 
    void addControllingSignal(const QString &signal);
+   void addControllingSignal(const QMetaMethod &signal);
 
  private:
    QAccessibleWidgetPrivate *d;
-   Q_DISABLE_COPY(QAccessibleWidget)
 };
 
-#endif
+#endif // QT_NO_ACCESSIBILITY
 
-#endif // QACCESSIBLEWIDGET_H
+#endif

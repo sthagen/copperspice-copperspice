@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include <QString>
+#include <qstring.h>
 
 const QString &settingsPrefix();
-QString settingPath(const char *path);
+QString settingPath(const QString &path);
 
-#endif // GLOBALS_H
+#endif

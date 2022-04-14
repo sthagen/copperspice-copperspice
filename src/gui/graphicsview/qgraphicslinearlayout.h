@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QGRAPHICSLINEARLAYOUT_H
 #define QGRAPHICSLINEARLAYOUT_H
 
-#include <QtGui/qgraphicsitem.h>
-#include <QtGui/qgraphicslayout.h>
+#include <qgraphicsitem.h>
+#include <qgraphicslayout.h>
 
-
-
-#if !defined(QT_NO_GRAPHICSVIEW)
+#if ! defined(QT_NO_GRAPHICSVIEW)
 
 class QGraphicsLinearLayoutPrivate;
 
@@ -37,7 +35,11 @@ class Q_GUI_EXPORT QGraphicsLinearLayout : public QGraphicsLayout
 {
  public:
    QGraphicsLinearLayout(QGraphicsLayoutItem *parent = nullptr);
-   QGraphicsLinearLayout(Qt::Orientation orientation, QGraphicsLayoutItem *parent = 0);
+   QGraphicsLinearLayout(Qt::Orientation orientation, QGraphicsLayoutItem *parent = nullptr);
+
+   QGraphicsLinearLayout(const QGraphicsLinearLayout &) = delete;
+   QGraphicsLinearLayout &operator=(const QGraphicsLinearLayout &) = delete;
+
    virtual ~QGraphicsLinearLayout();
 
    void setOrientation(Qt::Orientation orientation);
@@ -78,13 +80,10 @@ class Q_GUI_EXPORT QGraphicsLinearLayout : public QGraphicsLayout
    void dump(int indent = 0) const;
 
  private:
-   Q_DISABLE_COPY(QGraphicsLinearLayout)
    Q_DECLARE_PRIVATE(QGraphicsLinearLayout)
 };
 
 #endif
-
-
 
 #endif
 

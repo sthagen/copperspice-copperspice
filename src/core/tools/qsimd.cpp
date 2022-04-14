@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,7 +22,7 @@
 ***********************************************************************/
 
 #include <qsimd_p.h>
-#include <QByteArray>
+#include <qbytearray.h>
 
 #include <stdio.h>
 
@@ -417,11 +417,13 @@ static bool procCpuinfoContains(const char *prefix, const char *string)
       char *colon = static_cast<char *>(::memchr(line.data, ':', line.size));
 
       if (colon && line.size > prefix_len + string_len) {
-         if (!::strncmp(prefix, line.data, prefix_len)) {
+         if (::strncmp(prefix, line.data, prefix_len) == 0) {
             // prefix matches, next character must be ':' or space
+
             if (line.data[prefix_len] == ':' || ::isspace(line.data[prefix_len])) {
                // Does it contain the string?
                char *found = ::strstr(line.cString(), string);
+
                if (found && ::isspace(found[-1]) &&
                      (::isspace(found[string_len]) || found[string_len] == '\0')) {
                   present = true;
@@ -434,6 +436,7 @@ static bool procCpuinfoContains(const char *prefix, const char *string)
    } while (line.size);
 
    ::qt_safe_close(cpuinfo_fd);
+
    return present;
 }
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #define QSCRIPTSTATICSCOPEOBJECT_P_H
 
 #include "JSVariableObject.h"
-
-QT_BEGIN_NAMESPACE
 
 class QScriptStaticScopeObject : public JSC::JSVariableObject
 {
@@ -77,9 +75,9 @@ class QScriptStaticScopeObject : public JSC::JSVariableObject
 
    struct Data : public JSVariableObjectData {
       Data(bool canGrow_)
-         : JSVariableObjectData(&symbolTable, /*registers=*/0),
-           canGrow(canGrow_), registerArraySize(0) {
+         : JSVariableObjectData(&symbolTable, nullptr), canGrow(canGrow_), registerArraySize(0) {
       }
+
       bool canGrow;
       int registerArraySize;
       JSC::SymbolTable symbolTable;
@@ -93,7 +91,5 @@ class QScriptStaticScopeObject : public JSC::JSVariableObject
    void addSymbolTableProperty(const JSC::Identifier &, JSC::JSValue, unsigned attributes);
    int growRegisterArray(int);
 };
-
-QT_END_NAMESPACE
 
 #endif

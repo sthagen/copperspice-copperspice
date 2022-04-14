@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,12 +36,8 @@
 #include <qdebug.h>
 #include <QDesktopWidget>
 
-
 #include <qwidget_p.h>
 #include <qabstractscrollarea.h>
-
-
-
 
 static QWidget *qt_sizegrip_topLevelWidget(QWidget *w)
 {
@@ -116,22 +112,20 @@ class QSizeGripPrivate : public QWidgetPrivate
 };
 
 QSizeGripPrivate::QSizeGripPrivate()
-   : dxMax(0)
-   , dyMax(0)
-   , gotMousePress(false)
-   , tlw(0)
-   , m_platformSizeGrip(false)
+   : dxMax(0), dyMax(0), gotMousePress(false), tlw(nullptr), m_platformSizeGrip(false)
 {
 }
-
 
 Qt::Corner QSizeGripPrivate::corner() const
 {
    Q_Q(const QSizeGrip);
-   QWidget *tlw = qt_sizegrip_topLevelWidget(const_cast<QSizeGrip *>(q));
-   const QPoint sizeGripPos = q->mapTo(tlw, QPoint(0, 0));
-   bool isAtBottom = sizeGripPos.y() >= tlw->height() / 2;
-   bool isAtLeft = sizeGripPos.x() <= tlw->width() / 2;
+
+   QWidget *tmp = qt_sizegrip_topLevelWidget(const_cast<QSizeGrip *>(q));
+   const QPoint sizeGripPos = q->mapTo(tmp, QPoint(0, 0));
+
+   bool isAtBottom = sizeGripPos.y() >= tmp->height() / 2;
+   bool isAtLeft   = sizeGripPos.x() <= tmp->width() / 2;
+
    if (isAtLeft) {
       return isAtBottom ? Qt::BottomLeftCorner : Qt::TopLeftCorner;
    } else {
@@ -139,10 +133,8 @@ Qt::Corner QSizeGripPrivate::corner() const
    }
 }
 
-
-
 QSizeGrip::QSizeGrip(QWidget *parent)
-   : QWidget(*new QSizeGripPrivate, parent, 0)
+   : QWidget(*new QSizeGripPrivate, parent, Qt::EmptyFlag)
 {
    Q_D(QSizeGrip);
    d->init();
@@ -161,35 +153,32 @@ void QSizeGripPrivate::init()
    updateTopLevelWidget();
 }
 
-
-
 QSizeGrip::~QSizeGrip()
 {
 }
 
-/*!
-  \reimp
-*/
 QSize QSizeGrip::sizeHint() const
 {
    QStyleOption opt(0);
-   opt.init(this);
+   opt.initFrom(this);
+
    return (style()->sizeFromContents(QStyle::CT_SizeGrip, &opt, QSize(13, 13), this).
          expandedTo(QApplication::globalStrut()));
 }
 
-
 void QSizeGrip::paintEvent(QPaintEvent *event)
 {
-   Q_UNUSED(event);
+   (void) event;
+
    Q_D(QSizeGrip);
+
    QPainter painter(this);
+
    QStyleOptionSizeGrip opt;
-   opt.init(this);
+   opt.initFrom(this);
    opt.corner = d->m_corner;
    style()->drawControl(QStyle::CE_SizeGrip, &opt, &painter, this);
 }
-
 
 void QSizeGrip::mousePressEvent(QMouseEvent *e)
 {
@@ -219,7 +208,6 @@ void QSizeGrip::mousePressEvent(QMouseEvent *e)
    if (d->m_platformSizeGrip) {
       return;
    }
-
 
    // Find available desktop/workspace geometry.
    QRect availableGeometry;
@@ -285,12 +273,6 @@ void QSizeGrip::mousePressEvent(QMouseEvent *e)
    }
 }
 
-
-/*!
-    \fn void QSizeGrip::mouseMoveEvent(QMouseEvent * event)
-    Resizes the top-level widget containing this widget. The mouse
-    move event is passed in the \a event parameter.
-*/
 void QSizeGrip::mouseMoveEvent(QMouseEvent *e)
 {
    Q_D(QSizeGrip);
@@ -303,7 +285,6 @@ void QSizeGrip::mouseMoveEvent(QMouseEvent *e)
    if (! d->gotMousePress || tlw->testAttribute(Qt::WA_WState_ConfigPending)) {
       return;
    }
-
 
    QPoint np(e->globalPos());
 
@@ -342,9 +323,6 @@ void QSizeGrip::mouseMoveEvent(QMouseEvent *e)
    tlw->setGeometry(nr);
 }
 
-/*!
-  \reimp
-*/
 void QSizeGrip::mouseReleaseEvent(QMouseEvent *mouseEvent)
 {
    if (mouseEvent->button() == Qt::LeftButton) {
@@ -356,9 +334,6 @@ void QSizeGrip::mouseReleaseEvent(QMouseEvent *mouseEvent)
    }
 }
 
-/*!
-  \reimp
-*/
 void QSizeGrip::moveEvent(QMoveEvent * /*moveEvent*/)
 {
    Q_D(QSizeGrip);
@@ -375,32 +350,22 @@ void QSizeGrip::moveEvent(QMoveEvent * /*moveEvent*/)
 
 }
 
-/*!
-  \reimp
-*/
 void QSizeGrip::showEvent(QShowEvent *showEvent)
 {
    QWidget::showEvent(showEvent);
 }
 
-/*!
-  \reimp
-*/
 void QSizeGrip::hideEvent(QHideEvent *hideEvent)
 {
 
    QWidget::hideEvent(hideEvent);
 }
 
-/*!
-    \reimp
-*/
 void QSizeGrip::setVisible(bool visible)
 {
    QWidget::setVisible(visible);
 }
 
-/*! \reimp */
 bool QSizeGrip::eventFilter(QObject *o, QEvent *e)
 {
    Q_D(QSizeGrip);

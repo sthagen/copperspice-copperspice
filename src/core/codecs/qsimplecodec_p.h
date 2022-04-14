@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,8 +25,6 @@
 #define QSIMPLECODEC_P_H
 
 #include <qtextcodec.h>
-
-QT_BEGIN_NAMESPACE
 
 #ifndef QT_NO_TEXTCODEC
 
@@ -53,7 +51,5 @@ class QSimpleTextCodec: public QTextCodec
 };
 
 #endif // QT_NO_TEXTCODEC
-
-QT_END_NAMESPACE
 
 #endif // QSIMPLECODEC_P_H

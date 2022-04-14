@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,6 @@ QInputDeviceManager::QInputDeviceManager(QObject *parent)
    : QObject(parent), d_ptr(new QInputDeviceManagerPrivate)
 {
    d_ptr->q_ptr = this;
-   qRegisterMetaType<DeviceType>();
 }
 
 int QInputDeviceManager::deviceCount(DeviceType type) const

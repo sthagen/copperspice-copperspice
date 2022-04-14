@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,8 +40,8 @@ class PrivateSoundSource : public QIODevice
    PrivateSoundSource(QSoundEffectPrivate *s);
    ~PrivateSoundSource() {}
 
-   qint64 readData( char *data, qint64 len);
-   qint64 writeData(const char *data, qint64 len);
+   qint64 readData( char *data, qint64 len) override;
+   qint64 writeData(const char *data, qint64 len) override;
 
  private:
    QUrl           m_url;
@@ -65,12 +65,11 @@ class PrivateSoundSource : public QIODevice
    MULTI_CS_SLOT_1(Private, void decoderError())
    MULTI_CS_SLOT_2(decoderError)
 
-   MULTI_CS_SLOT_1(Private, void stateChanged(QAudio::State un_named_arg1))
+   MULTI_CS_SLOT_1(Private, void stateChanged(QAudio::State state))
    MULTI_CS_SLOT_2(stateChanged)
 
    friend class QSoundEffectPrivate;
 };
-
 
 class QSoundEffectPrivate : public QObject
 {
@@ -132,7 +131,7 @@ class QSoundEffectPrivate : public QObject
    void setPlaying(bool playing);
    void setLoopsRemaining(int loopsRemaining);
 
-   PrivateSoundSource *d;
+   PrivateSoundSource *m_soundSource;
 
    friend class PrivateSoundSource;
 };

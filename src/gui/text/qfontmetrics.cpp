@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,10 +31,8 @@
 
 #include <math.h>
 
-extern void qt_format_text(const QFont &font, const QRectF &_r,
-   int tf, const QString &text, QRectF *brect,
-   int tabStops, int *tabArray, int tabArrayLen,
-   QPainter *painter);
+extern void qt_format_text(const QFont &font, const QRectF &_r, int tf, const QString &text,
+            QRectF *brect, int tabStops, int *tabArray, int tabArrayLen, QPainter *painter);
 
 QFontMetrics::QFontMetrics(const QFont &font)
    : d(font.d.data())
@@ -57,11 +55,8 @@ QFontMetrics::QFontMetrics(const QFont &font, QPaintDevice *paintdevice)
 
 }
 
-/*!
-    Constructs a copy of \a fm.
-*/
-QFontMetrics::QFontMetrics(const QFontMetrics &fm)
-   : d(fm.d.data())
+QFontMetrics::QFontMetrics(const QFontMetrics &other)
+   : d(other.d.data())
 {
 }
 
@@ -69,14 +64,13 @@ QFontMetrics::~QFontMetrics()
 {
 }
 
-QFontMetrics &QFontMetrics::operator=(const QFontMetrics &fm)
+QFontMetrics &QFontMetrics::operator=(const QFontMetrics &other)
 {
-   d = fm.d.data();
+   d = other.d.data();
    return *this;
 }
 
-
-bool QFontMetrics::operator ==(const QFontMetrics &other) const
+bool QFontMetrics::operator==(const QFontMetrics &other) const
 {
    return d == other.d;
 }
@@ -84,15 +78,16 @@ bool QFontMetrics::operator ==(const QFontMetrics &other) const
 int QFontMetrics::ascent() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->ascent());
 }
-
 
 int QFontMetrics::descent() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->descent());
 }
 
@@ -107,7 +102,8 @@ int QFontMetrics::descent() const
 int QFontMetrics::height() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->ascent()) + qRound(engine->descent());
 }
 
@@ -121,7 +117,8 @@ int QFontMetrics::height() const
 int QFontMetrics::leading() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->leading());
 }
 
@@ -135,7 +132,8 @@ int QFontMetrics::leading() const
 int QFontMetrics::lineSpacing() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->leading()) + qRound(engine->ascent()) + qRound(engine->descent());
 }
 
@@ -152,7 +150,8 @@ int QFontMetrics::lineSpacing() const
 int QFontMetrics::minLeftBearing() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->minLeftBearing());
 }
 
@@ -169,7 +168,8 @@ int QFontMetrics::minLeftBearing() const
 int QFontMetrics::minRightBearing() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->minRightBearing());
 }
 
@@ -179,7 +179,8 @@ int QFontMetrics::minRightBearing() const
 int QFontMetrics::maxWidth() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->maxCharWidth());
 }
 
@@ -190,7 +191,8 @@ int QFontMetrics::maxWidth() const
 int QFontMetrics::xHeight() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    if (d->capital == QFont::SmallCaps) {
       return qRound(d->smallCapsFontPrivate()->engineForScript(QChar::Script_Common)->ascent());
    }
@@ -200,7 +202,8 @@ int QFontMetrics::xHeight() const
 int QFontMetrics::averageCharWidth() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->averageCharWidth());
 }
 
@@ -214,13 +217,13 @@ bool QFontMetrics::inFontUcs4(char32_t ch) const
    const int script_id = QChar(ch).script();
 
    QFontEngine *engine = d->engineForScript(script_id);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
 
    if (engine->type() == QFontEngine::Box) {
       return false;
    }
 
-   return engine->canRender(QString(ch));
+   return engine->canRender(make_view(QString(ch)));
 }
 
 int QFontMetrics::leftBearing(QChar ch) const
@@ -234,7 +237,7 @@ int QFontMetrics::leftBearing(QChar ch) const
       engine = d->engineForScript(script_id);
    }
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
 
    if (engine->type() == QFontEngine::Box) {
       return 0;
@@ -260,7 +263,7 @@ int QFontMetrics::rightBearing(QChar ch) const
       engine = d->engineForScript(script);
    }
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
    if (engine->type() == QFontEngine::Box) {
       return 0;
    }
@@ -270,7 +273,7 @@ int QFontMetrics::rightBearing(QChar ch) const
    glyph_t glyph = engine->glyphIndex(ch.unicode());
 
    qreal rb;
-   engine->getGlyphBearings(glyph, 0, &rb);
+   engine->getGlyphBearings(glyph, nullptr, &rb);
 
    return qRound(rb);
 }
@@ -286,11 +289,13 @@ int QFontMetrics::width(const QString &text, int len) const
 int QFontMetrics::width(const QString &text, int len, int flags) const
 {
    int pos = text.indexOf(QLatin1Char('\x9c'));
+
    if (pos != -1) {
       len = (len < 0) ? pos : qMin(pos, len);
    } else if (len < 0) {
       len = text.length();
    }
+
    if (len == 0) {
       return 0;
    }
@@ -301,11 +306,11 @@ int QFontMetrics::width(const QString &text, int len, int flags) const
       QVarLengthGlyphLayoutArray glyphs(numGlyphs);
       QFontEngine *engine = d->engineForScript(QChar::Script_Common);
 
-      if (! engine->stringToCMap(text, &glyphs, &numGlyphs, 0)) {
+      if (! engine->stringToCMap(text, &glyphs, &numGlyphs, Qt::EmptyFlag)) {
          // error, may want to throw
          glyphs.resize(numGlyphs);
 
-         if (! engine->stringToCMap(text, &glyphs, &numGlyphs, 0)) {
+         if (! engine->stringToCMap(text, &glyphs, &numGlyphs, Qt::EmptyFlag)) {
             Q_ASSERT_X(false, Q_FUNC_INFO, "stringToCMap should not fail twice");
          }
       }
@@ -338,7 +343,7 @@ int QFontMetrics::width(QChar ch) const
       engine = d->engineForScript(script_id);
    }
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
    d->alterCharForCapitalization(ch);
 
    glyph_t glyph = engine->glyphIndex(ch.unicode());
@@ -348,7 +353,7 @@ int QFontMetrics::width(QChar ch) const
    glyphs.numGlyphs = 1;
    glyphs.glyphs    = &glyph;
    glyphs.advances  = &advance;
-   engine->recalcAdvances(&glyphs, 0);
+   engine->recalcAdvances(&glyphs, Qt::EmptyFlag);
 
    return qRound(advance);
 }
@@ -377,7 +382,7 @@ QRect QFontMetrics::boundingRect(QChar ch) const
       engine = d->engineForScript(script);
    }
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
    d->alterCharForCapitalization(ch);
 
    glyph_t glyph = engine->glyphIndex(ch.unicode());
@@ -398,8 +403,8 @@ QRect QFontMetrics::boundingRect(const QRect &rect, int flags, const QString &te
 
    QRectF rb;
    QRectF rr(rect);
-   qt_format_text(QFont(d.data()), rr, flags | Qt::TextDontPrint, text, &rb, tabStops, tabArray,
-      tabArrayLen, 0);
+   qt_format_text(QFont(d.data()), rr, flags | Qt::TextDontPrint, text, &rb, tabStops,
+               tabArray, tabArrayLen, nullptr);
 
    return rb.toAlignedRect();
 }
@@ -451,7 +456,7 @@ QString QFontMetrics::elidedText(const QString &text, Qt::TextElideMode mode, in
 int QFontMetrics::underlinePos() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
    return qRound(engine->underlinePosition());
 }
 
@@ -487,7 +492,8 @@ int QFontMetrics::strikeOutPos() const
 int QFontMetrics::lineWidth() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return qRound(engine->lineThickness());
 }
 
@@ -495,7 +501,6 @@ QFontMetricsF::QFontMetricsF(const QFontMetrics &fontMetrics)
    : d(fontMetrics.d.data())
 {
 }
-
 
 QFontMetricsF &QFontMetricsF::operator=(const QFontMetrics &other)
 {
@@ -521,13 +526,13 @@ QFontMetricsF::QFontMetricsF(const QFont &font, QPaintDevice *paintdevice)
    } else {
       d = font.d.data();
    }
-
 }
 
 QFontMetricsF::QFontMetricsF(const QFontMetricsF &fm)
    : d(fm.d.data())
 {
 }
+
 QFontMetricsF::~QFontMetricsF()
 {
 }
@@ -547,7 +552,8 @@ bool QFontMetricsF::operator ==(const QFontMetricsF &other) const
 qreal QFontMetricsF::ascent() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->ascent().toReal();
 }
 
@@ -555,7 +561,8 @@ qreal QFontMetricsF::ascent() const
 qreal QFontMetricsF::descent() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->descent().toReal();
 }
 
@@ -570,7 +577,7 @@ qreal QFontMetricsF::descent() const
 qreal QFontMetricsF::height() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
 
    return (engine->ascent() + engine->descent()).toReal();
 }
@@ -585,7 +592,8 @@ qreal QFontMetricsF::height() const
 qreal QFontMetricsF::leading() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->leading().toReal();
 }
 
@@ -599,7 +607,8 @@ qreal QFontMetricsF::leading() const
 qreal QFontMetricsF::lineSpacing() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return (engine->leading() + engine->ascent() + engine->descent()).toReal();
 }
 
@@ -616,7 +625,8 @@ qreal QFontMetricsF::lineSpacing() const
 qreal QFontMetricsF::minLeftBearing() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->minLeftBearing();
 }
 
@@ -633,7 +643,8 @@ qreal QFontMetricsF::minLeftBearing() const
 qreal QFontMetricsF::minRightBearing() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->minRightBearing();
 }
 
@@ -643,7 +654,8 @@ qreal QFontMetricsF::minRightBearing() const
 qreal QFontMetricsF::maxWidth() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->maxCharWidth();
 }
 
@@ -654,7 +666,7 @@ qreal QFontMetricsF::maxWidth() const
 qreal QFontMetricsF::xHeight() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
 
    if (d->capital == QFont::SmallCaps) {
       return d->smallCapsFontPrivate()->engineForScript(QChar::Script_Common)->ascent().toReal();
@@ -666,7 +678,7 @@ qreal QFontMetricsF::xHeight() const
 qreal QFontMetricsF::averageCharWidth() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
 
    return engine->averageCharWidth().toReal();
 }
@@ -675,18 +687,19 @@ bool QFontMetricsF::inFont(QChar ch) const
 {
    return inFontUcs4(ch.unicode());
 }
+
 bool QFontMetricsF::inFontUcs4(char32_t ch) const
 {
    const int script = QChar(ch).script();
    QFontEngine *engine = d->engineForScript(script);
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
 
    if (engine->type() == QFontEngine::Box) {
       return false;
    }
 
-   return engine->canRender(QString(ch));
+   return engine->canRender(make_view(QString(ch)));
 }
 
 qreal QFontMetricsF::leftBearing(QChar ch) const
@@ -700,7 +713,7 @@ qreal QFontMetricsF::leftBearing(QChar ch) const
       engine = d->engineForScript(script);
    }
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
    if (engine->type() == QFontEngine::Box) {
       return 0;
    }
@@ -725,7 +738,7 @@ qreal QFontMetricsF::rightBearing(QChar ch) const
       engine = d->engineForScript(script);
    }
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
    if (engine->type() == QFontEngine::Box) {
       return 0;
    }
@@ -735,7 +748,7 @@ qreal QFontMetricsF::rightBearing(QChar ch) const
    glyph_t glyph = engine->glyphIndex(ch.unicode());
 
    qreal rb;
-   engine->getGlyphBearings(glyph, 0, &rb);
+   engine->getGlyphBearings(glyph, nullptr, &rb);
 
    return rb;
 }
@@ -765,7 +778,7 @@ qreal QFontMetricsF::width(QChar ch) const
    } else {
       engine = d->engineForScript(script);
    }
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
 
    d->alterCharForCapitalization(ch);
 
@@ -776,7 +789,7 @@ qreal QFontMetricsF::width(QChar ch) const
    glyphs.numGlyphs = 1;
    glyphs.glyphs = &glyph;
    glyphs.advances = &advance;
-   engine->recalcAdvances(&glyphs, 0);
+   engine->recalcAdvances(&glyphs, Qt::EmptyFlag);
    return advance.toReal();
 }
 
@@ -806,7 +819,7 @@ QRectF QFontMetricsF::boundingRect(QChar ch) const
       engine = d->engineForScript(script);
    }
 
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
    d->alterCharForCapitalization(ch);
 
    glyph_t glyph = engine->glyphIndex(ch.unicode());
@@ -827,7 +840,7 @@ QRectF QFontMetricsF::boundingRect(const QRectF &rect, int flags, const QString 
       }
 
    QRectF rb;
-   qt_format_text(QFont(d.data()), rect, flags | Qt::TextDontPrint, text, &rb, tabStops, tabArray, tabArrayLen, 0);
+   qt_format_text(QFont(d.data()), rect, flags | Qt::TextDontPrint, text, &rb, tabStops, tabArray, tabArrayLen, nullptr);
    return rb;
 }
 
@@ -881,7 +894,8 @@ QString QFontMetricsF::elidedText(const QString &text, Qt::TextElideMode mode, q
 qreal QFontMetricsF::underlinePos() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->underlinePosition().toReal();
 }
 
@@ -916,7 +930,7 @@ qreal QFontMetricsF::strikeOutPos() const
 qreal QFontMetricsF::lineWidth() const
 {
    QFontEngine *engine = d->engineForScript(QChar::Script_Common);
-   Q_ASSERT(engine != 0);
+   Q_ASSERT(engine != nullptr);
+
    return engine->lineThickness().toReal();
 }
-

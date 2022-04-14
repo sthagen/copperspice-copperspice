@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,6 +35,7 @@
 #include <cctype>
 #include <ios>
 #include <iomanip>
+#include <limits>
 #include <locale>
 #include <sstream>
 
@@ -79,7 +80,7 @@ class Q_CORE_EXPORT QStringParser
 
       // V is data type quint64, long, short, etc
       template <typename T, typename V, typename = typename std::enable_if<std::is_integral<V>::value>::type>
-      static T formatArg(const T &str, V value, int fieldwidth = 0, int base = 10, QChar32 fillChar = QChar32(' '))
+      [[nodiscard]] static T formatArg(const T &str, V value, int fieldwidth = 0, int base = 10, QChar32 fillChar = QChar32(' '))
       {
          ArgEscapeData d = findArgEscapes(str);
 
@@ -137,7 +138,7 @@ class Q_CORE_EXPORT QStringParser
 
       // V data type is double, float, long double
       template <typename T, typename V, typename = typename std::enable_if<std::is_floating_point<V>::value>::type>
-      static T formatArg(const T &str, V value, int fieldwidth = 0, char format = 'g', int precision = 6,
+      [[nodiscard]] static T formatArg(const T &str, V value, int fieldwidth = 0, char format = 'g', int precision = 6,
                   QChar32 fillChar = QChar32(' ') )
       {
          ArgEscapeData d = findArgEscapes(str);
@@ -241,7 +242,7 @@ class Q_CORE_EXPORT QStringParser
       template <typename T, typename V,
                   typename = typename std::enable_if<! std::is_arithmetic<typename std::remove_reference<V>::type>::value>::type>
 
-      static T formatArg(const T &str, V &&value, int fieldwidth = 0, QChar32 fillChar = QChar32(' '))
+      [[nodiscard]] static T formatArg(const T &str, V &&value, int fieldwidth = 0, QChar32 fillChar = QChar32(' '))
       {
          const T tmp(std::forward<V>(value));
          ArgEscapeData d = findArgEscapes(str);
@@ -260,9 +261,9 @@ class Q_CORE_EXPORT QStringParser
 
       // a4
       template <typename T, typename ...Ts>
-      static T formatArgs(const T &str, Ts... args)
+      [[nodiscard]] static T formatArgs(const T &str, Ts... args)
       {
-         const QVector<T> argList = { T(args)... };
+         const QVector<T> argList = { T("%1").formatArg(args)... };
          return multiArg(str, argList);
       }
 
@@ -272,7 +273,7 @@ class Q_CORE_EXPORT QStringParser
 
       // b1  value - quint64, long, short, etc
       template <typename T = QString8, typename V>
-      static T number(V value, int base  = 10)
+      [[nodiscard]] static T number(V value, int base  = 10)
       {
          if (base < 2 || base > 36) {
             qWarning("Warning: QStringParser::number() invalid numeric base (%d)", base);
@@ -293,7 +294,7 @@ class Q_CORE_EXPORT QStringParser
 
       // b2  value
       template <typename T = QString8>
-      static T number(double value, char format = 'g', int precision = 6)
+      [[nodiscard]] static T number(double value, char format = 'g', int precision = 6)
       {
          std::basic_ostringstream<char> stream;
 
@@ -361,10 +362,10 @@ class Q_CORE_EXPORT QStringParser
 
 #if defined (CS_DOXYPRESS)
       template <typename T>
-      static QList<T> split(const T &str, const QRegularExpression &separator, SplitBehavior behavior = KeepEmptyParts);
+      static QList<T> split(const T &str, const QRegularExpression &regExp, SplitBehavior behavior = KeepEmptyParts);
 #else
       template <typename T>
-      static QList<T> split(const T &str, const Cs::QRegularExpression<T> &separator, SplitBehavior behavior = KeepEmptyParts);
+      static QList<T> split(const T &str, const Cs::QRegularExpression<T> &regExp, SplitBehavior behavior = KeepEmptyParts);
 
 #endif
 
@@ -891,19 +892,19 @@ QList<T> QStringParser::split(const T &str, const T &separator, SplitBehavior be
 }
 
 template <typename T>
-QList<T> QStringParser::split(const T &str, const Cs::QRegularExpression<T> &separator, SplitBehavior behavior)
+QList<T> QStringParser::split(const T &str, const Cs::QRegularExpression<T> &regExp, SplitBehavior behavior)
 {
    QList<T> retval;
 
-   if (! separator.isValid()) {
+   if (! regExp.isValid()) {
       qWarning("QStringParser::split: Invalid QRegularExpression");
       return retval;
    }
 
-   typename T::const_iterator start_iter = str.begin();
+   typename T::const_iterator start_iter = str.cbegin();
    typename T::const_iterator end_iter;
 
-   Cs::QRegularExpressionMatch<T> match = separator.match(str);
+   Cs::QRegularExpressionMatch<T> match = regExp.match(str);
 
    while (match.hasMatch())  {
       end_iter = match.capturedStart();
@@ -915,12 +916,12 @@ QList<T> QStringParser::split(const T &str, const Cs::QRegularExpression<T> &sep
       start_iter = match.capturedEnd();
 
       // redo the match
-      match = separator.match(str, start_iter);
+      match = regExp.match(str, start_iter);
    }
 
    // pick up remaining text
-   if (start_iter != str.end() || behavior == QStringParser::KeepEmptyParts)  {
-      retval.append( T(start_iter, str.end()) );
+   if (start_iter != str.cend() || behavior == QStringParser::KeepEmptyParts)  {
+      retval.append( T(start_iter, str.cend()) );
    }
 
    return retval;

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,7 @@
 #ifndef QTABBAR_H
 #define QTABBAR_H
 
-#include <QtGui/qwidget.h>
-
-
+#include <qwidget.h>
 
 #ifndef QT_NO_TABBAR
 
@@ -82,6 +80,10 @@ class Q_GUI_EXPORT QTabBar: public QWidget
 
  public:
    explicit QTabBar(QWidget *parent = nullptr);
+
+   QTabBar(const QTabBar &) = delete;
+   QTabBar &operator=(const QTabBar &) = delete;
+
    ~QTabBar();
 
    enum Shape { RoundedNorth, RoundedSouth, RoundedWest, RoundedEast,
@@ -112,7 +114,7 @@ class Q_GUI_EXPORT QTabBar: public QWidget
    void moveTab(int from, int to);
 
    bool isTabEnabled(int index) const;
-   void setTabEnabled(int index, bool);
+   void setTabEnabled(int index, bool enable);
 
    QString tabText(int index) const;
    void setTabText(int index, const QString &text);
@@ -124,7 +126,7 @@ class Q_GUI_EXPORT QTabBar: public QWidget
    void setTabIcon(int index, const QIcon &icon);
 
    Qt::TextElideMode elideMode() const;
-   void setElideMode(Qt::TextElideMode);
+   void setElideMode(Qt::TextElideMode value);
 
 #ifndef QT_NO_TOOLTIP
    void setTabToolTip(int index, const QString &tip);
@@ -158,7 +160,7 @@ class Q_GUI_EXPORT QTabBar: public QWidget
    void setUsesScrollButtons(bool useButtons);
 
    bool tabsClosable() const;
-   void setTabsClosable(bool closable);
+   void setTabsClosable(bool closeable);
 
    void setTabButton(int index, ButtonPosition position, QWidget *widget);
    QWidget *tabButton(int index, ButtonPosition position) const;
@@ -167,7 +169,7 @@ class Q_GUI_EXPORT QTabBar: public QWidget
    void setSelectionBehaviorOnRemove(SelectionBehavior behavior);
 
    bool expanding() const;
-   void setExpanding(bool enabled);
+   void setExpanding(bool enable);
 
    bool isMovable() const;
    void setMovable(bool movable);
@@ -205,21 +207,21 @@ class Q_GUI_EXPORT QTabBar: public QWidget
    virtual void tabRemoved(int index);
    virtual void tabLayoutChange();
 
-   bool event(QEvent *) override;
-   void resizeEvent(QResizeEvent *) override;
-   void showEvent(QShowEvent *) override;
-   void hideEvent(QHideEvent *) override;
-   void paintEvent(QPaintEvent *) override;
-   void mousePressEvent (QMouseEvent *) override;
-   void mouseMoveEvent (QMouseEvent *) override;
-   void mouseReleaseEvent (QMouseEvent *) override;
+   bool event(QEvent *event) override;
+   void resizeEvent(QResizeEvent *event) override;
+   void showEvent(QShowEvent *event) override;
+   void hideEvent(QHideEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
+   void mousePressEvent (QMouseEvent *event) override;
+   void mouseMoveEvent (QMouseEvent *event) override;
+   void mouseReleaseEvent (QMouseEvent *event) override;
 
 #ifndef QT_NO_WHEELEVENT
    void wheelEvent(QWheelEvent *event) override;
 #endif
 
-   void keyPressEvent(QKeyEvent *) override;
-   void changeEvent(QEvent *) override;
+   void keyPressEvent(QKeyEvent *event) override;
+   void changeEvent(QEvent *event) override;
    void timerEvent(QTimerEvent *event) override;
    void initStyleOption(QStyleOptionTab *option, int tabIndex) const;
 
@@ -228,7 +230,6 @@ class Q_GUI_EXPORT QTabBar: public QWidget
 #endif
 
  private:
-   Q_DISABLE_COPY(QTabBar)
    Q_DECLARE_PRIVATE(QTabBar)
 
    GUI_CS_SLOT_1(Private, void _q_scrollTabs())
@@ -240,5 +241,4 @@ class Q_GUI_EXPORT QTabBar: public QWidget
 
 #endif // QT_NO_TABBAR
 
-
-#endif // QTABBAR_H
+#endif

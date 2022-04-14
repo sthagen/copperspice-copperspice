@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,6 @@
 #ifndef QPLATFORM_SCREEN_H
 #define QPLATFORM_SCREEN_H
 
-#include <qmetatype.h>
 #include <qnamespace.h>
 #include <qcoreevent.h>
 #include <qvariant.h>
@@ -47,8 +46,6 @@ using QDpi = QPair<qreal, qreal>;
 
 class Q_GUI_EXPORT QPlatformScreen
 {
-   Q_DECLARE_PRIVATE(QPlatformScreen)
-
  public:
    enum SubpixelAntialiasingType {
       // copied from qfontengine_p.h since we can't include private headers
@@ -67,6 +64,10 @@ class Q_GUI_EXPORT QPlatformScreen
    };
 
    QPlatformScreen();
+
+   QPlatformScreen(const QPlatformScreen &) = delete;
+   QPlatformScreen &operator=(const QPlatformScreen &) = delete;
+
    virtual ~QPlatformScreen();
 
    virtual QPixmap grabWindow(WId window, int x, int y, int width, int height) const;
@@ -124,8 +125,7 @@ class Q_GUI_EXPORT QPlatformScreen
    QScopedPointer<QPlatformScreenPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QPlatformScreen)
-
+   Q_DECLARE_PRIVATE(QPlatformScreen)
    friend class QScreenPrivate;
 };
 

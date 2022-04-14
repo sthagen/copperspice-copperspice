@@ -1,13 +1,13 @@
 /***********************************************************************
 *
-* Copyright (c) 2017-2020 Barbara Geller
-* Copyright (c) 2017-2020 Ansel Sermersheim
-
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
+*
 * Copyright (c) 1998-2009 John Maddock
 *
-* This file is part of CsString.
+* This file is part of CopperSpice.
 *
-* CsString is free software, released under the BSD 2-Clause license.
+* CopperSpice is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
 *
 * CopperSpice is distributed in the hope that it will be useful,
@@ -49,6 +49,12 @@ struct digraph : public std::pair<charT, charT> {
 
    digraph(const digraph<charT> &d) : std::pair<charT, charT>(d.first, d.second)
    {}
+
+   digraph &operator=(const digraph<charT> &d)  {
+      this->first  = d.first;
+      this->second = d.second;
+      return *this;
+   }
 
    template <class Seq>
    digraph(const Seq &s) : std::pair<charT, charT>() {
@@ -270,7 +276,7 @@ class basic_regex_creator
 
 template <class charT, class traits>
 basic_regex_creator<charT, traits>::basic_regex_creator(regex_data<charT, traits> *data)
-   : m_pdata(data), m_traits(*(data->m_ptraits)), m_last_state(0), m_repeater_id(0), m_has_backrefs(false), m_backrefs(0), m_has_recursions(false)
+   : m_pdata(data), m_traits(*(data->m_ptraits)), m_last_state(nullptr), m_repeater_id(0), m_has_backrefs(false), m_backrefs(0), m_has_recursions(false)
 {
    m_pdata->m_data.clear();
    m_pdata->m_status = cs_regex_ns::regex_constants::error_ok;
@@ -347,7 +353,7 @@ re_literal *basic_regex_creator<charT, traits>::append_literal(charT c)
    re_literal *result;
 
    // start by seeing if we have an existing re_literal we can extend
-   if ((0 == m_last_state) || (m_last_state->type != syntax_element_literal)) {
+   if ((m_last_state == nullptr) || (m_last_state->type != syntax_element_literal)) {
       // no existing re_literal, create a new one
 
       result = static_cast<re_literal *>(append_state(syntax_element_literal, sizeof(re_literal) + sizeof(charT)));
@@ -487,7 +493,7 @@ re_syntax_base *basic_regex_creator<charT, traits>::append_set(const basic_char_
 
       if (s1 > s2) {
          //  error:
-         return 0;
+         return nullptr;
       }
 
       charT *p = static_cast<charT *>(this->m_pdata->m_data.extend(sizeof(charT) * (s1.size() + s2.size() + 2) ) );
@@ -517,7 +523,7 @@ re_syntax_base *basic_regex_creator<charT, traits>::append_set(const basic_char_
       }
 
       if (s.empty()) {
-         return 0;   // invalid or unsupported equivalence class
+         return nullptr;   // invalid or unsupported equivalence class
       }
 
       charT *p = static_cast<charT *>(this->m_pdata->m_data.extend(sizeof(charT) * (s.size() + 1) ) );
@@ -625,7 +631,7 @@ void basic_regex_creator<charT, traits>::fixup_pointers(re_syntax_base *state)
             if (state->next.i) {
                state->next.p = getaddress(state->next.i, state);
             } else {
-               state->next.p = 0;
+               state->next.p = nullptr;
             }
             break;
 
@@ -651,7 +657,7 @@ void basic_regex_creator<charT, traits>::fixup_pointers(re_syntax_base *state)
             if (state->next.i) {
                state->next.p = getaddress(state->next.i, state);
             } else {
-               state->next.p = 0;
+               state->next.p = nullptr;
             }
       }
       state = state->next.p;
@@ -684,7 +690,7 @@ void basic_regex_creator<charT, traits>::fixup_recursions(re_syntax_base *state)
 
                      // clear the expression, we should be empty:
 
-                     this->m_pdata->m_expression = 0;
+                     this->m_pdata->m_expression     = nullptr;
                      this->m_pdata->m_expression_len = 0;
 
                      // and throw if required:
@@ -760,18 +766,19 @@ void basic_regex_creator<charT, traits>::fixup_recursions(re_syntax_base *state)
             }
             if (!ok) {
                // recursion to sub-expression that doesn't exist:
-               if (0 == this->m_pdata->m_status) { // update the error code if not already set
+               if (this->m_pdata->m_status == 0) {
+                  // update the error code if not already set
                   this->m_pdata->m_status = cs_regex_ns::regex_constants::error_bad_pattern;
                }
                //
                // clear the expression, we should be empty:
 
-               this->m_pdata->m_expression     = 0;
+               this->m_pdata->m_expression     = nullptr;
                this->m_pdata->m_expression_len = 0;
 
                // and throw if required:
                //
-               if (0 == (this->flags() & regex_constants::no_except)) {
+               if ((this->flags() & regex_constants::no_except) == 0) {
                   std::string message = "Encountered a forward reference to a recursive sub-expression that does not exist.";
                   cs_regex_ns::regex_error e(message, cs_regex_ns::regex_constants::error_bad_pattern, 0);
                   e.raise();
@@ -832,7 +839,7 @@ void basic_regex_creator<charT, traits>::create_startmaps(re_syntax_base *state)
                //
                // clear the expression, we should be empty:
                //
-               this->m_pdata->m_expression = 0;
+               this->m_pdata->m_expression     = nullptr;
                this->m_pdata->m_expression_len = 0;
 
                //
@@ -973,9 +980,10 @@ void basic_regex_creator<charT, traits>::create_startmap(re_syntax_base *state, 
                   unsigned int *pnull, unsigned char mask)
 {
    int not_last_jump = 1;
-   re_syntax_base *recursion_start = 0;
+   re_syntax_base *recursion_start   = nullptr;
+
    int recursion_sub = 0;
-   re_syntax_base *recursion_restart = 0;
+   re_syntax_base *recursion_restart = nullptr;
 
    // track case sensitivity
    bool l_icase = m_icase;
@@ -1022,7 +1030,7 @@ void basic_regex_creator<charT, traits>::create_startmap(re_syntax_base *state, 
 
             // now figure out if we can match a NULL string at this point:
             if (pnull) {
-               create_startmap(state->next.p, 0, pnull, mask);
+               create_startmap(state->next.p, nullptr, pnull, mask);
             }
             return;
          }
@@ -1039,7 +1047,7 @@ void basic_regex_creator<charT, traits>::create_startmap(re_syntax_base *state, 
                   }
 
                   // clear the expression, we should be empty:
-                  this->m_pdata->m_expression = 0;
+                  this->m_pdata->m_expression     = nullptr;
                   this->m_pdata->m_expression_len = 0;
 
                   // and throw if required:
@@ -1049,7 +1057,7 @@ void basic_regex_creator<charT, traits>::create_startmap(re_syntax_base *state, 
                      e.raise();
                   }
 
-               } else if (recursion_start == 0) {
+               } else if (recursion_start == nullptr) {
                   recursion_start = state;
                   recursion_restart = state->next.p;
                   state = static_cast<re_jump *>(state)->alt.p;
@@ -1240,6 +1248,7 @@ void basic_regex_creator<charT, traits>::create_startmap(re_syntax_base *state, 
                *pnull |= mask;
             }
             return;
+
          case syntax_element_endmark:
             // need to handle independent subs as a special case:
             if (static_cast<re_brace *>(state)->index < 0) {
@@ -1249,9 +1258,10 @@ void basic_regex_creator<charT, traits>::create_startmap(re_syntax_base *state, 
                   *pnull |= mask;
                }
                return;
+
             } else if (recursion_start && (recursion_sub != 0) && (recursion_sub == static_cast<re_brace *>(state)->index)) {
                // recursion termination:
-               recursion_start = 0;
+               recursion_start = nullptr;
                state = recursion_restart;
                break;
             }
@@ -1265,6 +1275,7 @@ void basic_regex_creator<charT, traits>::create_startmap(re_syntax_base *state, 
             if (m_pdata->m_has_recursions && static_cast<re_brace *>(state)->index) {
                bool ok = false;
                re_syntax_base *p = m_pdata->m_first_state;
+
                while (p) {
                   if (p->type == syntax_element_recurse) {
                      re_brace *p2 = static_cast<re_brace *>(static_cast<re_jump *>(p)->alt.p);
@@ -1325,7 +1336,7 @@ unsigned basic_regex_creator<charT, traits>::get_restart_type(re_syntax_base *st
          case syntax_element_restart_continue:
             return regbase::restart_continue;
          default:
-            state = 0;
+            state = nullptr;
             continue;
       }
    }

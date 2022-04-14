@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QICOHANDLER_P_H
 #define QICOHANDLER_P_H
 
-#include <QImageIOHandler>
+#include <qimageiohandler.h>
 
 class ICOReader;
 
@@ -34,20 +34,20 @@ class QIcoHandler: public QImageIOHandler
    QIcoHandler();
    virtual ~QIcoHandler();
 
-   bool canRead() const override;
+   bool canRead() override;
    bool read(QImage *image) override;
    bool write(const QImage &image) override;
 
-   QByteArray name() const override;
+   QString name() const override;
 
-   int imageCount() const override;
+   int imageCount() override;
    bool jumpToImage(int imageNumber) override;
    bool jumpToNextImage() override;
 
    static bool canRead(QIODevice *device);
 
    bool supportsOption(ImageOption option) const override;
-   QVariant option(ImageOption option) const override;
+   QVariant option(ImageOption option) override;
 
  private:
    void setupReader() const;

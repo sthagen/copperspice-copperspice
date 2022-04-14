@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,12 +21,7 @@
 *
 ***********************************************************************/
 
-#include <algorithm>
-
 #include <qurl.h>
-#include <qurl_p.h>
-#include <qtldurl_p.h>
-#include <qipaddress_p.h>
 
 #include <qbytearray.h>
 #include <qdebug.h>
@@ -35,6 +30,12 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qurlquery.h>
+
+#include <qurl_p.h>
+#include <qtldurl_p.h>
+#include <qipaddress_p.h>
+
+#include <algorithm>
 
 // source code located in qdir.cpp
 extern QString cs_internal_normalizePath(const QString &name, bool allowUncPaths);
@@ -390,7 +391,7 @@ static inline QString recodeFromUser(const QString &input, const ushort *actions
    QString::const_iterator begin = input.begin() + from;
    QString::const_iterator end   = input.begin() + to;
 
-   if (qt_urlRecode(output, begin, end, 0, actions)) {
+   if (qt_urlRecode(output, begin, end, Qt::EmptyFlag, actions)) {
       return output;
    }
 
@@ -528,7 +529,7 @@ inline void QUrlPrivate::appendFragment(QString &appendTo, QUrl::FormattingOptio
 {
    appendToUser(appendTo, fragment, options,
                 options & QUrl::EncodeDelimiters ? fragmentInUrl :
-                appendingTo == FullUrl ? 0 : fragmentInIsolation);
+                appendingTo == FullUrl ? nullptr : fragmentInIsolation);
 }
 
 inline void QUrlPrivate::appendQuery(QString &appendTo, QUrl::FormattingOptions options, Section appendingTo) const
@@ -750,7 +751,7 @@ inline void QUrlPrivate::appendHost(QString &appendTo, QUrl::FormattingOptions o
 {
    // EncodeUnicode is the only flag that matters
    if ((options & QUrl::FullyDecoded) == QUrl::FullyDecoded) {
-      options = 0;
+      options = Qt::EmptyFlag;
    } else {
       options &= QUrl::EncodeUnicode;
    }
@@ -805,7 +806,7 @@ static QString::const_iterator parseIpFuture(QString &host, QString::const_itera
 
       QString decoded;
 
-      if (mode == QUrl::TolerantMode && qt_urlRecode(decoded, begin, end, QUrl::FullyDecoded, 0)) {
+      if (mode == QUrl::TolerantMode && qt_urlRecode(decoded, begin, end, QUrl::FullyDecoded, nullptr)) {
          begin = decoded.constBegin();
          end   = decoded.constEnd();
       }
@@ -849,7 +850,7 @@ static QString::const_iterator parseIp6(QString &host, QString::const_iterator b
       // IPv6 failed parsing, check if it was a percent-encoded character in the middle and try again
       QString decoded;
 
-      if (mode == QUrl::TolerantMode && qt_urlRecode(decoded, begin, end, 0, decodeColon)) {
+      if (mode == QUrl::TolerantMode && qt_urlRecode(decoded, begin, end, Qt::EmptyFlag, decodeColon)) {
          // recurse if the parsing fails again, the qt_urlRecode above will return end
          return parseIp6(host, decoded.constBegin(), decoded.constEnd(), mode);
       }
@@ -947,7 +948,7 @@ inline bool QUrlPrivate::setHost(const QString &value, int xfrom, int xend, QUrl
    // check for percent-encoding first
    QString s;
 
-   if (mode == QUrl::TolerantMode && qt_urlRecode(s, begin, end, 0, 0)) {
+   if (mode == QUrl::TolerantMode && qt_urlRecode(s, begin, end, Qt::EmptyFlag, nullptr)) {
       // something was decoded, anything encoded left?
       int pos = s.indexOf('%'); // '%'
 
@@ -1403,49 +1404,14 @@ bool QUrlPrivate::validateComponent(QUrlPrivate::Section section, const QString 
    return true;
 }
 
-#if 0
-inline void QUrlPrivate::validate() const
-{
-   QUrlPrivate *that = (QUrlPrivate *)this;
-   that->encodedOriginal = that->toEncoded(); // may detach
-   parse(ParseOnly);
-
-   QURL_SETFLAG(that->stateFlags, Validated);
-
-   if (! isValid) {
-      return;
-   }
-
-   QString auth = authority(); // causes the non-encoded forms to be valid
-
-   // authority() calls canonicalHost() which sets this
-   if (!isHostValid) {
-      return;
-   }
-
-   if (scheme == QLatin1String("mailto")) {
-      if (!host.isEmpty() || port != -1 || !userName.isEmpty() || !password.isEmpty()) {
-         that->isValid = false;
-
-         that->errorInfo.setParams(0, QT_TRANSLATE_NOOP(QUrl, "expected empty host, username,"
-                                   "port and password"), 0, 0);
-      }
-
-   } else if (scheme == ftpScheme() || scheme == httpScheme()) {
-      if (host.isEmpty() && !(path.isEmpty() && encodedPath.isEmpty())) {
-         that->isValid = false;
-         that->errorInfo.setParams(0, QT_TRANSLATE_NOOP(QUrl, "host is empty, but not the path"), 0, 0);
-      }
-   }
-}
-#endif
-
-QUrl::QUrl(const QString &url, ParsingMode parsingMode) : d(0)
+QUrl::QUrl(const QString &url, ParsingMode parsingMode)
+   : d(nullptr)
 {
    setUrl(url, parsingMode);
 }
 
-QUrl::QUrl() : d(0)
+QUrl::QUrl()
+   : d(nullptr)
 {
 }
 
@@ -1487,7 +1453,7 @@ void QUrl::clear()
    if (d && !d->ref.deref()) {
       delete d;
    }
-   d = 0;
+   d = nullptr;
 }
 
 void QUrl::setUrl(const QString &url, ParsingMode parsingMode)
@@ -2153,7 +2119,8 @@ QString QUrl::fromAce(const QString &domain)
 
 QString QUrl::fromAce(const QByteArray &domain)
 {
-   return qt_ACE_do(QString::fromLatin1(domain), NormalizeAce, ForbidLeadingDot /*FIXME: make configurable*/);
+   QString str = QString::fromLatin1(domain);
+   return qt_ACE_do(str, NormalizeAce, ForbidLeadingDot /*FIXME: make configurable*/);
 }
 
 QByteArray QUrl::toAce(const QString &domain)
@@ -2162,15 +2129,9 @@ QByteArray QUrl::toAce(const QString &domain)
    return result.toLatin1();
 }
 
-/*!
-    \internal
-
-    Returns \c true if this URL is "less than" the given \a url. This
-    provides a means of ordering URLs.
-*/
-bool QUrl::operator <(const QUrl &url) const
+bool QUrl::operator<(const QUrl &url) const
 {
-   if (!d || !url.d) {
+   if (! d || !url.d) {
       bool thisIsEmpty = !d || d->isEmpty();
       bool thatIsEmpty = !url.d || url.d->isEmpty();
 
@@ -2225,11 +2186,7 @@ bool QUrl::operator <(const QUrl &url) const
    return cmp < 0;
 }
 
-/*!
-    Returns \c true if this URL and the given \a url are equal;
-    otherwise returns \c false.
-*/
-bool QUrl::operator ==(const QUrl &url) const
+bool QUrl::operator==(const QUrl &url) const
 {
    if (!d && !url.d) {
       return true;
@@ -2344,19 +2301,12 @@ bool QUrl::matches(const QUrl &url, FormattingOptions options) const
    return path1 == path2;
 }
 
-/*!
-    Returns \c true if this URL and the given \a url are not equal;
-    otherwise returns \c false.
-*/
-bool QUrl::operator !=(const QUrl &url) const
+bool QUrl::operator!=(const QUrl &url) const
 {
    return !(*this == url);
 }
 
-/*!
-    Assigns the specified \a url to this object.
-*/
-QUrl &QUrl::operator =(const QUrl &url)
+QUrl &QUrl::operator=(const QUrl &url)
 {
    if (!d) {
       if (url.d) {
@@ -2382,9 +2332,7 @@ void QUrl::detach()
    }
 }
 
-/*!
-    \internal
-*/
+// internal
 bool QUrl::isDetached() const
 {
    return !d || d->ref.load() == 1;
@@ -2470,22 +2418,25 @@ bool QUrl::isParentOf(const QUrl &childUrl) const
                    && childPath.length() > ourPath.length() && childPath.at(ourPath.length()) == QLatin1Char('/'))));
 }
 
-QDataStream &operator<<(QDataStream &out, const QUrl &url)
+QDataStream &operator<<(QDataStream &stream, const QUrl &url)
 {
    QByteArray u;
+
    if (url.isValid()) {
       u = url.toEncoded();
    }
-   out << u;
-   return out;
+
+   stream << u;
+   return stream;
 }
 
-QDataStream &operator>>(QDataStream &in, QUrl &url)
+QDataStream &operator>>(QDataStream &stream, QUrl &url)
 {
    QByteArray u;
-   in >> u;
+   stream >> u;
    url.setUrl(QString::fromLatin1(u));
-   return in;
+
+   return stream;
 }
 
 static QString errorMessage(QUrlPrivate::ErrorCode errorCode, const QString &errorSource, int errorPosition)

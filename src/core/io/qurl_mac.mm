@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,10 +34,10 @@ QUrl QUrl::fromCFURL(CFURLRef url)
 
 CFURLRef QUrl::toCFURL() const
 {
-    CFURLRef url = 0;
+    CFURLRef url = nullptr;
     CFStringRef str = toString(FullyEncoded).toCFString();
     if (str) {
-        url = CFURLCreateWithString(0, str, 0);
+        url = CFURLCreateWithString(nullptr, str, nullptr);
         CFRelease(str);
     }
     return url;

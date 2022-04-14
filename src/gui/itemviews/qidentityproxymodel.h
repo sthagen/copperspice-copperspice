@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,11 +24,9 @@
 #ifndef QIDENTITYPROXYMODEL_H
 #define QIDENTITYPROXYMODEL_H
 
-#include <QtGui/qabstractproxymodel.h>
+#include <qabstractproxymodel.h>
 
 #ifndef QT_NO_IDENTITYPROXYMODEL
-
-
 
 class QIdentityProxyModelPrivate;
 
@@ -38,6 +36,10 @@ class Q_GUI_EXPORT QIdentityProxyModel : public QAbstractProxyModel
 
  public:
    explicit QIdentityProxyModel(QObject *parent = nullptr);
+
+   QIdentityProxyModel(const QIdentityProxyModel &) = delete;
+   QIdentityProxyModel &operator=(const QIdentityProxyModel &) = delete;
+
    ~QIdentityProxyModel();
 
    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -71,7 +73,6 @@ class Q_GUI_EXPORT QIdentityProxyModel : public QAbstractProxyModel
 
  private:
    Q_DECLARE_PRIVATE(QIdentityProxyModel)
-   Q_DISABLE_COPY(QIdentityProxyModel)
 
    GUI_CS_SLOT_1(Private, void _q_sourceRowsAboutToBeInserted(const QModelIndex &un_named_arg1, int un_named_arg2, int un_named_arg3))
    GUI_CS_SLOT_2(_q_sourceRowsAboutToBeInserted)

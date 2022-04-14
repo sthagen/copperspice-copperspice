@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,10 +31,17 @@
 
 #include <algorithm>
 
-QT_BEGIN_NAMESPACE
+QDnsLookupThreadPool *cs_DnsLookupThreadPool()
+{
+   static QDnsLookupThreadPool retval;
+   return &retval;
+}
 
-Q_GLOBAL_STATIC(QDnsLookupThreadPool, theDnsLookupThreadPool);
-Q_GLOBAL_STATIC(QThreadStorage<bool *>, theDnsLookupSeedStorage);
+QThreadStorage<bool *> *cs_DnsLookupSeedStorage()
+{
+   static QThreadStorage<bool *> retval;
+   return &retval;
+}
 
 static bool qt_qdnsmailexchangerecord_less_than(const QDnsMailExchangeRecord &r1,
       const QDnsMailExchangeRecord &r2)
@@ -144,7 +151,7 @@ static void qt_qdnsservicerecord_sort(QList<QDnsServiceRecord> &records)
 }
 
 const char *QDnsLookupPrivate::msgNoIpV6NameServerAdresses =
-   QT_TRANSLATE_NOOP("QDnsLookupRunnable", "IPv6 addresses for nameservers are currently not supported");
+   cs_mark_tr("QDnsLookupRunnable", "IPv6 addresses for nameservers are currently not supported");
 
 QDnsLookup::QDnsLookup(QObject *parent)
    : QObject(parent), d_ptr(new QDnsLookupPrivate)
@@ -323,7 +330,7 @@ void QDnsLookup::abort()
 {
    Q_D(QDnsLookup);
    if (d->runnable) {
-      d->runnable = 0;
+      d->runnable = nullptr;
       d->reply = QDnsLookupReply();
       d->reply.error = QDnsLookup::OperationCancelledError;
       d->reply.errorString = tr("Operation cancelled");
@@ -344,10 +351,11 @@ void QDnsLookup::lookup()
    d->isFinished = false;
    d->reply = QDnsLookupReply();
    d->runnable = new QDnsLookupRunnable(d->type, QUrl::toAce(d->name), d->nameserver);
+
    connect(d->runnable, SIGNAL(finished(QDnsLookupReply)),
-           this, SLOT(_q_lookupFinished(QDnsLookupReply)),
-           Qt::BlockingQueuedConnection);
-   theDnsLookupThreadPool()->start(d->runnable);
+         this, SLOT(_q_lookupFinished(QDnsLookupReply)), Qt::BlockingQueuedConnection);
+
+   cs_DnsLookupThreadPool()->start(d->runnable);
 }
 
 /*!
@@ -832,7 +840,7 @@ void QDnsLookupPrivate::_q_lookupFinished(const QDnsLookupReply &_reply)
       qDebug("DNS reply for %s: %i (%s)", qPrintable(name), _reply.error, qPrintable(_reply.errorString));
 #endif
       reply = _reply;
-      runnable = 0;
+      runnable = nullptr;
       isFinished = true;
       emit q->finished();
    }
@@ -854,10 +862,11 @@ void QDnsLookupRunnable::run()
    query(requestType, requestName, nameserver, &reply);
 
    // Sort results.
-   if (!theDnsLookupSeedStorage()->hasLocalData()) {
+   if (! cs_DnsLookupSeedStorage()->hasLocalData()) {
       qsrand(QTime(0, 0, 0).msecsTo(QTime::currentTime()) ^ reinterpret_cast<quintptr>(this));
-      theDnsLookupSeedStorage()->setLocalData(new bool(true));
+      cs_DnsLookupSeedStorage()->setLocalData(new bool(true));
    }
+
    qt_qdnsmailexchangerecord_sort(reply.mailExchangeRecords);
    qt_qdnsservicerecord_sort(reply.serviceRecords);
 
@@ -904,5 +913,3 @@ void QDnsLookup::_q_lookupFinished(const QDnsLookupReply &reply)
    Q_D(QDnsLookup);
    d->_q_lookupFinished(reply);
 }
-
-QT_END_NAMESPACE

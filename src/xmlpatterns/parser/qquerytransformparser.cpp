@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -141,10 +141,6 @@
 #define YYMALLOC malloc
 #define YYFREE free
 
-QT_BEGIN_NAMESPACE
-
-/* Due to Qt's QT_BEGIN_NAMESPACE magic, we can't use `using namespace', for some
- * undocumented reason. */
 namespace QPatternist {
 
 /**
@@ -406,7 +402,7 @@ static ReturnOrderBy *locateReturnClause(const Expression::Ptr &expr)
    } else if (id == Expression::IDReturnOrderBy) {
       return expr->as<ReturnOrderBy>();
    } else {
-      return 0;
+      return nullptr;
    }
 }
 
@@ -840,11 +836,11 @@ static Expression::Ptr pushVariable(const QXmlName name,
 
    switch (type) {
       case VariableDeclaration::FunctionArgument:
-      /* Fallthrough. */
       case VariableDeclaration::ExpressionVariable: {
          slot = parseInfo->allocateExpressionSlot();
          break;
       }
+
       case VariableDeclaration::GlobalVariable: {
          slot = parseInfo->allocateGlobalVariableSlot();
          break;
@@ -853,18 +849,19 @@ static Expression::Ptr pushVariable(const QXmlName name,
          slot = parseInfo->staticContext->allocateRangeSlot();
          break;
       }
+
       case VariableDeclaration::PositionalVariable: {
          slot = parseInfo->allocatePositionalSlot();
          break;
       }
+
       case VariableDeclaration::TemplateParameter:
-      /* Fallthrough. We do nothing, template parameters
-       * doesn't use context slots at all, they're hashed
-       * on the name. */
+         // do nothing, template parameters doesn't use context slots, they are hashed on the name
+         break;
+
       case VariableDeclaration::ExternalVariable:
-         /* We do nothing, external variables doesn't use
-          *context slots/stack frames at all. */
-         ;
+         // do nothing, external variables doesn't use context slots/stack frames
+         break;
    }
 
    const VariableDeclaration::Ptr var(new VariableDeclaration(name, slot, type, seqType));
@@ -949,14 +946,18 @@ static Expression::Ptr resolveVariable(const QXmlName &name,
             retval = create(new RangeVariableReference(var->expression(), var->slot), sourceLocator, parseInfo);
             break;
          }
+
          case VariableDeclaration::GlobalVariable:
-         /* Fallthrough. From the perspective of an ExpressionVariableReference, it can't tell
+         /* From the perspective of an ExpressionVariableReference, it can't tell
           * a difference between a global and a local expression variable. However, the cache
           * mechanism must. */
+          [[fallthrough]];
+
          case VariableDeclaration::ExpressionVariable: {
             retval = create(new ExpressionVariableReference(var->slot, var.data()), sourceLocator, parseInfo);
             break;
          }
+
          case VariableDeclaration::FunctionArgument: {
             retval = create(new ArgumentReference(var->sequenceType, var->slot), sourceLocator, parseInfo);
             break;
@@ -1296,13 +1297,6 @@ typedef short int yytype_int16;
 # ifndef YY_
 #  define YY_(msgid) msgid
 # endif
-#endif
-
-/* Suppress unused-variable warnings by "using" E.  */
-#if ! defined lint || defined __GNUC__
-# define YYUSE(e) ((void) (e))
-#else
-# define YYUSE(e) /* empty */
 #endif
 
 /* Identity function, used to suppress warnings about constant conditions.  */
@@ -1855,7 +1849,7 @@ static const char *const yytname[] = {
    "SchemaAttributeTest", "ElementTest", "OptionalQuestionMark",
    "SchemaElementTest", "EmptyParanteses", "AttributeName", "ElementName",
    "TypeName", "FunctionName", "NCName", "LexicalName", "PragmaName",
-   "URILiteral", "StringLiteral", "QName", 0
+   "URILiteral", "StringLiteral", "QName", nullptr
 };
 #endif
 
@@ -2863,18 +2857,23 @@ YYSTYPE const *const yyvaluep;
 YYLTYPE const *const yylocationp;
 ParserContext *const parseInfo;
 #endif
+
 {
    if (!yyvaluep) {
       return;
    }
-   YYUSE (yylocationp);
-   YYUSE (parseInfo);
+
+   (void) yylocationp;
+   (void) parseInfo;
+
 # ifdef YYPRINT
    if (yytype < YYNTOKENS) {
       YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
    }
+
 # else
-   YYUSE (yyoutput);
+   (void) yyoutput;
+
 # endif
    switch (yytype) {
       default:
@@ -3087,7 +3086,8 @@ yytnamerr (char *yyres, const char *yystr)
                if (*++yyp != '\\') {
                   goto do_not_strip_quotes;
                }
-            /* Fall through.  */
+               [[fallthrough]];
+
             default:
                if (yyres) {
                   yyres[yyn] = *yyp;
@@ -3101,6 +3101,7 @@ yytnamerr (char *yyres, const char *yystr)
                }
                return yyn;
          }
+
    do_not_strip_quotes:
       ;
    }
@@ -3129,7 +3130,7 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
       return 0;
    } else {
       int yytype = YYTRANSLATE (yychar);
-      YYSIZE_T yysize0 = yytnamerr (0, yytname[yytype]);
+      YYSIZE_T yysize0 = yytnamerr (nullptr, yytname[yytype]);
       YYSIZE_T yysize = yysize0;
       YYSIZE_T yysize1;
       int yysize_overflow = 0;
@@ -3178,7 +3179,7 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
                break;
             }
             yyarg[yycount++] = yytname[yyx];
-            yysize1 = yysize + yytnamerr (0, yytname[yyx]);
+            yysize1 = yysize + yytnamerr (nullptr, yytname[yyx]);
             yysize_overflow |= (yysize1 < yysize);
             yysize = yysize1;
             yyfmt = yystpcpy (yyfmt, yyprefix);
@@ -3234,9 +3235,9 @@ YYLTYPE *yylocationp;
 ParserContext *const parseInfo;
 #endif
 {
-   YYUSE (yyvaluep);
-   YYUSE (yylocationp);
-   YYUSE (parseInfo);
+   (void) yyvaluep;
+   (void) yylocationp;
+   (void) parseInfo;
 
    if (!yymsg) {
       yymsg = "Deleting";
@@ -3864,7 +3865,7 @@ yyreduce:
          {
             const AtomicValue::Ptr val(Decimal::fromLexical((yyvsp[(2) - (2)].sval)));
             if (val->hasError()) {
-               parseInfo->staticContext->error(QtXmlPatterns::tr("The value of attribute %1 must be of type %2, which %3 isn't.")
+               parseInfo->staticContext->error(QtXmlPatterns::tr("Value of attribute %1 must be of type %2, has type %3.")
                   .formatArgs(formatKeyword("priority"),
                   formatType(parseInfo->staticContext->namePool(), BuiltinTypes::xsDecimal),
                   formatData((yyvsp[(2) - (2)].sval))), ReportContext::XTSE0530, fromYYLTYPE((yyloc), parseInfo));
@@ -7682,7 +7683,7 @@ yyerrlab:
       yyerror (&yylloc, parseInfo, YY_("syntax error"));
 #else
       {
-         YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
+         YYSIZE_T yysize = yysyntax_error (nullptr, yystate, yychar);
          if (yymsg_alloc < yysize && yymsg_alloc < YYSTACK_ALLOC_MAXIMUM) {
             YYSIZE_T yyalloc = 2 * yysize;
             if (! (yysize <= yyalloc && yyalloc <= YYSTACK_ALLOC_MAXIMUM)) {
@@ -7825,7 +7826,7 @@ yyabortlab:
 yyexhaustedlab:
    yyerror (&yylloc, parseInfo, YY_("memory exhausted"));
    yyresult = 2;
-   /* Fall through.  */
+   // fall through
 #endif
 
 yyreturn:
@@ -7864,15 +7865,14 @@ QString Tokenizer::tokenToString(const Token &token)
 {
    switch (token.type) {
       case NCNAME:
-      /* Fallthrough. */
       case QNAME:
-      /* Fallthrough. */
       case NUMBER:
-      /* Fallthrough. */
       case XPATH2_NUMBER:
          return token.value;
+
       case STRING_LITERAL:
          return QLatin1Char('"') + token.value + QLatin1Char('"');
+
       default: {
          const QString raw(QString::fromLatin1(yytname[YYTRANSLATE(token.type)]));
 
@@ -7888,4 +7888,3 @@ QString Tokenizer::tokenToString(const Token &token)
 
 } /* namespace Patternist */
 
-QT_END_NAMESPACE

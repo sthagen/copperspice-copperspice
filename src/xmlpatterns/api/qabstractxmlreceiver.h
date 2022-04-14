@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,10 @@
 #ifndef QABSTRACTXMLRECEIVER_H
 #define QABSTRACTXMLRECEIVER_H
 
-#include <QtCore/QVariant>
-#include <QtCore/QScopedPointer>
-#include <QtXmlPatterns/QXmlNodeModelIndex>
+#include <qvariant.h>
+#include <qscopedpointer.h>
+#include <qxmlnodemodelindex.h>
 #include <qstringfwd.h>
-
-QT_BEGIN_NAMESPACE
 
 class QAbstractXmlReceiverPrivate;
 class QXmlName;
@@ -70,12 +68,13 @@ class Q_XMLPATTERNS_EXPORT QAbstractXmlReceiver
    QScopedPointer<QAbstractXmlReceiverPrivate> d_ptr;
 
    void sendAsNode(const QPatternist::Item &outputItem);
+
  private:
    template<const QXmlNodeModelIndex::Axis axis>
    void sendFromAxis(const QXmlNodeModelIndex &node);
-   Q_DISABLE_COPY(QAbstractXmlReceiver)
-};
 
-QT_END_NAMESPACE
+   QAbstractXmlReceiver(const QAbstractXmlReceiver &) = delete;
+   QAbstractXmlReceiver &operator=(const QAbstractXmlReceiver &) = delete;
+};
 
 #endif

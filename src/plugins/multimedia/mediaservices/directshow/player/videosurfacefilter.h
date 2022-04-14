@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,24 +24,21 @@
 #ifndef VIDEOSURFACEFILTER_H
 #define VIDEOSURFACEFILTER_H
 
-#include "directshowglobal.h"
-#include "directshowmediatypelist.h"
-#include "directshowsamplescheduler.h"
-#include "directshowmediatype.h"
+#include <dsplayer_global.h>
+#include <directshowmediatypelist.h>
+#include <directshowsamplescheduler.h>
+#include <directshowmediatype.h>
 
-#include <QtCore/qbasictimer.h>
-#include <QtCore/qcoreevent.h>
-#include <QtCore/qmutex.h>
-#include <QtCore/qsemaphore.h>
-#include <QtCore/qstring.h>
-#include <QtCore/qwaitcondition.h>
+#include <qbasictimer.h>
+#include <qcoreevent.h>
+#include <qmutex.h>
+#include <qsemaphore.h>
+#include <qstring.h>
+#include <qwaitcondition.h>
 
 #include <dshow.h>
 
-QT_BEGIN_NAMESPACE
 class QAbstractVideoSurface;
-QT_END_NAMESPACE
-
 class DirectShowEventLoop;
 
 class VideoSurfaceFilter
@@ -52,9 +49,9 @@ class VideoSurfaceFilter
    , public IPin
 {
    CS_OBJECT(VideoSurfaceFilter)
+
  public:
-   VideoSurfaceFilter(
-      QAbstractVideoSurface *surface, DirectShowEventLoop *loop, QObject *parent = nullptr);
+   VideoSurfaceFilter(QAbstractVideoSurface *surface, DirectShowEventLoop *loop, QObject *parent = nullptr);
    ~VideoSurfaceFilter();
 
    // IUnknown
@@ -122,13 +119,12 @@ class VideoSurfaceFilter
  protected:
    void customEvent(QEvent *event);
 
- private :
+ private:
    CS_SLOT_1(Private, void supportedFormatsChanged())
    CS_SLOT_2(supportedFormatsChanged)
    CS_SLOT_1(Private, void sampleReady())
    CS_SLOT_2(sampleReady)
 
- private:
    HRESULT start();
    void stop();
    void flush();

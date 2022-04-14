@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,10 +22,12 @@
 ***********************************************************************/
 
 #include "config.h"
-#include "qscriptengineagent.h"
-#include "qscriptengineagent_p.h"
-#include "qscriptengine.h"
-#include "qscriptengine_p.h"
+
+#include <qscriptengineagent.h>
+#include <qscriptengine.h>
+
+#include <qscriptengineagent_p.h>
+#include <qscriptengine_p.h>
 
 #include "CodeBlock.h"
 #include "Instruction.h"
@@ -33,7 +35,7 @@
 void QScriptEngineAgentPrivate::attach()
 {
    if (engine->originalGlobalObject()->debugger()) {
-      engine->originalGlobalObject()->setDebugger(0);
+      engine->originalGlobalObject()->setDebugger(nullptr);
    }
 
    JSC::Debugger::attach(engine->originalGlobalObject());
@@ -170,7 +172,6 @@ void QScriptEngineAgent::scriptUnload(qint64 id)
    (void) id;
 }
 
-
 void QScriptEngineAgent::contextPush()
 {
 }
@@ -184,8 +185,7 @@ void QScriptEngineAgent::functionEntry(qint64 scriptId)
    (void) scriptId;
 }
 
-void QScriptEngineAgent::functionExit(qint64 scriptId,
-   const QScriptValue &returnValue)
+void QScriptEngineAgent::functionExit(qint64 scriptId, const QScriptValue &returnValue)
 {
    (void) scriptId;
    (void) returnValue;

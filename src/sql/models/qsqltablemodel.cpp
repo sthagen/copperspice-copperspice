@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -545,9 +545,8 @@ bool QSqlTableModel::setData(const QModelIndex &index, const QVariant &value, in
    }
 
    const QVariant oldValue = QSqlTableModel::data(index, role);
-   if (value == oldValue
-      && value.isNull() == oldValue.isNull()
-      && d->cache.value(index.row()).op() != QSqlTableModelPrivate::Insert) {
+
+   if (value == oldValue && d->cache.value(index.row()).op() != QSqlTableModelPrivate::Insert) {
       return true;
    }
 
@@ -1081,18 +1080,21 @@ void QSqlTableModel::clear()
 Qt::ItemFlags QSqlTableModel::flags(const QModelIndex &index) const
 {
    Q_D(const QSqlTableModel);
-   if (index.internalPointer() || index.column() < 0 || index.column() >= d->rec.count()
-      || index.row() < 0) {
-      return 0;
+
+   if (index.internalPointer() || index.column() < 0 || index.column() >= d->rec.count() || index.row() < 0) {
+      return Qt::EmptyFlag;
    }
+
    bool editable = true;
 
    if (d->rec.field(index.column()).isReadOnly()) {
       editable = false;
    } else {
       const QSqlTableModelPrivate::ModifiedRow mrow = d->cache.value(index.row());
+
       if (mrow.op() == QSqlTableModelPrivate::Delete) {
          editable = false;
+
       } else if (d->strategy == OnFieldChange) {
          if (mrow.op() != QSqlTableModelPrivate::Insert)
             if (!isDirty(index) && isDirty()) {
@@ -1104,14 +1106,13 @@ Qt::ItemFlags QSqlTableModel::flags(const QModelIndex &index) const
          }
       }
    }
+
    if (!editable) {
       return QSqlQueryModel::flags(index);
    } else {
       return QSqlQueryModel::flags(index) | Qt::ItemIsEditable;
    }
 }
-
-
 
 QSqlRecord QSqlTableModel::record() const
 {

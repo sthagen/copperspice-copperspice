@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,7 +34,7 @@ class Q_GUI_EXPORT QWindowContainer : public QWidget
    Q_DECLARE_PRIVATE(QWindowContainer)
 
  public:
-   explicit QWindowContainer(QWindow *embeddedWindow, QWidget *parent = 0, Qt::WindowFlags f = 0);
+   explicit QWindowContainer(QWindow *embeddedWindow, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::EmptyFlag);
    ~QWindowContainer();
    QWindow *containedWindow() const;
 
@@ -45,7 +45,7 @@ class Q_GUI_EXPORT QWindowContainer : public QWidget
    static void parentWasLowered(QWidget *parent);
 
  protected:
-   bool event(QEvent *ev) override;
+   bool event(QEvent *event) override;
 
  private :
    GUI_CS_SLOT_1(Private, void focusWindowChanged(QWindow *focusWindow))

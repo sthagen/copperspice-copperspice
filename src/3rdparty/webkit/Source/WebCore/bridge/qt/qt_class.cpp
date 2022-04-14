@@ -1,10 +1,11 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2018 Barbara Geller
-* Copyright (c) 2012-2018 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
+*
+* Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
 * Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
 *
 * This file is part of CopperSpice.
 *
@@ -16,7 +17,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *
-* <http://www.gnu.org/licenses/>.
+* https://www.gnu.org/licenses/
 *
 ***********************************************************************/
 
@@ -160,12 +161,12 @@ Field * QtClass::fieldNamed(const Identifier& identifier, Instance* instance) co
     if (obj) {
         if (f) {
             // only cache real metaproperties, but we do store the  other types so we can delete them later
-            if (f->fieldType() == QtField::MetaProperty) {
+            if (f->fieldType() == QtField::QtFieldType::MetaProperty) {
                 return f;
             }
 
 #ifndef QT_NO_PROPERTIES
-            if (f->fieldType() == QtField::DynamicProperty) {
+            if (f->fieldType() == QtField::QtFieldType::DynamicProperty) {
 
                 if (obj->dynamicPropertyNames().indexOf(name) >= 0) {
                     return f;

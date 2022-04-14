@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,15 +28,13 @@
 #include <qobject.h>
 #include <qdebug.h>
 
-
-
 class QAbstractSocketPrivate;
 class QAuthenticator;
 class QHostAddress;
 class QHostInfo;
 
 #ifndef QT_NO_NETWORKPROXY
-class QNetworkProxy;
+   class QNetworkProxy;
 #endif
 
 class QAbstractSocketPrivate;
@@ -129,6 +127,10 @@ class Q_NETWORK_EXPORT QAbstractSocket : public QIODevice
    using PauseModes = QFlags<PauseMode>;
 
    QAbstractSocket(SocketType socketType, QObject *parent);
+
+   QAbstractSocket(const QAbstractSocket &other) = delete;
+   QAbstractSocket &operator=(const QAbstractSocket &other) = delete;
+
    virtual ~QAbstractSocket();
 
    virtual void resume(); // to continue after proxy authentication required, SSL errors etc.
@@ -138,9 +140,9 @@ class Q_NETWORK_EXPORT QAbstractSocket : public QIODevice
    bool bind(const QHostAddress &address, quint16 port = 0, BindMode mode = DefaultForPlatform);
    bool bind(quint16 port = 0, BindMode mode = DefaultForPlatform);
 
-   virtual void connectToHost(const QString &hostName, quint16 port, OpenMode mode = ReadWrite,
+   virtual void connectToHost(const QString &hostName, quint16 port, OpenMode openMode = ReadWrite,
                   NetworkLayerProtocol protocol = AnyIPProtocol);
-   virtual void connectToHost(const QHostAddress &address, quint16 port, OpenMode mode = ReadWrite);
+   virtual void connectToHost(const QHostAddress &address, quint16 port, OpenMode openMode = ReadWrite);
    virtual void disconnectFromHost();
 
    bool isValid() const;
@@ -162,7 +164,7 @@ class Q_NETWORK_EXPORT QAbstractSocket : public QIODevice
    void abort();
 
    virtual qintptr socketDescriptor() const;
-   virtual bool setSocketDescriptor(qintptr socketDescriptor, SocketState state = ConnectedState,
+   virtual bool setSocketDescriptor(qintptr socketDescriptor, SocketState socketState = ConnectedState,
                   OpenMode openMode = ReadWrite);
 
    virtual void setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value);
@@ -198,11 +200,11 @@ class Q_NETWORK_EXPORT QAbstractSocket : public QIODevice
    NET_CS_SIGNAL_1(Public, void disconnected())
    NET_CS_SIGNAL_2(disconnected)
 
-   NET_CS_SIGNAL_1(Public, void stateChanged(QAbstractSocket::SocketState un_named_arg1))
-   NET_CS_SIGNAL_2(stateChanged, un_named_arg1)
+   NET_CS_SIGNAL_1(Public, void stateChanged(QAbstractSocket::SocketState socketState))
+   NET_CS_SIGNAL_2(stateChanged, socketState)
 
-   NET_CS_SIGNAL_1(Public, void error(QAbstractSocket::SocketError un_named_arg1))
-   NET_CS_SIGNAL_OVERLOAD(error, (QAbstractSocket::SocketError), un_named_arg1)
+   NET_CS_SIGNAL_1(Public, void error(QAbstractSocket::SocketError socketError))
+   NET_CS_SIGNAL_OVERLOAD(error, (QAbstractSocket::SocketError), socketError)
 
 #ifndef QT_NO_NETWORKPROXY
    NET_CS_SIGNAL_1(Public, void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *authenticator))
@@ -226,7 +228,6 @@ class Q_NETWORK_EXPORT QAbstractSocket : public QIODevice
 
  private:
    Q_DECLARE_PRIVATE(QAbstractSocket)
-   Q_DISABLE_COPY(QAbstractSocket)
 
    NET_CS_SLOT_1(Private, void _q_connectToNextAddress())
    NET_CS_SLOT_2(_q_connectToNextAddress)
@@ -250,11 +251,11 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QAbstractSocket::PauseModes)
 Q_NETWORK_EXPORT QDebug operator<<(QDebug, QAbstractSocket::SocketError);
 Q_NETWORK_EXPORT QDebug operator<<(QDebug, QAbstractSocket::SocketState);
 
-// moved to bottom of file to avoid recursive include issues
+// moved here to avoid recursive include issues
 #include <qhostinfo.h>
 
 #ifndef QT_NO_NETWORKPROXY
-#include <qnetworkproxy.h>
+   #include <qnetworkproxy.h>
 #endif
 
-#endif // QABSTRACTSOCKET_H
+#endif

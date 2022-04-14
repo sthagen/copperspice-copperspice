@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -26,14 +26,12 @@
 
 #include "JSVariableObject.h"
 
-QT_BEGIN_NAMESPACE
-
 namespace QScript {
 
 class QScriptActivationObject : public JSC::JSVariableObject
 {
  public:
-   QScriptActivationObject(JSC::ExecState *callFrame, JSC::JSObject *delegate = 0);
+   QScriptActivationObject(JSC::ExecState *callFrame, JSC::JSObject *delegate = nullptr);
    virtual ~QScriptActivationObject();
    virtual bool isDynamicScope() const {
       return true;
@@ -83,7 +81,5 @@ class QScriptActivationObject : public JSC::JSVariableObject
 };
 
 } // namespace QScript
-
-QT_END_NAMESPACE
 
 #endif

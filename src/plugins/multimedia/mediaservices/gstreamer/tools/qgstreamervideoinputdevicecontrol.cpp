@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,12 +29,11 @@
 #include <qgstutils_p.h>
 
 QGstreamerVideoInputDeviceControl::QGstreamerVideoInputDeviceControl(QObject *parent)
-   : QVideoDeviceSelectorControl(parent), m_factory(0), m_selectedDevice(0)
+   : QVideoDeviceSelectorControl(parent), m_factory(nullptr), m_selectedDevice(0)
 {
 }
 
-QGstreamerVideoInputDeviceControl::QGstreamerVideoInputDeviceControl(
-   GstElementFactory *factory, QObject *parent)
+QGstreamerVideoInputDeviceControl::QGstreamerVideoInputDeviceControl(GstElementFactory *factory, QObject *parent)
    : QVideoDeviceSelectorControl(parent), m_factory(factory), m_selectedDevice(0)
 {
    if (m_factory) {
@@ -51,20 +50,17 @@ QGstreamerVideoInputDeviceControl::~QGstreamerVideoInputDeviceControl()
 
 int QGstreamerVideoInputDeviceControl::deviceCount() const
 {
-   // emerald - camera    return QGstUtils::enumerateCameras(m_factory).count();
-   return 0;
+   return QGstUtils::enumerateCameras(m_factory).count();
 }
 
 QString QGstreamerVideoInputDeviceControl::deviceName(int index) const
 {
-   // emerald - camera    return QGstUtils::enumerateCameras(m_factory).value(index).name;
-   return QString();
+   return QGstUtils::enumerateCameras(m_factory).value(index).name;
 }
 
 QString QGstreamerVideoInputDeviceControl::deviceDescription(int index) const
 {
-   // emerald - camera    return QGstUtils::enumerateCameras(m_factory).value(index).description;
-   return QString();
+   return QGstUtils::enumerateCameras(m_factory).value(index).description;
 }
 
 int QGstreamerVideoInputDeviceControl::defaultDevice() const

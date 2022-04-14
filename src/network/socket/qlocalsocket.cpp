@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -42,7 +42,7 @@ QLocalSocket::~QLocalSocket()
 
 #if !defined(Q_OS_WIN) && ! defined(QT_LOCALSOCKET_TCP)
    Q_D(QLocalSocket);
-   d->unixSocket.setParent(0);
+   d->unixSocket.setParent(nullptr);
 #endif
 }
 
@@ -181,14 +181,6 @@ void QLocalSocket::_q_error(QAbstractSocket::SocketError un_named_arg1)
 
 #elif defined(Q_OS_WIN)
 
-/* GONE
-void QLocalSocket::_q_notified()
-{
-   Q_D(QLocalSocket);
-   d->_q_notified();
-}
-*/
-
 void QLocalSocket::_q_canWrite()
 {
    Q_D(QLocalSocket);
@@ -206,14 +198,6 @@ void QLocalSocket::_q_winError(ulong data1, const QString &data2)
    Q_D(QLocalSocket);
    d->_q_winError(data1, data2);
 }
-
-/* GONE
-void QLocalSocket::_q_emitReadyRead()
-{
-   Q_D(QLocalSocket);
-   d->_q_emitReadyRead();
-}
-*/
 
 #else
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,7 +23,7 @@
 
 #include <Cocoa/Cocoa.h>
 
-#include <qalgorithms.h>
+#include <qalgorithms.h>-
 #include <qapplication.h>
 #include <qdebug.h>
 #include <qcocoamenubar.h>
@@ -72,7 +72,7 @@ QCocoaMenuBar::~QCocoaMenuBar()
    static_menubars.removeOne(this);
 
    if (m_window && m_window->menubar() == this) {
-      m_window->setMenubar(0);
+      m_window->setMenubar(nullptr);
 
       // Delete the children first so they do not cause
       // the native menu items to be hidden after
@@ -225,11 +225,11 @@ void QCocoaMenuBar::handleReparent(QWindow *newParentWindow)
 #endif
 
    if (m_window) {
-      m_window->setMenubar(NULL);
+      m_window->setMenubar(nullptr);
    }
 
-   if (newParentWindow == NULL) {
-      m_window = NULL;
+   if (newParentWindow == nullptr) {
+      m_window = nullptr;
    } else {
       newParentWindow->create();
       m_window = static_cast<QCocoaWindow *>(newParentWindow->handle());
@@ -245,18 +245,18 @@ QCocoaWindow *QCocoaMenuBar::findWindowForMenubar()
       return static_cast<QCocoaWindow *>(qApp->focusWindow()->handle());
    }
 
-   return NULL;
+   return nullptr;
 }
 
 QCocoaMenuBar *QCocoaMenuBar::findGlobalMenubar()
 {
    for (QCocoaMenuBar *mb : static_menubars) {
-      if (mb->m_window == NULL) {
+      if (mb->m_window == nullptr) {
          return mb;
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 
 void QCocoaMenuBar::redirectKnownMenuItemsToFirstResponder()
@@ -331,7 +331,7 @@ void QCocoaMenuBar::updateMenuBarImmediately()
    QCocoaMenuBar *mb = findGlobalMenubar();
    QCocoaWindow *cw  = findWindowForMenubar();
 
-   QWindow *win = cw ? cw->window() : 0;
+   QWindow *win = cw ? cw->window() : nullptr;
 
    if (win && (win->flags() & Qt::Popup) == Qt::Popup) {
       // context menus, comboboxes, etc. don't need to update the menubar,

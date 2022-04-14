@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,20 +34,20 @@
 
 // Create the system default time zone
 QMacTimeZonePrivate::QMacTimeZonePrivate()
-    : m_nstz(0)
+    : m_nstz(nullptr)
 {
     init(systemTimeZoneId());
 }
 
 // Create a named time zone
 QMacTimeZonePrivate::QMacTimeZonePrivate(const QByteArray &ianaId)
-    : m_nstz(0)
+    : m_nstz(nullptr)
 {
     init(ianaId);
 }
 
 QMacTimeZonePrivate::QMacTimeZonePrivate(const QMacTimeZonePrivate &other)
-    : QTimeZonePrivate(other), m_nstz(0)
+    : QTimeZonePrivate(other), m_nstz(nullptr)
 {
     m_nstz = [other.m_nstz copy];
 }
@@ -64,11 +64,22 @@ QTimeZonePrivate *QMacTimeZonePrivate::clone()
 
 void QMacTimeZonePrivate::init(const QByteArray &ianaId)
 {
-    if (availableTimeZoneIds().contains(ianaId)) {
-        m_nstz = [[NSTimeZone timeZoneWithName:QCFString::toNSString(QString::fromUtf8(ianaId))] retain];
-        if (m_nstz)
-            m_id = ianaId;
-    }
+   if (ianaId.isEmpty()) {
+      // use system timezone
+      m_nstz = [NSTimeZone.systemTimeZone retain];
+
+      if (m_nstz != nullptr) {
+         m_id = QString::fromNSString(m_nstz.name).toUtf8();
+      }
+   }
+
+   if (availableTimeZoneIds().contains(ianaId)) {
+     m_nstz = [[NSTimeZone timeZoneWithName:QCFString::toNSString(QString::fromUtf8(ianaId))] retain];
+
+     if (m_nstz != nullptr) {
+        m_id = ianaId;
+     }
+   }
 }
 
 QString QMacTimeZonePrivate::comment() const

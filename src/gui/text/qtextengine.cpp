@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -75,7 +75,7 @@ class Itemizer
 {
  public:
    Itemizer(const QString &string, const QScriptAnalysis *analysis, QScriptItemArray &items)
-      : m_string(string), m_analysis(analysis), m_items(items), m_splitter(0) {
+      : m_string(string), m_analysis(analysis), m_items(items), m_splitter(nullptr) {
    }
 
    ~Itemizer() {
@@ -571,7 +571,8 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                   if (eor >= 0) {
                      appendItems(analysis, sor, eor, control, dir);
                   }
-               // fall through
+                  [[fallthrough]];
+
                case QChar::DirR:
                case QChar::DirAL:
                   dir = QChar::DirR;
@@ -637,7 +638,8 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                         status.eor = QChar::DirON;
                         dir = QChar::DirAN;
                      }
-                  // fall through
+                     [[fallthrough]];
+
                   case QChar::DirEN:
                   case QChar::DirL:
                      eor = current;
@@ -652,6 +654,7 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                      } else {
                         eor = current;
                      }
+
                      status.eor = QChar::DirEN;
                      dir = QChar::DirAN;
                      break;
@@ -662,6 +665,7 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                         eor = current;
                         break;
                      }
+                     [[fallthrough]];
 
                   case QChar::DirBN:
                   case QChar::DirB:
@@ -701,19 +705,23 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                }
                break;
             }
+            [[fallthrough]];
 
          case QChar::DirAN:
             hasBidi = true;
             dirCurrent = QChar::DirAN;
+
             if (dir == QChar::DirON) {
                dir = QChar::DirAN;
             }
+
             switch (status.last) {
                case QChar::DirL:
                case QChar::DirAN:
                   eor = current;
                   status.eor = QChar::DirAN;
                   break;
+
                case QChar::DirR:
                case QChar::DirAL:
                case QChar::DirEN:
@@ -725,11 +733,14 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                   dir = QChar::DirAN;
                   status.eor = QChar::DirAN;
                   break;
+
                case QChar::DirCS:
                   if (status.eor == QChar::DirAN) {
                      eor = current;
                      break;
                   }
+                  [[fallthrough]];
+
                case QChar::DirES:
                case QChar::DirET:
                case QChar::DirBN:
@@ -764,6 +775,7 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                         status.eor = dirCurrent;
                      }
                   }
+
                default:
                   break;
             }
@@ -847,7 +859,7 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
                status.last = QChar::DirL;
                break;
             }
-         // fall through
+            [[fallthrough]];
 
          default:
             status.last = dirCurrent;
@@ -981,7 +993,7 @@ static inline void qt_getJustificationOpportunities(QStringView str, const QScri
       case QChar::Script_Mongolian:
       case QChar::Script_PhagsPa:
       case QChar::Script_Manichaean:
-      case QChar::Script_PsalterPahlavi:
+      case QChar::Script_Psalter_Pahlavi:
          // same as default but inter character justification takes precedence
          spaceAs = Justification_Arabic_Space;
          break;
@@ -1209,8 +1221,10 @@ void QTextEngine::shapeText(int item) const
 }
 
 int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, QFontEngine *fontEngine,
-   const QVector<uint> &itemBoundaries, bool kerningEnabled, bool hasLetterSpacing) const
+            const QVector<uint> &itemBoundaries, bool kerningEnabled, bool hasLetterSpacing) const
 {
+   // harfbuzz
+
    uint glyphs_shaped = 0;
    auto strLength     = str.size();
 
@@ -1227,7 +1241,8 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
    props.direction = si.analysis.bidiLevel % 2 ? HB_DIRECTION_RTL : HB_DIRECTION_LTR;
 
    QChar::Script script = QChar::Script(si.analysis.script);
-   props.script = cs_script_to_hb_script(script);
+   props.script         = cs_script_to_hb_script(script);
+   props.language       = hb_language_get_default();
 
    uint current_cluster  = 0;
    uint expected_cluster = 0;
@@ -1269,10 +1284,10 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
 
       // shape
       {
-         hb_font_t *hb_font = cs_font_get_for_engine(actualFontEngine);
+         std::shared_ptr<hb_font_t> hb_font = cs_font_get_for_engine(actualFontEngine);
          Q_ASSERT(hb_font);
 
-         cs_font_set_use_design_metrics(hb_font, option.useDesignMetrics() ? uint(QFontEngine::DesignMetrics) : 0);
+         cs_font_set_use_design_metrics(hb_font.get(), option.useDesignMetrics() ? uint(QFontEngine::DesignMetrics) : 0);
 
          // ligatures are incompatible with custom letter spacing, so when a letter spacing is set
          // disable them for writing systems where they are purely cosmetic
@@ -1284,10 +1299,10 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
 
          const hb_feature_t features[5] = {
             { HB_TAG('k', 'e', 'r', 'n'), !! kerningEnabled, 0, uint(-1) },
-            { HB_TAG('l', 'i', 'g', 'a'), ! dontLigate, 0, uint(-1) },
-            { HB_TAG('c', 'l', 'i', 'g'), ! dontLigate, 0, uint(-1) },
-            { HB_TAG('d', 'l', 'i', 'g'), ! dontLigate, 0, uint(-1) },
-            { HB_TAG('h', 'l', 'i', 'g'), ! dontLigate, 0, uint(-1) }
+            { HB_TAG('l', 'i', 'g', 'a'), !  dontLigate,     0, uint(-1) },
+            { HB_TAG('c', 'l', 'i', 'g'), !  dontLigate,     0, uint(-1) },
+            { HB_TAG('d', 'l', 'i', 'g'), !  dontLigate,     0, uint(-1) },
+            { HB_TAG('h', 'l', 'i', 'g'), !  dontLigate,     0, uint(-1) }
          };
 
          const int num_features = dontLigate ? 5 : 1;
@@ -1300,17 +1315,20 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
          // from non-CoreText engine. The other shapers work with that engine just fine.
 
          if (actualFontEngine->type() != QFontEngine::Mac) {
+
             static const char *s_shaper_list_without_coretext[] = {
                "graphite2",
                "ot",
                "fallback",
                nullptr
             };
+
             shaper_list = s_shaper_list_without_coretext;
          }
 #endif
 
-         bool shapedOk = hb_shape_full(hb_font, buffer, features, num_features, shaper_list);
+         bool shapedOk = hb_shape_full(hb_font.get(), buffer, features, num_features, shaper_list);
+
          if (! shapedOk) {
             hb_buffer_destroy(buffer);
             return 0;
@@ -1371,7 +1389,7 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
 
                   if (g.glyphs[infos_position] != 0) {
                      QGlyphLayout tmp = g.mid(infos_position, 1);
-                     actualFontEngine->recalcAdvances(&tmp, 0);
+                     actualFontEngine->recalcAdvances(&tmp, Qt::EmptyFlag);
                   }
                   g.attributes[infos_position].dontPrint = true;
                }
@@ -1410,11 +1428,6 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
             ++infos_position;
          }
 
-         if (infos_position == num_glyphs)  {
-            // ran out of glyphs, all done
-            break;
-         }
-
          if (ch < 0x80) {
             expected_cluster += 1;
 
@@ -1429,6 +1442,11 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
          } else {
             expected_cluster += 4;
             delta += 3;
+         }
+
+         if (infos_position == num_glyphs)  {
+            // ran out of glyphs, all done
+            break;
          }
       }
 
@@ -1490,11 +1508,11 @@ void QTextEngine::init(QTextEngine *e)
    e->visualMovement     = false;
    e->delayDecorations   = false;
 
-   e->layoutData = 0;
-   e->minWidth   = 0;
-   e->maxWidth   = 0;
+   e->layoutData         = nullptr;
+   e->minWidth           = 0;
+   e->maxWidth           = 0;
 
-   e->specialData        = 0;
+   e->specialData        = nullptr;
    e->stackEngine        = false;
    e->useRawFont         = false;
 }
@@ -1574,7 +1592,7 @@ void QTextEngine::shape(int item) const
 
 static inline void releaseCachedFontEngine(QFontEngine *fontEngine)
 {
-   if (fontEngine && ! fontEngine->ref.deref()) {
+   if (fontEngine && ! fontEngine->m_refCount.deref()) {
       delete fontEngine;
    }
 }
@@ -1715,8 +1733,8 @@ void QTextEngine::itemize() const
                analysis->bidiLevel = control.baseLevel();
                break;
             }
+            [[fallthrough]];
 
-         // fall through
          default:
             analysis->flags  = QScriptAnalysis::None;
             break;
@@ -1775,7 +1793,7 @@ void QTextEngine::itemize() const
 
             if (s && position >= s->preeditPosition) {
                position += s->preeditText.length();
-               s = 0;
+               s = nullptr;
             }
 
             Q_ASSERT(position <= length);
@@ -2158,8 +2176,9 @@ QTextEngine::FontEngineCache::FontEngineCache()
 //input is common (and hard to cache at a higher level)
 QFontEngine *QTextEngine::fontEngine(const QScriptItem &si, QFixed *ascent, QFixed *descent, QFixed *leading) const
 {
-   QFontEngine *engine = 0;
-   QFontEngine *scaledEngine = 0;
+   QFontEngine *engine = nullptr;
+   QFontEngine *scaledEngine = nullptr;
+
    int script = si.analysis.script;
 
    QFont font = fnt;
@@ -2169,29 +2188,32 @@ QFontEngine *QTextEngine::fontEngine(const QScriptItem &si, QFixed *ascent, QFix
          engine = feCache.prevFontEngine;
 
       } else {
-         engine = QFontEngineMulti::createMultiFontEngine(rawFont.d->fontEngine, script);
+         engine = QFontEngineMulti::createMultiFontEngine(rawFont.m_fontPrivate->fontEngine, script);
+
          feCache.prevFontEngine = engine;
          feCache.prevScript = script;
-         engine->ref.ref();
+         engine->m_refCount.ref();
 
          if (feCache.prevScaledFontEngine) {
             releaseCachedFontEngine(feCache.prevScaledFontEngine);
-            feCache.prevScaledFontEngine = 0;
+            feCache.prevScaledFontEngine = nullptr;
          }
       }
 
       if (si.analysis.flags == QScriptAnalysis::SmallCaps) {
          if (feCache.prevScaledFontEngine) {
             scaledEngine = feCache.prevScaledFontEngine;
+
          } else {
-            QFontEngine *scEngine = rawFont.d->fontEngine->cloneWithSize(smallCapsFraction * rawFont.pixelSize());
-            scEngine->ref.ref();
+            QFontEngine *scEngine = rawFont.m_fontPrivate->fontEngine->cloneWithSize(smallCapsFraction * rawFont.pixelSize());
+
+            scEngine->m_refCount.ref();
             scaledEngine = QFontEngineMulti::createMultiFontEngine(scEngine, script);
-            scaledEngine->ref.ref();
+            scaledEngine->m_refCount.ref();
             feCache.prevScaledFontEngine = scaledEngine;
 
             // If scEngine is not ref'ed by scaledEngine, make sure it is deallocated and not leaked.
-            if (!scEngine->ref.deref()) {
+            if (! scEngine->m_refCount.deref()) {
                delete scEngine;
             }
 
@@ -2222,7 +2244,7 @@ QFontEngine *QTextEngine::fontEngine(const QScriptItem &si, QFixed *ascent, QFix
             engine = font.d->engineForScript(script);
 
             if (engine) {
-               engine->ref.ref();
+               engine->m_refCount.ref();
             }
 
             QTextCharFormat::VerticalAlignment valign = f.verticalAlignment();
@@ -2234,9 +2256,11 @@ QFontEngine *QTextEngine::fontEngine(const QScriptItem &si, QFixed *ascent, QFix
                }
                scaledEngine = font.d->engineForScript(script);
             }
+
             if (scaledEngine) {
-               scaledEngine->ref.ref();
+               scaledEngine->m_refCount.ref();
             }
+
             if (feCache.prevFontEngine) {
                releaseCachedFontEngine(feCache.prevFontEngine);
             }
@@ -2259,7 +2283,7 @@ QFontEngine *QTextEngine::fontEngine(const QScriptItem &si, QFixed *ascent, QFix
          } else {
             engine = font.d->engineForScript(script);
             if (engine) {
-               engine->ref.ref();
+               engine->m_refCount.ref();
             }
 
             if (feCache.prevFontEngine) {
@@ -2269,7 +2293,7 @@ QFontEngine *QTextEngine::fontEngine(const QScriptItem &si, QFixed *ascent, QFix
             feCache.prevScript = script;
             feCache.prevPosition = -1;
             feCache.prevLength = -1;
-            feCache.prevScaledFontEngine = 0;
+            feCache.prevScaledFontEngine = nullptr;
          }
       }
 
@@ -2308,7 +2332,7 @@ static void set(QJustificationPoint *point, int type, const QGlyphLayout &glyph,
          g.numGlyphs = 1;
          g.glyphs = &kashidaGlyph;
          g.advances = &point->kashidaWidth;
-         fe->recalcAdvances(&g, 0);
+         fe->recalcAdvances(&g, Qt::EmptyFlag);
 
          if (point->kashidaWidth == 0) {
             point->type = Justification_Prohibited;
@@ -2424,7 +2448,7 @@ void QTextEngine::justify(const QScriptLine &line)
                break;
 
             case Justification_Space:
-            // fall through
+               [[fallthrough]];
 
             case Justification_Arabic_Space:
                if (kashida_pos >= 0) {
@@ -2436,9 +2460,11 @@ void QTextEngine::justify(const QScriptLine &line)
                      ++nPoints;
                   }
                }
+
                kashida_pos = -1;
                kashida_type = Justification_Arabic_Normal;
-            // fall through
+
+               [[fallthrough]];
 
             case Justification_Character:
                set(&justificationPoints[nPoints++], justification, g.mid(i), fontEngine(si));
@@ -2563,22 +2589,23 @@ void QScriptLine::setDefaultHeight(QTextEngine *eng)
    QFixed other_ascent = e->ascent();
    QFixed other_descent = e->descent();
    QFixed other_leading = e->leading();
+
    leading = qMax(leading + ascent, other_leading + other_ascent) - qMax(ascent, other_ascent);
-   ascent = qMax(ascent, other_ascent);
+   ascent  = qMax(ascent, other_ascent);
    descent = qMax(descent, other_descent);
 }
 
 QTextEngine::LayoutData::LayoutData()
 {
-   memory = 0;
-   allocated = 0;
-   memory_on_stack = false;
-   used = 0;
-   hasBidi = false;
-   layoutState = LayoutEmpty;
+   memory             = nullptr;
+   allocated          = 0;
+   memory_on_stack    = false;
+   used               = 0;
+   hasBidi            = false;
+   layoutState        = LayoutEmpty;
    haveCharAttributes = false;
-   logClustersPtr = 0;
-   available_glyphs = 0;
+   logClustersPtr     = nullptr;
+   available_glyphs   = 0;
 }
 
 QTextEngine::LayoutData::LayoutData(const QString &str, void **stack_memory, int _allocated)
@@ -2599,8 +2626,8 @@ QTextEngine::LayoutData::LayoutData(const QString &str, void **stack_memory, int
       allocated = 0;
 
       memory_on_stack = false;
-      memory = 0;
-      logClustersPtr = 0;
+      memory = nullptr;
+      logClustersPtr = nullptr;
 
    } else {
       memory_on_stack = true;
@@ -2624,7 +2651,7 @@ QTextEngine::LayoutData::~LayoutData()
    if (!memory_on_stack) {
       free(memory);
    }
-   memory = 0;
+   memory = nullptr;
 }
 
 bool QTextEngine::LayoutData::reallocate(int totalGlyphs)
@@ -2639,13 +2666,13 @@ bool QTextEngine::LayoutData::reallocate(int totalGlyphs)
    int strSize = string.size();
 
    int space_charAttributes = sizeof(QCharAttributes) * strSize / sizeof(void *) + 1;
-   int space_logClusters    = sizeof(unsigned short)    * strSize / sizeof(void *) + 1;
+   int space_logClusters    = sizeof(unsigned short)  * strSize / sizeof(void *) + 1;
    int space_glyphs         = (totalGlyphs * QGlyphLayout::SpaceRequired) / sizeof(void *) + 2;;
 
    int newAllocated = space_charAttributes + space_glyphs + space_logClusters;
 
    // These values can be negative if the length of string/glyphs causes overflow,
-   // we can't layout such a long string all at once, so return false here to
+   // can not layout such a long string all at once, return false here to
    // indicate there is a failure
 
    if (space_charAttributes < 0 || space_logClusters < 0 || space_glyphs < 0 || newAllocated < allocated) {
@@ -2654,9 +2681,9 @@ bool QTextEngine::LayoutData::reallocate(int totalGlyphs)
    }
 
    void **newMem = memory;
-   newMem = (void **)::realloc(memory_on_stack ? 0 : memory, newAllocated * sizeof(void *));
+   newMem = (void **)::realloc(memory_on_stack ? nullptr : memory, newAllocated * sizeof(void *));
 
-   if (!newMem) {
+   if (! newMem) {
       layoutState = LayoutFailed;
       return false;
    }
@@ -2680,6 +2707,7 @@ bool QTextEngine::LayoutData::reallocate(int totalGlyphs)
    glyphLayout.grow(reinterpret_cast<char *>(m), totalGlyphs);
 
    allocated = newAllocated;
+
    return true;
 }
 
@@ -2707,7 +2735,8 @@ void QTextEngine::freeMemory()
 {
    if (!stackEngine) {
       delete layoutData;
-      layoutData = 0;
+      layoutData = nullptr;
+
    } else {
       layoutData->used = 0;
       layoutData->hasBidi = false;
@@ -2828,7 +2857,8 @@ void QTextEngine::setPreeditArea(int position, const QString &preeditText)
       }
       if (specialData->formats.isEmpty()) {
          delete specialData;
-         specialData = 0;
+         specialData = nullptr;
+
       } else {
          specialData->preeditText = QString();
          specialData->preeditPosition = -1;
@@ -2853,7 +2883,7 @@ void QTextEngine::setFormats(const QVector<QTextLayout::FormatRange> &formats)
       }
       if (specialData->preeditText.isEmpty()) {
          delete specialData;
-         specialData = 0;
+         specialData = nullptr;
       } else {
          specialData->formats.clear();
       }
@@ -3014,13 +3044,13 @@ QString QTextEngine::elidedText(Qt::TextElideMode mode, const QFixed &width, int
       glyphs.advances  = &ellipsisWidth;
 
       if (glyph != 0) {
-         fe->recalcAdvances(&glyphs, 0);
+         fe->recalcAdvances(&glyphs, Qt::EmptyFlag);
          ellipsisText = ellipsisChar;
 
       } else {
          glyph = fe->glyphIndex('.');
          if (glyph != 0) {
-            fe->recalcAdvances(&glyphs, 0);
+            fe->recalcAdvances(&glyphs, Qt::EmptyFlag);
 
             ellipsisWidth *= 3;
             ellipsisText = "...";
@@ -3242,10 +3272,10 @@ QFixed QTextEngine::calculateTabWidth(int item, QFixed x) const
                switch (tabSpec.type) {
                   case QTextOption::CenterTab:
                      length /= 2;
-                  // fall through
+                     [[fallthrough]];
 
                   case QTextOption::DelimiterTab:
-                  // fall through
+                     [[fallthrough]];
 
                   case QTextOption::RightTab:
                      tab = QFixed::fromReal(tabSpec.position) * dpiScale - length;
@@ -3792,7 +3822,7 @@ QStackTextEngine::QStackTextEngine(const QString &string, const QFont &f)
 
 QTextItemInt::QTextItemInt(const QScriptItem &si, QFont *font, const QTextCharFormat &format)
    : justified(false), underlineStyle(QTextCharFormat::NoUnderline), charFormat(format),
-     logClusters(0), f(0), fontEngine(0)
+     logClusters(nullptr), f(nullptr), fontEngine(nullptr)
 {
    f = font;
    fontEngine = f->d->engineForScript(si.analysis.script);
@@ -3802,10 +3832,9 @@ QTextItemInt::QTextItemInt(const QScriptItem &si, QFont *font, const QTextCharFo
 }
 
 QTextItemInt::QTextItemInt(const QGlyphLayout &g, QFont *font, QString::const_iterator begin, const QString::const_iterator end,
-   QFontEngine *fe, const QTextCharFormat &format)
-
-   : flags(0), justified(false), underlineStyle(QTextCharFormat::NoUnderline), charFormat(format),
-     m_iter(begin), m_end(end), logClusters(0), f(font),  glyphs(g), fontEngine(fe)
+            QFontEngine *fe, const QTextCharFormat &format)
+   : flags(Qt::EmptyFlag), justified(false), underlineStyle(QTextCharFormat::NoUnderline), charFormat(format),
+     m_iter(begin), m_end(end), logClusters(nullptr), f(font),  glyphs(g), fontEngine(fe)
 {
 }
 
@@ -3814,7 +3843,7 @@ void QTextItemInt::initWithScriptItem(const QScriptItem &si)
 {
    // explicitly initialize flags so that initFontAttributes can be called
    // multiple times on the same TextItem
-   flags = 0;
+   flags = Qt::EmptyFlag;
 
    if (si.analysis.bidiLevel % 2) {
       flags |= QTextItem::RightToLeft;

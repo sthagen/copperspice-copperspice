@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,8 +28,6 @@
 
 #ifndef QT_NO_IMAGEFORMAT_PPM
 
-
-
 class QByteArray;
 
 class QPpmHandler : public QImageIOHandler
@@ -37,15 +35,15 @@ class QPpmHandler : public QImageIOHandler
  public:
    QPpmHandler();
 
-   bool canRead() const override;
+   bool canRead() override;
    bool read(QImage *image) override;
    bool write(const QImage &image) override;
 
-   QByteArray name() const override;
+   QString name() const override;
 
-   static bool canRead(QIODevice *device, QByteArray *subType = 0);
+   static bool canRead(QIODevice *device, QByteArray *subType = nullptr);
 
-   QVariant option(ImageOption option) const override;
+   QVariant option(ImageOption option) override;
    void setOption(ImageOption option, const QVariant &value) override;
    bool supportsOption(ImageOption option) const override;
 
@@ -65,8 +63,6 @@ class QPpmHandler : public QImageIOHandler
    int mcc;
    mutable QByteArray subType;
 };
-
-
 
 #endif // QT_NO_IMAGEFORMAT_PPM
 

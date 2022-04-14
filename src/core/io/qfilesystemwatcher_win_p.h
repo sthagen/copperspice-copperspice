@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,14 +29,13 @@
 #ifndef QT_NO_FILESYSTEMWATCHER
 
 #include <qt_windows.h>
-#include <QtCore/qdatetime.h>
-#include <QtCore/qfile.h>
-#include <QtCore/qfileinfo.h>
-#include <QtCore/qhash.h>
-#include <QtCore/qmutex.h>
-#include <QtCore/qvector.h>
 
-QT_BEGIN_NAMESPACE
+#include <qdatetime.h>
+#include <qfile.h>
+#include <qfileinfo.h>
+#include <qhash.h>
+#include <qmutex.h>
+#include <qvector.h>
 
 class QWindowsFileSystemWatcherEngineThread;
 
@@ -132,6 +131,4 @@ class QWindowsFileSystemWatcherEngineThread : public QThread
 
 #endif // QT_NO_FILESYSTEMWATCHER
 
-QT_END_NAMESPACE
-
-#endif // QFILESYSTEMWATCHER_WIN_P_H
+#endif

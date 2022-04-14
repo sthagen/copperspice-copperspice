@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,66 +22,56 @@
 ***********************************************************************/
 
 #include <qatomic.h>
+
 #include <qmutexpool_p.h>
 
 QMutexPool *globalMutexPool()
 {
-   static QMutexPool retval(QMutex::Recursive);
+   static QMutexPool retval;
+
    return &retval;
 }
 
-QMutexPool::QMutexPool(QMutex::RecursionMode recursionMode, int size)
-   : mutexes(size), recursionMode(recursionMode)
+QMutexPool::QMutexPool(int size)
+   : m_mutexArray(size)
 {
-   for (int index = 0; index < mutexes.count(); ++index) {
-      mutexes[index].store(0);
+   for (int index = 0; index < m_mutexArray.count(); ++index) {
+      m_mutexArray[index].store(nullptr);
    }
 }
 
 QMutexPool::~QMutexPool()
 {
-   for (int index = 0; index < mutexes.count(); ++index) {
-      delete mutexes[index].load();
+   for (int index = 0; index < m_mutexArray.count(); ++index) {
+      delete m_mutexArray[index].load();
    }
 }
 
-/*!
-    Returns the global QMutexPool instance.
-*/
 QMutexPool *QMutexPool::instance()
 {
    return globalMutexPool();
 }
 
-/*!
-    \fn QMutexPool::get(const void *address)
-    Returns a QMutex from the pool. QMutexPool uses the value \a address
-    to determine which mutex is returned from the pool.
-*/
-
-/*! \internal
-  create the mutex for the given index
- */
-QMutex *QMutexPool::createMutex(int index)
+QRecursiveMutex *QMutexPool::createMutex(int index)
 {
-   // mutex not created, create one
-   QMutex *newMutex = new QMutex(recursionMode);
-   if (!mutexes[index].testAndSetRelease(0, newMutex)) {
+   QRecursiveMutex *newMutex = new QRecursiveMutex();
+   QRecursiveMutex *expected = nullptr;
+
+   if (! m_mutexArray[index].compareExchange(expected, newMutex, std::memory_order_release)) {
       delete newMutex;
    }
-   return mutexes[index].load();
+
+   return m_mutexArray[index].load();
 }
 
-/*!
-    Returns a QMutex from the global mutex pool.
-*/
-QMutex *QMutexPool::globalInstanceGet(const void *address)
+QRecursiveMutex *QMutexPool::globalInstanceGet(const void *address)
 {
    QMutexPool *const globalInstance = globalMutexPool();
-   if (globalInstance == 0) {
-      return 0;
+
+   if (globalInstance == nullptr) {
+      return nullptr;
    }
+
    return globalInstance->get(address);
 }
-
 

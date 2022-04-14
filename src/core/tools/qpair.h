@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,8 +24,9 @@
 #ifndef QPAIR_H
 #define QPAIR_H
 
-#include <utility>
 #include <qdatastream.h>
+
+#include <utility>
 
 template <class T1, class T2>
 using QPair = std::pair<T1, T2>;
@@ -37,17 +38,17 @@ QPair<T1, T2> qMakePair(const T1 &x, const T2 &y)
 }
 
 template <class T1, class T2>
-inline QDataStream &operator>>(QDataStream &s, QPair<T1, T2> &p)
+inline QDataStream &operator>>(QDataStream &stream, QPair<T1, T2> &pair)
 {
-   s >> p.first >> p.second;
-   return s;
+   stream >> pair.first >> pair.second;
+   return stream;
 }
 
 template <class T1, class T2>
-inline QDataStream &operator<<(QDataStream &s, const QPair<T1, T2> &p)
+inline QDataStream &operator<<(QDataStream &stream, const QPair<T1, T2> &pair)
 {
-   s << p.first << p.second;
-   return s;
+   stream << pair.first << pair.second;
+   return stream;
 }
 
 #endif

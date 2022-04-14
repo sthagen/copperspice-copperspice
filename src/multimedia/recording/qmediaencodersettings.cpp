@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,17 +22,6 @@
 ***********************************************************************/
 
 #include <qmediaencodersettings.h>
-
-static int qRegisterEncoderSettingsMetaTypes()
-{
-   qRegisterMetaType<QAudioEncoderSettings>();
-   qRegisterMetaType<QVideoEncoderSettings>();
-   qRegisterMetaType<QImageEncoderSettings>();
-
-   return 0;
-}
-
-Q_CONSTRUCTOR_FUNCTION(qRegisterEncoderSettingsMetaTypes)
 
 class QAudioEncoderSettingsPrivate  : public QSharedData
 {
@@ -314,7 +303,8 @@ QVariantMap QAudioEncoderSettings::encodingOptions() const
 void QAudioEncoderSettings::setEncodingOption(const QString &option, const QVariant &value)
 {
    d->isNull = false;
-   if (value.isNull()) {
+
+   if (! value.isValid()) {
       d->encodingOptions.remove(option);
    } else {
       d->encodingOptions.insert(option, value);
@@ -624,7 +614,8 @@ QVariantMap QVideoEncoderSettings::encodingOptions() const
 void QVideoEncoderSettings::setEncodingOption(const QString &option, const QVariant &value)
 {
    d->isNull = false;
-   if (value.isNull()) {
+
+   if (! value.isValid()) {
       d->encodingOptions.remove(option);
    } else {
       d->encodingOptions.insert(option, value);
@@ -814,7 +805,8 @@ QVariantMap QImageEncoderSettings::encodingOptions() const
 void QImageEncoderSettings::setEncodingOption(const QString &option, const QVariant &value)
 {
    d->isNull = false;
-   if (value.isNull()) {
+
+   if (! value.isValid()) {
       d->encodingOptions.remove(option);
    } else {
       d->encodingOptions.insert(option, value);

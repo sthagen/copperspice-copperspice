@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -92,10 +92,9 @@ class QPinchGesturePrivate : public QGesturePrivate
 
  public:
    QPinchGesturePrivate()
-      : totalChangeFlags(0), changeFlags(0),
-        totalScaleFactor(1), lastScaleFactor(1), scaleFactor(1),
-        totalRotationAngle(0), lastRotationAngle(0), rotationAngle(0),
-        isNewSequence(true) {
+      : totalChangeFlags(Qt::EmptyFlag), changeFlags(Qt::EmptyFlag),totalScaleFactor(1), lastScaleFactor(1),
+        scaleFactor(1), totalRotationAngle(0), lastRotationAngle(0), rotationAngle(0), isNewSequence(true)
+   {
    }
 
    QPinchGesture::ChangeFlags totalChangeFlags;

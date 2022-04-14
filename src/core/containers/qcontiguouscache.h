@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -85,14 +85,17 @@ class QContiguousCache
    typedef int size_type;
 
    explicit QContiguousCache(int capacity = 0);
-   QContiguousCache(const QContiguousCache<T> &v) : d(v.d) {
+   QContiguousCache(const QContiguousCache<T> &other)
+      : d(other.d)
+   {
       d->ref.ref();
+
       if (! d->sharable) {
          detach_helper();
       }
    }
 
-   inline ~QContiguousCache() {
+   ~QContiguousCache() {
       if (! d) {
          return;
       }
@@ -158,8 +161,8 @@ class QContiguousCache
    void setCapacity(int size);
 
    const T &at(int pos) const;
-   T &operator[](int i);
-   const T &operator[](int i) const;
+   T &operator[](int pos);
+   const T &operator[](int pos) const;
 
    void append(const T &value);
    void prepend(const T &value);
@@ -280,23 +283,25 @@ void QContiguousCache<T>::detach_helper()
 }
 
 template <typename T>
-void QContiguousCache<T>::setCapacity(int asize)
+void QContiguousCache<T>::setCapacity(int size)
 {
-   if (asize == d->alloc) {
+   if (size == d->alloc) {
       return;
    }
+
    detach();
+
    union {
       QContiguousCacheData *d;
       QContiguousCacheTypedData<T> *p;
    } x;
 
-   x.d = malloc(asize);
-   x.d->alloc = asize;
-   x.d->count = qMin(d->count, asize);
+   x.d = malloc(size);
+   x.d->alloc  = size;
+   x.d->count  = qMin(d->count, size);
    x.d->offset = d->offset + d->count - x.d->count;
 
-   if (asize) {
+   if (size) {
       x.d->start = x.d->offset % x.d->alloc;
    } else {
       x.d->start = 0;
@@ -378,12 +383,15 @@ inline QContiguousCacheData *QContiguousCache<T>::malloc(int aalloc)
 }
 
 template <typename T>
-QContiguousCache<T>::QContiguousCache(int cap)
+QContiguousCache<T>::QContiguousCache(int capacity)
 {
-   d = malloc(cap);
+   d = malloc(capacity);
    d->ref.store(1);
-   d->alloc = cap;
-   d->count = d->start = d->offset = 0;
+
+   d->alloc    = capacity;
+   d->count    = 0;
+   d->start    = 0;
+   d->offset   = 0;
    d->sharable = true;
 }
 

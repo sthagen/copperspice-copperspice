@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="uk_UA">
+<TS version="2.1" language="uk_UA">
 <context>
     <name>AbstractFindWidget</name>
     <message>
@@ -20,8 +20,8 @@
         <translation>Цілі &amp;слова</translation>
     </message>
     <message>
-        <source>&lt;img src=&quot;:/trolltech/shared/images/wrap.png&quot;&gt;&amp;nbsp;Search wrapped</source>
-        <translation>&lt;img src=&quot;:/trolltech/shared/images/wrap.png&quot;&gt;&amp;nbsp;Пошук з початку</translation>
+        <source>&lt;img src=&quot;:/qt-project.org/shared/images/wrap.png&quot;&gt;&amp;nbsp;Search wrapped</source>
+        <translation>&lt;img src=&quot;:/qt-project.org/shared/images/wrap.png&quot;&gt;&amp;nbsp;Пошук з початку</translation>
     </message>
 </context>
 <context>
@@ -525,10 +525,6 @@
         </translation>
     </message>
     <message>
-        <source>Change script</source>
-        <translation>Змінити скрипт</translation>
-    </message>
-    <message>
         <source>Change signals/slots</source>
         <translation>Змінити сигнали/слоти</translation>
     </message>
@@ -586,7 +582,7 @@
     </message>
     <message>
         <source>GroupBox</source>
-        <translation></translation>
+        <translation>GroupBox</translation>
     </message>
     <message>
         <source>Edit...</source>
@@ -651,52 +647,6 @@
     <message>
         <source>Qt Designer</source>
         <translation>Qt Designer</translation>
-    </message>
-    <message>
-        <source>This file contains top level spacers.&lt;br&gt;They have &lt;b&gt;NOT&lt;/b&gt; been saved into the form.</source>
-        <translation>Цей файл містить роздільники верхнього рівня.&lt;br&gt;Вони &lt;b&gt;НЕ&lt;/b&gt; будуть збережені в формі.</translation>
-    </message>
-    <message>
-        <source>Perhaps you forgot to create a layout?</source>
-        <translation>Можливо, ви забули створити розташування?</translation>
-    </message>
-    <message>
-        <source>Invalid UI file: The root element &lt;ui&gt; is missing.</source>
-        <translation>Неправильний файл UI: Кореневий елемент &lt;ui&gt; відсутній.</translation>
-    </message>
-    <message>
-        <source>An error has occurred while reading the UI file at line %1, column %2: %3</source>
-        <translation>Під час читання файлу UI сталася помилка в рядку %1, позиція %2: %3</translation>
-    </message>
-    <message>
-        <source>This file cannot be read because it was created using %1.</source>
-        <translation>Неможливо прочитати файл, бо його було створено з використанням %1.</translation>
-    </message>
-    <message>
-        <source>This file was created using Designer from Qt-%1 and cannot be read.</source>
-        <translation>Неможливо прочитати файл, бо його було створено з використанням Designer з Qt-%1.</translation>
-    </message>
-    <message>
-        <source>The converted file could not be read.</source>
-        <translation>Не вдалось прочитати конвертований файл.</translation>
-    </message>
-    <message>
-        <source>This file was created using Designer from Qt-%1 and will be converted to a new form by Qt Designer.</source>
-        <translation>Цей файл було створено з використанням Designer з Qt-%1.і його буде сконвертовано до нової форми.</translation>
-    </message>
-    <message>
-        <source>The old form has not been touched, but you will have to save the form under a new name.</source>
-        <translation>Стара форма не змінилася, але ви маєте зберегти форму під новим іменем.</translation>
-    </message>
-    <message>
-        <source>This file was created using Designer from Qt-%1 and could not be read:
-%2</source>
-        <translation>Не вдалось прочитати файл, бо його було створено з використанням Designer з Qt-%1:
-%2</translation>
-    </message>
-    <message>
-        <source>Please run it through &lt;b&gt;uic3&amp;nbsp;-convert&lt;/b&gt; to convert it to Qt-4&apos;s ui format.</source>
-        <translation>Будь ласка, пропустіть його через &lt;b&gt;uic3&amp;nbsp;-convert&lt;/b&gt;, щоб сконвертувати до формату Qt-4.</translation>
     </message>
     <message>
         <source>This file cannot be read because the extra info extension failed to load.</source>
@@ -870,16 +820,12 @@
     <name>FormBuilder</name>
     <message>
         <source>Invalid stretch value for &apos;%1&apos;: &apos;%2&apos;</source>
-        <extracomment>Parsing layout stretch values
-----------
-Parsing layout stretch values</extracomment>
+        <extracomment>Parsing layout stretch values</extracomment>
         <translation>Неправильне значення розтягування для &apos;%1&apos;: &apos;%2&apos;</translation>
     </message>
     <message>
         <source>Invalid minimum size for &apos;%1&apos;: &apos;%2&apos;</source>
-        <extracomment>Parsing grid layout minimum size values
-----------
-Parsing grid layout minimum size values</extracomment>
+        <extracomment>Parsing grid layout minimum size values</extracomment>
         <translation>Неправильне значення мінімального розміру для &apos;%1&apos;: &apos;%2&apos;</translation>
     </message>
 </context>
@@ -1171,25 +1117,26 @@ Parsing grid layout minimum size values</extracomment>
     </message>
 </context>
 <context>
-    <name>Q3WizardContainer</name>
-    <message>
-        <source>Page</source>
-        <translation>Сторінка</translation>
-    </message>
-</context>
-<context>
     <name>QAbstractFormBuilder</name>
-    <message>
-        <source>Unexpected element &lt;%1&gt;</source>
-        <translation>Неочікуваний елемент &lt;%1&gt;</translation>
-    </message>
     <message>
         <source>An error has occurred while reading the UI file at line %1, column %2: %3</source>
         <translation>Під час читання файлу UI &apos;%1&apos; сталася помилка в рядку %2, позиція %3</translation>
     </message>
     <message>
+        <source>This file was created using Designer from Qt-%1 and cannot be read.</source>
+        <translation>Неможливо прочитати файл, бо його було створено з використанням Designer з Qt-%1.</translation>
+    </message>
+    <message>
+        <source>This file cannot be read because it was created using %1.</source>
+        <translation>Неможливо прочитати файл, бо його було створено з використанням %1.</translation>
+    </message>
+    <message>
         <source>Invalid UI file: The root element &lt;ui&gt; is missing.</source>
         <translation>Неправильний файл UI: Кореневий елемент &lt;ui&gt; відсутній.</translation>
+    </message>
+    <message>
+        <source>Invalid UI file</source>
+        <translation>Неправильний файл UI</translation>
     </message>
     <message>
         <source>The creation of a widget of the class &apos;%1&apos; failed.</source>
@@ -1221,35 +1168,31 @@ This indicates an inconsistency in the ui-file.</source>
         <source>Invalid QButtonGroup reference &apos;%1&apos; referenced by &apos;%2&apos;.</source>
         <translation>&apos;%2&apos; містить неправильне посилання на QButtonGroup &apos;%1&apos;.</translation>
     </message>
-    <message>
-        <source>This version of the uitools library is linked without script support.</source>
-        <translation>Ця версія бібліотеки uitools зібрана без підтримки скриптів.</translation>
-    </message>
 </context>
 <context>
     <name>QAxWidgetPlugin</name>
     <message>
         <source>ActiveX control</source>
-        <translation>Елемент керування ActiveX</translation>
+        <translation>Елемент управління ActiveX</translation>
     </message>
     <message>
         <source>ActiveX control widget</source>
-        <translation>Віджет елемента керування ActiveX</translation>
+        <translation>Віджет елемента управління ActiveX</translation>
     </message>
 </context>
 <context>
     <name>QAxWidgetTaskMenu</name>
     <message>
         <source>Set Control</source>
-        <translation>Встановити елемент керування</translation>
+        <translation>Встановити елемент управління</translation>
     </message>
     <message>
         <source>Reset Control</source>
-        <translation>Скинути елемент керування</translation>
+        <translation>Скинути елемент управління</translation>
     </message>
     <message>
         <source>Licensed Control</source>
-        <translation>Ліцензований елемент керування</translation>
+        <translation>Ліцензований елемент управління</translation>
     </message>
     <message>
         <source>The control requires a design-time license</source>
@@ -1258,20 +1201,6 @@ This indicates an inconsistency in the ui-file.</source>
 </context>
 <context>
     <name>QCoreApplication</name>
-    <message>
-        <source>Exception at line %1: %2</source>
-        <translation>Виключна ситуація в рядку %1: %2</translation>
-    </message>
-    <message>
-        <source>Unknown error</source>
-        <translation>Невідома помилка</translation>
-    </message>
-    <message>
-        <source>An error occurred while running the script for %1: %2
-Script: %3</source>
-        <translation>Під час виконання скрипту для %1 сталася помилка: %2
-Скрипт: %3</translation>
-    </message>
     <message>
         <source>%1 is not a promoted class.</source>
         <translation>%1 не є перетвореним класом.</translation>
@@ -1321,11 +1250,11 @@ Script: %3</source>
     </message>
     <message>
         <source>Qt Designer</source>
-        <translation>Qt Designer</translation>
+        <translation type="vanished">Qt Designer</translation>
     </message>
     <message>
         <source>This application cannot be used for the Console edition of Qt</source>
-        <translation>Ця програма не може бути використана консольною редакцією Qt</translation>
+        <translation type="vanished">Ця програма не може бути використана консольною редакцією Qt</translation>
     </message>
 </context>
 <context>
@@ -1406,19 +1335,19 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>ALT+CTRL+S</source>
-        <translation></translation>
+        <translation>ALT+CTRL+S</translation>
     </message>
     <message>
         <source>CTRL+SHIFT+S</source>
-        <translation></translation>
+        <translation>CTRL+SHIFT+S</translation>
     </message>
     <message>
         <source>CTRL+R</source>
-        <translation></translation>
+        <translation>CTRL+R</translation>
     </message>
     <message>
         <source>CTRL+M</source>
-        <translation></translation>
+        <translation>CTRL+M</translation>
     </message>
     <message>
         <source>Qt Designer &amp;Help</source>
@@ -1427,10 +1356,6 @@ Do you want to replace it?</source>
     <message>
         <source>Current Widget Help</source>
         <translation>Довідка по поточному віджету</translation>
-    </message>
-    <message>
-        <source>What&apos;s New in Qt Designer?</source>
-        <translation>Що нового в Qt Designer?</translation>
     </message>
     <message>
         <source>About Plugins</source>
@@ -1493,6 +1418,10 @@ Do you want to update the file location or generate a new form?</source>
     <message>
         <source>&amp;New Form</source>
         <translation>&amp;Нова форма</translation>
+    </message>
+    <message>
+        <source>Qt Designer</source>
+        <translation>Qt Designer</translation>
     </message>
     <message>
         <source>Save Form?</source>
@@ -1580,7 +1509,7 @@ Would you like to retry?</source>
     <message>
         <source>Appearance</source>
         <extracomment>Tab in preferences dialog</extracomment>
-        <translation></translation>
+        <translation>Зовнішній вигляд</translation>
     </message>
 </context>
 <context>
@@ -1602,27 +1531,23 @@ Would you like to retry?</source>
     <name>QDesignerAxWidget</name>
     <message>
         <source>Reset control</source>
-        <translation>Скинути елемент керування</translation>
+        <translation>Скинути елемент управління</translation>
     </message>
     <message>
         <source>Set control</source>
-        <translation>Встановити елемент керування</translation>
+        <translation>Встановити елемент управління</translation>
     </message>
     <message>
         <source>Control loaded</source>
-        <translation>Елемент керування завантажено</translation>
+        <translation>Елемент управління завантажено</translation>
     </message>
     <message>
         <source>A COM exception occurred when executing a meta call of type %1, index %2 of &quot;%3&quot;.</source>
-        <translation>Виникла виключна ситуація COM під час здійснення мета-виклику типу %1, індекс %2 з &quot;%3&quot;.</translation>
+        <translation>Під час здійснення мета-виклику типу %1, індес %2 з &quot;%3&quot; сталась виключна ситуація COM.</translation>
     </message>
 </context>
 <context>
     <name>QDesignerFormBuilder</name>
-    <message>
-        <source>Script errors occurred:</source>
-        <translation>Трапились помилки скрипту:</translation>
-    </message>
     <message>
         <source>The preview failed to build.</source>
         <translation>Збій побудови попереднього перегляду.</translation>
@@ -1730,6 +1655,10 @@ Would you like to retry?</source>
     <message>
         <source>The class attribute for the class %1 does not match the class name %2.</source>
         <translation>Атрибут &quot;клас&quot; для класу %1 не збігається з іменем класу %2.</translation>
+    </message>
+    <message>
+        <source>Not loaded due to potential symbol clashes (QTCREATORBUG-10273)</source>
+        <translation type="vanished">Не завантажено через можливий конфлікт сиволів (QTCREATORBUG-10273)</translation>
     </message>
 </context>
 <context>
@@ -1880,21 +1809,19 @@ Container pages should only be added by specifying them in XML returned by the d
         <translation>Останній сеанс Qt Designer не був правильно завершений. Залишились резервні копії файлів. Бажаєте їх завантажити?</translation>
     </message>
     <message>
-        <source>The file &lt;b&gt;%1&lt;/b&gt; could not be opened.</source>
-        <translation>Не вдалось відкрити файл &lt;b&gt;%1&lt;/b&gt;.</translation>
+        <source>The file &lt;b&gt;%1&lt;/b&gt; could not be opened: %2</source>
+        <translation>Не вдалось відкрити файл &lt;b&gt;%1&lt;/b&gt;: %2</translation>
     </message>
     <message>
-        <source>The file &lt;b&gt;%1&lt;/b&gt; is not a valid Designer UI file.</source>
-        <translation>Файл &lt;b&gt;%1&lt;/b&gt; не є правильним файлом UI Qt Designer.</translation>
+        <source>The file &lt;b&gt;%1&lt;/b&gt; could not be opened: %1</source>
+        <translation type="obsolete">Не вдалось відкрити файл &lt;b&gt;%1&lt;/b&gt;: %1</translation>
     </message>
 </context>
 <context>
     <name>QFormBuilder</name>
     <message>
         <source>An empty class name was passed on to %1 (object name: &apos;%2&apos;).</source>
-        <extracomment>Empty class name passed to widget factory method
-----------
-Empty class name passed to widget factory method</extracomment>
+        <extracomment>Empty class name passed to widget factory method</extracomment>
         <translation>До %1 було передане пусте ім&apos;я класу (ім&apos;я об&apos;єкта: &apos;%2&apos;).</translation>
     </message>
     <message>
@@ -2541,7 +2468,7 @@ Empty class name passed to widget factory method</extracomment>
     <name>QtKeySequenceEdit</name>
     <message>
         <source>Clear Shortcut</source>
-        <translation>Видалити поєднання клавіш</translation>
+        <translation type="vanished">Видалити поєднання клавіш</translation>
     </message>
 </context>
 <context>
@@ -2724,7 +2651,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>newPrefix</source>
-        <translation></translation>
+        <translation>новийПрефікс</translation>
     </message>
     <message>
         <source>&lt;p&gt;&lt;b&gt;Warning:&lt;/b&gt; The file&lt;/p&gt;&lt;p&gt;%1&lt;/p&gt;&lt;p&gt;is outside of the current resource file&apos;s parent directory.&lt;/p&gt;</source>
@@ -2892,6 +2819,10 @@ to
     <message>
         <source>Copy Path</source>
         <translation>Копіювати шлях</translation>
+    </message>
+    <message>
+        <source>Filter</source>
+        <translation>Фільтр</translation>
     </message>
 </context>
 <context>
@@ -3110,15 +3041,6 @@ Do you want overwrite the template?</source>
     </message>
 </context>
 <context>
-    <name>ScriptErrorDialog</name>
-    <message>
-        <source>An error occurred while running the scripts for &quot;%1&quot;:
-</source>
-        <translation>Під час виконання скриптів для &quot;%1&quot; сталася помилка:
-</translation>
-    </message>
-</context>
-<context>
     <name>SelectSignalDialog</name>
     <message>
         <source>Go to slot</source>
@@ -3248,47 +3170,12 @@ Do you want overwrite the template?</source>
         <translation>&lt;br/&gt;Qt Designer - це дизайнер графічного інтерфейсу користувача для програм Qt.&lt;br/&gt;</translation>
     </message>
     <message>
-        <source>%1&lt;br/&gt;Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies).</source>
-        <translation>%1&lt;br/&gt;Copyright (C) 2012 Корпорація Nokia та/або її дочірні компанії.</translation>
-    </message>
-</context>
-<context>
-    <name>VideoPlayerTaskMenu</name>
-    <message>
-        <source>Available Mime Types</source>
-        <translation>Доступні типи MIME</translation>
+        <source>%1&lt;br/&gt;Copyright (C) %2 The Qt Company Ltd.</source>
+        <translation>%1&lt;br/&gt;Copyright (C) %2 The Qt Company Ltd.</translation>
     </message>
     <message>
-        <source>Display supported mime types...</source>
-        <translation>Показати підтримувані типи MIME...</translation>
-    </message>
-    <message>
-        <source>Load...</source>
-        <translation>Завантажити...</translation>
-    </message>
-    <message>
-        <source>Play</source>
-        <translation>Грати</translation>
-    </message>
-    <message>
-        <source>Pause</source>
-        <translation>Пауза</translation>
-    </message>
-    <message>
-        <source>Stop</source>
-        <translation>Зупинити</translation>
-    </message>
-    <message>
-        <source>Choose Video Player Media Source</source>
-        <translation>Оберіть джерело медіа для відеопрогравача</translation>
-    </message>
-    <message>
-        <source>An error has occurred in &apos;%1&apos;: %2</source>
-        <translation>Сталась помилка в &apos;%1&apos;: %2</translation>
-    </message>
-    <message>
-        <source>Video Player Error</source>
-        <translation>Помилка відеопрогравача</translation>
+        <source>%1&lt;br/&gt;Copyright (C) 2015 The Qt Company Ltd.</source>
+        <translation type="vanished">%1&lt;br/&gt;Copyright (C) 2015 The Qt Company Ltd та/або її дочірні компанії.</translation>
     </message>
 </context>
 <context>
@@ -3296,6 +3183,13 @@ Do you want overwrite the template?</source>
     <message>
         <source>The file contains a custom widget &apos;%1&apos; whose base class (%2) differs from the current entry in the widget database (%3). The widget database is left unchanged.</source>
         <translation>Цей файл містить користувацький віджет &apos;%1&apos;, чий базовий клас (%2) відрізняється від поточного елементу в базі даних віджетів (%3). Базу даних віджетів залишено без змін.</translation>
+    </message>
+</context>
+<context>
+    <name>qdesigner_internal</name>
+    <message>
+        <source>%1 Widget</source>
+        <translation>Віджет %1</translation>
     </message>
 </context>
 <context>
@@ -3349,6 +3243,10 @@ Do you want overwrite the template?</source>
         <translation>Детально</translation>
     </message>
     <message>
+        <source>Filter</source>
+        <translation>Фільтр</translation>
+    </message>
+    <message>
         <source>New action</source>
         <translation>Нова дія</translation>
     </message>
@@ -3394,29 +3292,6 @@ Do you want overwrite the template?</source>
     <message>
         <source>ToolTip</source>
         <translation>Спливаюча підказка</translation>
-    </message>
-</context>
-<context>
-    <name>qdesigner_internal::BrushManagerProxy</name>
-    <message>
-        <source>The element &apos;%1&apos; is missing the required attribute &apos;%2&apos;.</source>
-        <translation>У елемента &apos;%1&apos; відсутній обов&apos;язковий атрибут &apos;%2&apos;.</translation>
-    </message>
-    <message>
-        <source>Empty brush name encountered.</source>
-        <translation>Знайдено порожня назва пензля.</translation>
-    </message>
-    <message>
-        <source>An unexpected element &apos;%1&apos; was encountered.</source>
-        <translation>Знайдено неочікуваний елемент &apos;%1&apos;.</translation>
-    </message>
-    <message>
-        <source>An error occurred when reading the brush definition file &apos;%1&apos; at line line %2, column %3: %4</source>
-        <translation>Під час читання файлу опису пензля &apos;%1&apos; сталася помилка в рядку %2, позиція %3: %4</translation>
-    </message>
-    <message>
-        <source>An error occurred when reading the resource file &apos;%1&apos; at line %2, column %3: %4</source>
-        <translation>Під час читання файлу ресурсів &apos;%1&apos; сталася помилка в рядку %2, позиція %3: %4</translation>
     </message>
 </context>
 <context>
@@ -3924,11 +3799,11 @@ Do you want overwrite the template?</source>
     <name>qdesigner_internal::FilterWidget</name>
     <message>
         <source>Filter</source>
-        <translation>Фільтр</translation>
+        <translation type="vanished">Фільтр</translation>
     </message>
     <message>
         <source>Clear text</source>
-        <translation>Очистити текст</translation>
+        <translation type="vanished">Очистити текст</translation>
     </message>
 </context>
 <context>
@@ -3957,7 +3832,7 @@ Do you want overwrite the template?</source>
     </message>
     <message>
         <source>F2</source>
-        <translation></translation>
+        <translation>F2</translation>
     </message>
     <message>
         <source>Insert widget &apos;%1&apos;</source>
@@ -4041,6 +3916,18 @@ Do you want overwrite the template?</source>
     <message>
         <source>Delete</source>
         <translation>Видалити</translation>
+    </message>
+    <message>
+        <source>Invalid form</source>
+        <translation>Неправильна форма</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This file contains top level spacers.&lt;br/&gt;They will &lt;b&gt;not&lt;/b&gt; be saved.&lt;/p&gt;&lt;p&gt;Perhaps you forgot to create a layout?&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Цей файл містить роздільники верхнього рівня.&lt;br/&gt;Вони &lt;b&gt;не&lt;/b&gt; будуть збережені&lt;/p&gt;&lt;p&gt;Можливо ви забули створити розташування?&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This file contains top level spacers.&lt;br&gt;They will &lt;b&gt;not&lt;/b&gt; be saved.&lt;/p&gt;&lt;p&gt;Perhaps you forgot to create a layout?&lt;/p&gt;</source>
+        <translation type="obsolete">&lt;p&gt;Цей файл містить роздільники верхнього рівня.&lt;br&gt;Вони &lt;b&gt;не&lt;/b&gt; будуть збережені&lt;/p&gt;&lt;p&gt;Можливо ви забули створити розташування?&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -4527,7 +4414,7 @@ Do you want overwrite the template?</source>
     </message>
     <message>
         <source>horizontalSpacer</source>
-        <translation></translation>
+        <translation>horizontalSpacer</translation>
     </message>
     <message>
         <source>Property Type</source>
@@ -4919,46 +4806,57 @@ ate the goose who was loose.</source>
     <name>qdesigner_internal::PreviewWidget</name>
     <message>
         <source>Preview Window</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Вікно попереднього перегляду</translation>
     </message>
     <message>
         <source>LineEdit</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Поле введення</translation>
     </message>
     <message>
         <source>ComboBox</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Випадаючий список</translation>
     </message>
     <message>
         <source>PushButton</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Кнопка</translation>
     </message>
     <message>
         <source>ButtonGroup2</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Група кнопок 2</translation>
     </message>
     <message>
         <source>CheckBox1</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Прапорець 1</translation>
     </message>
     <message>
         <source>CheckBox2</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Прапорець 2</translation>
     </message>
     <message>
         <source>ButtonGroup</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Група кнопок</translation>
     </message>
     <message>
         <source>RadioButton1</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Перемикач 1</translation>
     </message>
     <message>
         <source>RadioButton2</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Перемикач 2</translation>
     </message>
     <message>
         <source>RadioButton3</source>
+        <extracomment>Palette Editor Preview Widget</extracomment>
         <translation>Перемикач 3</translation>
     </message>
 </context>
@@ -5045,6 +4943,10 @@ ate the goose who was loose.</source>
     <message>
         <source>Configure Property Editor</source>
         <translation>Налаштувати редактор властивостей</translation>
+    </message>
+    <message>
+        <source>Filter</source>
+        <translation>Фільтр</translation>
     </message>
     <message>
         <source>Object: %1
@@ -5171,10 +5073,6 @@ Class: %2</source>
     <message>
         <source>Remove Status Bar</source>
         <translation>Видалити рядок статусу</translation>
-    </message>
-    <message>
-        <source>Change script...</source>
-        <translation>Змінити скрипт...</translation>
     </message>
     <message>
         <source>Change signals/slots...</source>
@@ -5358,7 +5256,7 @@ Class: %2</source>
     </message>
     <message>
         <source>CTRL+B</source>
-        <translation></translation>
+        <translation>CTRL+B</translation>
     </message>
     <message>
         <source>Italic</source>
@@ -5366,7 +5264,7 @@ Class: %2</source>
     </message>
     <message>
         <source>CTRL+I</source>
-        <translation></translation>
+        <translation>CTRL+I</translation>
     </message>
     <message>
         <source>Underline</source>
@@ -5374,7 +5272,7 @@ Class: %2</source>
     </message>
     <message>
         <source>CTRL+U</source>
-        <translation></translation>
+        <translation>CTRL+U</translation>
     </message>
     <message>
         <source>Left Align</source>
@@ -5391,6 +5289,10 @@ Class: %2</source>
     <message>
         <source>Justify</source>
         <translation>По ширині</translation>
+    </message>
+    <message>
+        <source>Right to Left</source>
+        <translation>Справа наліво</translation>
     </message>
     <message>
         <source>Superscript</source>
@@ -5411,28 +5313,6 @@ Class: %2</source>
     <message>
         <source>Simplify Rich Text</source>
         <translation>Спростити форматований текст</translation>
-    </message>
-</context>
-<context>
-    <name>qdesigner_internal::ScriptDialog</name>
-    <message>
-        <source>Edit script</source>
-        <translation>Редагування скрипту</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;Enter a Qt Script snippet to be executed while loading the form.&lt;br&gt;The widget and its children are accessible via the variables &lt;i&gt;widget&lt;/i&gt; and &lt;i&gt;childWidgets&lt;/i&gt;, respectively.</source>
-        <translation>&lt;html&gt;Введіть фрагмент коду Qt Script, що має виконуватись під час завантаження форми.&lt;br&gt;Віджет та його діти доступні через змінні &lt;i&gt;widget&lt;/i&gt; та &lt;i&gt;childWidgets&lt;/i&gt;, відповідно.</translation>
-    </message>
-    <message>
-        <source>Syntax error</source>
-        <translation>Синтаксична помилка</translation>
-    </message>
-</context>
-<context>
-    <name>qdesigner_internal::ScriptErrorDialog</name>
-    <message>
-        <source>Script errors</source>
-        <translation>Помилки скрипту</translation>
     </message>
 </context>
 <context>
@@ -5792,6 +5672,10 @@ Class: %2</source>
         <source>Warning: Widget creation failed in the widget box. This could be caused by invalid custom widget XML.</source>
         <translation>Попередження: Збій створення віджета в панелі віджетів. Причиною цього може бути неправильний XML користувацького віджета.</translation>
     </message>
+    <message>
+        <source>Filter</source>
+        <translation>Фільтр</translation>
+    </message>
 </context>
 <context>
     <name>qdesigner_internal::WidgetBoxTreeWidget</name>
@@ -5854,7 +5738,7 @@ Class: %2</source>
     </message>
     <message>
         <source>%1 Widget</source>
-        <translation>Віджет %1</translation>
+        <translation type="vanished">Віджет %1</translation>
     </message>
     <message>
         <source>The current page of the container &apos;%1&apos; (%2) could not be determined while creating a layout.This indicates an inconsistency in the ui-file, probably a layout being constructed on a container widget.</source>

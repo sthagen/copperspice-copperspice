@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -23,7 +23,6 @@
 
 #include <qimageiohandler.h>
 
-#include <qbytearray.h>
 #include <qimage.h>
 #include <qvariant.h>
 
@@ -38,14 +37,14 @@ class QImageIOHandlerPrivate
    virtual ~QImageIOHandlerPrivate();
 
    QIODevice *device;
-   mutable QByteArray format;
+   QString format;
 
    QImageIOHandler *q_ptr;
 };
 
 QImageIOHandlerPrivate::QImageIOHandlerPrivate(QImageIOHandler *q)
 {
-   device = 0;
+   device = nullptr;
    q_ptr = q;
 }
 
@@ -79,25 +78,19 @@ QIODevice *QImageIOHandler::device() const
    return d->device;
 }
 
-void QImageIOHandler::setFormat(const QByteArray &format)
+void QImageIOHandler::setFormat(const QString &format)
 {
    Q_D(QImageIOHandler);
    d->format = format;
 }
 
-void QImageIOHandler::setFormat(const QByteArray &format) const
-{
-   Q_D(const QImageIOHandler);
-   d->format = format;
-}
-
-QByteArray QImageIOHandler::format() const
+QString QImageIOHandler::format() const
 {
    Q_D(const QImageIOHandler);
    return d->format;
 }
 
-QByteArray QImageIOHandler::name() const
+QString QImageIOHandler::name() const
 {
    return format();
 }
@@ -114,7 +107,7 @@ void QImageIOHandler::setOption(ImageOption option, const QVariant &value)
    (void) value;
 }
 
-QVariant QImageIOHandler::option(ImageOption option) const
+QVariant QImageIOHandler::option(ImageOption option)
 {
    (void) option;
    return QVariant();
@@ -136,7 +129,7 @@ QRect QImageIOHandler::currentImageRect() const
    return QRect();
 }
 
-int QImageIOHandler::imageCount() const
+int QImageIOHandler::imageCount()
 {
    return canRead() ? 1 : 0;
 }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -75,6 +75,7 @@ class Q_MULTIMEDIA_EXPORT QAudioFormat
    qint64 durationForFrames(qint32 frameCount) const;
 
    int bytesPerFrame() const;
+
  private:
    QSharedDataPointer<QAudioFormatPrivate> d;
 };
@@ -82,9 +83,5 @@ class Q_MULTIMEDIA_EXPORT QAudioFormat
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, const QAudioFormat &);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QAudioFormat::SampleType);
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, QAudioFormat::Endian);
-
-Q_DECLARE_METATYPE(QAudioFormat)
-Q_DECLARE_METATYPE(QAudioFormat::SampleType)
-Q_DECLARE_METATYPE(QAudioFormat::Endian)
 
 #endif

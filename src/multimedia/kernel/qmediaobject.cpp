@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -55,7 +55,7 @@ QMediaObject::~QMediaObject()
 
 QMultimedia::AvailabilityStatus QMediaObject::availability() const
 {
-   if (d_func()->service == 0) {
+   if (d_func()->service == nullptr) {
       return QMultimedia::ServiceMissing;
    }
 
@@ -117,7 +117,7 @@ void QMediaObject::unbind(QObject *object)
    QMediaBindableInterface *helper = dynamic_cast<QMediaBindableInterface *>(object);
 
    if (helper && helper->mediaObject() == this) {
-      helper->setMediaObject(0);
+      helper->setMediaObject(nullptr);
    } else {
       qWarning() << "QMediaObject:unbind(): Trying to unbind a helper object which was never bound";
    }
@@ -203,17 +203,16 @@ void QMediaObject::setupControls()
 {
    Q_D(QMediaObject);
 
-   if (d->service != 0) {
-      d->metaDataControl = qobject_cast<QMetaDataReaderControl *>(d->service->requestControl(QMetaDataReaderControl_iid));
+   if (d->service != nullptr) {
+      d->metaDataControl = dynamic_cast<QMetaDataReaderControl *>(d->service->requestControl(QMetaDataReaderControl_iid));
 
       if (d->metaDataControl) {
 
-         connect(d->metaDataControl, static_cast<void (QMetaDataReaderControl::*)()>(&QMetaDataReaderControl::metaDataChanged),
-            this, static_cast<void (QMediaObject::*)()>(&QMediaObject::metaDataChanged));
+         connect(d->metaDataControl, cs_mp_cast<>(&QMetaDataReaderControl::metaDataChanged),
+               this, cs_mp_cast<>(&QMediaObject::metaDataChanged));
 
-         connect(d->metaDataControl, static_cast<void (QMetaDataReaderControl::*)(const QString &, const QVariant &)>
-            (&QMetaDataReaderControl::metaDataChanged),
-            this, static_cast<void (QMediaObject::*)(const QString &, const QVariant &)>(&QMediaObject::metaDataChanged));
+         connect(d->metaDataControl, cs_mp_cast<const QString &, const QVariant &>(&QMetaDataReaderControl::metaDataChanged),
+               this, cs_mp_cast<const QString &, const QVariant &>(&QMediaObject::metaDataChanged));
 
          connect(d->metaDataControl, &QMetaDataReaderControl::metaDataAvailableChanged, this, &QMediaObject::metaDataAvailableChanged);
       }

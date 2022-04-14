@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -35,6 +35,13 @@ QJsonObject::QJsonObject(const_iterator iter_begin, const_iterator iter_end)
    m_object = std::make_shared<QJsonDataObject>();
    m_object->m_map = QFlatMap<QString, QJsonValue>(iter_begin, iter_end);
 }
+
+QJsonObject::QJsonObject(std::initializer_list<QPair<QString, QJsonValue> > list)
+{
+   m_object = std::make_shared<QJsonDataObject>();
+   m_object->m_map = QFlatMap<QString, QJsonValue>(list.begin(), list.end());
+}
+
 
 QJsonObject::QJsonObject(const QJsonObject &other)
 {

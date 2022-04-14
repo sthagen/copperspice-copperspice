@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,7 +24,7 @@
 #ifndef QTemplateMode_P_H
 #define QTemplateMode_P_H
 
-#include <QtCore/QSharedData>
+#include <QSharedData>
 #include <QXmlName>
 #include <qtemplatepattern_p.h>
 
@@ -49,7 +49,9 @@ class TemplateMode : public QSharedData
 
  private:
    const QXmlName m_modeName;
-   Q_DISABLE_COPY(TemplateMode)
+
+   TemplateMode(const TemplateMode &) = delete;
+   TemplateMode &operator=(const TemplateMode &) = delete;
 
    /**
     * Operator for std::sort()

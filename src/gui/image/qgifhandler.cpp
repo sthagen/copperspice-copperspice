@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,20 +27,10 @@
 #include <qiodevice.h>
 #include <qvariant.h>
 
-QT_BEGIN_NAMESPACE
-
 #define Q_TRANSPARENT 0x00ffffff
 
 // avoid going through QImage::scanLine() which calls detach
 #define FAST_SCAN_LINE(bits, bpl, y) (bits + (y) * bpl)
-
-
-/*
-  Incremental image decoder for GIF image format.
-
-  This subclass of QImageFormat decodes GIF format images,
-  including animated GIFs. Internally in
-*/
 
 class QGIFFormat
 {
@@ -127,22 +117,25 @@ class QGIFFormat
 */
 QGIFFormat::QGIFFormat()
 {
-   globalcmap = 0;
-   localcmap = 0;
-   lncols = 0;
-   gncols = 0;
-   disposal = NoDisposal;
+   globalcmap    = nullptr;
+   localcmap     = nullptr;
+   lncols        = 0;
+   gncols        = 0;
+   disposal      = NoDisposal;
+
    out_of_bounds = false;
-   disposed = true;
-   frame = -1;
-   state = Header;
-   count = 0;
-   lcmap = false;
-   newFrame = false;
+   disposed      = true;
+   frame         = -1;
+   state         = Header;
+   count         = 0;
+   lcmap         = false;
+   newFrame      = false;
+
    partialNewFrame = false;
-   table[0] = 0;
-   table[1] = 0;
-   stack = 0;
+
+   table[0] = nullptr;
+   table[1] = nullptr;
+   stack    = nullptr;
 }
 
 /*!
@@ -538,6 +531,7 @@ int QGIFFormat::decode(QImage *image, const uchar *buffer, int length,
 
                      *sp++ = firstcode = table[1][code];
                      code = max_code;
+
                      if (code < (1 << max_lzw_bits)) {
                         table[0][code] = oldcode;
                         table[1][code] = firstcode;
@@ -548,9 +542,11 @@ int QGIFFormat::decode(QImage *image, const uchar *buffer, int length,
                            code_size++;
                         }
                      }
+
                      oldcode = incode;
                      const int h = image->height();
-                     QRgb *line = 0;
+                     QRgb *line = nullptr;
+
                      if (!out_of_bounds && h > y) {
                         line = (QRgb *)FAST_SCAN_LINE(bits, bpl, y);
                      }
@@ -1127,7 +1123,7 @@ bool QGifHandler::imageIsComing() const
    return gifFormat->partialNewFrame;
 }
 
-bool QGifHandler::canRead() const
+bool QGifHandler::canRead()
 {
    if (canRead(device()) || imageIsComing()) {
       setFormat("gif");
@@ -1183,20 +1179,21 @@ bool QGifHandler::read(QImage *image)
 
 bool QGifHandler::write(const QImage &image)
 {
-   Q_UNUSED(image);
+   (void) image;
    return false;
 }
 
 bool QGifHandler::supportsOption(ImageOption option) const
 {
-   if (!device() || device()->isSequential()) {
+   if (! device() || device()->isSequential()) {
       return option == Animation;
+
    } else
       return option == Size
          || option == Animation;
 }
 
-QVariant QGifHandler::option(ImageOption option) const
+QVariant QGifHandler::option(ImageOption option)
 {
    if (option == Size) {
       if (!scanIsCached) {
@@ -1221,8 +1218,8 @@ QVariant QGifHandler::option(ImageOption option) const
 
 void QGifHandler::setOption(ImageOption option, const QVariant &value)
 {
-   Q_UNUSED(option);
-   Q_UNUSED(value);
+   (void) option;
+   (void) value;
 }
 
 int QGifHandler::nextImageDelay() const
@@ -1230,7 +1227,7 @@ int QGifHandler::nextImageDelay() const
    return nextDelay;
 }
 
-int QGifHandler::imageCount() const
+int QGifHandler::imageCount()
 {
    if (!scanIsCached) {
       QGIFFormat::scan(device(), &imageSizes, &loopCnt);
@@ -1260,7 +1257,7 @@ int QGifHandler::currentImageNumber() const
    return frameNumber;
 }
 
-QByteArray QGifHandler::name() const
+QString QGifHandler::name() const
 {
    return "gif";
 }

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,7 +38,7 @@ class QDataWidgetMapperPrivate
    Q_DECLARE_PUBLIC(QDataWidgetMapper)
 
    QDataWidgetMapperPrivate()
-      : model(QAbstractItemModelPrivate::staticEmptyModel()), delegate(0),
+      : model(QAbstractItemModelPrivate::staticEmptyModel()), delegate(nullptr),
         orientation(Qt::Horizontal), submitPolicy(QDataWidgetMapper::AutoSubmit) {
    }
 
@@ -90,7 +90,7 @@ class QDataWidgetMapperPrivate
    void _q_modelDestroyed();
 
    struct WidgetMapper {
-      inline WidgetMapper(QWidget *w = 0, int c = 0, const QModelIndex &i = QModelIndex())
+      inline WidgetMapper(QWidget *w = nullptr, int c = 0, const QModelIndex &i = QModelIndex())
          : widget(w), section(c), currentIndex(i) {}
 
       inline WidgetMapper(QWidget *w, int c, const QModelIndex &i, const QString &p)
@@ -232,7 +232,7 @@ void QDataWidgetMapperPrivate::_q_modelDestroyed()
 {
    Q_Q(QDataWidgetMapper);
 
-   model = 0;
+   model = nullptr;
    q->setModel(QAbstractItemModelPrivate::staticEmptyModel());
 }
 
@@ -274,7 +274,7 @@ QAbstractItemModel *QDataWidgetMapper::model() const
 {
    Q_D(const QDataWidgetMapper);
    return d->model == QAbstractItemModelPrivate::staticEmptyModel()
-                  ? static_cast<QAbstractItemModel *>(0) : d->model;
+                  ? static_cast<QAbstractItemModel *>(nullptr) : d->model;
 }
 
 void QDataWidgetMapper::setItemDelegate(QAbstractItemDelegate *delegate)
@@ -401,7 +401,7 @@ QWidget *QDataWidgetMapper::mappedWidgetAt(int section) const
       }
    }
 
-   return 0;
+   return nullptr;
 }
 
 void QDataWidgetMapper::revert()
@@ -635,7 +635,5 @@ void QDataWidgetMapper::_q_modelDestroyed()
    Q_D(QDataWidgetMapper);
    d->_q_modelDestroyed();
 }
-
-
 
 #endif

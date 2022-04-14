@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,9 +28,9 @@
 
 #ifndef QT_NO_BUTTONGROUP
 
-#include <QtCore/qlist.h>
-#include <QtCore/qpointer.h>
-#include <QtCore/qhash.h>
+#include <qlist.h>
+#include <qpointer.h>
+#include <qhash.h>
 
 class QButtonGroupPrivate
 {

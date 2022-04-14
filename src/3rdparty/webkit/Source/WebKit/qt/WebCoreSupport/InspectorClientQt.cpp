@@ -1,10 +1,11 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2018 Barbara Geller
-* Copyright (c) 2012-2018 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
+*
+* Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
 * Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
 *
 * This file is part of CopperSpice.
 *
@@ -16,7 +17,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *
-* <http://www.gnu.org/licenses/>.
+* https://www.gnu.org/licenses/
 *
 ***********************************************************************/
 
@@ -44,10 +45,10 @@
 #include "qwebpage.h"
 #include "qwebpage_p.h"
 #include "qwebview.h"
-#include <QtCore/QCoreApplication>
-#include <QtCore/QFile>
-#include <QtCore/QSettings>
-#include <QtCore/QVariant>
+#include <QCoreApplication>
+#include <QFile>
+#include <QSettings>
+#include <QVariant>
 
 namespace WebCore {
 
@@ -130,7 +131,8 @@ public:
         QString storedValueType = qsettings.value(settingKey + settingStorageTypeSuffix).toString();
         QVariant storedValue    = qsettings.value(settingKey);
 
-        storedValue.convert(QVariant::nameToType(storedValueType));
+        QVariant::Type tmp = static_cast<QVariant::Type>(QVariant::nameToType(storedValueType));
+        storedValue.convert(tmp);
 
         return variantToSetting(storedValue);
 

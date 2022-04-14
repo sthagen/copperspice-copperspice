@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,6 @@
 #include <qstring.h>
 #include <qcontainerfwd.h>
 
-
-
 class QVariant;
 class QSqlDriver;
 class QSqlError;
@@ -42,11 +40,13 @@ class Q_SQL_EXPORT QSqlQuery
 {
 
  public:
-   explicit QSqlQuery(QSqlResult *r);
+   explicit QSqlQuery(QSqlResult *result);
    explicit QSqlQuery(const QString &query = QString(), QSqlDatabase db = QSqlDatabase());
    explicit QSqlQuery(QSqlDatabase db);
+
    QSqlQuery(const QSqlQuery &other);
    QSqlQuery &operator=(const QSqlQuery &other);
+
    ~QSqlQuery();
 
    bool isValid() const;
@@ -66,13 +66,13 @@ class Q_SQL_EXPORT QSqlQuery
 
    void setForwardOnly(bool forward);
    bool exec(const QString &query);
-   QVariant value(int i) const;
+   QVariant value(int index) const;
    QVariant value(const QString &name) const;
 
    void setNumericalPrecisionPolicy(QSql::NumericalPrecisionPolicy precisionPolicy);
    QSql::NumericalPrecisionPolicy numericalPrecisionPolicy() const;
 
-   bool seek(int i, bool relative = false);
+   bool seek(int index, bool relative = false);
    bool next();
    bool previous();
    bool first();
@@ -85,10 +85,10 @@ class Q_SQL_EXPORT QSqlQuery
    enum BatchExecutionMode { ValuesAsRows, ValuesAsColumns };
    bool execBatch(BatchExecutionMode mode = ValuesAsRows);
    bool prepare(const QString &query);
-   void bindValue(const QString &placeholder, const QVariant &val,
-      QSql::ParamType type = QSql::In);
-   void bindValue(int pos, const QVariant &val, QSql::ParamType type = QSql::In);
-   void addBindValue(const QVariant &val, QSql::ParamType type = QSql::In);
+   void bindValue(const QString &placeholder, const QVariant &value, QSql::ParamType type = QSql::In);
+   void bindValue(int pos, const QVariant &value, QSql::ParamType type = QSql::In);
+   void addBindValue(const QVariant &value, QSql::ParamType type = QSql::In);
+
    QVariant boundValue(const QString &placeholder) const;
    QVariant boundValue(int pos) const;
    QMap<QString, QVariant> boundValues() const;
@@ -100,7 +100,5 @@ class Q_SQL_EXPORT QSqlQuery
  private:
    QSqlQueryPrivate *d;
 };
-
-
 
 #endif // QSQLQUERY_H

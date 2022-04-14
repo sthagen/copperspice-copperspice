@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,9 +24,9 @@
 #ifndef QSOUNDEFFECT_H
 #define QSOUNDEFFECT_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qurl.h>
-#include <QtCore/qstringlist.h>
+#include <qobject.h>
+#include <qurl.h>
+#include <qstringlist.h>
 
 class QSoundEffectPrivate;
 
@@ -81,6 +81,10 @@ class Q_MULTIMEDIA_EXPORT QSoundEffect : public QObject
    };
 
    explicit QSoundEffect(QObject *parent = nullptr);
+
+   QSoundEffect(const QSoundEffect &) = delete;
+   QSoundEffect &operator=(const QSoundEffect &) = delete;
+
    ~QSoundEffect();
 
    static QStringList supportedMimeTypes();
@@ -140,7 +144,6 @@ class Q_MULTIMEDIA_EXPORT QSoundEffect : public QObject
    MULTI_CS_SLOT_2(stop)
 
  private:
-   Q_DISABLE_COPY(QSoundEffect)
    QSoundEffectPrivate *d;
 };
 

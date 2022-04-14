@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -45,13 +45,13 @@ static DH *get_dh1024()
                        "/1y29Aa37e44a/taiZ+lrp8kEXxLH+ZJKGZR7OZTgf//////////AgEC"));
 
    const char *ptr = params.constData();
-   DH *dh = q_d2i_DHparams(NULL, reinterpret_cast<const unsigned char **>(&ptr), params.length());
+   DH *dh = q_d2i_DHparams(nullptr, reinterpret_cast<const unsigned char **>(&ptr), params.length());
 
    return dh;
 }
 
 QSslContext::QSslContext()
-   : ctx(0), pkey(0), session(0), m_sessionTicketLifeTimeHint(-1)
+   : ctx(nullptr), pkey(nullptr), session(nullptr), m_sessionTicketLifeTimeHint(-1)
 {
 }
 
@@ -93,20 +93,32 @@ init_context:
 
       case QSsl::SslV2:
 #ifndef OPENSSL_NO_SSL2
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
          sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv2_client_method() : q_SSLv2_server_method());
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+         sslContext->ctx = q_SSL_CTX_new(client ? q_TLS_client_method() : q_TLS_server_method());
+#endif
+
 #else
          // SSL 2 not supported by the system, but chosen deliberately -> error
-         sslContext->ctx = 0;
+         sslContext->ctx = nullptr;
          unsupportedProtocol = true;
 #endif
          break;
 
       case QSsl::SslV3:
 #ifndef OPENSSL_NO_SSL3_METHOD
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
          sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv3_client_method() : q_SSLv3_server_method());
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+         sslContext->ctx = q_SSL_CTX_new(client ? q_TLS_client_method() : q_TLS_server_method());
+#endif
+
 #else
          // SSL 3 not supported by the system, but chosen deliberately -> error
-         sslContext->ctx = 0;
+         sslContext->ctx = nullptr;
          unsupportedProtocol = true;
 #endif
          break;
@@ -121,7 +133,11 @@ init_context:
       case QSsl::AnyProtocol:
 
       default:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
          sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv23_client_method() : q_SSLv23_server_method());
+#else
+         sslContext->ctx = q_SSL_CTX_new(client ? q_TLS_client_method() : q_TLS_server_method());
+#endif
          break;
 
       case QSsl::TlsV1_0:
@@ -149,15 +165,21 @@ init_context:
          break;
 
       case QSsl::TlsV1_0_OrLater:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
          // Specific protocols will be specified via SSL options.
          sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv23_client_method() : q_SSLv23_server_method());
+#else
+         sslContext->ctx = q_SSL_CTX_new(client ? q_TLS_client_method() : q_TLS_server_method());
+#endif
          break;
 
       case QSsl::TlsV1_1_OrLater:
       case QSsl::TlsV1_2_OrLater:
-#if OPENSSL_VERSION_NUMBER >= 0x10001000L
+#if OPENSSL_VERSION_NUMBER >= 0x10001000L && OPENSSL_VERSION_NUMBER < 0x10100000L
          // Specific protocols will be specified via SSL options.
          sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv23_client_method() : q_SSLv23_server_method());
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+         sslContext->ctx = q_SSL_CTX_new(client ? q_TLS_client_method() : q_TLS_server_method());
 #else
          // TLS 1.1/1.2 not supported by the system, but chosen deliberately -> error
          sslContext->ctx = 0;
@@ -172,7 +194,11 @@ init_context:
       if (!reinitialized) {
          reinitialized = true;
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
          if (q_SSL_library_init() == 1) {
+#else
+         if (q_OPENSSL_init_ssl(0, nullptr) == 1 && q_OPENSSL_init_crypto(0, nullptr) == 1) {
+#endif
             goto init_context;
          }
       }
@@ -247,7 +273,7 @@ init_context:
       QList<QByteArray> unixDirs = QSslSocketPrivate::unixRootCertDirectories();
 
       for (int a = 0; a < unixDirs.count(); ++a) {
-         q_SSL_CTX_load_verify_locations(sslContext->ctx, 0, unixDirs.at(a).constData());
+         q_SSL_CTX_load_verify_locations(sslContext->ctx, nullptr, unixDirs.at(a).constData());
       }
    }
 
@@ -298,7 +324,7 @@ init_context:
       }
 
       if (configuration.d->privateKey.algorithm() == QSsl::Opaque) {
-         sslContext->pkey = 0;    // Don't free the private key, it belongs to QSslKey
+         sslContext->pkey = nullptr;    // do not free the private key, it belongs to QSslKey
       }
 
       // Check if the certificate matches the private key.
@@ -322,7 +348,7 @@ init_context:
 
    // Initialize peer verification.
    if (sslContext->sslConfiguration.peerVerifyMode() == QSslSocket::VerifyNone) {
-      q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_NONE, 0);
+      q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_NONE, nullptr);
    } else {
       q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_PEER, q_X509Callback);
    }
@@ -338,23 +364,26 @@ init_context:
    }
 
    // Set temp DH params
-   DH *dh = 0;
+   DH *dh = nullptr;
+
    dh = get_dh1024();
    q_SSL_CTX_set_tmp_dh(sslContext->ctx, dh);
    q_DH_free(dh);
 
 #ifndef OPENSSL_NO_EC
 
-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
+// ECDH is enabled by default since 1.1.0: https://github.com/openssl/openssl/issues/1437
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L && OPENSSL_VERSION_NUMBER <= 0x10100000L
    if (q_SSLeay() >= 0x10002000L) {
-      q_SSL_CTX_ctrl(sslContext->ctx, SSL_CTRL_SET_ECDH_AUTO, 1, NULL);
+      q_SSL_CTX_ctrl(sslContext->ctx, SSL_CTRL_SET_ECDH_AUTO, 1, nullptr);
 
    } else
 
 #endif
    {
       // Set temp ECDH params
-      EC_KEY *ecdh = 0;
+      EC_KEY *ecdh = nullptr;
+
       ecdh = q_EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
       q_SSL_CTX_set_tmp_ecdh(sslContext->ctx, ecdh);
       q_EC_KEY_free(ecdh);
@@ -444,7 +473,7 @@ SSL *QSslContext::createSsl()
 
    if (!session && !sessionASN1().isEmpty() && !sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionPersistence)) {
       const unsigned char *data = reinterpret_cast<const unsigned char *>(m_sessionASN1.constData());
-      session = q_d2i_SSL_SESSION(0, &data, m_sessionASN1.size());   // refcount is 1 already, set
+      session = q_d2i_SSL_SESSION(nullptr, &data, m_sessionASN1.size());   // refcount is 1 already, set
       // by function above
    }
 
@@ -453,7 +482,7 @@ SSL *QSslContext::createSsl()
       if (! q_SSL_set_session(ssl, session)) {
          qWarning("Could not set SSL session");
          q_SSL_SESSION_free(session);
-         session = 0;
+         session = nullptr;
       }
    }
 
@@ -502,8 +531,8 @@ bool QSslContext::cacheSession(SSL *ssl)
    // cache the session the caller gave us and increase reference count
    session = q_SSL_get1_session(ssl);
 
-   if (session && !sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionPersistence)) {
-      int sessionSize = q_i2d_SSL_SESSION(session, 0);
+   if (session && ! sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionPersistence)) {
+      int sessionSize = q_i2d_SSL_SESSION(session, nullptr);
 
       if (sessionSize > 0) {
          m_sessionASN1.resize(sessionSize);
@@ -513,11 +542,15 @@ bool QSslContext::cacheSession(SSL *ssl)
             qWarning("Could not store persistent version of SSL session");
          }
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+         m_sessionTicketLifeTimeHint = q_SSL_SESSION_get_ticket_lifetime_hint(session);
+#else
          m_sessionTicketLifeTimeHint = session->tlsext_tick_lifetime_hint;
+#endif
       }
    }
 
-   return (session != 0);
+   return (session != nullptr);
 }
 
 QByteArray QSslContext::sessionASN1() const
@@ -544,5 +577,3 @@ QString QSslContext::errorString() const
 {
    return errorStr;
 }
-
-

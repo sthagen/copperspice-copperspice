@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -25,32 +25,16 @@
 #include "qopenglfunctions_1_3.h"
 #include "qopenglcontext.h"
 
-QT_BEGIN_NAMESPACE
-
-/*!
-    \class QOpenGLFunctions_1_3
-    \inmodule QtGui
-    \since 5.1
-    \wrapper
-    \brief The QOpenGLFunctions_1_3 class provides all functions for OpenGL 1.3 specification.
-
-    This class is a wrapper for functions from OpenGL 1.3 specification.
-    See reference pages on \l {http://www.opengl.org/sdk/docs/}{opengl.org}
-    for function documentation.
-
-    \sa QAbstractOpenGLFunctions
-*/
-
 QOpenGLFunctions_1_3::QOpenGLFunctions_1_3()
  : QAbstractOpenGLFunctions()
- , d_1_0_Core(0)
- , d_1_1_Core(0)
- , d_1_2_Core(0)
- , d_1_3_Core(0)
- , d_1_0_Deprecated(0)
- , d_1_1_Deprecated(0)
- , d_1_2_Deprecated(0)
- , d_1_3_Deprecated(0)
+ , d_1_0_Core(nullptr)
+ , d_1_1_Core(nullptr)
+ , d_1_2_Core(nullptr)
+ , d_1_3_Core(nullptr)
+ , d_1_0_Deprecated(nullptr)
+ , d_1_1_Deprecated(nullptr)
+ , d_1_2_Deprecated(nullptr)
+ , d_1_3_Deprecated(nullptr)
 {
 }
 
@@ -104,7 +88,7 @@ bool QOpenGLFunctions_1_3::initializeOpenGLFunctions()
     {
         // Associate with private implementation, creating if necessary
         // Function pointers in the backends are resolved at creation time
-        QOpenGLVersionFunctionsBackend* d = 0;
+        QOpenGLVersionFunctionsBackend *d = nullptr;
         d = QAbstractOpenGLFunctionsPrivate::functionsBackend(context, QOpenGLFunctions_1_0_CoreBackend::versionStatus());
         if (!d) {
             d = new QOpenGLFunctions_1_0_CoreBackend(context);
@@ -194,5 +178,3 @@ QOpenGLVersionProfile QOpenGLFunctions_1_3::versionProfile()
     v.setVersion(1, 3);
     return v;
 }
-
-QT_END_NAMESPACE

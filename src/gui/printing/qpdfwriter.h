@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -42,6 +42,10 @@ class Q_GUI_EXPORT QPdfWriter : public QObject, public QPagedPaintDevice
 public:
    explicit QPdfWriter(const QString &filename);
    explicit QPdfWriter(QIODevice *device);
+
+   QPdfWriter(const QPdfWriter &) = delete;
+   QPdfWriter &operator=(const QPdfWriter &) = delete;
+
    ~QPdfWriter();
 
    QString creator() const;
@@ -70,15 +74,12 @@ public:
    bool setPageSize(const QPageSize &size) override;
    void setPageSize(QPageSize::PageSizeId sizeId)  override;   // not sure about this method
 
-protected:
+ protected:
    QPaintEngine *paintEngine() const override;
    int metric(PaintDeviceMetric id) const override;
 
-private:
+ private:
     std::unique_ptr<QPdfEngine> m_engine;
-
-    Q_DISABLE_COPY(QPdfWriter)
-
 };
 
 #endif // QT_NO_PDF

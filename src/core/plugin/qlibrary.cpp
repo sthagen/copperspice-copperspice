@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -50,12 +50,12 @@
 #endif
 
 #if defined(Q_OS_UNIX)
-// We don not use separate debug and release libs on UNIX, so we want
+// We do not use separate debug and release libs on UNIX,
 // to allow loading plugins, regardless of how they were built
 #  define QT_NO_DEBUG_PLUGIN_CHECK
 #endif
 
-static QBasicMutex qt_library_mutex;
+static QMutex qt_library_mutex;
 static QLibraryStore *qt_library_data = nullptr;
 static bool qt_library_data_once;
 
@@ -198,7 +198,7 @@ inline void QLibraryStore::releaseLibrary(QLibraryHandle *lib)
 }
 
 QLibraryHandle::QLibraryHandle(const QString &canonicalFileName, const QString &version, QLibrary::LoadHints loadHints)
-   : pluginState(MightBeAPlugin), pHnd(0), fileName(canonicalFileName), fullVersion(version),
+   : pluginState(MightBeAPlugin), pHnd(nullptr), fileName(canonicalFileName), fullVersion(version),
      libraryRefCount(0), libraryUnloadCount(0)
 {
    loadHintsInt.store(loadHints);
@@ -613,7 +613,7 @@ void QLibrary::setFileNameAndVersion(const QString &fileName, const QString &ver
 void *QLibrary::resolve(const QString &symbol)
 {
    if (! isLoaded() && ! load()) {
-      return 0;
+      return nullptr;
    }
 
    return m_handle->resolve(symbol);

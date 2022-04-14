@@ -1,13 +1,13 @@
 /***********************************************************************
 *
-* Copyright (c) 2017-2020 Barbara Geller
-* Copyright (c) 2017-2020 Ansel Sermersheim
-
+* Copyright (c) 2017-2022 Barbara Geller
+* Copyright (c) 2017-2022 Ansel Sermersheim
+*
 * Copyright (c) 1998-2009 John Maddock
 *
-* This file is part of CsString.
+* This file is part of CopperSpice.
 *
-* CsString is free software, released under the BSD 2-Clause license.
+* CopperSpice is free software, released under the BSD 2-Clause license.
 * For license details refer to LICENSE provided with this project.
 *
 * CopperSpice is distributed in the hope that it will be useful,
@@ -279,9 +279,11 @@ class repeater_count
    repeater_count *unwind_until(int n, repeater_count *p, int current_recursion_id) {
       while (p && (p->state_id != n)) {
          if (-2 - current_recursion_id == p->state_id) {
-            return 0;
+            return nullptr;
          }
+
          p = p->next;
+
          if (p && (p->state_id < 0)) {
             p = unwind_until(p->state_id, p, current_recursion_id);
             if (!p) {
@@ -290,19 +292,25 @@ class repeater_count
             p = p->next;
          }
       }
+
       return p;
    }
+
  public:
-   repeater_count(repeater_count **s) : stack(s), next(0), state_id(-1), count(0), start_pos() {}
+   repeater_count(repeater_count **s)
+      : stack(s), next(nullptr), state_id(-1), count(0), start_pos()
+   {}
 
    repeater_count(int i, repeater_count **s, BidiIterator start, int current_recursion_id)
       : start_pos(start) {
       state_id = i;
       stack = s;
-      next = *stack;
+      next  = *stack;
       *stack = this;
+
       if ((state_id > next->state_id) && (next->state_id >= 0)) {
          count = 0;
+
       } else {
          repeater_count *p = next;
          p = unwind_until(state_id, p, current_recursion_id);

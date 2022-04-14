@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -61,10 +61,10 @@ class Q_MULTIMEDIA_EXPORT QMediaPlaylistControl : public QMediaControl
    MULTI_CS_SIGNAL_2(playbackModeChanged, mode)
 
  protected:
-   QMediaPlaylistControl(QObject *parent = 0);
+   QMediaPlaylistControl(QObject *parent = nullptr);
 };
 
 #define QMediaPlaylistControl_iid "com.copperspice.CS.mediaPlayListControl/1.0"
-CS_DECLARE_INTERFACE(QMediaPlaylistControl, QMediaPlaylistControl_iid)    // emerald, was Q_MEDIA_DECLARE_CONTROL
+CS_DECLARE_INTERFACE(QMediaPlaylistControl, QMediaPlaylistControl_iid)
 
 #endif

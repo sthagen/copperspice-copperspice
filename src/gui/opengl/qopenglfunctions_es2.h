@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -25,13 +25,12 @@
 #ifndef QOPENGLVERSIONFUNCTIONS_ES2_H
 #define QOPENGLVERSIONFUNCTIONS_ES2_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 #if defined(QT_OPENGL_ES_2)
 
-#include <QOpenGLVersionFunctions>
+#include <qopengl_versionfunctions.h>
 #include <qopenglcontext.h>
-
 
 class QOpenGLFunctions_ES2Private;
 

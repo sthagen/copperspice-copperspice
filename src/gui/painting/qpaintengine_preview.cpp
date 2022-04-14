@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -54,8 +54,8 @@ QPreviewPaintEngine::QPreviewPaintEngine()
    : QPaintEngine(*(new QPreviewPaintEnginePrivate), PaintEngineFeatures(AllFeatures & ~ObjectBoundingModeGradients))
 {
    Q_D(QPreviewPaintEngine);
-   d->proxy_print_engine = 0;
-   d->proxy_paint_engine = 0;
+   d->proxy_print_engine = nullptr;
+   d->proxy_paint_engine = nullptr;
 }
 
 QPreviewPaintEngine::~QPreviewPaintEngine()
@@ -87,9 +87,9 @@ bool QPreviewPaintEngine::end()
    Q_D(QPreviewPaintEngine);
 
    delete d->painter;
-   d->painter = 0;
-   d->engine = 0;
-   d->state = QPrinter::Idle;
+   d->painter = nullptr;
+   d->engine  = nullptr;
+   d->state   = QPrinter::Idle;
    return true;
 }
 

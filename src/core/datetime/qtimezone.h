@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -56,7 +56,7 @@ class Q_CORE_EXPORT QTimeZone
    typedef QVector<OffsetData> OffsetDataList;
 
    QTimeZone();
-   explicit QTimeZone(const QByteArray &ianaId);
+   explicit QTimeZone(const QByteArray &zoneId);
    explicit QTimeZone(int offsetSeconds);
 
    QTimeZone(const QByteArray &zoneId, int offsetSeconds, const QString &name,
@@ -110,13 +110,13 @@ class Q_CORE_EXPORT QTimeZone
    static QTimeZone systemTimeZone();
    static QTimeZone utc();
 
-   static bool isTimeZoneIdAvailable(const QByteArray &ianaId);
+   static bool isTimeZoneIdAvailable(const QByteArray &zoneId);
 
    static QList<QByteArray> availableTimeZoneIds();
    static QList<QByteArray> availableTimeZoneIds(QLocale::Country country);
    static QList<QByteArray> availableTimeZoneIds(int offsetSeconds);
 
-   static QByteArray ianaIdToWindowsId(const QByteArray &ianaId);
+   static QByteArray ianaIdToWindowsId(const QByteArray &zoneId);
    static QByteArray windowsIdToDefaultIanaId(const QByteArray &windowsId);
    static QByteArray windowsIdToDefaultIanaId(const QByteArray &windowsId, QLocale::Country country);
    static QList<QByteArray> windowsIdToIanaIds(const QByteArray &windowsId);
@@ -125,7 +125,7 @@ class Q_CORE_EXPORT QTimeZone
  private:
    QTimeZone(QTimeZonePrivate &dd);
 
-   friend Q_CORE_EXPORT QDataStream &operator<<(QDataStream &ds, const QTimeZone &tz);
+   friend Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QTimeZone &tz);
    friend class QTimeZonePrivate;
    friend class QDateTime;
    friend class QDateTimePrivate;
@@ -133,8 +133,8 @@ class Q_CORE_EXPORT QTimeZone
    QSharedDataPointer<QTimeZonePrivate> d;
 };
 
-Q_CORE_EXPORT QDataStream &operator<<(QDataStream &ds, const QTimeZone &tz);
-Q_CORE_EXPORT QDataStream &operator>>(QDataStream &ds, QTimeZone &tz);
+Q_CORE_EXPORT QDataStream &operator<<(QDataStream &stream, const QTimeZone &tz);
+Q_CORE_EXPORT QDataStream &operator>>(QDataStream &stream, QTimeZone &tz);
 
 Q_CORE_EXPORT QDebug operator<<(QDebug dbg, const QTimeZone &tz);
 

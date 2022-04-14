@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -25,12 +25,12 @@
 #define QGRAPHICSEFFECT_P_H
 
 #include <qgraphicseffect.h>
-#include <QPixmapCache>
+#include <qpixmapcache.h>
+#include <qscopedpointer.h>
+
 #include <qpixmapfilter_p.h>
-#include <QScopedPointer>
 
 #ifndef QT_NO_GRAPHICSEFFECT
-QT_BEGIN_NAMESPACE
 
 class QGraphicsEffectSourcePrivate;
 
@@ -39,6 +39,9 @@ class Q_GUI_EXPORT QGraphicsEffectSource : public QObject
    GUI_CS_OBJECT(QGraphicsEffectSource)
 
  public:
+    QGraphicsEffectSource(const QGraphicsEffectSource &) = delete;
+    QGraphicsEffectSource &operator=(const QGraphicsEffectSource &) = delete;
+
    ~QGraphicsEffectSource();
    const QGraphicsItem *graphicsItem() const;
    const QWidget *widget() const;
@@ -51,7 +54,7 @@ class Q_GUI_EXPORT QGraphicsEffectSource : public QObject
    QRectF boundingRect(Qt::CoordinateSystem coordinateSystem = Qt::LogicalCoordinates) const;
    QRect deviceRect() const;
    QPixmap pixmap(Qt::CoordinateSystem system = Qt::LogicalCoordinates,
-                  QPoint *offset = 0, QGraphicsEffect::PixmapPadMode mode = QGraphicsEffect::PadToEffectiveBoundingRect) const;
+                  QPoint *offset = nullptr, QGraphicsEffect::PixmapPadMode mode = QGraphicsEffect::PadToEffectiveBoundingRect) const;
 
  protected:
    QGraphicsEffectSource(QGraphicsEffectSourcePrivate &dd, QObject *parent = nullptr);
@@ -60,7 +63,6 @@ class Q_GUI_EXPORT QGraphicsEffectSource : public QObject
 
  private:
    Q_DECLARE_PRIVATE(QGraphicsEffectSource)
-   Q_DISABLE_COPY(QGraphicsEffectSource)
 
    friend class QGraphicsEffect;
    friend class QGraphicsEffectPrivate;
@@ -96,7 +98,7 @@ class QGraphicsEffectSourcePrivate
    virtual void draw(QPainter *p) = 0;
    virtual void update() = 0;
    virtual bool isPixmap() const = 0;
-   virtual QPixmap pixmap(Qt::CoordinateSystem system, QPoint *offset = 0,
+   virtual QPixmap pixmap(Qt::CoordinateSystem system, QPoint *offset = nullptr,
                           QGraphicsEffect::PixmapPadMode mode = QGraphicsEffect::PadToTransparentBorder) const = 0;
    virtual void effectBoundingRectChanged() = 0;
 
@@ -129,7 +131,7 @@ class Q_GUI_EXPORT QGraphicsEffectPrivate
    Q_DECLARE_PUBLIC(QGraphicsEffect)
 
  public:
-   QGraphicsEffectPrivate() : source(0), isEnabled(1) {}
+   QGraphicsEffectPrivate() : source(nullptr), isEnabled(1) {}
    virtual ~QGraphicsEffectPrivate() {}
 
    void setGraphicsEffectSource(QGraphicsEffectSource *newSource);
@@ -144,17 +146,19 @@ class Q_GUI_EXPORT QGraphicsEffectPrivate
 
 };
 
-
 class QGraphicsColorizeEffectPrivate : public QGraphicsEffectPrivate
 {
    Q_DECLARE_PUBLIC(QGraphicsColorizeEffect)
 
  public:
    QGraphicsColorizeEffectPrivate()
-      : opaque(true) {
+      : opaque(true)
+   {
       filter = new QPixmapColorizeFilter;
    }
-   ~QGraphicsColorizeEffectPrivate() {
+
+   ~QGraphicsColorizeEffectPrivate()
+   {
       delete filter;
    }
 
@@ -168,8 +172,12 @@ class QGraphicsBlurEffectPrivate : public QGraphicsEffectPrivate
    Q_DECLARE_PUBLIC(QGraphicsBlurEffect)
 
  public:
-   QGraphicsBlurEffectPrivate() : filter(new QPixmapBlurFilter) {}
-   ~QGraphicsBlurEffectPrivate() {
+   QGraphicsBlurEffectPrivate() : filter(new QPixmapBlurFilter)
+   {
+   }
+
+   ~QGraphicsBlurEffectPrivate()
+   {
       delete filter;
    }
 
@@ -181,8 +189,12 @@ class QGraphicsDropShadowEffectPrivate : public QGraphicsEffectPrivate
    Q_DECLARE_PUBLIC(QGraphicsDropShadowEffect)
 
  public:
-   QGraphicsDropShadowEffectPrivate() : filter(new QPixmapDropShadowFilter) {}
-   ~QGraphicsDropShadowEffectPrivate() {
+   QGraphicsDropShadowEffectPrivate() : filter(new QPixmapDropShadowFilter)
+   {
+   }
+
+   ~QGraphicsDropShadowEffectPrivate()
+   {
       delete filter;
    }
 
@@ -205,8 +217,7 @@ class QGraphicsOpacityEffectPrivate : public QGraphicsEffectPrivate
    uint hasOpacityMask : 1;
 };
 
-QT_END_NAMESPACE
+#endif // QT_NO_GRAPHICSEFFECT
 
-#endif //QT_NO_GRAPHICSEFFECT
-#endif // QGRAPHICSEFFECT_P_H
+#endif
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -30,33 +30,19 @@
 
 #include "qgenericstaticcontext_p.h"
 
-QT_BEGIN_NAMESPACE
-
 using namespace QPatternist;
 
 GenericStaticContext::GenericStaticContext(const NamePool::Ptr &np,
-      QAbstractMessageHandler *const handler,
-      const QUrl &aBaseURI,
-      const FunctionFactory::Ptr &factory,
+      QAbstractMessageHandler *const handler, const QUrl &aBaseURI, const FunctionFactory::Ptr &factory,
       const QXmlQuery::QueryLanguage lang) : m_boundarySpacePolicy(BSPStrip)
-   , m_constructionMode(CMPreserve)
-   , m_functionFactory(factory)
-   , m_defaultFunctionNamespace(CommonNamespaces::XFN)
-   , m_orderingEmptySequence(Greatest)
-   , m_orderingMode(Ordered)
+   , m_constructionMode(CMPreserve), m_functionFactory(factory), m_defaultFunctionNamespace(CommonNamespaces::XFN)
+   , m_orderingEmptySequence(Greatest), m_orderingMode(Ordered)
    , m_defaultCollation(QUrl::fromEncoded(CommonNamespaces::UNICODE_COLLATION))
-   , m_baseURI(aBaseURI)
-   , m_messageHandler(handler)
-   , m_preserveMode(Preserve)
-   , m_inheritMode(Inherit)
+   , m_baseURI(aBaseURI), m_messageHandler(handler), m_preserveMode(Preserve), m_inheritMode(Inherit)
    , m_namespaceResolver(lang == QXmlQuery::XQuery10
                          ? GenericNamespaceResolver::defaultXQueryBindings()
                          : GenericNamespaceResolver::defaultXSLTBindings())
-   , m_namePool(np)
-   , m_uriResolver(0)
-   , m_queryLanguage(lang)
-   , m_rangeSlot(-1)
-   , m_compatModeEnabled(false)
+   , m_namePool(np), m_uriResolver(nullptr), m_queryLanguage(lang), m_rangeSlot(-1), m_compatModeEnabled(false)
 {
    /* We'll easily have at least this many AST nodes, that we need
     * to track locations for. */
@@ -318,4 +304,3 @@ VariableSlotID GenericStaticContext::allocateRangeSlot()
    return m_rangeSlot;
 }
 
-QT_END_NAMESPACE

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -31,9 +31,8 @@
 #include <qdynamiccontext_p.h>
 #include <qexternalvariableloader_p.h>
 
-QT_BEGIN_NAMESPACE
-
 namespace QPatternist {
+
 class VariableLoader : public ExternalVariableLoader
 {
  public:
@@ -74,9 +73,6 @@ class VariableLoader : public ExternalVariableLoader
 };
 }
 
-QT_END_NAMESPACE
-
-Q_DECLARE_METATYPE(QIODevice *)
-Q_DECLARE_METATYPE(QXmlQuery)
+CS_DECLARE_METATYPE(QXmlQuery)
 
 #endif

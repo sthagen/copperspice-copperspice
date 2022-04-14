@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,7 +33,7 @@
 class QSubpathForwardIterator
 {
  public:
-   QSubpathForwardIterator(const QDataBuffer<QStrokerOps::Element> *path)
+   QSubpathForwardIterator(const QVector<QStrokerOps::Element> *path)
       : m_path(path), m_pos(0) { }
 
    int position() const {
@@ -50,14 +50,14 @@ class QSubpathForwardIterator
    }
 
  private:
-   const QDataBuffer<QStrokerOps::Element> *m_path;
+   const QVector<QStrokerOps::Element> *m_path;
    int m_pos;
 };
 
 class QSubpathBackwardIterator
 {
  public:
-   QSubpathBackwardIterator(const QDataBuffer<QStrokerOps::Element> *path)
+   QSubpathBackwardIterator(const QVector<QStrokerOps::Element> *path)
       : m_path(path), m_pos(path->size() - 1) { }
 
    inline int position() const {
@@ -106,14 +106,14 @@ class QSubpathBackwardIterator
    }
 
  private:
-   const QDataBuffer<QStrokerOps::Element> *m_path;
+   const QVector<QStrokerOps::Element> *m_path;
    int m_pos;
 };
 
 class QSubpathFlatIterator
 {
  public:
-   QSubpathFlatIterator(const QDataBuffer<QStrokerOps::Element> *path, qreal threshold)
+   QSubpathFlatIterator(const QVector<QStrokerOps::Element> *path, qreal threshold)
       : m_path(path), m_pos(0), m_curve_index(-1), m_curve_threshold(threshold) { }
 
    bool hasNext() const {
@@ -141,13 +141,11 @@ class QSubpathFlatIterator
          Q_ASSERT(m_pos < m_path->size());
 
          m_curve = QBezier::fromPoints(QPointF(qt_fixed_to_real(m_path->at(m_pos - 1).x),
-                  qt_fixed_to_real(m_path->at(m_pos - 1).y)),
-               QPointF(qt_fixed_to_real(e.x),
-                  qt_fixed_to_real(e.y)),
-               QPointF(qt_fixed_to_real(m_path->at(m_pos + 1).x),
-                  qt_fixed_to_real(m_path->at(m_pos + 1).y)),
-               QPointF(qt_fixed_to_real(m_path->at(m_pos + 2).x),
+                  qt_fixed_to_real(m_path->at(m_pos - 1).y)), QPointF(qt_fixed_to_real(e.x),
+                  qt_fixed_to_real(e.y)), QPointF(qt_fixed_to_real(m_path->at(m_pos + 1).x),
+                  qt_fixed_to_real(m_path->at(m_pos + 1).y)), QPointF(qt_fixed_to_real(m_path->at(m_pos + 2).x),
                   qt_fixed_to_real(m_path->at(m_pos + 2).y))).toPolygon(m_curve_threshold);
+
          m_curve_index = 1;
          e.type = QPainterPath::LineToElement;
          e.x = m_curve.at(0).x();
@@ -160,7 +158,7 @@ class QSubpathFlatIterator
    }
 
  private:
-   const QDataBuffer<QStrokerOps::Element> *m_path;
+   const QVector<QStrokerOps::Element> *m_path;
    int m_pos;
    QPolygonF m_curve;
    int m_curve_index;
@@ -170,10 +168,6 @@ class QSubpathFlatIterator
 template <class Iterator> bool qt_stroke_side(Iterator *it, QStroker *stroker,
    bool capFirst, QLineF *startTangent);
 
-/*
- * QLineF::angle gives us the smalles angle between two lines. Here we
- * want to identify the line's angle direction on the unit circle.
-*/
 static inline qreal adapted_angle_on_x(const QLineF &line)
 {
    qreal angle = line.angle(QLineF(0, 0, 1, 0));
@@ -184,13 +178,8 @@ static inline qreal adapted_angle_on_x(const QLineF &line)
 }
 
 QStrokerOps::QStrokerOps()
-   : m_elements(0)
-   , m_curveThreshold(qt_real_to_fixed(0.25))
-   , m_dashThreshold(qt_real_to_fixed(0.25))
-   , m_customData(0)
-   , m_moveTo(0)
-   , m_lineTo(0)
-   , m_cubicTo(0)
+   : m_curveThreshold(qt_real_to_fixed(0.25)), m_dashThreshold(qt_real_to_fixed(0.25)),
+     m_customData(nullptr), m_moveTo(nullptr), m_lineTo(nullptr), m_cubicTo(nullptr)
 {
 }
 
@@ -201,16 +190,15 @@ QStrokerOps::~QStrokerOps()
 void QStrokerOps::begin(void *customData)
 {
    m_customData = customData;
-   m_elements.reset();
+   m_elements.clear();
 }
-
 
 void QStrokerOps::end()
 {
    if (m_elements.size() > 1) {
       processCurrentSubpath();
    }
-   m_customData = 0;
+   m_customData = nullptr;
 }
 
 
@@ -1023,6 +1011,7 @@ QDashStroker::QDashStroker(QStroker *stroker)
       setCubicToHook(qdashstroker_cubicTo);
    }
 }
+
 QDashStroker::~QDashStroker()
 {
 }

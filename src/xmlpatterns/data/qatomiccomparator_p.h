@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,12 +24,11 @@
 #ifndef QAtomicComparator_P_H
 #define QAtomicComparator_P_H
 
-#include <QFlags>
+#include <qflags.h>
 #include <qitem_p.h>
-#include <qatomictypedispatch_p.h>
 #include <qstringfwd.h>
 
-QT_BEGIN_NAMESPACE
+#include <qatomictypedispatch_p.h>
 
 namespace QPatternist {
 class AtomicComparator : public AtomicTypeVisitorResult
@@ -160,9 +159,10 @@ class AtomicComparator : public AtomicTypeVisitorResult
                               const ComparisonType type);
 
 };
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(AtomicComparator::Operators)
 }
 
-QT_END_NAMESPACE
+
 
 #endif

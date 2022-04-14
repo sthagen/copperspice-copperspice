@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -49,8 +49,8 @@ class Q_CORE_EXPORT QBasicTimer
       return id;
    }
 
-   void start(int msec, QObject *obj);
-   void start(int msec, Qt::TimerType timerType, QObject *obj);
+   void start(int msec, QObject *object);
+   void start(int msec, Qt::TimerType timerType, QObject *object);
    void stop();
 
  private:

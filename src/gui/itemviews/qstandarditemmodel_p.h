@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -28,13 +28,11 @@
 
 #ifndef QT_NO_STANDARDITEMMODEL
 
-#include <QtCore/qlist.h>
-#include <QtCore/qpair.h>
-#include <QtCore/qstack.h>
-#include <QtCore/qvariant.h>
-#include <QtCore/qvector.h>
-
-
+#include <qlist.h>
+#include <qpair.h>
+#include <qstack.h>
+#include <qvariant.h>
+#include <qvector.h>
 
 class QStandardItemData
 {
@@ -47,6 +45,7 @@ class QStandardItemData
       return role == other.role && value == other.value;
    }
 };
+
 inline QDataStream &operator>>(QDataStream &in, QStandardItemData &data)
 {
    in >> data.role;
@@ -60,19 +59,17 @@ inline QDataStream &operator<<(QDataStream &out, const QStandardItemData &data)
    out << data.value;
    return out;
 }
+
 class QStandardItemPrivate
 {
    Q_DECLARE_PUBLIC(QStandardItem)
 
  public:
    inline QStandardItemPrivate()
-      : model(0),
-        parent(0),
-        rows(0),
-        columns(0),
-        q_ptr(0),
-        lastIndexOf(2) {
+      : model(nullptr), parent(nullptr), rows(0), columns(0), q_ptr(nullptr), lastIndexOf(2)
+   {
    }
+
    virtual ~QStandardItemPrivate();
 
    inline int childIndex(int row, int column) const {
@@ -90,17 +87,19 @@ class QStandardItemPrivate
       }
       return lastIndexOf;
    }
+
    QPair<int, int> position() const;
    void setChild(int row, int column, QStandardItem *item,
       bool emitChanged = false);
    inline int rowCount() const {
       return rows;
    }
+
    inline int columnCount() const {
       return columns;
    }
-   void childDeleted(QStandardItem *child);
 
+   void childDeleted(QStandardItem *child);
    void setModel(QStandardItemModel *mod);
 
    inline void setParentAndModel(
@@ -148,16 +147,20 @@ class QStandardItemModelPrivate : public QAbstractItemModelPrivate
 
    inline QStandardItem *itemFromIndex(const QModelIndex &index) const {
       Q_Q(const QStandardItemModel);
+
       if (!index.isValid()) {
          return root.data();
       }
+
       if (index.model() != q) {
-         return 0;
+         return nullptr;
       }
+
       QStandardItem *parent = static_cast<QStandardItem *>(index.internalPointer());
-      if (parent == 0) {
-         return 0;
+      if (parent == nullptr) {
+         return nullptr;
       }
+
       return parent->child(index.row(), index.column());
    }
 

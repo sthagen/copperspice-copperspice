@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,12 +22,11 @@
 ***********************************************************************/
 
 #include <qelapsedtimer.h>
+
 #include <sys/time.h>
 #include <unistd.h>
 
 #include <mach/mach_time.h>
-
-QT_BEGIN_NAMESPACE
 
 QElapsedTimer::ClockType QElapsedTimer::clockType()
 {
@@ -40,6 +39,7 @@ bool QElapsedTimer::isMonotonic()
 }
 
 static mach_timebase_info_data_t info = {0, 0};
+
 static qint64 absoluteToNSecs(qint64 cpuTime)
 {
    if (info.denom == 0) {
@@ -111,5 +111,3 @@ bool operator<(const QElapsedTimer &v1, const QElapsedTimer &v2)
 {
    return v1.t1 < v2.t1;
 }
-
-QT_END_NAMESPACE

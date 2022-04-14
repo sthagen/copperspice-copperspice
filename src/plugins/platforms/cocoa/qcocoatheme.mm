@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -49,7 +49,7 @@
 QString QCocoaTheme::name = "cocoa";
 
 QCocoaTheme::QCocoaTheme()
-   : m_systemPalette(0)
+   : m_systemPalette(nullptr)
 {
 }
 
@@ -65,16 +65,19 @@ bool QCocoaTheme::usePlatformNativeDialog(DialogType dialogType) const
    if (dialogType == QPlatformTheme::FileDialog) {
       return true;
    }
+
 #ifndef QT_NO_COLORDIALOG
    if (dialogType == QPlatformTheme::ColorDialog) {
       return true;
    }
 #endif
+
 #ifndef QT_NO_FONTDIALOG
    if (dialogType == QPlatformTheme::FontDialog) {
       return true;
    }
 #endif
+
    return false;
 }
 
@@ -83,16 +86,19 @@ QPlatformDialogHelper *QCocoaTheme::createPlatformDialogHelper(DialogType dialog
    switch (dialogType) {
       case QPlatformTheme::FileDialog:
          return new QCocoaFileDialogHelper();
+
 #ifndef QT_NO_COLORDIALOG
       case QPlatformTheme::ColorDialog:
          return new QCocoaColorDialogHelper();
 #endif
+
 #ifndef QT_NO_FONTDIALOG
       case QPlatformTheme::FontDialog:
          return new QCocoaFontDialogHelper();
 #endif
+
       default:
-         return 0;
+         return nullptr;
    }
 }
 
@@ -110,13 +116,15 @@ const QPalette *QCocoaTheme::palette(Palette type) const
          m_systemPalette = qt_mac_createSystemPalette();
       }
       return m_systemPalette;
+
    } else {
       if (m_palettes.isEmpty()) {
          m_palettes = qt_mac_createRolePalettes();
       }
-      return m_palettes.value(type, 0);
+      return m_palettes.value(type, nullptr);
    }
-   return 0;
+
+   return nullptr;
 }
 
 QHash<QPlatformTheme::Font, QFont *> qt_mac_createRoleFonts()
@@ -130,7 +138,8 @@ const QFont *QCocoaTheme::font(Font type) const
    if (m_fonts.isEmpty()) {
       m_fonts = qt_mac_createRoleFonts();
    }
-   return m_fonts.value(type, 0);
+
+   return m_fonts.value(type, nullptr);
 }
 
 //! \internal

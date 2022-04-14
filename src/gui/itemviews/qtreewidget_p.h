@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -52,7 +52,7 @@ class QTreeModel : public QAbstractItemModel
    friend class QTreeWidgetItemIteratorPrivate;
 
  public:
-   explicit QTreeModel(int columns = 0, QTreeWidget *parent = 0);
+   explicit QTreeModel(int columns = 0, QTreeWidget *parent = nullptr);
    ~QTreeModel();
 
    inline QTreeWidget *view() const {
@@ -124,7 +124,7 @@ class QTreeModel : public QAbstractItemModel
    friend struct SkipSorting;
 
  protected:
-   QTreeModel(QTreeModelPrivate &, QTreeWidget *parent = 0);
+   QTreeModel(QTreeModelPrivate &, QTreeWidget *parent = nullptr);
    void emitDataChanged(QTreeWidgetItem *item, int column);
    void beginInsertItems(QTreeWidgetItem *parent, int row, int count);
    void endInsertItems();

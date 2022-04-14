@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,10 +24,8 @@
 #ifndef QTEMPORARYDIR_H
 #define QTEMPORARYDIR_H
 
-#include <QtCore/qdir.h>
-#include <QtCore/QScopedPointer>
-
-QT_BEGIN_NAMESPACE
+#include <qdir.h>
+#include <qscopedpointer.h>
 
 #ifndef QT_NO_TEMPORARYFILE
 
@@ -37,7 +35,11 @@ class Q_CORE_EXPORT QTemporaryDir
 {
  public:
    QTemporaryDir();
-   explicit QTemporaryDir(const QString &templateName);
+   explicit QTemporaryDir(const QString &tempPath);
+
+   QTemporaryDir(const QTemporaryDir &) = delete;
+   QTemporaryDir &operator=(const QTemporaryDir &) = delete;
+
    ~QTemporaryDir();
 
    bool isValid() const;
@@ -50,12 +52,8 @@ class Q_CORE_EXPORT QTemporaryDir
 
  private:
    QScopedPointer<QTemporaryDirPrivate> d_ptr;
-
-   Q_DISABLE_COPY(QTemporaryDir)
 };
 
 #endif // QT_NO_TEMPORARYFILE
 
-QT_END_NAMESPACE
-
-#endif // QTEMPORARYDIR_H
+#endif

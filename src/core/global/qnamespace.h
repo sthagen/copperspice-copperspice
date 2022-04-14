@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -38,12 +38,13 @@ class QMetaObject_T;
 class Q_CORE_EXPORT Qt
 {
    public:
+      // simulate cs_gadget to avoid circular dependencies
+
       using cs_parent = CSGadget_Fake_Parent;
       using cs_class  = Qt;
 
       static const char *cs_className();
       static const QMetaObject_T<Qt> &staticMetaObject();
-      virtual const QMetaObject *metaObject() const;
 
       template<int N>
       static void cs_regTrigger(cs_number<N>)
@@ -53,6 +54,8 @@ class Q_CORE_EXPORT Qt
       {
          return cs_number<0>{};
       }
+
+      static constexpr EmptyFlag_Type EmptyFlag = {};
 
       enum GlobalColor {
          color0,
@@ -85,24 +88,11 @@ class Q_CORE_EXPORT Qt
          MetaModifier         = 0x10000000,
          KeypadModifier       = 0x20000000,
          GroupSwitchModifier  = 0x40000000,
+
          // Do not extend the mask to include 0x01000000
          KeyboardModifierMask = 0xfe000000
       };
       using KeyboardModifiers = QFlags<KeyboardModifier>;
-
-   //shorter names for shortcuts
-   // The use of all-caps identifiers has the potential for clashing with
-   // user-defined or third-party macros. More so when the identifiers are not
-   // "namespace"-prefixed. This is considered bad practice and is why
-   // KeypadModifier was not added to the Modifier enum.
-   enum Modifier {
-      META          = Qt::MetaModifier,
-      SHIFT         = Qt::ShiftModifier,
-      CTRL          = Qt::ControlModifier,
-      ALT           = Qt::AltModifier,
-      MODIFIER_MASK = KeyboardModifierMask,
-      UNICODE_ACCEL = 0x00000000
-   };
 
    enum MouseButton {
       NoButton         = 0x00000000,
@@ -148,20 +138,29 @@ class Q_CORE_EXPORT Qt
    };
    using MouseButtons = QFlags<MouseButton>;
 
-   enum Orientation {
-      Horizontal = 0x1,
-      Vertical   = 0x2
-   };
+   CORE_CS_ENUM(Orientation)
+   CORE_CS_FLAG(Orientation, Orientations)
+
+   CORE_CS_REGISTER_ENUM(
+      enum Orientation {
+         Horizontal = 0x1,
+         Vertical   = 0x2
+      };
+   )
 
    using Orientations = QFlags<Orientation>;
 
-   enum FocusPolicy {
-      NoFocus     = 0,
-      TabFocus    = 0x1,
-      ClickFocus  = 0x2,
-      StrongFocus = TabFocus | ClickFocus | 0x8,
-      WheelFocus  = StrongFocus | 0x4
-   };
+   CORE_CS_ENUM(FocusPolicy)
+
+   CORE_CS_REGISTER_ENUM(
+      enum FocusPolicy {
+         NoFocus     = 0,
+         TabFocus    = 0x1,
+         ClickFocus  = 0x2,
+         StrongFocus = TabFocus | ClickFocus | 0x8,
+         WheelFocus  = StrongFocus | 0x4
+      };
+   )
 
     enum TabFocusBehavior {
       NoTabFocus           = 0x00,
@@ -185,52 +184,60 @@ class Q_CORE_EXPORT Qt
    // The following two enums can be combined to one integer which
    // is passed as 'flags' to drawText and qt_format_text.
 
-   enum AlignmentFlag {
-      AlignLeft       = 0x0001,
-      AlignLeading    = AlignLeft,
-      AlignRight      = 0x0002,
-      AlignTrailing   = AlignRight,
-      AlignHCenter    = 0x0004,
-      AlignJustify    = 0x0008,
-      AlignAbsolute   = 0x0010,
-      AlignHorizontal_Mask = AlignLeft | AlignRight | AlignHCenter | AlignJustify | AlignAbsolute,
+   CORE_CS_ENUM(AlignmentFlag)
+   CORE_CS_FLAG(AlignmentFlag, Alignment)
 
-      AlignTop        = 0x0020,
-      AlignBottom     = 0x0040,
-      AlignVCenter    = 0x0080,
-      AlignBaseline   = 0x0100,
-      AlignVertical_Mask = AlignTop | AlignBottom | AlignVCenter | AlignBaseline,
+   CORE_CS_REGISTER_ENUM(
+      enum AlignmentFlag {
+         AlignLeft       = 0x0001,
+         AlignLeading    = AlignLeft,
+         AlignRight      = 0x0002,
+         AlignTrailing   = AlignRight,
+         AlignHCenter    = 0x0004,
+         AlignJustify    = 0x0008,
+         AlignAbsolute   = 0x0010,
+         AlignHorizontal_Mask = AlignLeft | AlignRight | AlignHCenter | AlignJustify | AlignAbsolute,
 
-      AlignCenter = AlignVCenter | AlignHCenter
-   };
+         AlignTop        = 0x0020,
+         AlignBottom     = 0x0040,
+         AlignVCenter    = 0x0080,
+         AlignBaseline   = 0x0100,
+         AlignVertical_Mask = AlignTop | AlignBottom | AlignVCenter | AlignBaseline,
+         AlignCenter     = AlignVCenter | AlignHCenter
+      };
+   )
 
    using Alignment = QFlags<AlignmentFlag>;
 
    enum TextFlag {
-      TextSingleLine = 0x0100,
-      TextDontClip = 0x0200,
-      TextExpandTabs = 0x0400,
-      TextShowMnemonic = 0x0800,
-      TextWordWrap = 0x1000,
-      TextWrapAnywhere = 0x2000,
-      TextDontPrint = 0x4000,
+      TextSingleLine            = 0x0100,
+      TextDontClip              = 0x0200,
+      TextExpandTabs            = 0x0400,
+      TextShowMnemonic          = 0x0800,
+      TextWordWrap              = 0x1000,
+      TextWrapAnywhere          = 0x2000,
+      TextDontPrint             = 0x4000,
       TextIncludeTrailingSpaces = 0x08000000,
-      TextHideMnemonic = 0x8000,
-      TextJustificationForced = 0x10000,
-      TextForceLeftToRight = 0x20000,
-      TextForceRightToLeft = 0x40000,
-      TextLongestVariant = 0x80000,
-      TextBypassShaping = 0x100000
+      TextHideMnemonic          = 0x8000,
+      TextJustificationForced   = 0x10000,
+      TextForceLeftToRight      = 0x20000,
+      TextForceRightToLeft      = 0x40000,
+      TextLongestVariant        = 0x80000,
+      TextBypassShaping         = 0x100000
    };
 
-   enum TextElideMode {
-      ElideLeft,
-      ElideRight,
-      ElideMiddle,
-      ElideNone
-   };
+   CORE_CS_ENUM(TextElideMode)
 
-    enum WhiteSpaceMode {
+   CORE_CS_REGISTER_ENUM(
+      enum TextElideMode {
+         ElideLeft,
+         ElideRight,
+         ElideMiddle,
+         ElideNone
+      };
+   )
+
+   enum WhiteSpaceMode {
       WhiteSpaceNormal,
       WhiteSpacePre,
       WhiteSpaceNoWrap,
@@ -295,10 +302,10 @@ class Q_CORE_EXPORT Qt
    using WindowStates = QFlags<WindowState>;
 
     enum ApplicationState {
-       ApplicationSuspended    = 0x00000000,
-       ApplicationHidden       = 0x00000001,
-       ApplicationInactive     = 0x00000002,
-       ApplicationActive       = 0x00000004
+       ApplicationSuspended  = 0x00000000,
+       ApplicationHidden     = 0x00000001,
+       ApplicationInactive   = 0x00000002,
+       ApplicationActive     = 0x00000004
     };
 
    using ApplicationStates = QFlags<ApplicationState>;
@@ -368,18 +375,18 @@ class Q_CORE_EXPORT Qt
       WA_WState_OwnSizePolicy = 68,
       WA_WState_ExplicitShowHide = 69,
 
-      WA_ShowModal = 70,            // ## deprecated
+      WA_ShowModal = 70,                // ## deprecated
       WA_MouseNoMask = 71,
-      WA_GroupLeader = 72,          // ## deprecated
-      WA_NoMousePropagation = 73,   // ## for now, might go away.
+      WA_GroupLeader = 72,              // ## deprecated
+      WA_NoMousePropagation = 73,       // ## might go away
       WA_Hover = 74,
-      WA_InputMethodTransparent = 75, // Don't reset IM when user clicks on this (for virtual keyboards on embedded)
+      WA_InputMethodTransparent = 75,   // do not reset IM when user clicks on this (for virtual keyboards on embedded)
       WA_QuitOnClose = 76,
 
       WA_KeyboardFocusChange = 77,
 
       WA_AcceptDrops = 78,
-      WA_DropSiteRegistered = 79,   // internal
+      WA_DropSiteRegistered = 79,       // internal
 
       WA_WindowPropagation = 80,
 
@@ -1009,25 +1016,33 @@ class Q_CORE_EXPORT Qt
       Key_unknown = 0x01ffffff
    };
 
-   enum ArrowType {
-      NoArrow,
-      UpArrow,
-      DownArrow,
-      LeftArrow,
-      RightArrow
-   };
+   CORE_CS_ENUM(ArrowType)
+
+   CORE_CS_REGISTER_ENUM(
+      enum ArrowType {
+         NoArrow,
+         UpArrow,
+         DownArrow,
+         LeftArrow,
+         RightArrow
+      };
+   )
 
    // keep in sync with enum UnderlineStyle in gui/text/qtextformat.h
-   enum PenStyle {
-      NoPen,
-      SolidLine,
-      DashLine,
-      DotLine,
-      DashDotLine,
-      DashDotDotLine,
-      CustomDashLine,
-      MPenStyle = 0x0f
-   };
+   CORE_CS_ENUM(PenStyle)
+
+   CORE_CS_REGISTER_ENUM(
+      enum PenStyle {
+         NoPen,
+         SolidLine,
+         DashLine,
+         DotLine,
+         DashDotLine,
+         DashDotDotLine,
+         CustomDashLine,
+         MPenStyle = 0x0f
+      };
+   )
 
    enum PenCapStyle {                    // line endcap style
       FlatCap = 0x00,
@@ -1044,27 +1059,31 @@ class Q_CORE_EXPORT Qt
       MPenJoinStyle = 0x1c0
    };
 
-   enum BrushStyle {                     // brush style
-      NoBrush,
-      SolidPattern,
-      Dense1Pattern,
-      Dense2Pattern,
-      Dense3Pattern,
-      Dense4Pattern,
-      Dense5Pattern,
-      Dense6Pattern,
-      Dense7Pattern,
-      HorPattern,
-      VerPattern,
-      CrossPattern,
-      BDiagPattern,
-      FDiagPattern,
-      DiagCrossPattern,
-      LinearGradientPattern,
-      RadialGradientPattern,
-      ConicalGradientPattern,
-      TexturePattern = 24
-   };
+   CORE_CS_ENUM(BrushStyle)
+
+   CORE_CS_REGISTER_ENUM(
+      enum BrushStyle {                     // brush style
+         NoBrush,
+         SolidPattern,
+         Dense1Pattern,
+         Dense2Pattern,
+         Dense3Pattern,
+         Dense4Pattern,
+         Dense5Pattern,
+         Dense6Pattern,
+         Dense7Pattern,
+         HorPattern,
+         VerPattern,
+         CrossPattern,
+         BDiagPattern,
+         FDiagPattern,
+         DiagCrossPattern,
+         LinearGradientPattern,
+         RadialGradientPattern,
+         ConicalGradientPattern,
+         TexturePattern = 24
+      };
+   )
 
    enum SizeMode {
       AbsoluteSize,
@@ -1109,11 +1128,15 @@ class Q_CORE_EXPORT Qt
       CustomCursor = 25
    };
 
-   enum TextFormat {
-      PlainText,
-      RichText,
-      AutoText
-   };
+   CORE_CS_ENUM(TextFormat)
+
+   CORE_CS_REGISTER_ENUM(
+      enum TextFormat {
+         PlainText,
+         RichText,
+         AutoText
+      };
+   )
 
    enum AspectRatioMode {
       IgnoreAspectRatio,
@@ -1121,17 +1144,23 @@ class Q_CORE_EXPORT Qt
       KeepAspectRatioByExpanding
    };
 
-   enum DockWidgetArea {
-      LeftDockWidgetArea = 0x1,
-      RightDockWidgetArea = 0x2,
-      TopDockWidgetArea = 0x4,
-      BottomDockWidgetArea = 0x8,
+   CORE_CS_ENUM(DockWidgetArea)
+   CORE_CS_FLAG(DockWidgetArea, DockWidgetAreas)
 
-      DockWidgetArea_Mask = 0xf,
-      AllDockWidgetAreas = DockWidgetArea_Mask,
-      NoDockWidgetArea = 0
-   };
+   CORE_CS_REGISTER_ENUM(
+      enum DockWidgetArea {
+         LeftDockWidgetArea   = 0x1,
+         RightDockWidgetArea  = 0x2,
+         TopDockWidgetArea    = 0x4,
+         BottomDockWidgetArea = 0x8,
 
+         DockWidgetArea_Mask   = 0xf,
+         AllDockWidgetAreas    = DockWidgetArea_Mask,
+         NoDockWidgetArea     = 0
+      };
+   )
+
+   // internal
    enum DockWidgetAreaSizes {
       NDockWidgetAreas = 4
    };
@@ -1149,14 +1178,15 @@ class Q_CORE_EXPORT Qt
       NoToolBarArea = 0
    };
 
+   using ToolBarAreas = QFlags<ToolBarArea>;
+
+   // internal
    enum ToolBarAreaSizes {
       NToolBarAreas = 4
    };
 
-   using ToolBarAreas = QFlags<ToolBarArea>;
-
    enum DateFormat {
-      TextDate,                      // default Qt
+      TextDate,                      // default
       ISODate,                       // ISO 8601
       SystemLocaleDate,              // deprecated
       LocalDate = SystemLocaleDate,  // deprecated
@@ -1168,33 +1198,49 @@ class Q_CORE_EXPORT Qt
       RFC2822Date                    // RFC 2822 (+ 850 and 1036 during parsing)
    };
 
-   enum TimeSpec {
-      LocalTime,
-      UTC,
-      OffsetFromUTC,
-      TimeZone
-   };
+   CORE_CS_ENUM(TimeSpec)
 
-   enum DayOfWeek {
-      Monday    = 1,
-      Tuesday   = 2,
-      Wednesday = 3,
-      Thursday  = 4,
-      Friday    = 5,
-      Saturday  = 6,
-      Sunday    = 7
-   };
+   CORE_CS_REGISTER_ENUM(
+      enum TimeSpec {
+         LocalTime,
+         UTC,
+         OffsetFromUTC,
+         TimeZone
+      };
+   )
 
-   enum ScrollBarPolicy {
-      ScrollBarAsNeeded,
-      ScrollBarAlwaysOff,
-      ScrollBarAlwaysOn
-   };
+   CORE_CS_ENUM(DayOfWeek)
 
-   enum CaseSensitivity {
-      CaseInsensitive,
-      CaseSensitive
-   };
+   CORE_CS_REGISTER_ENUM(
+      enum DayOfWeek {
+         Monday    = 1,
+         Tuesday   = 2,
+         Wednesday = 3,
+         Thursday  = 4,
+         Friday    = 5,
+         Saturday  = 6,
+         Sunday    = 7
+      };
+   )
+
+   CORE_CS_ENUM(ScrollBarPolicy)
+
+   CORE_CS_REGISTER_ENUM(
+      enum ScrollBarPolicy {
+         ScrollBarAsNeeded,
+         ScrollBarAlwaysOff,
+         ScrollBarAlwaysOn
+      };
+   )
+
+   CORE_CS_ENUM(CaseSensitivity)
+
+   CORE_CS_REGISTER_ENUM(
+      enum CaseSensitivity {
+         CaseInsensitive,
+         CaseSensitive
+      };
+   )
 
    enum Corner {
       TopLeftCorner = 0x00000,
@@ -1243,13 +1289,16 @@ class Q_CORE_EXPORT Qt
       IntersectClip
    };
 
-   // Shape = 0x1, BoundingRect = 0x2
-   enum ItemSelectionMode {
-      ContainsItemShape = 0x0,
-      IntersectsItemShape = 0x1,
-      ContainsItemBoundingRect = 0x2,
-      IntersectsItemBoundingRect = 0x3
-   };
+   CORE_CS_ENUM(ItemSelectionMode)
+
+   CORE_CS_REGISTER_ENUM(
+      enum ItemSelectionMode {
+         ContainsItemShape          = 0x0,
+         IntersectsItemShape        = 0x1,
+         ContainsItemBoundingRect   = 0x2,
+         IntersectsItemBoundingRect = 0x3
+      };
+   )
 
    enum ItemSelectionOperation {
       ReplaceSelection,
@@ -1279,13 +1328,17 @@ class Q_CORE_EXPORT Qt
       NoFocusReason
    };
 
-   enum ContextMenuPolicy {
-      NoContextMenu,
-      DefaultContextMenu,
-      ActionsContextMenu,
-      CustomContextMenu,
-      PreventContextMenu
-   };
+   CORE_CS_ENUM(ContextMenuPolicy)
+
+   CORE_CS_REGISTER_ENUM(
+      enum ContextMenuPolicy {
+         NoContextMenu,
+         DefaultContextMenu,
+         ActionsContextMenu,
+         CustomContextMenu,
+         PreventContextMenu
+      };
+   )
 
    enum InputMethodQuery {
       ImEnabled           = 0x1,
@@ -1355,19 +1408,27 @@ class Q_CORE_EXPORT Qt
       EnterKeyPrevious
    };
 
-   enum ToolButtonStyle {
-      ToolButtonIconOnly,
-      ToolButtonTextOnly,
-      ToolButtonTextBesideIcon,
-      ToolButtonTextUnderIcon,
-      ToolButtonFollowStyle
-   };
+   CORE_CS_ENUM(ToolButtonStyle)
 
-   enum LayoutDirection {
-      LeftToRight,
-      RightToLeft,
-      LayoutDirectionAuto
-   };
+   CORE_CS_REGISTER_ENUM(
+      enum ToolButtonStyle {
+         ToolButtonIconOnly,
+         ToolButtonTextOnly,
+         ToolButtonTextBesideIcon,
+         ToolButtonTextUnderIcon,
+         ToolButtonFollowStyle
+      };
+   )
+
+   CORE_CS_ENUM(LayoutDirection)
+
+   CORE_CS_REGISTER_ENUM(
+      enum LayoutDirection {
+         LeftToRight,
+         RightToLeft,
+         LayoutDirectionAuto
+      };
+   )
 
    enum AnchorPoint {
       AnchorLeft = 0,
@@ -1382,16 +1443,23 @@ class Q_CORE_EXPORT Qt
       FindDirectChildrenOnly  = 0x0,
       FindChildrenRecursively = 0x1
    };
+
    using FindChildOptions = QFlags<FindChildOption>;
 
-   enum DropAction {
-      CopyAction       = 0x1,
-      MoveAction       = 0x2,
-      LinkAction       = 0x4,
-      ActionMask       = 0xff,
-      TargetMoveAction = 0x8002,
-      IgnoreAction     = 0x0
-   };
+   CORE_CS_ENUM(DropAction)
+   CORE_CS_FLAG(DropAction, DropActions)
+
+   CORE_CS_REGISTER_ENUM(
+      enum DropAction {
+         CopyAction       = 0x1,
+         MoveAction       = 0x2,
+         LinkAction       = 0x4,
+         ActionMask       = 0xff,
+         TargetMoveAction = 0x8002,
+         IgnoreAction     = 0x0
+      };
+   )
+
    using DropActions = QFlags<DropAction>;
 
    enum CheckState {
@@ -1462,23 +1530,33 @@ class Q_CORE_EXPORT Qt
 
    typedef void *HANDLE;
 
-   enum WindowModality {
-      NonModal,
-      WindowModal,
-      ApplicationModal
-   };
+   CORE_CS_ENUM(WindowModality)
 
-   enum TextInteractionFlag {
-      NoTextInteraction         = 0,
-      TextSelectableByMouse     = 1,
-      TextSelectableByKeyboard  = 2,
-      LinksAccessibleByMouse    = 4,
-      LinksAccessibleByKeyboard = 8,
-      TextEditable              = 16,
+   CORE_CS_REGISTER_ENUM(
+      enum WindowModality {
+         NonModal,
+         WindowModal,
+         ApplicationModal
+      };
+   )
 
-      TextEditorInteraction     = TextSelectableByMouse | TextSelectableByKeyboard | TextEditable,
-      TextBrowserInteraction    = TextSelectableByMouse | LinksAccessibleByMouse | LinksAccessibleByKeyboard
-   };
+   CORE_CS_ENUM(TextInteractionFlag)
+   CORE_CS_FLAG(TextInteractionFlag, TextInteractionFlags)
+
+   CORE_CS_REGISTER_ENUM(
+      enum TextInteractionFlag {
+         NoTextInteraction         = 0,
+         TextSelectableByMouse     = 1,
+         TextSelectableByKeyboard  = 2,
+         LinksAccessibleByMouse    = 4,
+         LinksAccessibleByKeyboard = 8,
+         TextEditable              = 16,
+
+         TextEditorInteraction     = TextSelectableByMouse | TextSelectableByKeyboard | TextEditable,
+         TextBrowserInteraction    = TextSelectableByMouse | LinksAccessibleByMouse | LinksAccessibleByKeyboard
+      };
+   )
+
    using TextInteractionFlags = QFlags<TextInteractionFlag>;
 
    enum EventPriority {
@@ -1487,13 +1565,17 @@ class Q_CORE_EXPORT Qt
       LowEventPriority = -1
    };
 
-   enum SizeHint {
-      MinimumSize,
-      PreferredSize,
-      MaximumSize,
-      MinimumDescent,
-      NSizeHints
-   };
+   CORE_CS_ENUM(SizeHint)
+
+   CORE_CS_REGISTER_ENUM(
+      enum SizeHint {
+         MinimumSize,
+         PreferredSize,
+         MaximumSize,
+         MinimumDescent,
+         NSizeHints
+      };
+   )
 
    enum WindowFrameSection {
       NoSection,
@@ -1508,11 +1590,11 @@ class Q_CORE_EXPORT Qt
       TitleBarArea                // For move
    };
 
-   enum class Initialization {
-      Uninitialized
+   // internal
+   struct NoDataOverload {
    };
 
-   static constexpr Initialization Uninitialized = Initialization::Uninitialized;
+   static constexpr auto NoData = NoDataOverload();
 
    enum CoordinateSystem {
       DeviceCoordinates,
@@ -1579,11 +1661,14 @@ class Q_CORE_EXPORT Qt
       NavigationModeCursorForceVisible
    };
 
-   enum CursorMoveStyle {
-      LogicalMoveStyle,
-      VisualMoveStyle
-   };
+   CORE_CS_ENUM(CursorMoveStyle)
 
+   CORE_CS_REGISTER_ENUM(
+      enum CursorMoveStyle {
+         LogicalMoveStyle,
+         VisualMoveStyle
+      };
+   )
 
    enum TimerType {
       PreciseTimer,
@@ -1592,7 +1677,7 @@ class Q_CORE_EXPORT Qt
    };
 
    enum ScrollPhase {
-      NoScrollPhase = 0, // Make public in 5.7 or asap
+      NoScrollPhase = 0,
       ScrollBegin,
       ScrollUpdate,
       ScrollEnd
@@ -1601,7 +1686,7 @@ class Q_CORE_EXPORT Qt
    enum MouseEventSource {
       MouseEventNotSynthesized,
       MouseEventSynthesizedBySystem,
-      MouseEventSynthesizedByQt,
+      MouseEventSynthesizedByCS,
       MouseEventSynthesizedByApplication
    };
 
@@ -1615,67 +1700,34 @@ class Q_CORE_EXPORT Qt
    // following enum and 3 methods declarations moved from gui/text/qtextdocument.h
    enum HitTestAccuracy { ExactHit, FuzzyHit };
 
-   static bool mightBeRichText(const QString &);
+   static bool mightBeRichText(const QString &text);
    static QString convertFromPlainText(const QString &plain, WhiteSpaceMode mode = WhiteSpacePre);
 
 #ifndef QT_NO_TEXTCODEC
    static QTextCodec *codecForHtml(const QByteArray &ba);
 #endif
 
-   CORE_CS_ENUM(ScrollBarPolicy)
-   CORE_CS_ENUM(FocusPolicy)
-   CORE_CS_ENUM(ContextMenuPolicy)
-   CORE_CS_ENUM(ArrowType)
-   CORE_CS_ENUM(ToolButtonStyle)
-   CORE_CS_ENUM(PenStyle)
+   CORE_CS_ENUM(ApplicationAttribute)
+   CORE_CS_ENUM(AspectRatioMode)
+   CORE_CS_ENUM(Axis)
+   CORE_CS_ENUM(BGMode)
+   CORE_CS_ENUM(CheckState)
+   CORE_CS_ENUM(ClipOperation)
+   CORE_CS_ENUM(ConnectionType)
+   CORE_CS_ENUM(Corner)
+   CORE_CS_ENUM(CursorShape)
+   CORE_CS_ENUM(DateFormat)
+   CORE_CS_ENUM(FillRule)
+   CORE_CS_ENUM(GlobalColor)
+   CORE_CS_ENUM(Key)
+   CORE_CS_ENUM(MaskMode)
    CORE_CS_ENUM(PenCapStyle)
    CORE_CS_ENUM(PenJoinStyle)
-   CORE_CS_ENUM(BrushStyle)
-   CORE_CS_ENUM(FillRule)
-   CORE_CS_ENUM(MaskMode)
-   CORE_CS_ENUM(BGMode)
-   CORE_CS_ENUM(ClipOperation)
-   CORE_CS_ENUM(SizeMode)
-   CORE_CS_ENUM(Axis)
-   CORE_CS_ENUM(Corner)
-   CORE_CS_ENUM(LayoutDirection)
-   CORE_CS_ENUM(SizeHint)
-   CORE_CS_ENUM(TextFormat)
-   CORE_CS_ENUM(TextElideMode)
-   CORE_CS_ENUM(DateFormat)
-   CORE_CS_ENUM(TimeSpec)
-   CORE_CS_ENUM(DayOfWeek)
-   CORE_CS_ENUM(CursorShape)
-   CORE_CS_ENUM(GlobalColor)
-   CORE_CS_ENUM(AspectRatioMode)
-   CORE_CS_ENUM(TransformationMode)
-   CORE_CS_ENUM(Key)
    CORE_CS_ENUM(ShortcutContext)
-   CORE_CS_ENUM(ItemSelectionMode)
-   CORE_CS_ENUM(CheckState)
+   CORE_CS_ENUM(SizeMode)
    CORE_CS_ENUM(SortOrder)
-   CORE_CS_ENUM(CaseSensitivity)
-   CORE_CS_ENUM(WindowModality)
+   CORE_CS_ENUM(TransformationMode)
    CORE_CS_ENUM(WidgetAttribute)
-   CORE_CS_ENUM(ApplicationAttribute)
-   CORE_CS_ENUM(ConnectionType)
-   CORE_CS_ENUM(CursorMoveStyle)
-
-   //
-   CORE_CS_ENUM(TextInteractionFlag)
-   CORE_CS_FLAG(TextInteractionFlag, TextInteractionFlags)
-
-   CORE_CS_ENUM(Orientation)
-   CORE_CS_FLAG(Orientation, Orientations)
-
-   CORE_CS_ENUM(AlignmentFlag)
-   CORE_CS_FLAG(AlignmentFlag, Alignment)
-
-   CORE_CS_ENUM(DropAction)
-   CORE_CS_FLAG(DropAction, DropActions)
-
-   CORE_CS_ENUM(DockWidgetArea)
-   CORE_CS_FLAG(DockWidgetArea, DockWidgetAreas)
 
    CORE_CS_ENUM(ToolBarArea)
    CORE_CS_FLAG(ToolBarArea, ToolBarAreas)
@@ -1734,7 +1786,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(Qt::TouchPointStates)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Qt::MouseEventFlags)
 
 #ifndef QT_NO_GESTURES
-Q_DECLARE_OPERATORS_FOR_FLAGS(Qt::GestureFlags)
+   Q_DECLARE_OPERATORS_FOR_FLAGS(Qt::GestureFlags)
 #endif
 
 typedef bool (*qInternalCallback)(void **);

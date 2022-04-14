@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,12 @@
 #ifndef QGenericDynamicContext_P_H
 #define QGenericDynamicContext_P_H
 
-#include <QDateTime>
-#include <QVector>
+#include <qdatetime.h>
+#include <qvector.h>
 
 #include <qdaytimeduration_p.h>
 #include <qstackcontextbase_p.h>
 #include <qexpression_p.h>
-
-QT_BEGIN_NAMESPACE
 
 namespace QPatternist {
 
@@ -104,8 +102,7 @@ class GenericDynamicContext : public StackContextBase<DynamicContext>
    ItemCacheCell::Vector           m_globalItemCacheCells;
    ItemSequenceCacheCell::Vector   m_globalItemSequenceCacheCells;
 };
-}
 
-QT_END_NAMESPACE
+}
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -27,7 +27,7 @@
 #include <qsqldriver.h>
 #include <qsqlresult.h>
 
-#if defined (Q_OS_WIN32)
+#if defined (Q_OS_WIN)
 #include <qt_windows.h>
 #endif
 
@@ -43,9 +43,6 @@
 
 #include <sql.h>
 #include <sqlext.h>
-
-
-QT_BEGIN_NAMESPACE
 
 class QODBCPrivate;
 class QODBCDriverPrivate;
@@ -124,8 +121,5 @@ class Q_EXPORT_SQLDRIVER_ODBC QODBCDriver : public QSqlDriver
    QODBCDriverPrivate *d;
    friend class QODBCPrivate;
 };
-
-QT_END_NAMESPACE
-
 
 #endif // QSQL_ODBC_H

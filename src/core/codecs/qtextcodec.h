@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,14 +37,16 @@ class QTextEncoder;
 
 class Q_CORE_EXPORT QTextCodec
 {
-   Q_DISABLE_COPY(QTextCodec)
-
  public:
+   QTextCodec(const QTextCodec &) = delete;
+   QTextCodec &operator=(const QTextCodec &) = delete;
+
    static QTextCodec *codecForName(const QString &name);
 
    static QTextCodec *codecForName(const char *name) {
       return codecForName(QString::fromUtf8(name));
    }
+
    static QTextCodec *codecForMib(int mib);
 
    static QStringList availableCodecs();
@@ -56,14 +58,14 @@ class Q_CORE_EXPORT QTextCodec
    static QTextCodec *codecForTr();
    static void setCodecForTr(QTextCodec *c);
 
-   static QTextCodec *codecForHtml(const QByteArray &ba);
-   static QTextCodec *codecForHtml(const QByteArray &ba, QTextCodec *defaultCodec);
+   static QTextCodec *codecForHtml(const QByteArray &data);
+   static QTextCodec *codecForHtml(const QByteArray &data, QTextCodec *defaultCodec);
 
-   static QTextCodec *codecForUtfText(const QByteArray &ba);
-   static QTextCodec *codecForUtfText(const QByteArray &ba, QTextCodec *defaultCodec);
+   static QTextCodec *codecForUtfText(const QByteArray &data);
+   static QTextCodec *codecForUtfText(const QByteArray &data, QTextCodec *defaultCodec);
 
-   bool canEncode(QChar) const;
-   bool canEncode(const QString &) const;
+   bool canEncode(QChar ch) const;
+   bool canEncode(const QString &str) const;
 
    enum ConversionFlag {
       DefaultConversion,
@@ -74,31 +76,31 @@ class Q_CORE_EXPORT QTextCodec
    using ConversionFlags = QFlags<ConversionFlag>;
 
    struct Q_CORE_EXPORT ConverterState {
-      ConverterState(ConversionFlags f = DefaultConversion)
-         : flags(f), remainingChars(0), invalidChars(0), d(0)
+      ConverterState(ConversionFlags flags = DefaultConversion)
+         : m_flags(flags), remainingChars(0), invalidChars(0), m_data(nullptr)
       {
          state_data[0] = 0;
          state_data[1] = 0;
          state_data[2] = 0;
       }
 
+      ConverterState(const ConverterState &) = delete;
+      ConverterState &operator=(const ConverterState &) = delete;
+
       ~ConverterState();
 
-      ConversionFlags flags;
+      ConversionFlags m_flags;
       int remainingChars;
       int invalidChars;
       uint state_data[3];
-      void *d;
-
-    private:
-      Q_DISABLE_COPY(ConverterState)
+      void *m_data;
    };
 
-   QString toUnicode(const QByteArray &) const;
-   QString toUnicode(const char *chars) const;
+   QString toUnicode(const QByteArray &input) const;
+   QString toUnicode(const char *input) const;
 
-   QString toUnicode(const char *in, int len, ConverterState *state = nullptr) const {
-      return convertToUnicode(in, len, state);
+   QString toUnicode(const char *input, int len, ConverterState *state = nullptr) const {
+      return convertToUnicode(input, len, state);
    }
 
    QByteArray fromUnicode(const QString &str, ConverterState *state = nullptr) const {
@@ -117,7 +119,7 @@ class Q_CORE_EXPORT QTextCodec
    virtual int mibEnum() const = 0;
 
  protected:
-   virtual QString convertToUnicode(const char *in, int len, ConverterState *state) const = 0;
+   virtual QString convertToUnicode(const char *input, int len, ConverterState *state) const = 0;
    virtual QByteArray convertFromUnicode(QStringView str, ConverterState *state) const = 0;
 
    QTextCodec();
@@ -128,11 +130,12 @@ class Q_CORE_EXPORT QTextCodec
    static QTextCodec *cftr;
    static bool validCodecs();
 };
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(QTextCodec::ConversionFlags)
 
 inline QTextCodec *QTextCodec::codecForTr()
 {
-   return validCodecs() ? cftr : 0;
+   return validCodecs() ? cftr : nullptr;
 }
 
 inline void QTextCodec::setCodecForTr(QTextCodec *c)
@@ -142,12 +145,15 @@ inline void QTextCodec::setCodecForTr(QTextCodec *c)
 
 class Q_CORE_EXPORT QTextEncoder
 {
-   Q_DISABLE_COPY(QTextEncoder)
-
  public:
    explicit QTextEncoder(const QTextCodec *codec) : c(codec), state() {}
    QTextEncoder(const QTextCodec *codec, QTextCodec::ConversionFlags flags);
+
+   QTextEncoder(const QTextEncoder &) = delete;
+   QTextEncoder &operator=(const QTextEncoder &) = delete;
+
    ~QTextEncoder();
+
    QByteArray fromUnicode(const QString &str);
    QByteArray fromUnicode(const QChar *uc, int len);
    bool hasFailure() const;
@@ -159,12 +165,19 @@ class Q_CORE_EXPORT QTextEncoder
 
 class Q_CORE_EXPORT QTextDecoder
 {
-   Q_DISABLE_COPY(QTextDecoder)
-
  public:
-   explicit QTextDecoder(const QTextCodec *codec) : c(codec), state() {}
+   explicit QTextDecoder(const QTextCodec *codec)
+      : c(codec), state()
+   {
+   }
+
    QTextDecoder(const QTextCodec *codec, QTextCodec::ConversionFlags flags);
+
+   QTextDecoder(const QTextDecoder &) = delete;
+   QTextDecoder &operator=(const QTextDecoder &) = delete;
+
    ~QTextDecoder();
+
    QString toUnicode(const char *chars, int len);
    QString toUnicode(const QByteArray &ba);
    void toUnicode(QString *target, const char *chars, int len);
@@ -177,4 +190,4 @@ class Q_CORE_EXPORT QTextDecoder
 
 #endif // QT_NO_TEXTCODEC
 
-#endif // QTEXTCODEC_H
+#endif

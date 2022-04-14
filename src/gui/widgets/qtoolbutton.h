@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -36,8 +36,6 @@ class Q_GUI_EXPORT QToolButton : public QAbstractButton
 {
    GUI_CS_OBJECT(QToolButton)
 
-   GUI_CS_ENUM(Qt::ToolButtonStyle)
-   GUI_CS_ENUM(Qt::ArrowType)
    GUI_CS_ENUM(ToolButtonPopupMode)
 
 #ifndef QT_NO_MENU
@@ -55,13 +53,19 @@ class Q_GUI_EXPORT QToolButton : public QAbstractButton
    GUI_CS_PROPERTY_WRITE(arrowType, setArrowType)
 
  public:
-   enum ToolButtonPopupMode {
-      DelayedPopup,
-      MenuButtonPopup,
-      InstantPopup
-   };
+   GUI_CS_REGISTER_ENUM(
+      enum ToolButtonPopupMode {
+         DelayedPopup,
+         MenuButtonPopup,
+         InstantPopup
+      };
+   )
 
    explicit QToolButton(QWidget *parent = nullptr);
+
+   QToolButton(const QToolButton &) = delete;
+   QToolButton &operator=(const QToolButton &) = delete;
+
    ~QToolButton();
 
    QSize sizeHint() const override;
@@ -93,32 +97,31 @@ class Q_GUI_EXPORT QToolButton : public QAbstractButton
    GUI_CS_SLOT_1(Public, void setToolButtonStyle(Qt::ToolButtonStyle style))
    GUI_CS_SLOT_2(setToolButtonStyle)
 
-   GUI_CS_SLOT_1(Public, void setDefaultAction(QAction *un_named_arg1))
+   GUI_CS_SLOT_1(Public, void setDefaultAction(QAction *action))
    GUI_CS_SLOT_2(setDefaultAction)
 
-   GUI_CS_SIGNAL_1(Public, void triggered(QAction *un_named_arg1))
-   GUI_CS_SIGNAL_2(triggered, un_named_arg1)
+   GUI_CS_SIGNAL_1(Public, void triggered(QAction *action))
+   GUI_CS_SIGNAL_2(triggered, action)
 
  protected:
    QToolButton(QToolButtonPrivate &, QWidget *parent);
 
-   bool event(QEvent *e) override;
-   void mousePressEvent(QMouseEvent *) override;
-   void mouseReleaseEvent(QMouseEvent *) override;
-   void paintEvent(QPaintEvent *) override;
-   void actionEvent(QActionEvent *) override;
+   bool event(QEvent *event) override;
+   void mousePressEvent(QMouseEvent *event) override;
+   void mouseReleaseEvent(QMouseEvent *event) override;
+   void paintEvent(QPaintEvent *event) override;
+   void actionEvent(QActionEvent *event) override;
 
-   void enterEvent(QEvent *) override;
-   void leaveEvent(QEvent *) override;
-   void timerEvent(QTimerEvent *) override;
-   void changeEvent(QEvent *) override;
+   void enterEvent(QEvent *event) override;
+   void leaveEvent(QEvent *event) override;
+   void timerEvent(QTimerEvent *event) override;
+   void changeEvent(QEvent *event) override;
 
    bool hitButton(const QPoint &pos) const override;
    void nextCheckState() override;
    void initStyleOption(QStyleOptionToolButton *option) const;
 
  private:
-   Q_DISABLE_COPY(QToolButton)
    Q_DECLARE_PRIVATE(QToolButton)
 
 #ifndef QT_NO_MENU
@@ -137,7 +140,6 @@ class Q_GUI_EXPORT QToolButton : public QAbstractButton
 
    GUI_CS_SLOT_1(Private, void _q_actionTriggered())
    GUI_CS_SLOT_2(_q_actionTriggered)
-
 };
 
 #endif // QT_NO_TOOLBUTTON

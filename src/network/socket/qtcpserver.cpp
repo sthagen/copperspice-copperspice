@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -37,14 +37,14 @@
 #define Q_CHECK_SOCKETENGINE(returnValue) do { \
     if (! d->socketEngine) { \
         return returnValue; \
-    } } while (0)
+    } } while (false)
 
 
 /*! \internal
 */
 QTcpServerPrivate::QTcpServerPrivate()
-   : port(0), state(QAbstractSocket::UnconnectedState), socketEngine(0)
-   , serverSocketError(QAbstractSocket::UnknownSocketError), maxConnections(30)
+   : port(0), state(QAbstractSocket::UnconnectedState), socketEngine(nullptr),
+     serverSocketError(QAbstractSocket::UnknownSocketError), maxConnections(30)
 {
 }
 
@@ -272,7 +272,7 @@ void QTcpServer::close()
          // in out of memory situations, the socketEngine
          // will be deleted in ~QTcpServer (it's a child-object of this)
       }
-      d->socketEngine = 0;
+      d->socketEngine = nullptr;
    }
 
    d->state = QAbstractSocket::UnconnectedState;
@@ -385,7 +385,7 @@ QTcpSocket *QTcpServer::nextPendingConnection()
 {
    Q_D(QTcpServer);
    if (d->pendingConnections.isEmpty()) {
-      return 0;
+      return nullptr;
    }
 
    if (! d->socketEngine->isReadNotificationEnabled()) {

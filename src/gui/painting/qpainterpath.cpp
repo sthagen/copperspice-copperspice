@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -161,8 +161,9 @@ void QPainterPath::setElementPositionAt(int i, qreal x, qreal y)
     e.x = x;
     e.y = y;
 }
+
 QPainterPath::QPainterPath()
-   : d_ptr(0)
+   : d_ptr(nullptr)
 {
 }
 
@@ -204,10 +205,12 @@ void QPainterPath::ensureData_helper()
 {
    QPainterPathPrivate *data = new QPainterPathData;
    data->elements.reserve(16);
+
    QPainterPath::Element e = { 0, 0, QPainterPath::MoveToElement };
    data->elements << e;
    d_ptr.reset(data);
-   Q_ASSERT(d_ptr != 0);
+
+   Q_ASSERT(d_ptr != nullptr);
 }
 
 QPainterPath &QPainterPath::operator=(const QPainterPath &other)
@@ -395,11 +398,8 @@ void QPainterPath::arcTo(const QRectF &rect, qreal startAngle, qreal sweepLength
 
    lineTo(curve_start);
    for (int i = 0; i < point_count; i += 3) {
-      cubicTo(pts[i].x(), pts[i].y(),
-         pts[i + 1].x(), pts[i + 1].y(),
-         pts[i + 2].x(), pts[i + 2].y());
+      cubicTo(pts[i].x(), pts[i].y(), pts[i + 1].x(), pts[i + 1].y(), pts[i + 2].x(), pts[i + 2].y());
    }
-
 }
 
 void QPainterPath::arcMoveTo(const QRectF &rect, qreal angle)
@@ -409,7 +409,7 @@ void QPainterPath::arcMoveTo(const QRectF &rect, qreal angle)
    }
 
    QPointF pt;
-   qt_find_ellipse_coords(rect, angle, 0, &pt, 0);
+   qt_find_ellipse_coords(rect, angle, 0, &pt, nullptr);
    moveTo(pt);
 }
 
@@ -546,10 +546,8 @@ void QPainterPath::addText(const QPointF &point, const QFont &f, const QString &
          QGlyphLayout glyphs = eng->shapedGlyphs(&si);
          QFontEngine *fe = f.d->engineForScript(si.analysis.script);
          Q_ASSERT(fe);
-         fe->addOutlineToPath(x, y, glyphs, this,
-            si.analysis.bidiLevel % 2
-            ? QTextItem::RenderFlags(QTextItem::RightToLeft)
-            : QTextItem::RenderFlags(0));
+         fe->addOutlineToPath(x, y, glyphs, this, si.analysis.bidiLevel % 2
+            ? QTextItem::RenderFlags(QTextItem::RightToLeft) : QTextItem::RenderFlags(Qt::EmptyFlag));
 
          const qreal lw = fe->lineThickness().toReal();
          if (f.d->underline) {
@@ -2352,9 +2350,10 @@ void QPainterPath::setDirty(bool dirty)
 {
    d_func()->dirtyBounds        = dirty;
    d_func()->dirtyControlBounds = dirty;
+
    delete d_func()->pathConverter;
-   d_func()->pathConverter = 0;
-   d_func()->convex = false;
+   d_func()->pathConverter = nullptr;
+   d_func()->convex        = false;
 }
 
 void QPainterPath::computeBoundingRect() const

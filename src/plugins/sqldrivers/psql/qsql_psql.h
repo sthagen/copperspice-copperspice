@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -33,8 +33,8 @@
 #define Q_EXPORT_SQLDRIVER_PSQL Q_SQL_EXPORT
 #endif
 
-typedef struct pg_conn PGconn;
-typedef struct pg_result PGresult;
+using PGconn   = struct pg_conn;
+using PGresult = struct pg_result;
 
 class QPSQLResultPrivate;
 class QPSQLDriverPrivate;
@@ -98,6 +98,7 @@ class Q_EXPORT_SQLDRIVER_PSQL QPSQLDriver : public QSqlDriver
       Version98 = 24,
       Version10 = 25,
       Version11 = 26,
+      Version12 = 27,
    };
 
    explicit QPSQLDriver(QObject *parent = nullptr);
@@ -136,5 +137,8 @@ class Q_EXPORT_SQLDRIVER_PSQL QPSQLDriver : public QSqlDriver
 
    friend class QPSQLResultPrivate;
 };
+
+CS_DECLARE_METATYPE(pg_conn)
+CS_DECLARE_METATYPE(pg_result)
 
 #endif

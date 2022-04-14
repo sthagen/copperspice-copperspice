@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -53,6 +53,7 @@ class Q_MULTIMEDIA_EXPORT QAbstractVideoSurface : public QObject
 
    virtual QList<QVideoFrame::PixelFormat> supportedPixelFormats(
       QAbstractVideoBuffer::HandleType handleType = QAbstractVideoBuffer::NoHandle) const = 0;
+
    virtual bool isFormatSupported(const QVideoSurfaceFormat &format) const;
    virtual QVideoSurfaceFormat nearestFormat(const QVideoSurfaceFormat &format) const;
 
@@ -77,8 +78,8 @@ class Q_MULTIMEDIA_EXPORT QAbstractVideoSurface : public QObject
    MULTI_CS_SIGNAL_1(Public, void supportedFormatsChanged())
    MULTI_CS_SIGNAL_2(supportedFormatsChanged)
 
-   MULTI_CS_SIGNAL_1(Public, void nativeResolutionChanged(const QSize &arg1))
-   MULTI_CS_SIGNAL_2(nativeResolutionChanged, arg1)
+   MULTI_CS_SIGNAL_1(Public, void nativeResolutionChanged(const QSize &resolution))
+   MULTI_CS_SIGNAL_2(nativeResolutionChanged, resolution)
 
  protected:
    QScopedPointer<QAbstractVideoSurfacePrivate> d_ptr;
@@ -92,8 +93,5 @@ class Q_MULTIMEDIA_EXPORT QAbstractVideoSurface : public QObject
 };
 
 Q_MULTIMEDIA_EXPORT QDebug operator<<(QDebug, const QAbstractVideoSurface::Error &);
-
-Q_DECLARE_METATYPE(QAbstractVideoSurface *)
-Q_DECLARE_METATYPE(QAbstractVideoSurface::Error)
 
 #endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -34,10 +34,13 @@ class QScreen;
 class Q_GUI_EXPORT QOffscreenSurface : public QObject, public QSurface
 {
    GUI_CS_OBJECT_MULTIPLE(QOffscreenSurface, QObject)
-   Q_DECLARE_PRIVATE(QOffscreenSurface)
 
  public:
    explicit QOffscreenSurface(QScreen *screen = nullptr);
+
+   QOffscreenSurface(const QOffscreenSurface &) = delete;
+   QOffscreenSurface &operator=(const QOffscreenSurface &) = delete;
+
    virtual ~QOffscreenSurface();
 
    SurfaceType surfaceType() const override;
@@ -65,12 +68,12 @@ class Q_GUI_EXPORT QOffscreenSurface : public QObject, public QSurface
    QScopedPointer<QOffscreenSurfacePrivate> d_ptr;
 
  private:
-   GUI_CS_SLOT_1(Private, void screenDestroyed(QObject *screen))
-   GUI_CS_SLOT_2(screenDestroyed)
+   Q_DECLARE_PRIVATE(QOffscreenSurface)
 
    QPlatformSurface *surfaceHandle() const override;
 
-   Q_DISABLE_COPY(QOffscreenSurface)
+   GUI_CS_SLOT_1(Private, void screenDestroyed(QObject *screen))
+   GUI_CS_SLOT_2(screenDestroyed)
 };
 
 #endif

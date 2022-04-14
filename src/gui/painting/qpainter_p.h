@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -24,14 +24,14 @@
 #ifndef QPAINTER_P_H
 #define QPAINTER_P_H
 
-#include <QtGui/qbrush.h>
-#include <QtGui/qfont.h>
-#include <QtGui/qpen.h>
-#include <QtGui/qregion.h>
-#include <QtGui/qmatrix.h>
-#include <QtGui/qpainter.h>
-#include <QtGui/qpainterpath.h>
-#include <QtGui/qpaintengine.h>
+#include <qbrush.h>
+#include <qfont.h>
+#include <qpen.h>
+#include <qregion.h>
+#include <qmatrix.h>
+#include <qpainter.h>
+#include <qpainterpath.h>
+#include <qpaintengine.h>
 
 #include <qpen_p.h>
 
@@ -212,9 +212,10 @@ class QPainterPrivate
 
  public:
    QPainterPrivate(QPainter *painter)
-      : q_ptr(painter), d_ptrs(0), state(0), dummyState(0), txinv(0), inDestructor(false), d_ptrs_size(0),
-        refcount(1), device(0), original_device(0), helper_device(0), engine(0), emulationEngine(0),
-        extended(0) {
+      : q_ptr(painter), d_ptrs(nullptr), state(nullptr), dummyState(nullptr), txinv(0), inDestructor(false),
+        d_ptrs_size(0), refcount(1), device(nullptr), original_device(nullptr), helper_device(nullptr),
+        engine(nullptr),  emulationEngine(nullptr), extended(nullptr)
+   {
    }
 
    ~QPainterPrivate();

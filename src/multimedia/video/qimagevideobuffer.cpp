@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -22,11 +22,11 @@
 ***********************************************************************/
 
 #include <qimagevideobuffer_p.h>
-#include <qabstractvideobuffer_p.h>
+
 #include <qimage.h>
 #include <qvariant.h>
 
-
+#include <qabstractvideobuffer_p.h>
 
 class QImageVideoBufferPrivate : public QAbstractVideoBufferPrivate
 {
@@ -72,8 +72,9 @@ uchar *QImageVideoBuffer::map(MapMode mode, int *numBytes, int *bytesPerLine)
       }
 
       return d->image.bits();
+
    } else {
-      return 0;
+      return nullptr;
    }
 }
 
@@ -83,4 +84,3 @@ void QImageVideoBuffer::unmap()
 
    d->mapMode = NotMapped;
 }
-

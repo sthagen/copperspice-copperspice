@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -21,9 +21,9 @@
 *
 ***********************************************************************/
 
-#include <QtCore/QBuffer>
-#include <QtCore/QStringList>
-#include <QtXmlPatterns/QXmlFormatter>
+#include <qbuffer.h>
+#include <qstringlist.h>
+#include <qxmlformatter.h>
 
 #include "qacceltreeresourceloader_p.h"
 #include "qcommonvalues_p.h"
@@ -283,13 +283,17 @@ bool QXmlQuery::evaluateTo(QAbstractXmlReceiver *callback) const
           */
          const QPatternist::Expression::Ptr expr(d->expression());
          const QPatternist::DynamicContext::Ptr dynContext(d->dynamicContext(callback));
+
          callback->startOfSequence();
          expr->evaluateToSequenceReceiver(dynContext);
+
          callback->endOfSequence();
          return true;
+
       } catch (const QPatternist::Exception) {
          return false;
       }
+
    } else {
       return false;
    }

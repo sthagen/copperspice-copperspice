@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -142,8 +142,7 @@ inline uint qHash(const QFontDef &fd, uint seed = 0)
       ^  qHash(fd.fixedPitch)
       ^  qHash(fd.family, seed)
       ^  qHash(fd.styleName)
-      ^  qHash(fd.hintingPreference)
-      ;
+      ^  qHash(fd.hintingPreference);
 }
 
 class QFontEngineData
@@ -154,7 +153,7 @@ class QFontEngineData
 
    ~QFontEngineData();
 
-   QAtomicInt ref;
+   QAtomicInt m_refCount;
    const int fontCacheId;
 
    QFontEngine *engines[QChar::ScriptCount];
@@ -267,8 +266,15 @@ class QFontCache : public QObject
    };
 
    struct Engine {
-      Engine() : data(0), timestamp(0), hits(0) { }
-      Engine(QFontEngine *d) : data(d), timestamp(0), hits(0) { }
+      Engine()
+         : data(nullptr), timestamp(0), hits(0)
+      {
+      }
+
+      Engine(QFontEngine *d)
+         : data(d), timestamp(0), hits(0)
+      {
+      }
 
       QFontEngine *data;
       uint timestamp;

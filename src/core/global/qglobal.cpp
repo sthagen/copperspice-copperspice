@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -42,7 +42,7 @@
 #include <unistd.h>
 #endif
 
-const char *qVersion()
+const char *csVersion()
 {
    return CS_VERSION_STR;
 }
@@ -80,9 +80,8 @@ static QSysInfo::MacVersion macVersion()
 
 const QSysInfo::MacVersion QSysInfo::MacintoshVersion = macVersion();
 
-
 // ** Windows
-#elif defined(Q_OS_WIN32)
+#elif defined(Q_OS_WIN)
 
 #include <qt_windows.h>
 
@@ -99,11 +98,13 @@ static inline bool determineWinOsVersionPost8(OSVERSIONINFO *result)
      return false;
    }
 
-   PtrGetFileVersionInfoSizeW getFileVersionInfoSizeW = (PtrGetFileVersionInfoSizeW)versionLib.resolve("GetFileVersionInfoSizeW");
+   PtrGetFileVersionInfoSizeW getFileVersionInfoSizeW =
+         (PtrGetFileVersionInfoSizeW)versionLib.resolve("GetFileVersionInfoSizeW");
+
    PtrVerQueryValueW verQueryValueW = (PtrVerQueryValueW)versionLib.resolve("VerQueryValueW");
    PtrGetFileVersionInfoW getFileVersionInfoW = (PtrGetFileVersionInfoW)versionLib.resolve("GetFileVersionInfoW");
 
-   if (! getFileVersionInfoSizeW || !verQueryValueW || !getFileVersionInfoW) {
+   if (! getFileVersionInfoSizeW || ! verQueryValueW || ! getFileVersionInfoW) {
      return false;
    }
 
@@ -122,7 +123,7 @@ static inline bool determineWinOsVersionPost8(OSVERSIONINFO *result)
    }
 
    UINT uLen;
-   VS_FIXEDFILEINFO *fileInfo = 0;
+   VS_FIXEDFILEINFO *fileInfo = nullptr;
 
    if (! verQueryValueW(versionInfo.data(), L"\\", (LPVOID *)&fileInfo, &uLen)) {
      return false;

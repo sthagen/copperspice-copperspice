@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -163,7 +163,7 @@ bool QProcessPrivate::openChannel(Channel &channel)
    }
 
    if (channel.type == Channel::Normal) {
-      // we're piping this channel to our own process
+      // piping this channel to our own process
       if (qt_create_pipe(channel.pipe) != 0) {
          return false;
       }
@@ -175,19 +175,20 @@ bool QProcessPrivate::openChannel(Channel &channel)
          if (&channel == &stdinChannel) {
             channel.notifier = new QSocketNotifier(channel.pipe[1], QSocketNotifier::Write, q);
             channel.notifier->setEnabled(false);
-            QObject::connect(channel.notifier, SIGNAL(activated(int)), q, SLOT(_q_canWrite()));
+
+            QObject::connect(channel.notifier, &QSocketNotifier::activated, q, &QProcess::_q_canWrite);
 
          } else {
             channel.notifier = new QSocketNotifier(channel.pipe[0], QSocketNotifier::Read, q);
-            QString receiver;
 
             if (&channel == &stdoutChannel) {
-               receiver = SLOT(_q_canReadStandardOutput());
+               QObject::connect(channel.notifier, &QSocketNotifier::activated, q, &QProcess::_q_canReadStandardOutput);
+
             } else {
-               receiver = SLOT(_q_canReadStandardError());
+               QObject::connect(channel.notifier, &QSocketNotifier::activated, q, &QProcess::_q_canReadStandardError);
+
             }
 
-            QObject::connect(channel.notifier, SIGNAL(activated(int)), q, receiver);
          }
       }
 
@@ -304,12 +305,12 @@ static char **_q_dupEnvironment(const QProcessEnvironmentPrivate::Hash &environm
 {
    *envc = 0;
    if (environment.isEmpty()) {
-      return 0;
+      return nullptr;
    }
 
    char **envp = new char *[environment.count() + 2];
-   envp[environment.count()] = 0;
-   envp[environment.count() + 1] = 0;
+   envp[environment.count()] = nullptr;
+   envp[environment.count() + 1] = nullptr;
 
    QProcessEnvironmentPrivate::Hash::const_iterator it        = environment.constBegin();
    const QProcessEnvironmentPrivate::Hash::const_iterator end = environment.constEnd();
@@ -335,12 +336,9 @@ void QProcessPrivate::startProcess()
    qDebug("QProcessPrivate::startProcess()");
 #endif
 
-
    // Initialize pipes
-   if (!openChannel(stdinChannel) ||
-         !openChannel(stdoutChannel) ||
-         !openChannel(stderrChannel) ||
-         qt_create_pipe(childStartedPipe) != 0) {
+   if (! openChannel(stdinChannel) || ! openChannel(stdoutChannel) ||
+            ! openChannel(stderrChannel) || qt_create_pipe(childStartedPipe) != 0) {
       setErrorAndEmit(QProcess::FailedToStart, qt_error_string(errno));
       cleanup();
       return;
@@ -351,7 +349,7 @@ void QProcessPrivate::startProcess()
    if (threadData->eventDispatcher) {
       startupSocketNotifier = new QSocketNotifier(childStartedPipe[0], QSocketNotifier::Read, q);
 
-      QObject::connect(startupSocketNotifier, SIGNAL(activated(int)), q, SLOT(_q_startupNotification()));
+      QObject::connect(startupSocketNotifier, &QSocketNotifier::activated, q, &QProcess::_q_startupNotification);
    }
 
    // Start the process (platform dependent)
@@ -359,7 +357,7 @@ void QProcessPrivate::startProcess()
 
    // Create argument list with right number of elements, and set the final one to 0
    char **argv = new char *[arguments.count() + 2];
-   argv[arguments.count() + 1] = 0;
+   argv[arguments.count() + 1] = nullptr;
 
    // Encode the program name
    QByteArray encodedProgramName = QFile::encodeName(program);
@@ -369,14 +367,16 @@ void QProcessPrivate::startProcess()
    QFileInfo fileInfo(program);
 
    if (encodedProgramName.endsWith(".app") && fileInfo.isDir()) {
-      QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(0, QCFString(fileInfo.absoluteFilePath()), kCFURLPOSIXPathStyle, true);
+      QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(nullptr, QCFString(fileInfo.absoluteFilePath()).toCFStringRef(),
+               kCFURLPOSIXPathStyle, true);
+
       {
          // CFBundle is not reentrant, since CFBundleCreate might return a reference
          // to a cached bundle object. Protect the bundle calls with a mutex lock.
          static QMutex cfbundleMutex;
 
          QMutexLocker lock(&cfbundleMutex);
-         QCFType<CFBundleRef> bundle = CFBundleCreate(0, url);
+         QCFType<CFBundleRef> bundle = CFBundleCreate(nullptr, url);
 
          // 'executableURL' can be either relative or absolute
          QCFType<CFURLRef> executableURL = CFBundleCopyExecutableURL(bundle);
@@ -387,7 +387,7 @@ void QProcessPrivate::startProcess()
 
       if (url) {
          const QCFString str = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
-         encodedProgramName += "/Contents/MacOS/" + static_cast<QString>(str).toUtf8();
+         encodedProgramName += "/Contents/MacOS/" + str.toQString().toUtf8();
       }
    }
 #endif
@@ -403,7 +403,7 @@ void QProcessPrivate::startProcess()
 
    // Duplicate the environment.
    int envc    = 0;
-   char **envp = 0;
+   char **envp = nullptr;
 
    if (environment.d.constData()) {
       QProcessEnvironmentPrivate::MutexLocker locker(environment.d);
@@ -411,8 +411,9 @@ void QProcessPrivate::startProcess()
    }
 
    // Encode the working directory if it's non-empty, otherwise just pass 0.
-   const char *workingDirPtr = 0;
+   const char *workingDirPtr = nullptr;
    QByteArray encodedWorkingDirectory;
+
    if (! workingDirectory.isEmpty()) {
       encodedWorkingDirectory = QFile::encodeName(workingDirectory);
       workingDirPtr = encodedWorkingDirectory.constData();
@@ -420,7 +421,7 @@ void QProcessPrivate::startProcess()
 
    // If the program does not specify a path, generate a list of possible
    // locations for the binary using the PATH environment variable.
-   char **path = 0;
+   char **path = nullptr;
    int pathc = 0;
 
    if (! program.contains('/')) {
@@ -432,7 +433,7 @@ void QProcessPrivate::startProcess()
          if (!pathEntries.isEmpty()) {
             pathc = pathEntries.size();
             path = new char *[pathc + 1];
-            path[pathc] = 0;
+            path[pathc] = nullptr;
 
             for (int k = 0; k < pathEntries.size(); ++k) {
                QByteArray tmp = QFile::encodeName(pathEntries.at(k));
@@ -485,7 +486,8 @@ void QProcessPrivate::startProcess()
 
       q->setProcessState(QProcess::NotRunning);
       setErrorAndEmit(QProcess::FailedToStart,
-                      QProcess::tr("Resource error (fork failure): %1").formatArg(qt_error_string(lastForkErrno)));
+            QProcess::tr("Resource error (fork failure): %1").formatArg(qt_error_string(lastForkErrno)));
+
       cleanup();
       return;
    }
@@ -498,8 +500,7 @@ void QProcessPrivate::startProcess()
 
    pid = Q_PID(childPid);
 
-   // parent
-   // close the ends we don't use and make all pipes non-blocking
+   // parent. close the ends we do not use and make all pipes non-blocking
 
    qt_safe_close(childStartedPipe[1]);
    childStartedPipe[1] = -1;
@@ -531,7 +532,7 @@ void QProcessPrivate::startProcess()
 
    if (threadData->eventDispatcher) {
       deathNotifier = new QSocketNotifier(forkfd, QSocketNotifier::Read, q);
-      QObject::connect(deathNotifier, SIGNAL(activated(int)), q, SLOT(_q_processDied()));
+      QObject::connect(deathNotifier, &QSocketNotifier::activated, q, &QProcess::_q_processDied);
    }
 }
 
@@ -621,7 +622,7 @@ bool QProcessPrivate::processStarted(QString *errorMessage)
    if (startupSocketNotifier) {
       startupSocketNotifier->setEnabled(false);
       startupSocketNotifier->deleteLater();
-      startupSocketNotifier = 0;
+      startupSocketNotifier = nullptr;
    }
 
    qt_safe_close(childStartedPipe[0]);
@@ -738,8 +739,6 @@ void QProcessPrivate::killProcess()
 
 bool QProcessPrivate::waitForStarted(int msecs)
 {
-   Q_Q(QProcess);
-
 #if defined (QPROCESS_DEBUG)
    qDebug("QProcessPrivate::waitForStarted(%d) waiting for child to start (fd = %d)", msecs,
           childStartedPipe[0]);
@@ -749,7 +748,7 @@ bool QProcessPrivate::waitForStarted(int msecs)
    FD_ZERO(&fds);
    FD_SET(childStartedPipe[0], &fds);
 
-   if (qt_select_msecs(childStartedPipe[0] + 1, &fds, 0, msecs) == 0) {
+   if (qt_select_msecs(childStartedPipe[0] + 1, &fds, nullptr, msecs) == 0) {
       setError(QProcess::Timedout);
 
 #if defined (QPROCESS_DEBUG)
@@ -1009,7 +1008,7 @@ bool QProcessPrivate::waitForWrite(int msecs)
    fd_set fdwrite;
    FD_ZERO(&fdwrite);
    FD_SET(stdinChannel.pipe[1], &fdwrite);
-   return qt_select_msecs(stdinChannel.pipe[1] + 1, 0, &fdwrite, msecs < 0 ? 0 : msecs) == 1;
+   return qt_select_msecs(stdinChannel.pipe[1] + 1, nullptr, &fdwrite, msecs < 0 ? 0 : msecs) == 1;
 }
 
 void QProcessPrivate::findExitCode()
@@ -1030,7 +1029,7 @@ bool QProcessPrivate::waitForDeadChild()
    exitCode = info.status;
    crashed = info.code != CLD_EXITED;
    delete deathNotifier;
-   deathNotifier = 0;
+   deathNotifier = nullptr;
    EINTR_LOOP(ret, forkfd_close(forkfd));
    forkfd = -1; // Child is dead, don't try to kill it anymore
 
@@ -1065,7 +1064,7 @@ bool QProcessPrivate::startDetached(const QString &program, const QStringList &a
       struct sigaction noaction;
       memset(&noaction, 0, sizeof(noaction));
       noaction.sa_handler = SIG_IGN;
-      ::sigaction(SIGPIPE, &noaction, 0);
+      ::sigaction(SIGPIPE, &noaction, nullptr);
 
       ::setsid();
 
@@ -1086,7 +1085,7 @@ bool QProcessPrivate::startDetached(const QString &program, const QStringList &a
          for (int i = 0; i < arguments.size(); ++i) {
             argv[i + 1] = ::strdup(QFile::encodeName(arguments.at(i)).constData());
          }
-         argv[arguments.size() + 1] = 0;
+         argv[arguments.size() + 1] = nullptr;
 
          if (!program.contains(QLatin1Char('/'))) {
             const QString path = QString::fromUtf8(::getenv("PATH"));
@@ -1114,7 +1113,7 @@ bool QProcessPrivate::startDetached(const QString &program, const QStringList &a
          struct sigaction noaction;
          memset(&noaction, 0, sizeof(noaction));
          noaction.sa_handler = SIG_IGN;
-         ::sigaction(SIGPIPE, &noaction, 0);
+         ::sigaction(SIGPIPE, &noaction, nullptr);
 
          // '\1' means execv failed
          char c = '\1';
@@ -1125,7 +1124,7 @@ bool QProcessPrivate::startDetached(const QString &program, const QStringList &a
          struct sigaction noaction;
          memset(&noaction, 0, sizeof(noaction));
          noaction.sa_handler = SIG_IGN;
-         ::sigaction(SIGPIPE, &noaction, 0);
+         ::sigaction(SIGPIPE, &noaction, nullptr);
 
          // '\2' means internal error
          char c = '\2';

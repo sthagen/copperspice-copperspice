@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -29,8 +29,6 @@
 #include <qaccessiblewidget.h>
 #include <qabstractitemview.h>
 #include <qheaderview.h>
-
-QT_BEGIN_NAMESPACE
 
 #ifndef QT_NO_ACCESSIBILITY
 
@@ -297,11 +295,8 @@ class QAccessibleTableCornerButton: public QAccessibleInterface
    QPointer<QAbstractItemView> view;
 };
 
-
 #endif
 
 #endif // QT_NO_ACCESSIBILITY
 
-QT_END_NAMESPACE
-
-#endif // ACCESSIBLE_ITEMVIEWS_H
+#endif

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -40,7 +40,6 @@ QClipboard::QClipboard(QObject *parent)
    : QObject(parent)
 {
 }
-
 
 QClipboard::~QClipboard()
 {
@@ -108,7 +107,8 @@ QImage QClipboard::image(Mode mode) const
    if (!data) {
       return QImage();
    }
-   return qvariant_cast<QImage>(data->imageData());
+
+   return data->imageData().value<QImage>();
 }
 
 void QClipboard::setImage(const QImage &image, Mode mode)
@@ -121,7 +121,7 @@ void QClipboard::setImage(const QImage &image, Mode mode)
 QPixmap QClipboard::pixmap(Mode mode) const
 {
    const QMimeData *data = mimeData(mode);
-   return data ? qvariant_cast<QPixmap>(data->imageData()) : QPixmap();
+   return data ? data->imageData().value<QPixmap>() : QPixmap();
 }
 
 void QClipboard::setPixmap(const QPixmap &pixmap, Mode mode)
@@ -135,15 +135,17 @@ const QMimeData *QClipboard::mimeData(Mode mode) const
 {
    QPlatformClipboard *clipboard = QGuiApplicationPrivate::platformIntegration()->clipboard();
    if (!clipboard->supportsMode(mode)) {
-      return 0;
+      return nullptr;
    }
+
    return clipboard->mimeData(mode);
 }
+
 void QClipboard::setMimeData(QMimeData *src, Mode mode)
 {
    QPlatformClipboard *clipboard = QGuiApplicationPrivate::platformIntegration()->clipboard();
    if (!clipboard->supportsMode(mode)) {
-      if (src != 0) {
+      if (src != nullptr) {
          qWarning("Data set on unsupported clipboard mode. QMimeData object will be deleted.");
          src->deleteLater();
       }
@@ -153,8 +155,9 @@ void QClipboard::setMimeData(QMimeData *src, Mode mode)
 }
 void QClipboard::clear(Mode mode)
 {
-   setMimeData(0, mode);
+   setMimeData(nullptr, mode);
 }
+
 bool QClipboard::supportsSelection() const
 {
    return supportsMode(Selection);

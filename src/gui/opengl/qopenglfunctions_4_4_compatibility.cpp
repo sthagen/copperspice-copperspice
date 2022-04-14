@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2013 Klarälvdalens Datakonsult AB, a KDAB Group company
 * Copyright (c) 2015 The Qt Company Ltd.
@@ -25,47 +25,31 @@
 #include "qopenglfunctions_4_4_compatibility.h"
 #include "qopenglcontext.h"
 
-QT_BEGIN_NAMESPACE
-
-/*!
-    \class QOpenGLFunctions_4_4_Compatibility
-    \inmodule QtGui
-    \since 5.5
-    \wrapper
-    \brief The QOpenGLFunctions_4_4_Compatibility class provides all functions for OpenGL 4.4 compatibility profile.
-
-    This class is a wrapper for functions from OpenGL 4.4 compatibility profile.
-    See reference pages on \l {http://www.opengl.org/sdk/docs/}{opengl.org}
-    for function documentation.
-
-    \sa QAbstractOpenGLFunctions
-*/
-
 QOpenGLFunctions_4_4_Compatibility::QOpenGLFunctions_4_4_Compatibility()
  : QAbstractOpenGLFunctions()
- , d_1_0_Core(0)
- , d_1_1_Core(0)
- , d_1_2_Core(0)
- , d_1_3_Core(0)
- , d_1_4_Core(0)
- , d_1_5_Core(0)
- , d_2_0_Core(0)
- , d_2_1_Core(0)
- , d_3_0_Core(0)
- , d_3_1_Core(0)
- , d_3_2_Core(0)
- , d_3_3_Core(0)
- , d_4_0_Core(0)
- , d_4_1_Core(0)
- , d_4_2_Core(0)
- , d_4_3_Core(0)
- , d_4_4_Core(0)
- , d_1_0_Deprecated(0)
- , d_1_1_Deprecated(0)
- , d_1_2_Deprecated(0)
- , d_1_3_Deprecated(0)
- , d_1_4_Deprecated(0)
- , d_3_3_Deprecated(0)
+ , d_1_0_Core(nullptr)
+ , d_1_1_Core(nullptr)
+ , d_1_2_Core(nullptr)
+ , d_1_3_Core(nullptr)
+ , d_1_4_Core(nullptr)
+ , d_1_5_Core(nullptr)
+ , d_2_0_Core(nullptr)
+ , d_2_1_Core(nullptr)
+ , d_3_0_Core(nullptr)
+ , d_3_1_Core(nullptr)
+ , d_3_2_Core(nullptr)
+ , d_3_3_Core(nullptr)
+ , d_4_0_Core(nullptr)
+ , d_4_1_Core(nullptr)
+ , d_4_2_Core(nullptr)
+ , d_4_3_Core(nullptr)
+ , d_4_4_Core(nullptr)
+ , d_1_0_Deprecated(nullptr)
+ , d_1_1_Deprecated(nullptr)
+ , d_1_2_Deprecated(nullptr)
+ , d_1_3_Deprecated(nullptr)
+ , d_1_4_Deprecated(nullptr)
+ , d_3_3_Deprecated(nullptr)
 {
 }
 
@@ -179,7 +163,7 @@ bool QOpenGLFunctions_4_4_Compatibility::initializeOpenGLFunctions()
     {
         // Associate with private implementation, creating if necessary
         // Function pointers in the backends are resolved at creation time
-        QOpenGLVersionFunctionsBackend* d = 0;
+        QOpenGLVersionFunctionsBackend *d = nullptr;
         d = QAbstractOpenGLFunctionsPrivate::functionsBackend(context, QOpenGLFunctions_1_0_CoreBackend::versionStatus());
         if (!d) {
             d = new QOpenGLFunctions_1_0_CoreBackend(context);
@@ -391,4 +375,3 @@ QOpenGLVersionProfile QOpenGLFunctions_4_4_Compatibility::versionProfile()
     return v;
 }
 
-QT_END_NAMESPACE

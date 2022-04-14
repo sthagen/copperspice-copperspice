@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2020 Barbara Geller
-* Copyright (c) 2012-2020 Ansel Sermersheim
+* Copyright (c) 2012-2022 Barbara Geller
+* Copyright (c) 2012-2022 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -39,9 +39,6 @@ class Q_NETWORK_EXPORT QFtp : public QObject
    NET_CS_OBJECT(QFtp)
 
  public:
-   explicit QFtp(QObject *parent = nullptr);
-   virtual ~QFtp();
-
    enum State {
       Unconnected,
       HostLookup,
@@ -74,14 +71,23 @@ class Q_NETWORK_EXPORT QFtp : public QObject
       Rename,
       RawCommand
    };
+
    enum TransferMode {
       Active,
       Passive
    };
+
    enum TransferType {
       Binary,
       Ascii
    };
+
+   explicit QFtp(QObject *parent = nullptr);
+
+   QFtp(const QFtp &) = delete;
+   QFtp &operator=(const QFtp &) = delete;
+
+   virtual ~QFtp();
 
    int setProxy(const QString &host, quint16 port);
    int connectToHost(const QString &host, quint16 port = 21);
@@ -90,7 +96,7 @@ class Q_NETWORK_EXPORT QFtp : public QObject
    int setTransferMode(TransferMode mode);
    int list(const QString &dir = QString());
    int cd(const QString &dir);
-   int get(const QString &file, QIODevice *dev = 0, TransferType type = Binary);
+   int get(const QString &file, QIODevice *dev = nullptr, TransferType type = Binary);
    int put(const QByteArray &data, const QString &file, TransferType type = Binary);
    int put(QIODevice *dev, const QString &file, TransferType type = Binary);
    int remove(const QString &file);
@@ -118,29 +124,34 @@ class Q_NETWORK_EXPORT QFtp : public QObject
    NET_CS_SLOT_1(Public, void abort())
    NET_CS_SLOT_2(abort)
 
-   NET_CS_SIGNAL_1(Public, void stateChanged(int un_named_arg1))
-   NET_CS_SIGNAL_2(stateChanged, un_named_arg1)
-   NET_CS_SIGNAL_1(Public, void listInfo(const QUrlInfo &un_named_arg1))
-   NET_CS_SIGNAL_2(listInfo, un_named_arg1)
+   NET_CS_SIGNAL_1(Public, void stateChanged(int state))
+   NET_CS_SIGNAL_2(stateChanged, state)
+
+   NET_CS_SIGNAL_1(Public, void listInfo(const QUrlInfo &urlInfo))
+   NET_CS_SIGNAL_2(listInfo, urlInfo)
+
    NET_CS_SIGNAL_1(Public, void readyRead())
    NET_CS_SIGNAL_2(readyRead)
-   NET_CS_SIGNAL_1(Public, void dataTransferProgress(qint64 un_named_arg1, qint64 un_named_arg2))
-   NET_CS_SIGNAL_2(dataTransferProgress, un_named_arg1, un_named_arg2)
-   NET_CS_SIGNAL_1(Public, void rawCommandReply(int un_named_arg1, const QString &un_named_arg2))
-   NET_CS_SIGNAL_2(rawCommandReply, un_named_arg1, un_named_arg2)
 
-   NET_CS_SIGNAL_1(Public, void commandStarted(int un_named_arg1))
-   NET_CS_SIGNAL_2(commandStarted, un_named_arg1)
-   NET_CS_SIGNAL_1(Public, void commandFinished(int un_named_arg1, bool un_named_arg2))
-   NET_CS_SIGNAL_2(commandFinished, un_named_arg1, un_named_arg2)
-   NET_CS_SIGNAL_1(Public, void done(bool un_named_arg1))
-   NET_CS_SIGNAL_2(done, un_named_arg1)
+   NET_CS_SIGNAL_1(Public, void dataTransferProgress(qint64 done, qint64 total))
+   NET_CS_SIGNAL_2(dataTransferProgress, done, total)
+
+   NET_CS_SIGNAL_1(Public, void rawCommandReply(int replyCode, const QString &detail))
+   NET_CS_SIGNAL_2(rawCommandReply, replyCode, detail )
+
+   NET_CS_SIGNAL_1(Public, void commandStarted(int id))
+   NET_CS_SIGNAL_2(commandStarted, id)
+
+   NET_CS_SIGNAL_1(Public, void commandFinished(int id, bool error))
+   NET_CS_SIGNAL_2(commandFinished, id, error)
+
+   NET_CS_SIGNAL_1(Public, void done(bool error))
+   NET_CS_SIGNAL_2(done, error)
 
  protected:
    QScopedPointer<QFtpPrivate> d_ptr;
 
  private:
-   Q_DISABLE_COPY(QFtp)
    Q_DECLARE_PRIVATE(QFtp)
 
    NET_CS_SLOT_1(Private, void _q_startNextCommand())
@@ -161,4 +172,4 @@ class Q_NETWORK_EXPORT QFtp : public QObject
 
 #endif // QT_NO_FTP
 
-#endif // QFTP_H
+#endif
