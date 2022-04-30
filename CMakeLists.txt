@@ -18,7 +18,7 @@ project(copperspice)
 
 set(BUILD_MAJOR "1")
 set(BUILD_MINOR "7")
-set(BUILD_MICRO "3")
+set(BUILD_MICRO "4")
 
 set(BUILD_ABI ${BUILD_MAJOR}.${BUILD_MINOR})
 
@@ -61,8 +61,8 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
 endif()
 
-# required library
-set(BUILD_COMPONENTS Core Xml)
+# required libraries
+set(BUILD_COMPONENTS "Core Xml")
 
 # unused at this time: DBus, Declarative, and ScriptTools
 set(CS_OPTIONAL_COMPONENTS Gui Multimedia Network OpenGL Script Sql Svg WebKit XmlPatterns)
