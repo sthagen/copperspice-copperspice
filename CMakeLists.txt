@@ -54,7 +54,7 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
    file(RELATIVE_PATH CS_BIN_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
                                    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 
-   set(CMAKE_INSTALL_RPATH "$ORIGIN/${CS_BIN_RPATH}")
+   set(CMAKE_INSTALL_RPATH "$ORIGIN/${CS_BIN_RPATH}:$ORIGIN/..")
 
 elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
    set(CMAKE_INSTALL_BINDIR bin)
@@ -609,6 +609,7 @@ if (WITH_GUI)
       set(BUILD_PLATFORMS_XCB_PLUGIN TRUE)
    endif()
 
+   add_subdirectory(src/plugins/imageformats)
    add_subdirectory(src/plugins/platforms)
    add_subdirectory(src/plugins/printerdrivers)
 endif()
