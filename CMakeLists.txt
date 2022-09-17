@@ -17,8 +17,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 project(copperspice)
 
 set(BUILD_MAJOR "1")
-set(BUILD_MINOR "7")
-set(BUILD_MICRO "4")
+set(BUILD_MINOR "8")
+set(BUILD_MICRO "0")
 
 set(BUILD_ABI ${BUILD_MAJOR}.${BUILD_MINOR})
 
@@ -67,7 +67,7 @@ endif()
 set(BUILD_COMPONENTS "Core Xml")
 
 # unused at this time: DBus, Declarative, and ScriptTools
-set(CS_OPTIONAL_COMPONENTS Gui Multimedia Network OpenGL Script Sql Svg WebKit XmlPatterns)
+set(CS_OPTIONAL_COMPONENTS Gui Multimedia Network OpenGL Script Sql Svg Vulkan WebKit XmlPatterns)
 
 set(PACKAGE           "copperspice")
 set(PACKAGE_NAME      "CopperSpice")
@@ -220,13 +220,10 @@ if (NOT HAVE_CXX_ATOMICS_WITHOUT_LIB)
 endif()
 
 option(WITH_PSQL_PLUGIN "Build PostgreSQL database plugin (if possible)" ON)
-add_feature_info(PostgreSQL WITH_PSQL_PLUGIN "Popular open source database")
 
 option(WITH_MYSQL_PLUGIN "Build MySQL database plugin (if possible)" ON)
-add_feature_info(MySQL WITH_MYSQL_PLUGIN "Popular open source database")
 
 option(WITH_ODBC_PLUGIN "Build ODBC database plugin (if possible)" ON)
-add_feature_info(ODBC WITH_ODBC_PLUGIN "Popular open source database")
 
 foreach(component ${CS_OPTIONAL_COMPONENTS})
    string(TOUPPER ${component} uppercomp)
@@ -369,8 +366,32 @@ if (CMAKE_DISABLE_FIND_PACKAGE_MySQL)
 elseif (NOT MySQL_FOUND)
    message(STATUS "MySQL was not found, CopperSpice plugin will not be built\n")
 
+else()
+   message(STATUS "MySQL was found, CopperSpice plugin will be built\n")
+
 endif()
 
+if (WITH_VULKAN)
+   find_package(Vulkan 1.1)
+   set_package_properties(Vulkan PROPERTIES
+      PURPOSE "Required for Vulkan support"
+      DESCRIPTION "The Vulkan SDK"
+      URL "https://www.lunarg.com/"
+      TYPE REQUIRED
+   )
+
+   if (NOT TARGET Vulkan::Vulkan)
+      set(WITH_VULKAN NO)
+
+      if (Vulkan_FOUND)
+         message(STATUS "Partial Vulkan installation exists however the SDK was not found, CsVulkan library will not be built\n")
+      else()
+         message(STATUS "Vulkan SDK was not found, CsVulkan library will not be built\n")
+      endif()
+
+   endif()
+
+endif()
 
 # emerald - temporarily turn off GTK as a workaround, conflicts with freetype version in Harfbuzz
 set(CMAKE_DISABLE_FIND_PACKAGE_GTK2 TRUE)
