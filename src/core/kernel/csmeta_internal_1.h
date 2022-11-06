@@ -106,12 +106,8 @@ const QString &cs_argName(const CSArgument<T1> &data1, const CSArgument<T2> &dat
 class CSGenericReturnArgument
 {
  public:
-   virtual ~CSGenericReturnArgument();
+   virtual ~CSGenericReturnArgument() = default;
 };
-
-inline CSGenericReturnArgument::~CSGenericReturnArgument()
-{
-}
 
 template <typename T>
 class CSReturnArgument : public CSGenericReturnArgument
@@ -192,7 +188,9 @@ std::pair<T, bool> convertFromQVariant(QVariant data);
 class JarReadAbstract
 {
  public:
-   virtual ~JarReadAbstract() {}
+   virtual ~JarReadAbstract()
+   {
+   }
 
    virtual QVariant runV(const QObject *) const = 0;
 
