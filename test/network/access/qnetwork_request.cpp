@@ -3,10 +3,6 @@
 * Copyright (c) 2012-2022 Barbara Geller
 * Copyright (c) 2012-2022 Ansel Sermersheim
 *
-* Copyright (c) 2015 The Qt Company Ltd.
-* Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
-* Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
-*
 * This file is part of CopperSpice.
 *
 * CopperSpice is free software. You can redistribute it and/or
@@ -21,11 +17,20 @@
 *
 ***********************************************************************/
 
-#ifndef QSSL_P_H
-#define QSSL_P_H
+#include <qnetwork_request.h>
 
-// unused file
+#include <cs_catch2.h>
 
+TEST_CASE("QNetworkRequest traits", "[qnetwork_request]")
+{
+   REQUIRE(std::is_copy_constructible_v<QNetworkRequest> == true);
+   REQUIRE(std::is_move_constructible_v<QNetworkRequest> == true);
 
+   REQUIRE(std::is_copy_assignable_v<QNetworkRequest> == true);
+   REQUIRE(std::is_move_assignable_v<QNetworkRequest> == true);
 
-#endif
+   REQUIRE(std::is_nothrow_move_constructible_v<QNetworkRequest> == false);
+   REQUIRE(std::is_nothrow_move_assignable_v<QNetworkRequest> == false);
+
+   REQUIRE(std::has_virtual_destructor_v<QNetworkRequest> == false);
+}

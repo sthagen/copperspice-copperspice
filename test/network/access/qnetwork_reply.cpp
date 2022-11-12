@@ -3,10 +3,6 @@
 * Copyright (c) 2012-2022 Barbara Geller
 * Copyright (c) 2012-2022 Ansel Sermersheim
 *
-* Copyright (c) 2015 The Qt Company Ltd.
-* Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
-* Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
-*
 * This file is part of CopperSpice.
 *
 * CopperSpice is free software. You can redistribute it and/or
@@ -21,31 +17,20 @@
 *
 ***********************************************************************/
 
-#include <qsslellipticcurve.h>
+#include <qnetwork_reply.h>
 
-QString QSslEllipticCurve::shortName() const
-{
-   return QString();
-}
+#include <cs_catch2.h>
 
-QString QSslEllipticCurve::longName() const
+TEST_CASE("QNetworkReply traits", "[qnetwork_reply]")
 {
-   return QString();
-}
+   REQUIRE(std::is_copy_constructible_v<QNetworkReply> == false);
+   REQUIRE(std::is_move_constructible_v<QNetworkReply> == false);
 
-QSslEllipticCurve QSslEllipticCurve::fromShortName(const QString &name)
-{
-   (void) name;
-   return QSslEllipticCurve();
-}
+   REQUIRE(std::is_copy_assignable_v<QNetworkReply> == false);
+   REQUIRE(std::is_move_assignable_v<QNetworkReply> == false);
 
-QSslEllipticCurve QSslEllipticCurve::fromLongName(const QString &name)
-{
-   (void) name;
-   return QSslEllipticCurve();
-}
+   REQUIRE(std::is_nothrow_move_constructible_v<QNetworkReply> == false);
+   REQUIRE(std::is_nothrow_move_assignable_v<QNetworkReply> == false);
 
-bool QSslEllipticCurve::isTlsNamedCurve() const
-{
-   return false;
+   REQUIRE(std::has_virtual_destructor_v<QNetworkReply> == true);
 }

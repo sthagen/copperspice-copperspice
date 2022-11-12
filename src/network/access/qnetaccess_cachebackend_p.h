@@ -25,6 +25,7 @@
 #define QNETWORK_ACCESS_CACHEBACKEND_P_H
 
 #include <qnetaccess_backend_p.h>
+
 #include <qnetwork_request.h>
 #include <qnetwork_reply.h>
 
@@ -44,8 +45,6 @@ class QNetworkAccessCacheBackend : public QNetworkAccessBackend
 
  private:
    bool sendCacheContents();
-
 };
 
-
-#endif // QNETWORKACCESSCACHEBACKEND_P_H
+#endif

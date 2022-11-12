@@ -21,9 +21,10 @@
 *
 ***********************************************************************/
 
-#include "qsslellipticcurve.h"
-#include "qsslsocket_p.h"
-#include "qsslsocket_openssl_symbols_p.h"
+#include <qsslellipticcurve.h>
+#include <qsslsocket_p.h>
+
+#include <qsslsocket_openssl_symbols_p.h>
 
 #include <openssl/ssl.h>
 #include <openssl/obj_mac.h>
@@ -102,7 +103,6 @@ QSslEllipticCurve QSslEllipticCurve::fromLongName(const QString &name)
 
    return result;
 }
-
 
 // The brainpool curve NIDs (RFC 7027) have been introduced in OpenSSL 1.0.2,
 // redefine them here to make it compile with previous versions of OpenSSL

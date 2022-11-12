@@ -25,14 +25,15 @@
 #define QSSLSOCKET_P_H
 
 #include <qsslsocket.h>
-#include <qtcpsocket_p.h>
 #include <qsslkey.h>
+
+#include <qtcpsocket_p.h>
 #include <qsslconfiguration_p.h>
 
 #ifdef QT_OPENSSL
-#include <qsslcontext_openssl_p.h>
+#   include <qsslcontext_openssl_p.h>
 #else
-class QSslContext;
+   class QSslContext;
 #endif
 
 #include <qstringlist.h>
@@ -50,19 +51,24 @@ class QSslContext;
 #  ifndef HCRYPTPROV_LEGACY
 #    define HCRYPTPROV_LEGACY HCRYPTPROV
 #  endif
+
 #endif
 
 #if defined(Q_OS_DARWIN)
-typedef CFDataRef (*PtrSecCertificateCopyData)(SecCertificateRef);
-typedef OSStatus (*PtrSecTrustSettingsCopyCertificates)(int, CFArrayRef*);
-typedef OSStatus (*PtrSecTrustCopyAnchorCertificates)(CFArrayRef*);
+   using PtrSecCertificateCopyData           = CFDataRef (*)(SecCertificateRef);
+   using PtrSecTrustSettingsCopyCertificates = OSStatus (*)(int, CFArrayRef*);
+   using PtrSecTrustCopyAnchorCertificates   = OSStatus (*)(CFArrayRef*);
+
 #endif
 
 #if defined(Q_OS_WIN)
-typedef HCERTSTORE (WINAPI *PtrCertOpenSystemStoreW)(HCRYPTPROV_LEGACY, LPCWSTR);
-typedef PCCERT_CONTEXT (WINAPI *PtrCertFindCertificateInStore)(HCERTSTORE, DWORD, DWORD, DWORD,
-                                                               const void *, PCCERT_CONTEXT);
-typedef BOOL (WINAPI *PtrCertCloseStore)(HCERTSTORE, DWORD);
+   using PtrCertOpenSystemStoreW  = HCERTSTORE (WINAPI *)(HCRYPTPROV_LEGACY, LPCWSTR);
+
+   using PtrCertFindCertificateInStore =
+         PCCERT_CONTEXT (WINAPI *)(HCERTSTORE, DWORD, DWORD, DWORD, const void *, PCCERT_CONTEXT);
+
+   using PtrCertCloseStore        = BOOL (WINAPI *)(HCERTSTORE, DWORD);
+
 #endif
 
 class QSslSocketPrivate : public QTcpSocketPrivate
