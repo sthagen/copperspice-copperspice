@@ -44,7 +44,7 @@
 #include <sql.h>
 #include <sqlext.h>
 
-class QODBCPrivate;
+class QODBCResultPrivate;
 class QODBCDriverPrivate;
 class QODBCDriver;
 class QSqlRecordInfo;
@@ -59,6 +59,8 @@ class QODBCResult : public QSqlResult
    bool exec() override;
 
    QVariant handle() const;
+   QVariant lastInsertId() const;
+
    void setForwardOnly(bool forward) override;
 
  protected:
@@ -75,10 +77,11 @@ class QODBCResult : public QSqlResult
    QSqlRecord record() const override;
 
    void virtual_hook(int id, void *data) override;
+   void detachFromResultSet() override;
    bool nextResult() override;
 
  private:
-   QODBCPrivate *d;
+   Q_DECLARE_PRIVATE(QODBCResult)
 };
 
 class Q_EXPORT_SQLDRIVER_ODBC QODBCDriver : public QSqlDriver
@@ -117,8 +120,9 @@ class Q_EXPORT_SQLDRIVER_ODBC QODBCDriver : public QSqlDriver
    bool endTrans();
    void cleanup();
 
-   QODBCDriverPrivate *d;
-   friend class QODBCPrivate;
+   Q_DECLARE_PRIVATE(QODBCDriver)
+
+   friend class QODBCResultPrivate;
 };
 
 #endif
