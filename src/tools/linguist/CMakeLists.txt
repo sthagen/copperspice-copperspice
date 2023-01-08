@@ -11,16 +11,8 @@ set(EXTRA_LINGUIST_CXXFLAGS)
 set(EXTRA_LINGUIST_LDFLAGS)
 
 include_directories(
-   ${CMAKE_BINARY_DIR}/include
-   ${CMAKE_BINARY_DIR}/privateinclude
-
-   ${CMAKE_BINARY_DIR}/include/QtCore
    ${CMAKE_BINARY_DIR}/privateinclude/QtCore/private
-
-   ${CMAKE_BINARY_DIR}/include/QtGui
    ${CMAKE_BINARY_DIR}/privateinclude/QtGui/private
-
-   ${CMAKE_BINARY_DIR}/include/QtXml
    ${CMAKE_BINARY_DIR}/privateinclude/QtXml/private
 
    ${CMAKE_CURRENT_SOURCE_DIR}
@@ -49,10 +41,10 @@ target_sources(linguist${TOOLS_SUFFIX}
    ${CMAKE_CURRENT_SOURCE_DIR}/statistics.h
    ${CMAKE_CURRENT_SOURCE_DIR}/translate_dialog.h
 
-   ${CMAKE_CURRENT_SOURCE_DIR}/../shared/similartext.h
+   ${CMAKE_SOURCE_DIR}/src/tools/shared/similartext.h
 
-#      ${CMAKE_CURRENT_SOURCE_DIR}/formpreviewview.h
-#      ${CMAKE_CURRENT_SOURCE_DIR}/formpreviewview.cpp
+#  ${CMAKE_CURRENT_SOURCE_DIR}/formpreviewview.h
+#  ${CMAKE_CURRENT_SOURCE_DIR}/formpreviewview.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/batchtranslation_dialog.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/errorsview.cpp
@@ -75,7 +67,7 @@ target_sources(linguist${TOOLS_SUFFIX}
    ${CMAKE_CURRENT_SOURCE_DIR}/statistics.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/translate_dialog.cpp
 
-   ${CMAKE_CURRENT_SOURCE_DIR}/../shared/similartext.cpp
+   ${CMAKE_SOURCE_DIR}/src/tools/shared/similartext.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/batchtranslation.ui
    ${CMAKE_CURRENT_SOURCE_DIR}/find_dialog.ui

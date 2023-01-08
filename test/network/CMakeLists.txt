@@ -33,15 +33,6 @@ target_link_libraries(CsNetworkTest
 )
 
 include_directories(
-   ${CMAKE_BINARY_DIR}/include
-   ${CMAKE_BINARY_DIR}/privateinclude
-
-   ${CMAKE_BINARY_DIR}/include/QtCore
-   ${CMAKE_BINARY_DIR}/privateinclude/QtCore/private
-
-   ${CMAKE_BINARY_DIR}/include/QtNetwork
-   ${CMAKE_BINARY_DIR}/privateinclude/QtNetwork/private
-
    ${CMAKE_CURRENT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
@@ -63,6 +54,9 @@ target_sources(CsNetworkTest
    ${CMAKE_CURRENT_SOURCE_DIR}/socket/qtcpsocket.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/socket/qudpsocket.cpp
 )
+
+# sets working dir for CTest
+set(CMAKE_CURRENT_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/")
 
 include(ParseAndAddCatchTests)
 ParseAndAddCatchTests(CsNetworkTest)

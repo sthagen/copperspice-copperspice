@@ -10,13 +10,7 @@ set(EXTRA_LRELEASE_CXXFLAGS)
 set(EXTRA_LRELEASE_LDFLAGS)
 
 include_directories(
-   ${CMAKE_BINARY_DIR}/include
-   ${CMAKE_BINARY_DIR}/privateinclude
-
-   ${CMAKE_BINARY_DIR}/include/QtCore
    ${CMAKE_BINARY_DIR}/privateinclude/QtCore/private
-
-   ${CMAKE_BINARY_DIR}/include/QtXml
    ${CMAKE_BINARY_DIR}/privateinclude/QtXml/private
 
    ${CMAKE_CURRENT_SOURCE_DIR}
@@ -48,7 +42,9 @@ endif()
 function_variable_fixup("${EXTRA_LRELEASE_CXXFLAGS}" EXTRA_LRELEASE_CXXFLAGS)
 function_variable_fixup("${EXTRA_LRELEASE_LDFLAGS}"  EXTRA_LRELEASE_LDFLAGS)
 
-target_link_libraries(lrelease${TOOLS_SUFFIX} ${EXTRA_LRELEASE_LIBS})
+target_link_libraries(lrelease${TOOLS_SUFFIX}
+   ${EXTRA_LRELEASE_LIBS}
+)
 
 set_target_properties(lrelease${TOOLS_SUFFIX}
    PROPERTIES

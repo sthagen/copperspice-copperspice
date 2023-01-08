@@ -1,13 +1,7 @@
 add_library(sharedtools OBJECT "")
 
 list(APPEND SHAREDTOOLS_INCLUDES
-   ${CMAKE_BINARY_DIR}/include
-   ${CMAKE_BINARY_DIR}/privateinclude
-
-   ${CMAKE_BINARY_DIR}/include/QtCore
    ${CMAKE_BINARY_DIR}/privateinclude/QtCore/private
-
-   ${CMAKE_BINARY_DIR}/include/QtXml
    ${CMAKE_BINARY_DIR}/privateinclude/QtXml/private
 
    ${CMAKE_SOURCE_DIR}/src/tools/shared
@@ -33,6 +27,11 @@ function_variable_fixup("${SHAREDTOOLS_EXTRA_LDFLAGS}"  SHAREDTOOLS_EXTRA_LDFLAG
 
 target_compile_definitions(sharedtools PRIVATE ${SHAREDTOOLS_DEFINITIONS})
 target_include_directories(sharedtools PRIVATE ${SHAREDTOOLS_INCLUDES})
+
+target_link_libraries(sharedtools
+   CsCore
+   CsXml
+)
 
 set_target_properties(sharedtools
    PROPERTIES

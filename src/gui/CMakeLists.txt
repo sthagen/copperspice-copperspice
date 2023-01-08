@@ -15,14 +15,14 @@ target_compile_definitions(CsGui
 set(EXTRA_GUI_CXXFLAGS)
 set(EXTRA_GUI_LDFLAGS)
 
+target_include_directories(CsGui
+   PUBLIC
+   $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include/QtGui>
+   $<INSTALL_INTERFACE:include/QtGui>
+)
+
 include_directories(
-   ${CMAKE_BINARY_DIR}/include
-   ${CMAKE_BINARY_DIR}/privateinclude
-
-   ${CMAKE_BINARY_DIR}/include/QtCore
    ${CMAKE_BINARY_DIR}/privateinclude/QtCore/private
-
-   ${CMAKE_BINARY_DIR}/include/QtGui
    ${CMAKE_BINARY_DIR}/privateinclude/QtGui/private
 
    ${CMAKE_CURRENT_SOURCE_DIR}/accessible
@@ -179,7 +179,6 @@ target_sources(CsGui
 
 target_include_directories(CsGui
    PUBLIC
-   $<INSTALL_INTERFACE:include/QtGui>
    ${OPENGL_INCLUDE_DIR}
 )
 
