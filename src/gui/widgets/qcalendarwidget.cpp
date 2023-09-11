@@ -1443,8 +1443,9 @@ QCalendarView::QCalendarView(QWidget *parent)
 
 QModelIndex QCalendarView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
 {
-   QCalendarModel *calendarModel = qobject_cast<QCalendarModel *>(model());
-   if (!calendarModel) {
+   QCalendarModel *calendarModel = dynamic_cast<QCalendarModel *>(model());
+
+   if (calendarModel == nullptr) {
       return QTableView::moveCursor(cursorAction, modifiers);
    }
 
@@ -1501,7 +1502,7 @@ void QCalendarView::keyPressEvent(QKeyEvent *event)
       }
    } else if (event->key() == Qt::Key_Back) {
       if (QApplication::keypadNavigationEnabled() && hasEditFocus()) {
-         if (qobject_cast<QCalendarModel *>(model())) {
+         if (dynamic_cast<QCalendarModel *>(model())) {
             emit changeDate(origDate, true); //changes selection back to origDate, but doesn't activate
             setEditFocus(false);
             return;
@@ -1540,7 +1541,7 @@ bool QCalendarView::event(QEvent *event)
 {
 #ifdef QT_KEYPAD_NAVIGATION
    if (event->type() == QEvent::FocusIn) {
-      if (QCalendarModel *calendarModel = qobject_cast<QCalendarModel *>(model())) {
+      if (QCalendarModel *calendarModel = dynamic_cast<QCalendarModel *>(model())) {
          origDate = calendarModel->m_date;
       }
    }
@@ -1551,8 +1552,9 @@ bool QCalendarView::event(QEvent *event)
 
 QDate QCalendarView::handleMouseEvent(QMouseEvent *event)
 {
-   QCalendarModel *calendarModel = qobject_cast<QCalendarModel *>(model());
-   if (!calendarModel) {
+   QCalendarModel *calendarModel = dynamic_cast<QCalendarModel *>(model());
+
+   if (calendarModel == nullptr) {
       return QDate();
    }
 
@@ -1568,8 +1570,9 @@ QDate QCalendarView::handleMouseEvent(QMouseEvent *event)
 
 void QCalendarView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-   QCalendarModel *calendarModel = qobject_cast<QCalendarModel *>(model());
-   if (!calendarModel) {
+   QCalendarModel *calendarModel = dynamic_cast<QCalendarModel *>(model());
+
+   if (calendarModel == nullptr) {
       QTableView::mouseDoubleClickEvent(event);
       return;
    }
@@ -1587,8 +1590,9 @@ void QCalendarView::mouseDoubleClickEvent(QMouseEvent *event)
 
 void QCalendarView::mousePressEvent(QMouseEvent *event)
 {
-   QCalendarModel *calendarModel = qobject_cast<QCalendarModel *>(model());
-   if (!calendarModel) {
+   QCalendarModel *calendarModel = dynamic_cast<QCalendarModel *>(model());
+
+   if (calendarModel == nullptr) {
       QTableView::mousePressEvent(event);
       return;
    }
@@ -1617,8 +1621,9 @@ void QCalendarView::mousePressEvent(QMouseEvent *event)
 
 void QCalendarView::mouseMoveEvent(QMouseEvent *event)
 {
-   QCalendarModel *calendarModel = qobject_cast<QCalendarModel *>(model());
-   if (!calendarModel) {
+   QCalendarModel *calendarModel = dynamic_cast<QCalendarModel *>(model());
+
+   if (calendarModel == nullptr) {
       QTableView::mouseMoveEvent(event);
       return;
    }
@@ -1643,8 +1648,9 @@ void QCalendarView::mouseMoveEvent(QMouseEvent *event)
 
 void QCalendarView::mouseReleaseEvent(QMouseEvent *event)
 {
-   QCalendarModel *calendarModel = qobject_cast<QCalendarModel *>(model());
-   if (!calendarModel) {
+   QCalendarModel *calendarModel = dynamic_cast<QCalendarModel *>(model());
+
+   if (calendarModel == nullptr) {
       QTableView::mouseReleaseEvent(event);
       return;
    }
@@ -3032,18 +3038,23 @@ bool QCalendarWidget::event(QEvent *event)
 bool QCalendarWidget::eventFilter(QObject *watched, QEvent *event)
 {
    Q_D(QCalendarWidget);
+
    if (event->type() == QEvent::MouseButtonPress && d->yearEdit->hasFocus()) {
-      QWidget *tlw = window();
-      QWidget *widget = static_cast<QWidget *>(watched);
-      //as we have a event filter on the whole application we first make sure that the top level widget
-      //of both this and the watched widget are the same to decide if we should finish the year edition.
-      if (widget->window() == tlw) {
+      QWidget *tlw    = window();
+      QWidget *widget = dynamic_cast<QWidget *>(watched);
+
+      // have an event filter on the whole application, first make sure the top level widget
+      // of both this and the watched widget are the same to decide if we should finish the year edition
+
+      if (widget != nullptr && widget->window() == tlw) {
          QPoint mousePos = widget->mapTo(tlw, static_cast<QMouseEvent *>(event)->pos());
-         QRect geom = QRect(d->yearEdit->mapTo(tlw, QPoint(0, 0)), d->yearEdit->size());
-         if (!geom.contains(mousePos)) {
+         QRect geom      = QRect(d->yearEdit->mapTo(tlw, QPoint(0, 0)), d->yearEdit->size());
+
+         if (! geom.contains(mousePos)) {
             event->accept();
             d->_q_yearEditingFinished();
             setFocus();
+
             return true;
          }
       }

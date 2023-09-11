@@ -52,41 +52,41 @@ QOpenGLTexturePrivate::QOpenGLTexturePrivate(QOpenGLTexture::Target textureTarge
     dimensions[0] = dimensions[1] = dimensions[2] = 1;
 
     switch (target) {
-    case QOpenGLTexture::Target1D:
-        bindingTarget = QOpenGLTexture::BindingTarget1D;
-        break;
-    case QOpenGLTexture::Target1DArray:
-        bindingTarget = QOpenGLTexture::BindingTarget1DArray;
-        break;
-    case QOpenGLTexture::Target2D:
-        bindingTarget = QOpenGLTexture::BindingTarget2D;
-        break;
-    case QOpenGLTexture::Target2DArray:
-        bindingTarget = QOpenGLTexture::BindingTarget2DArray;
-        break;
-    case QOpenGLTexture::Target3D:
-        bindingTarget = QOpenGLTexture::BindingTarget3D;
-        break;
-    case QOpenGLTexture::TargetCubeMap:
-        bindingTarget = QOpenGLTexture::BindingTargetCubeMap;
-        faces = 6;
-        break;
-    case QOpenGLTexture::TargetCubeMapArray:
-        bindingTarget = QOpenGLTexture::BindingTargetCubeMapArray;
-        faces = 6;
-        break;
-    case QOpenGLTexture::Target2DMultisample:
-        bindingTarget = QOpenGLTexture::BindingTarget2DMultisample;
-        break;
-    case QOpenGLTexture::Target2DMultisampleArray:
-        bindingTarget = QOpenGLTexture::BindingTarget2DMultisampleArray;
-        break;
-    case QOpenGLTexture::TargetRectangle:
-        bindingTarget = QOpenGLTexture::BindingTargetRectangle;
-        break;
-    case QOpenGLTexture::TargetBuffer:
-        bindingTarget = QOpenGLTexture::BindingTargetBuffer;
-        break;
+       case QOpenGLTexture::Target1D:
+           bindingTarget = QOpenGLTexture::BindingTarget1D;
+           break;
+       case QOpenGLTexture::Target1DArray:
+           bindingTarget = QOpenGLTexture::BindingTarget1DArray;
+           break;
+       case QOpenGLTexture::Target2D:
+           bindingTarget = QOpenGLTexture::BindingTarget2D;
+           break;
+       case QOpenGLTexture::Target2DArray:
+           bindingTarget = QOpenGLTexture::BindingTarget2DArray;
+           break;
+       case QOpenGLTexture::Target3D:
+           bindingTarget = QOpenGLTexture::BindingTarget3D;
+           break;
+       case QOpenGLTexture::TargetCubeMap:
+           bindingTarget = QOpenGLTexture::BindingTargetCubeMap;
+           faces = 6;
+           break;
+       case QOpenGLTexture::TargetCubeMapArray:
+           bindingTarget = QOpenGLTexture::BindingTargetCubeMapArray;
+           faces = 6;
+           break;
+       case QOpenGLTexture::Target2DMultisample:
+           bindingTarget = QOpenGLTexture::BindingTarget2DMultisample;
+           break;
+       case QOpenGLTexture::Target2DMultisampleArray:
+           bindingTarget = QOpenGLTexture::BindingTarget2DMultisampleArray;
+           break;
+       case QOpenGLTexture::TargetRectangle:
+           bindingTarget = QOpenGLTexture::BindingTargetRectangle;
+           break;
+       case QOpenGLTexture::TargetBuffer:
+           bindingTarget = QOpenGLTexture::BindingTargetBuffer;
+           break;
     }
 
     swizzleMask[0] = QOpenGLTexture::RedValue;
@@ -1195,15 +1195,15 @@ void QOpenGLTexturePrivate::setData(int mipLevel, int layer, QOpenGLTexture::Cub
 {
     switch (target) {
     case QOpenGLTexture::Target1D:
-        Q_UNUSED(layer);
-        Q_UNUSED(cubeFace);
+        (void) layer;
+        (void) cubeFace;
         texFuncs->glTextureSubImage1D(textureId, target, bindingTarget, mipLevel,
                                       0, mipLevelSize( mipLevel, dimensions[0] ),
                                       sourceFormat, sourceType, data, options);
         break;
 
     case QOpenGLTexture::Target1DArray:
-        Q_UNUSED(cubeFace);
+        (void) cubeFace;
         texFuncs->glTextureSubImage2D(textureId, target, bindingTarget, mipLevel,
                                       0, layer,
                                       mipLevelSize(mipLevel, dimensions[0]),
@@ -1212,8 +1212,8 @@ void QOpenGLTexturePrivate::setData(int mipLevel, int layer, QOpenGLTexture::Cub
         break;
 
     case QOpenGLTexture::Target2D:
-        Q_UNUSED(layer);
-        Q_UNUSED(cubeFace);
+        (void) layer;
+        (void) cubeFace;
         texFuncs->glTextureSubImage2D(textureId, target, bindingTarget, mipLevel,
                                       0, 0,
                                       mipLevelSize(mipLevel, dimensions[0]),
@@ -1222,7 +1222,7 @@ void QOpenGLTexturePrivate::setData(int mipLevel, int layer, QOpenGLTexture::Cub
         break;
 
     case QOpenGLTexture::Target2DArray:
-        Q_UNUSED(cubeFace);
+        (void) cubeFace;
         texFuncs->glTextureSubImage3D(textureId, target, bindingTarget, mipLevel,
                                       0, 0, layer,
                                       mipLevelSize(mipLevel, dimensions[0]),
@@ -1232,7 +1232,7 @@ void QOpenGLTexturePrivate::setData(int mipLevel, int layer, QOpenGLTexture::Cub
         break;
 
     case QOpenGLTexture::Target3D:
-        Q_UNUSED(cubeFace);
+        (void) cubeFace;
         texFuncs->glTextureSubImage3D(textureId, target, bindingTarget, mipLevel,
                                       0, 0, layer,
                                       mipLevelSize(mipLevel, dimensions[0]),
@@ -1242,7 +1242,7 @@ void QOpenGLTexturePrivate::setData(int mipLevel, int layer, QOpenGLTexture::Cub
         break;
 
     case QOpenGLTexture::TargetCubeMap:
-        Q_UNUSED(layer);
+        (void) layer;
         texFuncs->glTextureSubImage2D(textureId, cubeFace, bindingTarget, mipLevel,
                                       0, 0,
                                       mipLevelSize(mipLevel, dimensions[0]),
@@ -1263,9 +1263,9 @@ void QOpenGLTexturePrivate::setData(int mipLevel, int layer, QOpenGLTexture::Cub
     }
 
     case QOpenGLTexture::TargetRectangle:
-        Q_UNUSED(mipLevel);
-        Q_UNUSED(layer);
-        Q_UNUSED(cubeFace);
+        (void) mipLevel;
+        (void) layer;
+        (void) cubeFace;
         texFuncs->glTextureSubImage2D(textureId, target, bindingTarget, 0,
                                       0, 0,
                                       dimensions[0],
@@ -1301,8 +1301,9 @@ void QOpenGLTexturePrivate::setCompressedData(int mipLevel, int layer, QOpenGLTe
 
     switch (target) {
     case QOpenGLTexture::Target1D:
-        Q_UNUSED(layer);
-        Q_UNUSED(cubeFace);
+        (void) layer;
+        (void) cubeFace;
+
         if (needsFullSpec) {
             texFuncs->glCompressedTextureImage1D(textureId, target, bindingTarget, mipLevel,
                                                  format,
@@ -1316,7 +1317,8 @@ void QOpenGLTexturePrivate::setCompressedData(int mipLevel, int layer, QOpenGLTe
         break;
 
     case QOpenGLTexture::Target1DArray:
-        Q_UNUSED(cubeFace);
+        (void) cubeFace;
+
         if (!needsFullSpec) {
             texFuncs->glCompressedTextureSubImage2D(textureId, target, bindingTarget, mipLevel,
                                                     0, layer,
@@ -1327,8 +1329,9 @@ void QOpenGLTexturePrivate::setCompressedData(int mipLevel, int layer, QOpenGLTe
         break;
 
     case QOpenGLTexture::Target2D:
-        Q_UNUSED(layer);
-        Q_UNUSED(cubeFace);
+        (void) layer;
+        (void) cubeFace;
+
         if (needsFullSpec) {
             texFuncs->glCompressedTextureImage2D(textureId, target, bindingTarget, mipLevel,
                                                  format,
@@ -1345,7 +1348,8 @@ void QOpenGLTexturePrivate::setCompressedData(int mipLevel, int layer, QOpenGLTe
         break;
 
     case QOpenGLTexture::Target2DArray:
-        Q_UNUSED(cubeFace);
+        (void) cubeFace;
+
         if (!needsFullSpec) {
             texFuncs->glCompressedTextureSubImage3D(textureId, target, bindingTarget, mipLevel,
                                                     0, 0, layer,
@@ -1357,7 +1361,8 @@ void QOpenGLTexturePrivate::setCompressedData(int mipLevel, int layer, QOpenGLTe
         break;
 
     case QOpenGLTexture::Target3D:
-        Q_UNUSED(cubeFace);
+        (void) cubeFace;
+
         if (needsFullSpec) {
             texFuncs->glCompressedTextureImage3D(textureId, target, bindingTarget, mipLevel,
                                                  format,
@@ -1376,7 +1381,8 @@ void QOpenGLTexturePrivate::setCompressedData(int mipLevel, int layer, QOpenGLTe
         break;
 
     case QOpenGLTexture::TargetCubeMap:
-        Q_UNUSED(layer);
+        (void) layer;
+
         if (needsFullSpec) {
             texFuncs->glCompressedTextureImage2D(textureId, cubeFace, bindingTarget, mipLevel,
                                                  format,
@@ -2584,8 +2590,8 @@ void QOpenGLTexture::setSize(int width, int height, int depth)
     case QOpenGLTexture::Target1DArray:
     case QOpenGLTexture::TargetBuffer:
         d->dimensions[0] = width;
-        Q_UNUSED(height);
-        Q_UNUSED(depth);
+        (void) height;
+        (void) depth;
         break;
 
     case QOpenGLTexture::Target2D:
@@ -2595,15 +2601,16 @@ void QOpenGLTexture::setSize(int width, int height, int depth)
     case QOpenGLTexture::Target2DMultisampleArray:
         d->dimensions[0] = width;
         d->dimensions[1] = height;
-        Q_UNUSED(depth);
+        (void) depth;
         break;
 
     case QOpenGLTexture::TargetCubeMap:
     case QOpenGLTexture::TargetCubeMapArray:
-        if (width != height)
-            qWarning("QAbstractOpenGLTexture::setSize(): Cube map textures must be square");
+        if (width != height) {
+           qWarning("QAbstractOpenGLTexture::setSize(): Cube map textures must be square");
+        }
         d->dimensions[0] = d->dimensions[1] = width;
-        Q_UNUSED(depth);
+        (void) depth;
         break;
 
     case QOpenGLTexture::Target3D:
@@ -2614,54 +2621,29 @@ void QOpenGLTexture::setSize(int width, int height, int depth)
     }
 }
 
-/*!
-    Returns the width of a 1D, 2D or 3D texture.
-
-    \sa height(), depth(), setSize()
-*/
 int QOpenGLTexture::width() const
 {
     Q_D(const QOpenGLTexture);
     return d->dimensions[0];
 }
 
-/*!
-    Returns the height of a 2D or 3D texture.
-
-    \sa width(), depth(), setSize()
-*/
 int QOpenGLTexture::height() const
 {
     Q_D(const QOpenGLTexture);
     return d->dimensions[1];
 }
 
-/*!
-    Returns the depth of a 3D texture.
-
-    \sa width(), height(), setSize()
-*/
 int QOpenGLTexture::depth() const
 {
     Q_D(const QOpenGLTexture);
     return d->dimensions[2];
 }
 
-/*!
-    For texture targets that support mipmaps, this function
-    sets the requested number of mipmap \a levels to allocate storage
-    for. This function should be called before storage is allocated
-    for the texture.
-
-    If the texture target does not support mipmaps this function
-    has no effect.
-
-    \sa mipLevels(), maximumMipLevels(), isStorageAllocated()
-*/
 void QOpenGLTexture::setMipLevels(int levels)
 {
     Q_D(QOpenGLTexture);
     d->create();
+
     if (isStorageAllocated()) {
         qWarning("Cannot set mip levels on a texture that already has storage allocated.\n"
                  "To do so, destroy() the texture and then create() and setMipLevels()");
@@ -3547,18 +3529,6 @@ void QOpenGLTexture::generateMipMaps(int baseLevel, bool resetBaseLevel)
         setMipBaseLevel(oldBaseLevel);
 }
 
-/*!
-    GLSL shaders are able to reorder the components of the vec4 returned by texture
-    functions. It is also desirable to be able to control this reordering from CPU
-    side code. This is made possible by swizzle masks since OpenGL 3.3.
-
-    Each component of the texture can be mapped to one of the SwizzleValue options.
-
-    This function maps \a component to the output \a value.
-
-    \note This function has no effect on Mac and Qt built for OpenGL ES 2.
-    \sa swizzleMask()
-*/
 void QOpenGLTexture::setSwizzleMask(SwizzleComponent component, SwizzleValue value)
 {
 #if !defined(Q_OS_DARWIN) && !defined(QT_OPENGL_ES_2)
@@ -3576,30 +3546,28 @@ void QOpenGLTexture::setSwizzleMask(SwizzleComponent component, SwizzleValue val
         return;
     }
 #else
-    Q_UNUSED(component);
-    Q_UNUSED(value);
+    (void) component;
+    (void) value;
 #endif
+
     qWarning("QOpenGLTexture: Texture swizzling is not supported");
 }
 
-/*!
-    Parameters \a {r}, \a {g}, \a {b}, and \a {a}  are values used for setting
-    the colors red, green, blue, and the alpha value.
-    \overload
-*/
-void QOpenGLTexture::setSwizzleMask(SwizzleValue r, SwizzleValue g,
-                                    SwizzleValue b, SwizzleValue a)
+void QOpenGLTexture::setSwizzleMask(SwizzleValue r, SwizzleValue g, SwizzleValue b, SwizzleValue a)
 {
-#if !defined(Q_OS_DARWIN) && !defined(QT_OPENGL_ES_2)
-    if (!QOpenGLContext::currentContext()->isOpenGLES()) {
+#if ! defined(Q_OS_DARWIN) && !defined(QT_OPENGL_ES_2)
+    if (! QOpenGLContext::currentContext()->isOpenGLES()) {
         Q_D(QOpenGLTexture);
         d->create();
+
         Q_ASSERT(d->texFuncs);
         Q_ASSERT(d->textureId);
-        if (!d->features.testFlag(Swizzle)) {
+
+        if (! d->features.testFlag(Swizzle)) {
             qWarning("QOpenGLTexture::setSwizzleMask() requires OpenGL >= 3.3");
             return;
         }
+
         GLint swizzleMask[] = {GLint(r), GLint(g), GLint(b), GLint(a)};
         d->swizzleMask[0] = r;
         d->swizzleMask[1] = g;
@@ -3609,45 +3577,20 @@ void QOpenGLTexture::setSwizzleMask(SwizzleValue r, SwizzleValue g,
         return;
     }
 #else
-    Q_UNUSED(r);
-    Q_UNUSED(g);
-    Q_UNUSED(b);
-    Q_UNUSED(a);
+    (void) r;
+    (void) g;
+    (void) b;
+    (void) a;
 #endif
     qWarning("QOpenGLTexture: Texture swizzling is not supported");
 }
 
-/*!
-    Returns the swizzle mask for texture \a component.
-*/
 QOpenGLTexture::SwizzleValue QOpenGLTexture::swizzleMask(SwizzleComponent component) const
 {
     Q_D(const QOpenGLTexture);
     return d->swizzleMask[component - SwizzleRed];
 }
 
-/*!
-    \enum QOpenGLTexture::DepthStencilMode
-    \since 5.4
-    This enum specifies which component of a depth/stencil texture is
-    accessed when the texture is sampled.
-
-    \value DepthMode Equivalent to GL_DEPTH_COMPONENT.
-    \value StencilMode Equivalent to GL_STENCIL_INDEX.
-*/
-
-/*!
-    If using a texture that has a combined depth/stencil format this function sets
-    which component of the texture is accessed to \a mode.
-
-    When the parameter is set to DepthMode, then accessing it from the
-    shader will access the depth component as a single float, as normal. But when
-    the parameter is set to StencilMode, the shader will access the stencil component.
-
-    \note This function has no effect on Mac and Qt built for OpenGL ES 2.
-    \since 5.4
-    \sa depthStencilMode()
-*/
 void QOpenGLTexture::setDepthStencilMode(QOpenGLTexture::DepthStencilMode mode)
 {
 #if !defined(Q_OS_DARWIN) && !defined(QT_OPENGL_ES_2)
@@ -3665,48 +3608,18 @@ void QOpenGLTexture::setDepthStencilMode(QOpenGLTexture::DepthStencilMode mode)
         return;
     }
 #else
-    Q_UNUSED(mode);
+    (void) mode;
 #endif
+
     qWarning("QOpenGLTexture: DepthStencil Mode is not supported");
 }
 
-/*!
-    Returns the depth stencil mode for textures using a combined depth/stencil format.
-
-    \since 5.4
-    \sa setDepthStencilMode()
-*/
 QOpenGLTexture::DepthStencilMode QOpenGLTexture::depthStencilMode() const
 {
     Q_D(const QOpenGLTexture);
     return d->depthStencilMode;
 }
 
-/*!
-    \enum QOpenGLTexture::ComparisonFunction
-    \since 5.5
-    This enum specifies which comparison operator is used when texture comparison
-    is enabled on this texture.
-
-    \value CompareLessEqual Equivalent to GL_LEQUAL.
-    \value CompareGreaterEqual Equivalent to GL_GEQUAL.
-    \value CompareLess Equivalent to GL_LESS.
-    \value CompareGreater Equivalent to GL_GREATER.
-    \value CompareEqual Equivalent to GL_EQUAL.
-    \value CommpareNotEqual Equivalent to GL_NOTEQUAL.
-    \value CompareAlways Equivalent to GL_ALWAYS.
-    \value CompareNever Equivalent to GL_NEVER.
-
-*/
-
-/*
-    \since 5.5
-
-    Sets the texture comparison function on this texture to \a function. The texture
-    comparison function is used by shadow samplers when sampling a depth texture.
-
-    \sa comparisonFunction()
-*/
 void QOpenGLTexture::setComparisonFunction(QOpenGLTexture::ComparisonFunction function)
 {
     Q_D(QOpenGLTexture);
@@ -3719,37 +3632,12 @@ void QOpenGLTexture::setComparisonFunction(QOpenGLTexture::ComparisonFunction fu
     d->texFuncs->glTextureParameteri(d->textureId, d->target, d->bindingTarget, GL_TEXTURE_COMPARE_FUNC, function);
 }
 
-/*!
-    \since 5.5
-
-    Returns the texture comparison operator set on this texture. By default, a
-    texture has a CompareLessEqual comparison function.
-
-    \sa setComparisonFunction()
-*/
 QOpenGLTexture::ComparisonFunction QOpenGLTexture::comparisonFunction() const
 {
     Q_D(const QOpenGLTexture);
     return d->comparisonFunction;
 }
 
-/*!
-    \enum QOpenGLTexture::ComparisonMode
-    \since 5.5
-    This enum specifies which comparison mode is used when sampling this texture.
-
-    \value CompareRefToTexture Equivalent to GL_COMPARE_REF_TO_TEXTURE.
-    \value CompareNone Equivalent to GL_NONE.
-*/
-
-/*!
-    \since 5.5
-
-    Sets the texture comparison mode on this texture to \a mode. The texture
-    comparison mode is used by shadow samplers when sampling a depth texture.
-
-    \sa comparisonMode()
-*/
 void QOpenGLTexture::setComparisonMode(QOpenGLTexture::ComparisonMode mode)
 {
     Q_D(QOpenGLTexture);
@@ -3762,25 +3650,12 @@ void QOpenGLTexture::setComparisonMode(QOpenGLTexture::ComparisonMode mode)
     d->texFuncs->glTextureParameteri(d->textureId, d->target, d->bindingTarget, GL_TEXTURE_COMPARE_MODE, mode);
 }
 
-/*!
-    \since 5.5
-
-    Returns the texture comparison mode set on this texture. By default, a
-    texture has a CompareNone comparison mode (i.e. comparisons are disabled).
-
-    \sa setComparisonMode()
-*/
 QOpenGLTexture::ComparisonMode QOpenGLTexture::comparisonMode() const
 {
     Q_D(const QOpenGLTexture);
     return d->comparisonMode;
 }
 
-/*!
-    Sets the filter used for minification to \a filter.
-
-    \sa minificationFilter(), setMagnificationFilter(), setMinMagFilters()
-*/
 void QOpenGLTexture::setMinificationFilter(QOpenGLTexture::Filter filter)
 {
     Q_D(QOpenGLTexture);
@@ -3791,22 +3666,12 @@ void QOpenGLTexture::setMinificationFilter(QOpenGLTexture::Filter filter)
     d->texFuncs->glTextureParameteri(d->textureId, d->target, d->bindingTarget, GL_TEXTURE_MIN_FILTER, filter);
 }
 
-/*!
-    Returns the minification filter.
-
-    \sa setMinificationFilter()
-*/
 QOpenGLTexture::Filter QOpenGLTexture::minificationFilter() const
 {
     Q_D(const QOpenGLTexture);
     return d->minFilter;
 }
 
-/*!
-    Sets the magnification filter to \a filter.
-
-    \sa magnificationFilter(), setMinificationFilter(), setMinMagFilters()
-*/
 void QOpenGLTexture::setMagnificationFilter(QOpenGLTexture::Filter filter)
 {
     Q_D(QOpenGLTexture);
@@ -3817,23 +3682,12 @@ void QOpenGLTexture::setMagnificationFilter(QOpenGLTexture::Filter filter)
     d->texFuncs->glTextureParameteri(d->textureId, d->target, d->bindingTarget, GL_TEXTURE_MAG_FILTER, filter);
 }
 
-/*!
-    Returns the magnification filter.
-
-    \sa setMagnificationFilter()
-*/
 QOpenGLTexture::Filter QOpenGLTexture::magnificationFilter() const
 {
     Q_D(const QOpenGLTexture);
     return d->magFilter;
 }
 
-/*!
-    Sets the minification filter to \a minificationFilter and the magnification filter
-    to \a magnificationFilter.
-
-    \sa minMagFilters(), setMinificationFilter(), setMagnificationFilter()
-*/
 void QOpenGLTexture::setMinMagFilters(QOpenGLTexture::Filter minificationFilter,
                                       QOpenGLTexture::Filter magnificationFilter)
 {
@@ -3847,23 +3701,12 @@ void QOpenGLTexture::setMinMagFilters(QOpenGLTexture::Filter minificationFilter,
     d->texFuncs->glTextureParameteri(d->textureId, d->target, d->bindingTarget, GL_TEXTURE_MAG_FILTER, magnificationFilter);
 }
 
-/*!
-    Returns the current minification and magnification filters.
-
-    \sa setMinMagFilters()
-*/
 QPair<QOpenGLTexture::Filter, QOpenGLTexture::Filter> QOpenGLTexture::minMagFilters() const
 {
     Q_D(const QOpenGLTexture);
     return QPair<QOpenGLTexture::Filter, QOpenGLTexture::Filter>(d->minFilter, d->magFilter);
 }
 
-/*!
-    If your OpenGL implementation supports the GL_EXT_texture_filter_anisotropic extension
-    this function sets the maximum anisotropy level to \a anisotropy.
-
-    \sa maximumAnisotropy()
-*/
 void QOpenGLTexture::setMaximumAnisotropy(float anisotropy)
 {
     Q_D(QOpenGLTexture);
@@ -3928,15 +3771,9 @@ QOpenGLTexture::WrapMode QOpenGLTexture::wrapMode(QOpenGLTexture::CoordinateDire
     return d->wrapMode(direction);
 }
 
-/*!
-    Sets the border color of the texture to \a color.
-
-    \note This function has no effect on Mac and Qt built for OpenGL ES 2.
-    \sa borderColor()
-*/
 void QOpenGLTexture::setBorderColor(QColor color)
 {
-#if !defined(QT_OPENGL_ES_2)
+#if ! defined(QT_OPENGL_ES_2)
     if (!QOpenGLContext::currentContext()->isOpenGLES()) {
         Q_D(QOpenGLTexture);
         d->create();
@@ -3954,16 +3791,11 @@ void QOpenGLTexture::setBorderColor(QColor color)
         return;
     }
 #else
-    Q_UNUSED(color);
+    (void) color;
 #endif
     qWarning("QOpenGLTexture: Border color is not supported");
 }
 
-/*!
-    Sets the color red to \a {r}, green to \a {g}, blue to \a {b}, and \a {a} to the
-    alpha value.
-    \overload
-*/
 void QOpenGLTexture::setBorderColor(float r, float g, float b, float a)
 {
 #if !defined(QT_OPENGL_ES_2)
@@ -3984,19 +3816,14 @@ void QOpenGLTexture::setBorderColor(float r, float g, float b, float a)
         return;
     }
 #else
-    Q_UNUSED(r);
-    Q_UNUSED(g);
-    Q_UNUSED(b);
-    Q_UNUSED(a);
+    (void) r;
+    (void) g;
+    (void) b;
+    (void) a;
 #endif
     qWarning("QOpenGLTexture: Border color is not supported");
 }
 
-/*!
-    Sets the color red to \a {r}, green to \a {g}, blue to \a {b}, and the alpha
-    value to \a {a}.
-    \overload
-*/
 void QOpenGLTexture::setBorderColor(int r, int g, int b, int a)
 {
 #if !defined(QT_OPENGL_ES_2)
@@ -4017,21 +3844,16 @@ void QOpenGLTexture::setBorderColor(int r, int g, int b, int a)
         return;
     }
 #else
-    Q_UNUSED(r);
-    Q_UNUSED(g);
-    Q_UNUSED(b);
-    Q_UNUSED(a);
+    (void) r;
+    (void) g;
+    (void) b;
+    (void) a;
 #endif
     qWarning("QOpenGLTexture: Border color is not supported");
 
     // TODO Handle case of using glTextureParameterIiv() based on format
 }
 
-/*!
-    Sets the color red to \a {r}, green to \a {g}, blue to \a {b}, and the alpha
-    value to \a {a}.
-    \overload
-*/
 void QOpenGLTexture::setBorderColor(uint r, uint g, uint b, uint a)
 {
 #if !defined(QT_OPENGL_ES_2)
@@ -4046,27 +3868,27 @@ void QOpenGLTexture::setBorderColor(uint r, uint g, uint b, uint a)
         values[2] = int(b);
         values[3] = int(a);
         d->borderColor.clear();
-        for (int i = 0; i < 4; ++i)
+
+        for (int i = 0; i < 4; ++i) {
             d->borderColor.append(QVariant(values[i]));
+        }
+
         d->texFuncs->glTextureParameteriv(d->textureId, d->target, d->bindingTarget, GL_TEXTURE_BORDER_COLOR, values);
+
         return;
     }
 #else
-    Q_UNUSED(r);
-    Q_UNUSED(g);
-    Q_UNUSED(b);
-    Q_UNUSED(a);
+    (void) r;
+    (void) g;
+    (void) b;
+    (void) a;
 #endif
+
     qWarning("QOpenGLTexture: Border color is not supported");
 
     // TODO Handle case of using glTextureParameterIuiv() based on format
 }
 
-/*!
-    Returns the borderColor of this texture.
-
-    \sa setBorderColor()
-*/
 QColor QOpenGLTexture::borderColor() const
 {
     Q_D(const QOpenGLTexture);
@@ -4158,29 +3980,18 @@ void QOpenGLTexture::setMinimumLevelOfDetail(float value)
         return;
     }
 #else
-    Q_UNUSED(value);
+    (void) value;
 #endif
+
     qWarning("QOpenGLTexture: Detail level is not supported");
 }
 
-/*!
-    Returns the minimum level of detail parameter.
-
-    \sa setMinimumLevelOfDetail(), maximumLevelOfDetail(), levelOfDetailRange()
-*/
 float QOpenGLTexture::minimumLevelOfDetail() const
 {
     Q_D(const QOpenGLTexture);
     return d->minLevelOfDetail;
 }
 
-/*!
-    Sets the maximum level of detail to \a value. This limits the selection of lowest
-    resolution mipmap (highest mipmap level). The default value is 1000.
-
-    \note This function has no effect on Qt built for OpenGL ES 2.
-    \sa maximumLevelOfDetail(), setMinimumLevelOfDetail(), setLevelOfDetailRange()
-*/
 void QOpenGLTexture::setMaximumLevelOfDetail(float value)
 {
 #if !defined(QT_OPENGL_ES_2)
@@ -4195,28 +4006,18 @@ void QOpenGLTexture::setMaximumLevelOfDetail(float value)
         return;
     }
 #else
-    Q_UNUSED(value);
+    (void) value;
 #endif
+
     qWarning("QOpenGLTexture: Detail level is not supported");
 }
 
-/*!
-    Returns the maximum level of detail parameter.
-
-    \sa setMaximumLevelOfDetail(), minimumLevelOfDetail(), levelOfDetailRange()
-*/
 float QOpenGLTexture::maximumLevelOfDetail() const
 {
     Q_D(const QOpenGLTexture);
     return d->maxLevelOfDetail;
 }
 
-/*!
-    Sets the minimum level of detail parameters to \a min and the maximum level
-    to \a max.
-    \note This function has no effect on Qt built for OpenGL ES 2.
-    \sa levelOfDetailRange(), setMinimumLevelOfDetail(), setMaximumLevelOfDetail()
-*/
 void QOpenGLTexture::setLevelOfDetailRange(float min, float max)
 {
 #if !defined(QT_OPENGL_ES_2)
@@ -4233,17 +4034,13 @@ void QOpenGLTexture::setLevelOfDetailRange(float min, float max)
         return;
     }
 #else
-    Q_UNUSED(min);
-    Q_UNUSED(max);
+    (void) min;
+    (void) max;
 #endif
+
     qWarning("QOpenGLTexture: Detail level is not supported");
 }
 
-/*!
-    Returns the minimum and maximum level of detail parameters.
-
-    \sa setLevelOfDetailRange(), minimumLevelOfDetail(), maximumLevelOfDetail()
-*/
 QPair<float, float> QOpenGLTexture::levelOfDetailRange() const
 {
     Q_D(const QOpenGLTexture);
@@ -4251,7 +4048,7 @@ QPair<float, float> QOpenGLTexture::levelOfDetailRange() const
 }
 void QOpenGLTexture::setLevelofDetailBias(float bias)
 {
-#if !defined(QT_OPENGL_ES_2)
+#if ! defined(QT_OPENGL_ES_2)
     if (!QOpenGLContext::currentContext()->isOpenGLES()) {
         Q_D(QOpenGLTexture);
         d->create();
@@ -4262,7 +4059,7 @@ void QOpenGLTexture::setLevelofDetailBias(float bias)
         return;
     }
 #else
-    Q_UNUSED(bias);
+    (void) bias;
 #endif
     qWarning("QOpenGLTexture: Detail level is not supported");
 }
@@ -4272,4 +4069,3 @@ float QOpenGLTexture::levelofDetailBias() const
     Q_D(const QOpenGLTexture);
     return d->levelOfDetailBias;
 }
-

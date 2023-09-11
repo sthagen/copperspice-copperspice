@@ -44,15 +44,21 @@
 class QSslSocketGlobalData
 {
  public:
-   QSslSocketGlobalData() : config(new QSslConfigurationPrivate)
-   {   }
+   QSslSocketGlobalData()
+      : config(new QSslConfigurationPrivate)
+   {  }
 
    QMutex mutex;
    QList<QSslCipher> supportedCiphers;
    QVector<QSslEllipticCurve> supportedEllipticCurves;
    QExplicitlySharedDataPointer<QSslConfigurationPrivate> config;
 };
-Q_GLOBAL_STATIC(QSslSocketGlobalData, globalData)
+
+static QSslSocketGlobalData *globalData()
+{
+   static QSslSocketGlobalData retval;
+   return &retval;
+}
 
 QSslSocket::QSslSocket(QObject *parent)
    : QTcpSocket(*new QSslSocketBackendPrivate, parent)
@@ -85,7 +91,8 @@ void QSslSocket::resume()
    QMetaObject::invokeMethod(this, "_q_resumeImplementation", Qt::QueuedConnection);
 }
 
-void QSslSocket::connectToHostEncrypted(const QString &hostName, quint16 port, OpenMode mode, NetworkLayerProtocol protocol)
+void QSslSocket::connectToHostEncrypted(const QString &hostName, quint16 port,
+      OpenMode mode, NetworkLayerProtocol protocol)
 {
    Q_D(QSslSocket);
 
@@ -151,6 +158,7 @@ bool QSslSocket::setSocketDescriptor(qintptr socketDescriptor, SocketState state
 void QSslSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
 {
    Q_D(QSslSocket);
+
    if (d->plainSocket) {
       d->plainSocket->setSocketOption(option, value);
    }
@@ -159,6 +167,7 @@ void QSslSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVa
 QVariant QSslSocket::socketOption(QAbstractSocket::SocketOption option)
 {
    Q_D(QSslSocket);
+
    if (d->plainSocket) {
       return d->plainSocket->socketOption(option);
    } else {
@@ -1538,5 +1547,4 @@ void QSslSocket::_q_caRootLoaded(QSslCertificate arg1, QSslCertificate arg2)
    d->_q_caRootLoaded(arg1, arg2);
 }
 #endif
-
 

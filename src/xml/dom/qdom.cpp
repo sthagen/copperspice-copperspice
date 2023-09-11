@@ -2916,7 +2916,7 @@ QDomDocumentTypePrivate::~QDomDocumentTypePrivate()
 void QDomDocumentTypePrivate::init()
 {
    entities = new QDomNamedNodeMapPrivate(this);
-   QT_TRY {
+   try {
       notations = new QDomNamedNodeMapPrivate(this);
       publicId.clear();
       systemId.clear();
@@ -2924,9 +2924,9 @@ void QDomDocumentTypePrivate::init()
 
       entities->setAppendToParent(true);
       notations->setAppendToParent(true);
-   } QT_CATCH(...) {
+   } catch(...) {
       delete entities;
-      QT_RETHROW;
+      throw;
    }
 }
 
@@ -3395,7 +3395,7 @@ bool QDomAttrPrivate::specified() const
 static QString encodeText(const QString &str, QTextStream &s, const bool encodeQuotes = true,
             const bool performAVN = false, const bool encodeEOLs = false){
 #ifdef QT_NO_TEXTCODEC
-   Q_UNUSED(s);
+   (void) s;
 #else
    const QTextCodec *const codec = s.codec();
    Q_ASSERT(codec);

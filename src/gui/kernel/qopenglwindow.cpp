@@ -130,7 +130,8 @@ void QOpenGLWindowPrivate::initialize()
 
 void QOpenGLWindowPrivate::beginPaint(const QRegion &region)
 {
-   Q_UNUSED(region);
+   (void) region;
+
    Q_Q(QOpenGLWindow);
 
    initialize();
@@ -223,8 +224,10 @@ void QOpenGLWindowPrivate::bindFBO()
 
 void QOpenGLWindowPrivate::flush(const QRegion &region)
 {
-   Q_UNUSED(region);
+   (void) region;
+
    Q_Q(QOpenGLWindow);
+
    context->swapBuffers(q);
    emit q->frameSwapped();
 }
@@ -234,11 +237,6 @@ void QOpenGLWindowPaintDevice::ensureActiveTarget()
    QOpenGLWindowPrivate::get(m_window)->bindFBO();
 }
 
-/*!
-  Constructs a new QOpenGLWindow with the given \a parent and \a updateBehavior.
-
-  \sa QOpenGLWindow::UpdateBehavior
- */
 QOpenGLWindow::QOpenGLWindow(QOpenGLWindow::UpdateBehavior updateBehavior, QWindow *parent)
    : QPaintDeviceWindow(*(new QOpenGLWindowPrivate(nullptr, updateBehavior)), parent)
 {

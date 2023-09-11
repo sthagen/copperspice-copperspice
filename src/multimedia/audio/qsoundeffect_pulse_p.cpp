@@ -217,8 +217,17 @@ void PulseDaemon::prepare()
 
 } // namespace
 
-Q_GLOBAL_STATIC(PulseDaemon, pulseDaemon)
-Q_GLOBAL_STATIC(QSampleCache, sampleCache)
+static PulseDaemon *pulseDaemon()
+{
+   static PulseDaemon retval;
+   return &retval;
+}
+
+static QSampleCache *sampleCache()
+{
+   static QSampleCache retval;
+   return &retval;
+}
 
 namespace {
 
@@ -1072,8 +1081,8 @@ void QSoundEffectPrivate::contextFailed()
 
 void QSoundEffectPrivate::stream_write_callback(pa_stream *s, size_t length, void *userdata)
 {
-    Q_UNUSED(length);
-    Q_UNUSED(s);
+    (void) length;
+    (void) s;
 
     QSoundEffectPrivate *self = reinterpret_cast<QSoundEffectPrivate*>(userdata);
 
@@ -1142,7 +1151,8 @@ void QSoundEffectPrivate::stream_reset_buffer_callback(pa_stream *s, int success
     qDebug() << "stream_reset_buffer_callback";
 #endif
 
-    Q_UNUSED(s);
+    (void) s;
+
     QSoundEffectRef *ref = reinterpret_cast<QSoundEffectRef*>(userdata);
     QSoundEffectPrivate *self = ref->soundEffect();
 
@@ -1182,7 +1192,7 @@ void QSoundEffectPrivate::stream_adjust_prebuffer_callback(pa_stream *s, int suc
     qDebug() << "stream_adjust_prebuffer_callback";
 #endif
 
-    Q_UNUSED(s);
+    (void) s;
 
     QSoundEffectRef *ref = reinterpret_cast<QSoundEffectRef*>(userdata);
     QSoundEffectPrivate *self = ref->soundEffect();

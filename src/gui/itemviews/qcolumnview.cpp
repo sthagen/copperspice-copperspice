@@ -145,18 +145,12 @@ void QColumnView::setRootIndex(const QModelIndex &index)
    d->updateScrollbars();
 }
 
-/*!
-    \reimp
-*/
 bool QColumnView::isIndexHidden(const QModelIndex &index) const
 {
-   Q_UNUSED(index);
+   (void) index;
    return false;
 }
 
-/*!
-    \reimp
-*/
 QModelIndex QColumnView::indexAt(const QPoint &point) const
 {
    Q_D(const QColumnView);
@@ -171,9 +165,6 @@ QModelIndex QColumnView::indexAt(const QPoint &point) const
    return QModelIndex();
 }
 
-/*!
-    \reimp
-*/
 QRect QColumnView::visualRect(const QModelIndex &index) const
 {
    if (!index.isValid()) {
@@ -209,13 +200,11 @@ void QColumnView::scrollContentsBy(int dx, int dy)
    QAbstractItemView::scrollContentsBy(dx, dy);
 }
 
-/*!
-    \reimp
-*/
 void QColumnView::scrollTo(const QModelIndex &index, ScrollHint hint)
 {
    Q_D(QColumnView);
-   Q_UNUSED(hint);
+   (void) hint;
+
    if (!index.isValid() || d->columns.isEmpty()) {
       return;
    }
@@ -226,7 +215,7 @@ void QColumnView::scrollTo(const QModelIndex &index, ScrollHint hint)
    }
 
    d->currentAnimation.stop();
-#endif //QT_NO_ANIMATION
+#endif
 
    // Fill up what is needed to get to index
    d->closeColumns(index, true);
@@ -311,7 +300,8 @@ QModelIndex QColumnView::moveCursor(CursorAction cursorAction, Qt::KeyboardModif
 {
    // the child views which have focus get to deal with this first and if
    // they don't accept it then it comes up this view and we only grip left/right
-   Q_UNUSED(modifiers);
+   (void) modifiers;
+
    if (!model()) {
       return QModelIndex();
    }
@@ -458,27 +448,23 @@ QRegion QColumnView::visualRegionForSelection(const QItemSelection &selection) c
    return firstRegion.united(lastRegion);
 }
 
-/*!
-    \reimp
-*/
 void QColumnView::setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command)
 {
-   Q_UNUSED(rect);
-   Q_UNUSED(command);
+   (void) rect;
+   (void) command;
 }
 
-/*!
-    \reimp
-*/
 void QColumnView::setSelectionModel(QItemSelectionModel *newSelectionModel)
 {
    Q_D(const QColumnView);
+
    for (int i = 0; i < d->columns.size(); ++i) {
       if (d->columns.at(i)->selectionModel() == selectionModel()) {
          d->columns.at(i)->setSelectionModel(newSelectionModel);
          break;
       }
    }
+
    QAbstractItemView::setSelectionModel(newSelectionModel);
 }
 

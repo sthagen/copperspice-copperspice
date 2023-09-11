@@ -3604,7 +3604,7 @@ QImage QRasterBuffer::colorizeBitmap(const QImage &image, const QColor &color)
       QRgb *target = reinterpret_cast<QRgb *>(dest.scanLine(y));
 
       if (! source || !target) {
-         QT_THROW(std::bad_alloc());   // we must have run out of memory
+         throw(std::bad_alloc());   // we must have run out of memory
       }
 
       for (int x = 0; x < width; ++x) {
@@ -4439,7 +4439,11 @@ void QGradientCache::generateGradientColorTable(const QGradient &gradient, QRgba
    colorTable[size - 1] = current_color;
 }
 
-Q_GLOBAL_STATIC(QGradientCache, qt_gradient_cache)
+static QGradientCache *qt_gradient_cache()
+{
+   static QGradientCache retval;
+   return &retval;
+}
 
 void QSpanData::init(QRasterBuffer *rb, const QRasterPaintEngine *pe)
 {

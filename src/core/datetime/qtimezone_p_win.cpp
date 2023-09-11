@@ -187,7 +187,8 @@ static TIME_ZONE_INFORMATION getRegistryTzi(const QByteArray &windowsId, bool *o
 
    return tzi;
 }
-#else // QT_USE_REGISTRY_TIMEZONE
+#else
+// QT_USE_REGISTRY_TIMEZONE
 struct QWinDynamicTimeZone {
    QString standardName;
    QString daylightName;
@@ -196,9 +197,13 @@ struct QWinDynamicTimeZone {
    bool daylightTime;
 };
 
-typedef QHash<QByteArray, QWinDynamicTimeZone> QWinRTTimeZoneHash;
+using QWinRTTimeZoneHash = QHash<QByteArray, QWinDynamicTimeZone>;
 
-Q_GLOBAL_STATIC(QWinRTTimeZoneHash, gTimeZones)
+static QWinRTTimeZoneHash *gTimeZones()
+{
+   static QWinRTTimeZoneHash retval;
+   return &retval;
+}
 
 static void enumerateTimeZones()
 {

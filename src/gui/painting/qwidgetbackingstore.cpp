@@ -47,7 +47,13 @@
 extern QRegion qt_dirtyRegion(QWidget *);
 
 #ifndef QT_NO_OPENGL
-Q_GLOBAL_STATIC(QPlatformTextureList, qt_dummy_platformTextureList)
+
+static QPlatformTextureList *qt_dummy_platformTextureList()
+{
+   static QPlatformTextureList retval;
+   return &retval;
+}
+
 #endif
 
 /**
@@ -60,7 +66,7 @@ void QWidgetBackingStore::qt_flush(QWidget *widget, const QRegion &region, QBack
    QWidgetBackingStore *widgetBackingStore)
 {
 #ifdef QT_NO_OPENGL
-   Q_UNUSED(widgetTextures);
+   (void) widgetTextures;
    Q_ASSERT(!region.isEmpty());
 #else
    Q_ASSERT(!region.isEmpty() || widgetTextures);
@@ -149,7 +155,7 @@ void QWidgetBackingStore::qt_flush(QWidget *widget, const QRegion &region, QBack
 }
 
 #ifndef QT_NO_PAINT_DEBUG
-#if defined(Q_OS_WIN) && ! defined(Q_OS_WINRT)
+#if defined(Q_OS_WIN)
 
 static void showYellowThing_win(QWidget *widget, const QRegion &region, int msec)
 {
@@ -213,8 +219,8 @@ void QWidgetBackingStore::showYellowThing(QWidget *widget, const QRegion &toBePa
       widget = nativeParent;
    }
 
-#if defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
-   Q_UNUSED(unclipped);
+#if defined(Q_OS_WIN)
+   (void) unclipped;
    showYellowThing_win(widget, paintRegion, msec);
 
 #else

@@ -838,29 +838,20 @@ QModelIndex QListView::indexAt(const QPoint &p) const
    return QModelIndex();
 }
 
-/*!
-  \reimp
-*/
 int QListView::horizontalOffset() const
 {
    return d_func()->commonListView->horizontalOffset();
 }
 
-/*!
-  \reimp
-*/
 int QListView::verticalOffset() const
 {
    return d_func()->commonListView->verticalOffset();
 }
 
-/*!
-  \reimp
-*/
 QModelIndex QListView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
 {
    Q_D(QListView);
-   Q_UNUSED(modifiers);
+   (void) modifiers;
 
    QModelIndex current = currentIndex();
    if (!current.isValid()) {

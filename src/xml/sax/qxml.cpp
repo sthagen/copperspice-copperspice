@@ -903,7 +903,7 @@ void QXmlInputSource::init()
 {
    d = new QXmlInputSourcePrivate;
 
-   QT_TRY {
+   try {
       d->inputDevice = nullptr;
       d->inputStream = nullptr;
 
@@ -917,9 +917,9 @@ void QXmlInputSource::init()
       d->encodingDeclChars.clear();
       d->lookingForEncodingDecl = true;
 
-   } QT_CATCH(...) {
+   } catch(...) {
       delete(d);
-      QT_RETHROW;
+      throw;
    }
 }
 
@@ -1153,7 +1153,7 @@ static QString extractEncodingDecl(const QString &text, bool *needMoreText)
 QString QXmlInputSource::fromRawData(const QByteArray &data, bool beginning)
 {
 #ifdef QT_NO_TEXTCODEC
-   Q_UNUSED(beginning);
+   (void) beginning;
    return QString::fromLatin1(data.constData(), data.size());
 
 #else
