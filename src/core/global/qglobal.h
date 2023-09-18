@@ -300,11 +300,9 @@
 
 #  define Q_CC_CLANG
 #  define Q_CC_GNU
-#  define Q_C_CALLBACKS
 
 #  define Q_FUNC_INFO       __func__
 
-#  define Q_ALIGNOF(type)   __alignof__(type)
 #  define Q_LIKELY(expr)    __builtin_expect(!!(expr), true)
 #  define Q_UNLIKELY(expr)  __builtin_expect(!!(expr), false)
 
@@ -321,7 +319,6 @@
 #  endif
 
 #  define Q_CC_GNU
-#  define Q_C_CALLBACKS
 
 #  if defined(__MINGW32__)
 #    define Q_CC_MINGW
@@ -334,7 +331,6 @@
 
 #  define Q_FUNC_INFO       __PRETTY_FUNCTION__
 
-#  define Q_ALIGNOF(type)   __alignof__(type)
 #  define Q_LIKELY(expr)    __builtin_expect(!!(expr), true)
 #  define Q_UNLIKELY(expr)  __builtin_expect(!!(expr), false)
 
@@ -357,7 +353,6 @@
 
 #  define Q_FUNC_INFO       __FUNCSIG__
 
-#  define Q_ALIGNOF(type)   __alignof(type)
 #  define Q_LIKELY(expr)    (expr)
 #  define Q_UNLIKELY(expr)  (expr)
 
@@ -377,10 +372,7 @@
 #elif defined(__EDG) || defined(__EDG__)
 //  **
 
-#  if defined(__COMO__)
-#    define Q_C_CALLBACKS
-
-#  elif defined(__INTEL_COMPILER)
+#  if defined(__INTEL_COMPILER)
 #    define Q_CC_INTEL
 
 #  elif defined(__sgi)
