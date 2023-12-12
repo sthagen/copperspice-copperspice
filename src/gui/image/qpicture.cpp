@@ -38,6 +38,11 @@
 #include <qpixmap.h>
 #include <qregion.h>
 
+#ifndef QT_NO_PICTUREIO
+#include <qregularexpression.h>
+#include <qpictureformatplugin.h>
+#endif
+
 #include <qfactoryloader_p.h>
 #include <qpaintengine_pic_p.h>
 #include <qfont_p.h>
@@ -59,7 +64,7 @@ QPicture::QPicture(int formatVersion)
    Q_D(QPicture);
 
    if (formatVersion == 0) {
-      qWarning("QPicture: invalid format version 0");
+      qWarning("QPicture::QPicture() Invalid format version");
    }
 
    // still accept the 0 default from before Qt 3.0.
@@ -152,7 +157,8 @@ bool QPicture::load(QIODevice *dev, const QString &format)
          return true;
       }
 #endif
-      qWarning("QPicture::load: No such picture format: %s", csPrintable(format));
+
+      qWarning("QPicture::load() No picture format with the name %s", csPrintable(format));
       operator=(QPicture());
       return false;
    }
@@ -167,7 +173,7 @@ bool QPicture::load(QIODevice *dev, const QString &format)
 bool QPicture::save(const QString &fileName, const QString &format)
 {
    if (paintingActive()) {
-      qWarning("QPicture::save() Painting in progress, call QPainter::end() first");
+      qWarning("QPicture::save() Painting in progress, QPainter::end() required before saving");
       return false;
    }
 
@@ -185,7 +191,7 @@ bool QPicture::save(const QString &fileName, const QString &format)
       bool result = false;
 #endif
       {
-         qWarning("QPicture::save(): Picture format was not found, %s", csPrintable(format));
+         qWarning("QPicture::save() Picture format was not found, %s", csPrintable(format));
       }
       return result;
    }
@@ -203,7 +209,7 @@ bool QPicture::save(const QString &fileName, const QString &format)
 bool QPicture::save(QIODevice *dev, const QString &format)
 {
    if (paintingActive()) {
-      qWarning("QPicture::save() Painting in progress, call QPainter::end() first");
+      qWarning("QPicture::save() Painting in progress, QPainter::end() required before saving");
       return false;
    }
 
@@ -223,7 +229,7 @@ bool QPicture::save(QIODevice *dev, const QString &format)
 #endif
 
       {
-         qWarning("QPicture::save(): Picture format was not found, %s", csPrintable(format));
+         qWarning("QPicture::save() Picture format was not found, %s", csPrintable(format));
       }
       return result;
    }
@@ -283,7 +289,7 @@ bool QPicture::play(QPainter *painter)
 
    s >> nrecords;
    if (!exec(painter, s, nrecords)) {
-      qWarning("QPicture::play: Format error");
+      qWarning("QPicture::play() Format error");
       d->pictb.close();
       return false;
    }
@@ -773,7 +779,7 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
             painter->setOpacity(qreal(dbl));
             break;
          default:
-            qWarning("QPicture::play: Invalid command %d", c);
+            qWarning("QPicture::play() Invalid command %d", c);
             if (len) {                      // skip unknown command
                s.device()->seek(s.device()->pos() + len);
             }
@@ -837,7 +843,7 @@ int QPicture::metric(PaintDeviceMetric m) const
          break;
       default:
          val = 0;
-         qWarning("QPicture::metric: Invalid metric command");
+         qWarning("QPicture::metric() Invalid metric command");
    }
    return val;
 }
@@ -913,7 +919,7 @@ bool QPicturePrivate::checkFormat()
    s.readRawData(mf_id, 4);                      // read actual tag
 
    if (memcmp(mf_id, qt_mfhdr_tag, 4) != 0) {    // wrong header id
-      qWarning("QPicturePaintEngine::checkFormat, Incorrect header");
+      qWarning("QPicturePaintEngine::checkFormat() Incorrect header");
       pictb.close();
       return false;
    }
@@ -926,8 +932,7 @@ bool QPicturePrivate::checkFormat()
    s >> cs;                                      // read checksum
    ccs = (quint16) qChecksum(buf.constData() + data_start, buf.size() - data_start);
    if (ccs != cs) {
-      qWarning("QPicturePaintEngine::checkFormat: Invalid checksum %x, %x expected",
-         ccs, cs);
+      qWarning("QPicturePaintEngine::checkFormat() Invalid checksum %x, expected %x", ccs, cs);
       pictb.close();
       return false;
    }
@@ -936,7 +941,7 @@ bool QPicturePrivate::checkFormat()
    s >> major >> minor;                          // read version number
 
    if (major > mfhdr_maj) {                      // new, incompatible version
-      qWarning("QPicturePaintEngine::checkFormat: Incompatible version %d.%d", major, minor);
+      qWarning("QPicturePaintEngine::checkFormat() Incompatible version %d.%d", major, minor);
       pictb.close();
       return false;
    }
@@ -951,7 +956,7 @@ bool QPicturePrivate::checkFormat()
          brect = QRect(l, t, w, h);
       }
    } else {
-      qWarning("QPicturePaintEngine::checkFormat: Format error");
+      qWarning("QPicturePaintEngine::checkFormat() Format error");
       pictb.close();
       return false;
    }
@@ -1486,7 +1491,7 @@ bool QPictureIO::write()
 
    QPictureHandler *h = get_picture_handler(d->frmt);
    if (! h || ! h->write_picture) {
-      qWarning("QPictureIO::write: No such picture format handler: %s", csPrintable(format()) );
+      qWarning("QPictureIO::write() No picture format handler for %s", csPrintable(format()) );
       return false;
    }
 
