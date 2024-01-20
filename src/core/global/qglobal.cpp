@@ -21,11 +21,6 @@
 *
 ***********************************************************************/
 
-#include <limits>
-#include <mutex>
-#include <random>
-#include <stdlib.h>
-
 #include <qbytearray.h>
 #include <qglobal.h>
 #include <qlog.h>
@@ -35,7 +30,15 @@
 
 #include <qsystemlibrary_p.h>
 
-#if defined(Q_OS_DARWIN) && ! defined(Q_OS_IOS)
+#include <limits>
+#include <mutex>
+#include <random>
+#include <stdlib.h>
+
+#if defined(Q_OS_DARWIN)
+#include <qcore_mac_p.h>
+#include <qnamespace.h>
+
 #include <CoreServices/CoreServices.h>
 #endif
 
@@ -58,37 +61,101 @@ const char *csVersion()
 }
 
 // ** OSX
-#if ! defined(QWS) && defined(Q_OS_DARWIN)
+#if defined(Q_OS_DARWIN)
 
-#include <qcore_mac_p.h>
-#include <qnamespace.h>
-
-static QSysInfo::MacVersion macVersion()
+QSysInfo::MacVersion QSysInfo::macVersion()
 {
-   // qcore_mac_objc.mm
-   const QAppleOperatingSystemVersion version = qt_apple_os_version();
+   // kernel/qcore_mac_objc.mm
+   const QAppleOperatingSystemVersion osVersion = qt_apple_os_version();
 
-#if defined(Q_OS_DARWIN) && ! defined(Q_OS_IOS)
+   QSysInfo::MacVersion retval;
 
-   if (version.major == 10) {
-      return QSysInfo::MacVersion(version.minor + 2);
+   if (osVersion.major == 10 && osVersion.minor == 11) {
+      retval = MacVersion::MV_10_11;
+
+   } else if (osVersion.major == 10 && osVersion.minor == 12) {
+      retval = MacVersion::MV_10_12;
+
+   } else if (osVersion.major == 10 && osVersion.minor == 13) {
+      retval = MacVersion::MV_10_13;
+
+   } else if (osVersion.major == 10 && osVersion.minor == 14) {
+      retval = MacVersion::MV_10_14;
+
+   } else if (osVersion.major == 10 && osVersion.minor == 15) {
+      retval = MacVersion::MV_10_15;
+
+   } else if (osVersion.major == 10 && osVersion.minor == 16) {
+      retval = MacVersion::MV_10_16;
+
+   // **
+   } else if (osVersion.major == 11) {
+      retval = MacVersion::MV_11;
+
+   } else if (osVersion.major == 12) {
+      retval = MacVersion::MV_12;
+
+   } else if (osVersion.major == 13) {
+      retval = MacVersion::MV_13;
+
+   } else if (osVersion.major == 14) {
+      retval = MacVersion::MV_14;
 
    } else {
-      return QSysInfo::MV_Unknown;
+      retval = QSysInfo::MV_Unknown;
 
    }
 
-#elif defined(Q_OS_IOS)
-   return QSysInfo::MV_IOS;
-
-#else
-   return QSysInfo::MV_Unknown;
-
-#endif
-
+   return retval;
 }
 
-const QSysInfo::MacVersion QSysInfo::MacintoshVersion = macVersion();
+const QSysInfo::MacVersion QSysInfo::MacintoshVersion = QSysInfo::macVersion();
+
+QString QSysInfo::macEdition(MacVersion macVersion)
+{
+   QString retval = "Unknown Version";
+
+   switch (macVersion) {
+      case QSysInfo::MacVersion::MV_10_11:
+         retval = "El Capitan";
+         break;
+
+      case QSysInfo::MacVersion::MV_10_12:
+         retval = "Sierra";
+         break;
+
+      case QSysInfo::MacVersion::MV_10_13:
+         retval = "High Sierra";
+         break;
+
+      case QSysInfo::MacVersion::MV_10_14:
+         retval = "Mojave";
+         break;
+
+      case QSysInfo::MacVersion::MV_10_15:
+         retval = "Catalina";
+         break;
+
+      case QSysInfo::MacVersion::MV_11:
+         retval = "Big Sur";
+         break;
+
+      case QSysInfo::MacVersion::MV_12:
+         retval = "Monterey";
+         break;
+
+      case QSysInfo::MacVersion::MV_13:
+         retval = "Ventura";
+         break;
+
+      case QSysInfo::MacVersion::MV_14:
+         retval = "Sonoma";
+         break;
+   }
+
+   return retval;
+}
+
 
 // ** Windows
 #elif defined(Q_OS_WIN)
@@ -301,7 +368,7 @@ QWindowsSockInit::QWindowsSockInit()
    if (WSAStartup(MAKEWORD(2,0), &wsadata) != 0) {
       qWarning("QTcpSocketAPI() WinSock v2.0 initialization failed");
     } else {
-       version = 0x20;
+      version = 0x20;
     }
 }
 
@@ -310,7 +377,8 @@ QWindowsSockInit::~QWindowsSockInit()
    WSACleanup();
 }
 
-#endif  // end of windows block
+#endif  // end of OS_X_WIN
+
 
 QString QSysInfo::machineHostName()
 {
@@ -325,10 +393,10 @@ QString QSysInfo::machineHostName()
 
 #else
 
-#  ifdef Q_OS_WIN
-    // QtNetwork depends on machineHostName() initializing ws2_32.dll
+#ifdef Q_OS_WIN
+    // network depends on machineHostName() initializing ws2_32.dll
     static QWindowsSockInit winSock;
-#  endif
+#endif
 
    char hostName[512];
    if (gethostname(hostName, sizeof(hostName)) == -1) {
@@ -343,24 +411,17 @@ QString QSysInfo::machineHostName()
 }
 
 // Q_CHECK_PTR macro calls this function if an allocation check fails
-
 void qt_check_pointer(const char *n, int l)
 {
    qFatal("In file %s, line %d: Out of memory", n, l);
 }
 
-/* \internal
-   Allows you to throw an exception without including <new>
-   Called internally from Q_CHECK_PTR on certain OS combinations
-*/
 void qBadAlloc()
 {
    throw(std::bad_alloc());
 }
 
-/*
-    Dijkstra's bisection algorithm to find the square root of an integer.
-*/
+// Dijkstra's bisection algorithm to find the square root of an integer.
 Q_CORE_EXPORT unsigned int qt_int_sqrt(unsigned int n)
 {
    if (n >= (std::numeric_limits<unsigned int>::max() >> 2)) {
@@ -426,7 +487,7 @@ bool qputenv(const char *varName, const QByteArray &value)
    int result = putenv(envVar);
 
    if (result != 0) {
-      // error, we have to delete the string.
+      // error, we have to delete the string
       delete[] envVar;
    }
 
@@ -471,4 +532,3 @@ int qrand()
 {
    return s_dist(s_rand);
 }
-
