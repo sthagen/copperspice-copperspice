@@ -50,7 +50,6 @@ class QMultiHash
 
       using pointer           = Val *;
       using reference         = Val &;
-
       using difference_type   = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::difference_type;
       using size_type         = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::difference_type;
       using value_type        = Val;
@@ -58,7 +57,8 @@ class QMultiHash
       iterator() = default;
 
       iterator(typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::iterator iter)
-         : m_iter(std::move(iter)) {
+         : m_iter(std::move(iter))
+      {
       }
 
       const Key &key() const {
@@ -134,7 +134,6 @@ class QMultiHash
 
       using pointer           = const Val *;
       using reference         = const Val &;
-
       using difference_type   = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::difference_type;
       using size_type         = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::difference_type;
       using value_type        = Val;
@@ -224,6 +223,8 @@ class QMultiHash
       typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::const_iterator m_iter;
    };
 
+   static constexpr int bucket_count = 1;
+
    using difference_type = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::difference_type;
    using pointer         = Val *;
    using reference       = Val &;
@@ -236,11 +237,6 @@ class QMultiHash
    using key_equal       = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::key_equal;
 
    using allocator_type  = typename std::unordered_multimap<Key, Val, Hash, KeyEqual>::allocator_type;
-
-   static constexpr int bucket_count = 1;
-
-   // iterator and const_iterator are classes
-
    using const_pointer   = const Val *;
    using const_reference = const Val &;
 
@@ -253,23 +249,28 @@ class QMultiHash
    QMultiHash(const QMultiHash<Key, Val, Hash, KeyEqual> &other) = default;
    QMultiHash(QMultiHash<Key, Val, Hash, KeyEqual> &&other) = default;
 
-   QMultiHash(std::initializer_list<std::pair<const Key, Val> > list, const Hash & hash = Hash(),
-                  const KeyEqual &key_equal = KeyEqual())
-      : m_data(list, bucket_count, hash, key_equal) {}
+   QMultiHash(std::initializer_list<std::pair<const Key, Val>> list, const Hash &hash = Hash(),
+         const KeyEqual &key_equal = KeyEqual())
+      : m_data(list, bucket_count, hash, key_equal)
+   { }
 
-   explicit QMultiHash(const Hash & hash, const KeyEqual &key_equal = KeyEqual())
-      : m_data(hash, key_equal) {}
+   explicit QMultiHash(const Hash &hash, const KeyEqual &key_equal = KeyEqual())
+      : m_data(hash, key_equal)
+   { }
 
    explicit QMultiHash(const std::unordered_multimap<Key, Val, Hash, KeyEqual> &other)
-      : m_data(other) {}
+      : m_data(other)
+   { }
 
    explicit QMultiHash(std::unordered_multimap<Key, Val, Hash, KeyEqual> &&other)
-       : m_data(std::move(other)) {}
+      : m_data(std::move(other))
+   { }
 
    template <typename Input_Iterator>
-   QMultiHash(Input_Iterator first, Input_Iterator last, const Hash & hash = Hash(),
-                  const KeyEqual &key_equal = KeyEqual())
-      : m_data(first, last, hash, key_equal) {}
+   QMultiHash(Input_Iterator first, Input_Iterator last, const Hash &hash = Hash(),
+         const KeyEqual &key_equal = KeyEqual())
+      : m_data(first, last, hash, key_equal)
+   { }
 
    ~QMultiHash() = default;
 
@@ -686,8 +687,8 @@ QList<Val> QMultiHash<Key, Val, Hash, KeyEqual>::values(const Key &key) const
 template <typename Key, typename Val, typename Hash, typename KeyEqual>
 class QMultiHashIterator
 {
-   typedef typename QMultiHash<Key, Val, Hash, KeyEqual>::const_iterator const_iterator;
-   typedef const_iterator Item;
+   using const_iterator = typename QMultiHash<Key, Val, Hash, KeyEqual>::const_iterator;
+   using Item           = const_iterator;
 
  public:
    QMultiHashIterator(const QMultiHash<Key, Val, Hash, KeyEqual> &hash)
@@ -756,6 +757,7 @@ class QMultiHashIterator
             return true;
          }
       }
+
       return false;
    }
 
@@ -783,13 +785,14 @@ class QMultiHashIterator
 template <typename Key, typename Val, typename Hash, typename KeyEqual>
 class QMutableMultiHashIterator
 {
-   typedef typename QMultiHash<Key, Val, Hash, KeyEqual>::iterator iterator;
-   typedef typename QMultiHash<Key, Val, Hash, KeyEqual>::const_iterator const_iterator;
-   typedef iterator Item;
+   using iterator       = typename QMultiHash<Key, Val, Hash, KeyEqual>::iterator;
+   using const_iterator = typename QMultiHash<Key, Val, Hash, KeyEqual>::const_iterator;
+   using Item           = iterator;
 
  public:
    QMutableMultiHashIterator(QMultiHash<Key, Val, Hash, KeyEqual> &hash)
-      : c(&hash), i(c->begin()), n(c->end())  { }
+      : c(&hash), i(c->begin()), n(c->end())
+   { }
 
    ~QMutableMultiHashIterator()
    { }

@@ -38,29 +38,27 @@
 
 #include <sys/stat.h>
 
-typedef struct __FSEventStream *FSEventStreamRef;
-typedef const struct __FSEventStream *ConstFSEventStreamRef;
-typedef const struct __CFArray *CFArrayRef;
-typedef UInt32 FSEventStreamEventFlags;
-typedef uint64_t FSEventStreamEventId;
+using FSEventStreamRef        = struct __FSEventStream *;
+using ConstFSEventStreamRef   = const struct __FSEventStream *;
+using CFArrayRef              = const struct __CFArray *;
+using FSEventStreamEventFlags = UInt32;
+using FSEventStreamEventId    = uint64_t;
 
 #if ! defined(Q_OS_IOS)
 
-// Yes, I use a stat64 element here. QFileInfo requires too much knowledge about implementation
-// details to be used as a long-standing record. Since I'm going to have to store this information, I can
-// do the stat myself too.
-
 struct PathInfo {
    PathInfo(const QString &path, const QByteArray &absPath)
-      : originalPath(path), absolutePath(absPath) {}
+      : originalPath(path), absolutePath(absPath)
+   { }
 
    QString originalPath;       // The path we need to emit
    QByteArray absolutePath;    // The path we need to stat.
    struct ::stat savedInfo;    // All the info for the path so we can compare it.
 };
 
-typedef QLinkedList<PathInfo> PathInfoList;
-typedef QHash<QString, PathInfoList> PathHash;
+using PathInfoList = QLinkedList<PathInfo>;
+using PathHash     = QHash<QString, PathInfoList>;
+
 #endif
 
 class QFSEventsFileSystemWatcherEngine : public QFileSystemWatcherEngine
@@ -83,8 +81,8 @@ class QFSEventsFileSystemWatcherEngine : public QFileSystemWatcherEngine
    void updateFiles();
 
    static void fseventsCallback(ConstFSEventStreamRef streamRef, void *clientCallBackInfo, size_t numEvents,
-                                void *eventPaths, const FSEventStreamEventFlags eventFlags[],
-                                const FSEventStreamEventId eventIds[]);
+         void *eventPaths, const FSEventStreamEventFlags eventFlags[], const FSEventStreamEventId eventIds[]);
+
    void run() override;
    FSEventStreamRef fsStream;
    CFArrayRef pathsToWatch;
@@ -105,4 +103,3 @@ class QFSEventsFileSystemWatcherEngine : public QFileSystemWatcherEngine
 #endif //QT_NO_FILESYSTEMWATCHER
 
 #endif
-

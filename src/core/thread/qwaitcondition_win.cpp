@@ -36,8 +36,7 @@ class QWaitConditionEvent
 {
  public:
    QWaitConditionEvent()
-      : priority(0), wokenUp(false)
-   {
+      : priority(0), wokenUp(false) {
       event = CreateEvent(nullptr, TRUE, FALSE, nullptr);
    }
 
@@ -49,8 +48,7 @@ class QWaitConditionEvent
    bool wokenUp;
    HANDLE event;
 };
-
-typedef QList<QWaitConditionEvent *> EventQueue;
+using EventQueue = QList<QWaitConditionEvent *>;
 
 class QWaitConditionPrivate
 {
@@ -68,18 +66,21 @@ QWaitConditionEvent *QWaitConditionPrivate::pre()
 {
    mtx.lock();
    QWaitConditionEvent *wce =
-      freeQueue.isEmpty() ? new QWaitConditionEvent : freeQueue.takeFirst();
+         freeQueue.isEmpty() ? new QWaitConditionEvent : freeQueue.takeFirst();
    wce->priority = GetThreadPriority(GetCurrentThread());
    wce->wokenUp = false;
 
    // insert 'wce' into the queue (sorted by priority)
    int index = 0;
+
    for (; index < queue.size(); ++index) {
       QWaitConditionEvent *current = queue.at(index);
+
       if (current->priority < wce->priority) {
          break;
       }
    }
+
    queue.insert(index, wce);
    mtx.unlock();
 
@@ -99,6 +100,7 @@ bool QWaitConditionPrivate::wait(QWaitConditionEvent *wce, unsigned long time)
          ret = true;
          break;
    }
+
    return ret;
 }
 
@@ -180,6 +182,7 @@ bool QWaitCondition::wait(QReadWriteLock *readWriteLock, unsigned long time)
    } else {
       readWriteLock->lockForRead();
    }
+
    d->post(wce, returnValue);
 
    return returnValue;
@@ -192,9 +195,11 @@ void QWaitCondition::wakeOne()
 
    for (int i = 0; i < d->queue.size(); ++i) {
       QWaitConditionEvent *current = d->queue.at(i);
+
       if (current->wokenUp) {
          continue;
       }
+
       SetEvent(current->event);
       current->wokenUp = true;
       break;
@@ -205,6 +210,7 @@ void QWaitCondition::wakeAll()
 {
    // wake up the all threads in the queue
    QMutexLocker locker(&d->mtx);
+
    for (int i = 0; i < d->queue.size(); ++i) {
       QWaitConditionEvent *current = d->queue.at(i);
       SetEvent(current->event);

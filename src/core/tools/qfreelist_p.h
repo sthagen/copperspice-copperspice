@@ -28,8 +28,8 @@
 
 template <typename T>
 struct QFreeListElement {
-   typedef const T &ConstReferenceType;
-   typedef T &ReferenceType;
+   using ReferenceType      = T &;
+   using ConstReferenceType = const T &;
 
    T _t;
    std::atomic<int> next;
@@ -45,13 +45,16 @@ struct QFreeListElement {
 
 template <>
 struct QFreeListElement<void> {
-   typedef void ConstReferenceType;
-   typedef void ReferenceType;
+   using ReferenceType      = void;
+   using ConstReferenceType = void;
 
    std::atomic<int> next;
 
-   inline void t() const { }
-   inline void t() { }
+   void t() const {
+   }
+
+   void t() {
+   }
 };
 
 struct QFreeListDefaultConstants {
@@ -71,10 +74,10 @@ struct QFreeListDefaultConstants {
 template <typename T, typename ConstantsType = QFreeListDefaultConstants>
 class QFreeList
 {
-   typedef T ValueType;
-   typedef QFreeListElement<T> ElementType;
-   typedef typename ElementType::ConstReferenceType ConstReferenceType;
-   typedef typename ElementType::ReferenceType ReferenceType;
+   using ValueType          = T;
+   using ElementType        = QFreeListElement<T>;
+   using ReferenceType      = typename ElementType::ReferenceType;
+   using ConstReferenceType = typename ElementType::ConstReferenceType;
 
    // return which block the index \a x falls in, and modify \a x to be the index into that block
    static int blockfor(int &x) {
@@ -84,6 +87,7 @@ class QFreeList
          if (x < size) {
             return i;
          }
+
          x -= size;
       }
 
@@ -162,7 +166,10 @@ inline typename QFreeList<T, ConstantsType>::ReferenceType QFreeList<T, Constant
 template <typename T, typename ConstantsType>
 inline int QFreeList<T, ConstantsType>::next()
 {
-   int id, newid, at;
+   int id;
+   int newid;
+   int at;
+
    ElementType *v;
 
    id = _next.load();
@@ -223,6 +230,5 @@ inline void QFreeList<T, ConstantsType>::release(int id)
    //        x & ConstantsType::IndexMask,
    //        (newid & ~ConstantsType::IndexMask) >> 24);
 }
-
 
 #endif // QFREELIST_P_H

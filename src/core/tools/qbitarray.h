@@ -31,7 +31,9 @@ class QBitRef;
 class Q_CORE_EXPORT QBitArray
 {
  public:
-   inline QBitArray() {}
+   QBitArray()
+   { }
+
    explicit QBitArray(int size, bool value = false);
 
    QBitArray(const QBitArray &other)
@@ -120,8 +122,7 @@ class Q_CORE_EXPORT QBitArray
       }
    }
 
-   typedef QByteArray::DataPtr DataPtr;
-   DataPtr &data_ptr() {
+   QByteArray::DataPtr &data_ptr() {
       return d.data_ptr();
    }
 

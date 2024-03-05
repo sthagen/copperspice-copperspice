@@ -26,12 +26,14 @@
 
 #include <qtextcodec.h>
 
-#if defined(Q_OS_UNIX) && !defined(QT_NO_ICONV)
+#if defined(Q_OS_UNIX) && ! defined(QT_NO_ICONV)
 
 #ifdef Q_OS_DARWIN
-typedef void *iconv_t;
+using iconv_t = void *;
+
 #else
 #include <iconv.h>
+
 #endif
 
 class QIconvCodec: public QTextCodec

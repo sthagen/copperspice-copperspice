@@ -35,7 +35,7 @@ template <typename T>
 struct SelectSpecialization {
    template <class Normal, class Void>
    struct Type {
-      typedef Normal type;
+      using type = Normal;
    };
 };
 
@@ -43,12 +43,12 @@ template <>
 struct SelectSpecialization<void> {
    template <class Normal, class Void>
    struct Type {
-      typedef Void type;
+      using type = Void;
    };
 };
 
 template <typename T>
-class RunFunctionTaskBase : public QFutureInterface<T> , public QRunnable
+class RunFunctionTaskBase : public QFutureInterface<T>, public QRunnable
 {
  public:
    QFuture<T> start() {
@@ -85,6 +85,7 @@ class RunFunctionTask : public RunFunctionTaskBase<T>
       this->reportResult(result);
       this->reportFinished();
    }
+
    T result;
 };
 

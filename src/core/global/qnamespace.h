@@ -732,9 +732,7 @@ class Q_CORE_EXPORT Qt
       Key_division = 0x0f7,
       Key_ydiaeresis = 0x0ff,
 
-      // International input method support (X keycode - 0xEE00, the
-      // definition follows Qt/Embedded 2.3.7) Only interesting if
-      // you are writing your own input method
+      // International input method support, only interesting when writing a custom input method
 
       // International & multi-key character composition
       Key_AltGr               = 0x01001103,
@@ -1539,7 +1537,7 @@ class Q_CORE_EXPORT Qt
    };
    using MatchFlags = QFlags<MatchFlag>;
 
-   typedef void *HANDLE;
+   using HANDLE = void *;
 
    CORE_CS_ENUM(WindowModality)
 
@@ -1794,7 +1792,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(Qt::MouseEventFlags)
    Q_DECLARE_OPERATORS_FOR_FLAGS(Qt::GestureFlags)
 #endif
 
-typedef bool (*qInternalCallback)(void **);
+using qInternalCallback = bool (*)(void **);
 
 class Q_CORE_EXPORT QInternal
 {

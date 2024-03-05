@@ -22,13 +22,15 @@
 ***********************************************************************/
 
 #include <qelapsedtimer.h>
+
 #include <qlog.h>
 
 #include <qsystemlibrary_p.h>
 
 #include <windows.h>
 
-typedef ULONGLONG (WINAPI *PtrGetTickCount64)(void);
+using PtrGetTickCount64 = ULONGLONG (WINAPI *)(void);
+
 static PtrGetTickCount64 ptrGetTickCount64 = nullptr;
 
 // Result of QueryPerformanceFrequency, 0 indicates that the high resolution timer is unavailable
@@ -37,13 +39,15 @@ static quint64 counterFrequency = 0;
 static void resolveLibs()
 {
    static volatile bool done = false;
+
    if (done) {
       return;
    }
 
    // try to get GetTickCount64 from the system
    QSystemLibrary kernel32(QLatin1String("kernel32"));
-   if (!kernel32.load()) {
+
+   if (! kernel32.load()) {
       return;
    }
 
@@ -51,6 +55,7 @@ static void resolveLibs()
 
    // Retrieve the number of high-resolution performance counter ticks per second
    LARGE_INTEGER frequency;
+
    if (!QueryPerformanceFrequency(&frequency)) {
       counterFrequency = 0;
    } else {
@@ -96,17 +101,20 @@ static quint64 getTickCount()
    static quint32 highdword = 0;
    static quint32 lastval = 0;
    quint32 val = GetTickCount();
+
    if (val < lastval) {
       ++highdword;
    }
+
    lastval = val;
    return val | (quint64(highdword) << 32);
 }
 
 quint64 qt_msectime()
 {
-    return ticksToNanoseconds(getTickCount()) / 1000000;
+   return ticksToNanoseconds(getTickCount()) / 1000000;
 }
+
 QElapsedTimer::ClockType QElapsedTimer::clockType()
 {
    resolveLibs();
@@ -169,5 +177,3 @@ bool operator<(const QElapsedTimer &v1, const QElapsedTimer &v2)
 {
    return (v1.t1 - v2.t1) < 0;
 }
-
-

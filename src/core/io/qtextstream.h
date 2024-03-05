@@ -74,7 +74,8 @@ class Q_CORE_EXPORT QTextStream
    };
    using NumberFlags = QFlags<NumberFlag>;
 
-   class Params {
+   class Params
+   {
       int   p_realNumberPrecision;
       int   p_integerBase;
       int   p_fieldWidth;
@@ -208,13 +209,9 @@ class Q_CORE_EXPORT QTextStream
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QTextStream::NumberFlags)
 
-/*****************************************************************************
-  QTextStream manipulators
- *****************************************************************************/
-
-typedef QTextStream &(*QTextStreamFunction)(QTextStream &);    // manipulator function
-typedef void (QTextStream::*QTSMFI)(int);                      // manipulator w/int argument
-typedef void (QTextStream::*QTSMFC)(QChar);                    // manipulator w/QChar argument
+using QTextStreamFunction = QTextStream &(*)(QTextStream &);    // manipulator function
+using QTSMFI              = void (QTextStream::*)(int);         // manipulator w/int argument
+using QTSMFC              = void (QTextStream::*)(QChar);       // manipulator w/QChar argument
 
 class Q_CORE_EXPORT QTextStreamManipulator
 {
