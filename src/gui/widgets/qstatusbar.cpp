@@ -43,7 +43,6 @@
 #include <qlayoutengine_p.h>
 #include <qwidget_p.h>
 
-
 class QStatusBarPrivate : public QWidgetPrivate
 {
    Q_DECLARE_PUBLIC(QStatusBar)
@@ -458,9 +457,6 @@ void QStatusBar::hideOrShow()
    repaint(d->messageRect());
 }
 
-/*!
-  \reimp
- */
 void QStatusBar::showEvent(QShowEvent *)
 {
 #ifndef QT_NO_SIZEGRIP
@@ -470,7 +466,6 @@ void QStatusBar::showEvent(QShowEvent *)
    }
 #endif
 }
-
 
 void QStatusBar::paintEvent(QPaintEvent *event)
 {
@@ -495,30 +490,23 @@ void QStatusBar::paintEvent(QPaintEvent *event)
          }
       }
    }
+
    if (haveMessage) {
       p.setPen(palette().foreground().color());
       p.drawText(d->messageRect(), Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, d->tempItem);
    }
 }
 
-/*!
-    \reimp
-*/
 void QStatusBar::resizeEvent(QResizeEvent *e)
 {
    QWidget::resizeEvent(e);
 }
 
-/*!
-    \reimp
-*/
-
 bool QStatusBar::event(QEvent *e)
 {
    Q_D(QStatusBar);
 
-   if (e->type() == QEvent::LayoutRequest
-   ) {
+   if (e->type() == QEvent::LayoutRequest) {
       // Calculate new strut height and call reformat() if it has changed
       int maxH = fontMetrics().height();
 
@@ -544,6 +532,7 @@ bool QStatusBar::event(QEvent *e)
          update();
       }
    }
+
    if (e->type() == QEvent::ChildRemoved) {
       QStatusBarPrivate::SBItem *item = nullptr;
 

@@ -66,8 +66,6 @@ NSView *getEmbeddableView(QWindow *qtWindow)
     return qtView; // qtView is ready for use.
 }
 
-
-
 QMacNativeWidget::QMacNativeWidget(NSView *parentView)
     : QWidget(nullptr)
 {
@@ -79,16 +77,10 @@ QMacNativeWidget::QMacNativeWidget(NSView *parentView)
     setAttribute(Qt::WA_NoSystemBackground, false);
 }
 
-/*!
-    Destroy the QMacNativeWidget.
-*/
 QMacNativeWidget::~QMacNativeWidget()
 {
 }
 
-/*!
-    \reimp
-*/
 QSize QMacNativeWidget::sizeHint() const
 {
     // QMacNativeWidget really does not have any other choice
@@ -109,5 +101,3 @@ bool QMacNativeWidget::event(QEvent *ev)
 {
    return QWidget::event(ev);
 }
-
-

@@ -43,7 +43,7 @@
 
 #include <qcore_unix_p.h>
 
-// OpenBSD 4.2 doesn't define EIDRM, see BUGS section:
+// OpenBSD 4.2 does not define EIDRM, refer to BUGS section
 // http://www.openbsd.org/cgi-bin/man.cgi?query=semop&manpath=OpenBSD+4.2
 #if defined(Q_OS_OPENBSD) && !defined(EIDRM)
 #define EIDRM EINVAL
@@ -51,15 +51,16 @@
 
 //#define QSYSTEMSEMAPHORE_DEBUG
 
-QSystemSemaphorePrivate::QSystemSemaphorePrivate() :
 #ifndef QT_POSIX_IPC
-   unix_key(-1), semaphore(-1), createdFile(false),
+   QSystemSemaphorePrivate::QSystemSemaphorePrivate()
+      : unix_key(-1), semaphore(-1), createdFile(false), createdSemaphore(false),
+        error(QSystemSemaphore::NoError)
+   { }
 #else
-   semaphore(SEM_FAILED),
+   QSystemSemaphorePrivate::QSystemSemaphorePrivate()
+      : semaphore(SEM_FAILED), createdSemaphore(false), error(QSystemSemaphore::NoError)
+   { }
 #endif
-   createdSemaphore(false), error(QSystemSemaphore::NoError)
-{
-}
 
 void QSystemSemaphorePrivate::setErrorString(const QString &function)
 {

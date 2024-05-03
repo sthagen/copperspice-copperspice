@@ -49,12 +49,11 @@
 
 #include <algorithm>
 
-void qt_format_text(const QFont &fnt, const QRectF &_r,
-   int tf, const QTextOption *opt, const QString &str, QRectF *brect,
-   int tabstops, int *, int tabarraylen,
-   QPainter *painter);
+void qt_format_text(const QFont &fnt, const QRectF &_r, int tf, const QTextOption *opt,
+      const QString &str, QRectF *brect, int tabstops, int *, int tabarraylen, QPainter *painter);
 
-const char  *qt_mfhdr_tag = "QPIC"; // header tag
+const char *qt_mfhdr_tag = "QPIC";               // header tag
+
 static constexpr const quint16 mfhdr_maj = 11;   // major version #
 static constexpr const quint16 mfhdr_min = 0;    // minor version #
 
@@ -81,7 +80,6 @@ QPicture::QPicture(const QPicture &pic)
 {
 }
 
-/*! \internal */
 QPicture::QPicture(QPicturePrivate &dptr)
    : QPaintDevice(), d_ptr(&dptr)
 {
@@ -91,9 +89,6 @@ QPicture::~QPicture()
 {
 }
 
-/*!
-  \internal
-*/
 int QPicture::devType() const
 {
    return QInternal::Picture;
@@ -128,7 +123,7 @@ void QPicture::setData(const char *data, uint size)
 {
    detach();
    d_func()->pictb.setData(data, size);
-   d_func()->resetFormat();                                // we'll have to check
+   d_func()->resetFormat();
 }
 
 bool QPicture::load(const QString &fileName, const QString &format)
@@ -337,12 +332,6 @@ class QFakeDevice : public QPaintDevice
    int dpi_x;
    int dpi_y;
 };
-
-/*!
-  \internal
-  Iterates over the internal picture data and draws the picture using
-  \a painter.
-*/
 
 bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
 {
@@ -593,11 +582,11 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
                QFontMetrics fm(fnt);
                QPointF pt(p.x(), p.y() - fm.ascent());
                qt_format_text(fnt, QRectF(pt, size), flags, nullptr,
-                  str, nullptr, 0, nullptr, 0, painter);
+                     str, nullptr, 0, nullptr, 0, painter);
 
             } else {
                qt_format_text(font, QRectF(p, QSizeF(1, 1)), Qt::TextSingleLine | Qt::TextDontClip, nullptr,
-                  str, nullptr, 0, nullptr, 0, painter);
+                     str, nullptr, 0, nullptr, 0, painter);
             }
 
             break;
@@ -840,6 +829,7 @@ bool QPicture::exec(QPainter *painter, QDataStream &s, int nrecords)
       //qDebug("device->at(): %i, strm_pos: %i len: %i", (int)s.device()->pos(), strm_pos, len);
       Q_ASSERT(qint32(s.device()->pos() - strm_pos) == len);
 #endif
+
    }
 
    return false;

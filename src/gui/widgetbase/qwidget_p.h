@@ -64,10 +64,12 @@ class QUpdateLaterEvent : public QEvent
 {
  public:
    explicit QUpdateLaterEvent(const QRegion &paintRegion)
-      : QEvent(UpdateLater), m_region(paintRegion) {
+      : QEvent(UpdateLater), m_region(paintRegion)
+   {
    }
 
-   ~QUpdateLaterEvent() {
+   ~QUpdateLaterEvent()
+   {
    }
 
    const QRegion &region() const {
@@ -117,10 +119,9 @@ class QWidgetBackingStoreTracker
 };
 
 struct QTLWExtra {
-   // *************************** Cross-platform variables *****************************
+   // cross platform variables
 
-   // Regular pointers (keep them together to avoid gaps on 64 bits architectures).
-   QIcon *icon; // widget icon
+   QIcon *icon;
 
    QWidgetBackingStoreTracker backingStoreTracker;
    QBackingStore *backingStore;
@@ -129,23 +130,23 @@ struct QTLWExtra {
    QWindow *window;
    QOpenGLContext *shareContext;
 
-   // Implicit pointers (shared_null).
-   QString caption; // widget caption
-   QString iconText; // widget icon text
-   QString role; // widget role
-   QString filePath; // widget file path
+   QString caption;
+   QString iconText;
+   QString role;
+   QString filePath;
 
-   // Other variables.
-   short incw, inch; // size increments
-   short basew, baseh; // base sizes
-   // frame strut, don't use these directly, use QWidgetPrivate::frameStrut() instead.
+   short incw;
+   short inch;
+   short basew;
+   short baseh;
+
+   // frame strut, do not use these directly, use QWidgetPrivate::frameStrut() instead
    QRect frameStrut;
-   QRect normalGeometry; // used by showMin/maximized/FullScreen
-   Qt::WindowFlags savedFlags; // Save widget flags while showing fullscreen
+   QRect normalGeometry;
+   Qt::WindowFlags savedFlags;
 
-   int initialScreenIndex; // Screen number when passing a QDesktop[Screen]Widget as parent.
+   int initialScreenIndex;
    QVector<QPlatformTextureList *> widgetTextures;
-   // *************************** Cross-platform bit fields ****************************
    uint opacity : 8;
    uint posIncludesFrame : 1;
    uint sizeAdjusted : 1;
@@ -153,15 +154,11 @@ struct QTLWExtra {
    uint inRepaint : 1;
    uint embedded : 1;
 
-
-
-
 };
 
 struct QWExtra {
-   // *************************** Cross-platform variables *****************************
+   // cross platform variables
 
-   // Regular pointers (keep them together to avoid gaps on 64 bits architectures).
    void *glContext;       // if the widget is hijacked by QGLWindowSurface
    QTLWExtra *topextra;   // only useful for TLWs
 
@@ -176,20 +173,17 @@ struct QWExtra {
    QPointer<QStyle> style;
    QPointer<QWidget> focus_proxy;
 
-   // Implicit pointers (shared_empty/shared_null).
-   QRegion mask; // widget mask
+   QRegion mask;
    QString styleSheet;
 
-   // Other variables.
    qint32 minw;
-   qint32 minh; // minimum size
+   qint32 minh;
    qint32 maxw;
-   qint32 maxh; // maximum size
+   qint32 maxh;
    quint16 customDpiX;
    quint16 customDpiY;
    QSize staticContentsSize;
 
-   // *************************** Cross-platform bit fields ****************************
    uint explicitMinSize : 2;
    uint explicitMaxSize : 2;
    uint autoFillBackground : 1;
@@ -197,9 +191,6 @@ struct QWExtra {
    uint inRenderWithPainter : 1;
    uint hasMask : 1;
    uint hasWindowContainer : 1;
-
-
-
 };
 
 static inline bool bypassGraphicsProxyWidget(const QWidget *p)
@@ -208,8 +199,10 @@ static inline bool bypassGraphicsProxyWidget(const QWidget *p)
       if (p->windowFlags() & Qt::BypassGraphicsProxyWidget) {
          return true;
       }
+
       p = p->parentWidget();
    }
+
    return false;
 }
 
@@ -218,7 +211,6 @@ class Q_GUI_EXPORT QWidgetPrivate
    Q_DECLARE_PUBLIC(QWidget)
 
  public:
-   // *************************** Cross-platform ***************************************
    enum DrawWidgetFlags {
       DrawAsRoot = 0x01,
       DrawPaintOnScreen = 0x02,
@@ -249,6 +241,7 @@ class Q_GUI_EXPORT QWidgetPrivate
    static QWidgetPrivate *get(QWidget *w) {
       return w->d_func();
    }
+
    static const QWidgetPrivate *get(const QWidget *w) {
       return w->d_func();
    }
@@ -296,6 +289,7 @@ class Q_GUI_EXPORT QWidgetPrivate
 
       updateFont(font);
    }
+
    void resolveFont();
    QFont naturalWidgetFont(uint inheritedMask) const;
 
@@ -312,18 +306,22 @@ class Q_GUI_EXPORT QWidgetPrivate
 
    void paintBackground(QPainter *, const QRegion &, int flags = DrawAsRoot) const;
    bool isAboutToShow() const;
+
    QRegion prepareToRender(const QRegion &region, QWidget::RenderFlags renderFlags);
    void render_helper(QPainter *painter, const QPoint &targetOffset, const QRegion &sourceRegion,
-      QWidget::RenderFlags renderFlags);
+         QWidget::RenderFlags renderFlags);
+
    void render(QPaintDevice *target, const QPoint &targetOffset, const QRegion &sourceRegion,
-      QWidget::RenderFlags renderFlags);
+         QWidget::RenderFlags renderFlags);
+
    void drawWidget(QPaintDevice *pdev, const QRegion &rgn, const QPoint &offset, int flags,
-      QPainter *sharedPainter = nullptr, QWidgetBackingStore *backingStore = nullptr);
+         QPainter *sharedPainter = nullptr, QWidgetBackingStore *backingStore = nullptr);
+
    void sendPaintEvent(const QRegion &toBePainted);
 
    void paintSiblingsRecursive(QPaintDevice *pdev, const QObjectList &children, int index,
-      const QRegion &rgn, const QPoint &offset, int flags,
-      QPainter *sharedPainter, QWidgetBackingStore *backingStore);
+         const QRegion &rgn, const QPoint &offset, int flags,
+         QPainter *sharedPainter, QWidgetBackingStore *backingStore);
 
 #ifndef QT_NO_GRAPHICSVIEW
    static QGraphicsProxyWidget *nearestGraphicsProxyWidget(const QWidget *origin);
@@ -441,13 +439,16 @@ class Q_GUI_EXPORT QWidgetPrivate
    // aboutToDestroy() is called just before the contents of
    // QWidget::destroy() is executed. It's used to signal QWidget
    // sub-classes that their internals are about to be released.
-   virtual void aboutToDestroy() {}
+   virtual void aboutToDestroy() {
+   }
 
-   inline QWidget *effectiveFocusWidget() {
+   QWidget *effectiveFocusWidget() {
       QWidget *w = q_func();
+
       while (w->focusProxy()) {
          w = w->focusProxy();
       }
+
       return w;
    }
 
@@ -457,6 +458,7 @@ class Q_GUI_EXPORT QWidgetPrivate
    // a widget and takes care is this one is in QGraphicsView.
    // If the widget is not embed in a scene then the geometry available is
    // null, we let QDesktopWidget decide for us.
+
    static QRect screenGeometry(const QWidget *widget) {
       QRect screen;
 
@@ -477,6 +479,7 @@ class Q_GUI_EXPORT QWidgetPrivate
             }
          }
       }
+
 #endif
       return screen;
    }
@@ -491,6 +494,7 @@ class Q_GUI_EXPORT QWidgetPrivate
       if (offset) {
          *offset = redirectDev ? redirectOffset : QPoint();
       }
+
       return redirectDev;
    }
 
@@ -524,9 +528,11 @@ class Q_GUI_EXPORT QWidgetPrivate
 
    QRect effectiveRectFor(const QRect &rect) const {
 #ifndef QT_NO_GRAPHICSEFFECT
+
       if (graphicsEffect && graphicsEffect->isEnabled()) {
          return graphicsEffect->boundingRectFor(rect).toAlignedRect();
       }
+
 #endif
       return rect;
    }
@@ -535,6 +541,7 @@ class Q_GUI_EXPORT QWidgetPrivate
 
    void handleSoftwareInputPanel(Qt::MouseButton button, bool clickCausedFocus) {
       Q_Q(QWidget);
+
       if (button == Qt::LeftButton && qApp->autoSipEnabled()) {
          QStyle::RequestSoftwareInputPanel behavior = QStyle::RequestSoftwareInputPanel(
                q->style()->styleHint(QStyle::SH_RequestSoftwareInputPanel));
@@ -572,40 +579,60 @@ class Q_GUI_EXPORT QWidgetPrivate
    virtual GLuint textureId() const {
       return 0;
    }
+
    virtual QImage grabFramebuffer() {
       return QImage();
    }
-   virtual void beginBackingStorePainting() { }
-   virtual void endBackingStorePainting() { }
-   virtual void beginCompose() { }
-   virtual void endCompose() { }
+
+   virtual void beginBackingStorePainting() {
+   }
+
+   virtual void endBackingStorePainting() {
+   }
+
+   virtual void beginCompose() {
+   }
+
+   virtual void endCompose() {
+   }
+
    void setRenderToTexture() {
       renderToTexture = true;
       setTextureChildSeen();
    }
+
    void setTextureChildSeen() {
       Q_Q(QWidget);
+
       if (textureChildSeen) {
          return;
       }
+
       textureChildSeen = 1;
 
-      if (!q->isWindow()) {
+      if (! q->isWindow()) {
          QWidget *parent = q->parentWidget();
+
          if (parent) {
             get(parent)->setTextureChildSeen();
          }
       }
    }
+
    static void sendComposeStatus(QWidget *w, bool end);
-   virtual void initializeViewportFramebuffer() { }
-   virtual void resizeViewportFramebuffer() { }
-   virtual void resolveSamples() { }
+
+   virtual void initializeViewportFramebuffer() {
+   }
+
+   virtual void resizeViewportFramebuffer() {
+   }
+
+   virtual void resolveSamples() {
+   }
 #endif
 
    static void setWidgetParentHelper(QObject *widgetAsObject, QObject *newParent);
 
-   // Regular pointers (keep them together to avoid gaps on 64 bit architectures).
    QWExtra *extra;
    QWidget *focus_next;
    QWidget *focus_prev;
@@ -618,9 +645,8 @@ class Q_GUI_EXPORT QWidgetPrivate
    mutable const QMetaObject *polished;
    QGraphicsEffect *graphicsEffect;
 
-   // All widgets are added into the allWidgets set. Once
-   // they receive a window id they are also added to the mapper.
-   // This should just ensure that all widgets are deleted by QApplication
+   // All widgets are added into the allWidgets set.
+   // Once they receive a window id they are also added to the mapper.
    static QWidgetMapper *mapper;
    static QWidgetSet *allWidgets;
 
@@ -632,7 +658,6 @@ class Q_GUI_EXPORT QWidgetPrivate
    static QPointer<QWidget> editingWidget;
 #endif
 
-   // Implicit pointers (shared_null/shared_empty).
    QRegion opaqueChildren;
    QRegion dirty;
 
@@ -654,7 +679,6 @@ class Q_GUI_EXPORT QWidgetPrivate
    QString accessibleDescription;
 #endif
 
-   // Other variables
    uint inheritedFontResolveMask;
    uint inheritedPaletteResolveMask;
    short leftmargin;
@@ -665,8 +689,9 @@ class Q_GUI_EXPORT QWidgetPrivate
    signed char topLayoutItemMargin;
    signed char rightLayoutItemMargin;
    signed char bottomLayoutItemMargin;
-   static int instanceCounter; // Current number of widget instances
-   static int maxInstances; // Maximum number of widget instances
+   static int instanceCounter;   // Current number of widget instances
+   static int maxInstances;      // Maximum number of widget instances
+
    Qt::HANDLE hd;
    QWidgetData m_privateData;
    QSizePolicy size_policy;
@@ -681,8 +706,7 @@ class Q_GUI_EXPORT QWidgetPrivate
    QMap<Qt::GestureType, Qt::GestureFlags> gestureContext;
 #endif
 
-   // Bit fields.
-   uint high_attributes[4]; // the low ones are in QWidget::widget_attributes
+   uint high_attributes[4];            // low ones are in QWidget::widget_attributes
    QPalette::ColorRole fg_role : 8;
    QPalette::ColorRole bg_role : 8;
    uint dirtyOpaqueChildren : 1;
@@ -708,10 +732,8 @@ class Q_GUI_EXPORT QWidgetPrivate
    uint childrenHiddenByWState : 1;
    uint childrenShownByExpose : 1;
 
-
-   // *************************** Platform specific ************************************
 #if defined(Q_OS_WIN)
-   uint noPaintOnScreen : 1;    // see qwidget.cpp ::paintEngine()
+   uint noPaintOnScreen : 1;    // refer to qwidget.cpp ::paintEngine()
 #endif
 
 #if defined(Q_OS_DARWIN)
@@ -732,7 +754,7 @@ class Q_GUI_EXPORT QWidgetPrivate
 
 struct QWidgetPaintContext {
    inline QWidgetPaintContext(QPaintDevice *d, const QRegion &r, const QPoint &o, int f,
-      QPainter *p, QWidgetBackingStore *b)
+         QPainter *p, QWidgetBackingStore *b)
       : pdev(d), rgn(r), offset(o), flags(f), sharedPainter(p), backingStore(b), painter(nullptr) {}
 
    QPaintDevice *pdev;
@@ -774,9 +796,8 @@ class QWidgetEffectSourcePrivate : public QGraphicsEffectSourcePrivate
       return false;
    }
 
-   inline void effectBoundingRectChanged() override {
-      // ### This function should take a rect parameter; then we can avoid
-      // updating too much on the parent widget.
+   void effectBoundingRectChanged() override {
+      // ### should take a rect parameter; then we can avoid updating too much on the parent widget
       if (QWidget *parent = m_widget->parentWidget()) {
          parent->update();
       } else {
@@ -802,7 +823,7 @@ class QWidgetEffectSourcePrivate : public QGraphicsEffectSourcePrivate
    QTransform lastEffectTransform;
    bool updateDueToGraphicsEffect;
 };
-#endif //QT_NO_GRAPHICSEFFECT
+#endif
 
 inline QWExtra *QWidgetPrivate::extraData() const
 {
@@ -837,6 +858,7 @@ inline void QWidgetPrivate::setSharedPainter(QPainter *painter)
 inline bool QWidgetPrivate::pointInsideRectAndMask(const QPoint &p) const
 {
    Q_Q(const QWidget);
+
    return q->rect().contains(p) && (!extra || !extra->hasMask || q->testAttribute(Qt::WA_MouseNoMask)
          || extra->mask.contains(p));
 }

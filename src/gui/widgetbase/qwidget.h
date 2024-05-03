@@ -415,7 +415,7 @@ class Q_GUI_EXPORT QWidget : public QObject, public QPaintDevice
    QWidget *window() const;
    QWidget *nativeParentWidget() const;
 
-   inline QWidget *topLevelWidget() const {
+   QWidget *topLevelWidget() const {
       return window();
    }
 
@@ -450,12 +450,12 @@ class Q_GUI_EXPORT QWidget : public QObject, public QPaintDevice
    void clearMask();
 
    void render(QPaintDevice *target, const QPoint &targetOffset = QPoint(),
-      const QRegion &sourceRegion = QRegion(),
-      RenderFlags renderFlags = RenderFlags(DrawWindowBackground | DrawChildren));
+         const QRegion &sourceRegion = QRegion(),
+         RenderFlags renderFlags = RenderFlags(DrawWindowBackground | DrawChildren));
 
    void render(QPainter *painter, const QPoint &targetOffset = QPoint(),
-      const QRegion &sourceRegion = QRegion(),
-      RenderFlags renderFlags = RenderFlags(DrawWindowBackground | DrawChildren));
+         const QRegion &sourceRegion = QRegion(),
+         RenderFlags renderFlags = RenderFlags(DrawWindowBackground | DrawChildren));
 
    QPixmap grab(const QRect &rectangle = QRect(QPoint(0, 0), QSize(-1, -1)));
 
@@ -837,11 +837,11 @@ class Q_GUI_EXPORT QWidget : public QObject, public QPaintDevice
 
    virtual bool focusNextPrevChild(bool next);
 
-   inline bool focusNextChild() {
+   bool focusNextChild() {
       return focusNextPrevChild(true);
    }
 
-   inline bool focusPreviousChild() {
+   bool focusPreviousChild() {
       return focusNextPrevChild(false);
    }
 

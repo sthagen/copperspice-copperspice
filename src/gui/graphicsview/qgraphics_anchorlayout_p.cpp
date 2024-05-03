@@ -1706,12 +1706,14 @@ void QGraphicsAnchorLayoutPrivate::addAnchor_helper(QGraphicsLayoutItem *firstIt
    // from v1 or v2. "data" however is shared between the two references
    // so we still know that the anchor direction is from 1 to 2.
    data->from = v1;
-   data->to = v2;
+   data->to   = v2;
+
 #ifdef QT_DEBUG
    data->name = QString::fromLatin1("%1 --to--> %2").formatArg(v1->toString()).formatArg(v2->toString());
 #endif
-   // ### bit to track internal anchors, since inside AnchorData methods
-   // we don't have access to the 'q' pointer.
+
+   // tracks internal anchors, currently inside AnchorData methods
+   // access to the 'q' pointer is not available
    data->isLayoutAnchor = (data->item == q);
 
    graph[orientation].createEdge(v1, v2, data);
@@ -2821,6 +2823,7 @@ bool QGraphicsAnchorLayoutPrivate::solveMinMax(const QList<QSimplexConstraint *>
          ad->sizeAtMaximum = ad->result - g_offset;
       }
    }
+
    return feasible;
 }
 
@@ -2955,13 +2958,6 @@ bool QGraphicsAnchorLayoutPrivate::solvePreferred(const QList<QSimplexConstraint
    return feasible;
 }
 
-/*!
-    \internal
-    Returns true if there are no arrangement that satisfies all constraints.
-    Otherwise returns false.
-
-    \sa addAnchor()
-*/
 bool QGraphicsAnchorLayoutPrivate::hasConflicts() const
 {
    QGraphicsAnchorLayoutPrivate *that = const_cast<QGraphicsAnchorLayoutPrivate *>(this);

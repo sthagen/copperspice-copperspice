@@ -83,36 +83,43 @@ class QLayoutParameter
       Cached
    };
 
-   inline QLayoutParameter() : q_value(T()), q_state(Default) {}
-   inline QLayoutParameter(T value, State state = Default) : q_value(value), q_state(state) {}
+   QLayoutParameter()
+      : q_value(T()), q_state(Default)
+   { }
 
-   inline void setUserValue(T value) {
+   QLayoutParameter(T value, State state = Default)
+      : q_value(value), q_state(state)
+   { }
+
+   void setUserValue(T value) {
       q_value = value;
       q_state = User;
    }
-   inline void setCachedValue(T value) const {
+
+   void setCachedValue(T value) const {
       if (q_state != User) {
          q_value = value;
          q_state = Cached;
       }
    }
 
-   inline T value() const {
+   T value() const {
       return q_value;
    }
 
-   inline T value(T defaultValue) const {
+   T value(T defaultValue) const {
       return isUser() ? q_value : defaultValue;
    }
 
-   inline bool isDefault() const {
+   bool isDefault() const {
       return q_state == Default;
    }
 
-   inline bool isUser() const {
+   bool isUser() const {
       return q_state == User;
    }
-   inline bool isCached() const {
+
+   bool isCached() const {
       return q_state == Cached;
    }
 
@@ -124,16 +131,19 @@ class QLayoutParameter
 class QStretchParameter : public QLayoutParameter<int>
 {
  public:
-   QStretchParameter() : QLayoutParameter<int>(-1) {}
+   QStretchParameter()
+      : QLayoutParameter<int>(-1)
+   { }
 
 };
 
 class QGridLayoutBox
 {
  public:
-   inline QGridLayoutBox()
+   QGridLayoutBox()
       : q_minimumSize(0), q_preferredSize(0), q_maximumSize(FLT_MAX),
-        q_minimumDescent(-1), q_minimumAscent(-1) {}
+        q_minimumDescent(-1), q_minimumAscent(-1)
+   { }
 
    void add(const QGridLayoutBox &other, int stretch, qreal spacing);
    void combine(const QGridLayoutBox &other);
@@ -280,9 +290,11 @@ class QGridLayoutItem
    inline int columnSpan() const {
       return q_rowSpans[GridOrientation_Horizontal];
    }
+
    inline int lastRow() const {
       return firstRow() + rowSpan() - 1;
    }
+
    inline int lastColumn() const {
       return firstColumn() + columnSpan() - 1;
    }
@@ -317,6 +329,7 @@ class QGridLayoutItem
    virtual bool hasDynamicConstraint() const {
       return false;
    }
+
    virtual Qt::Orientation dynamicConstraintOrientation() const {
       return Qt::Horizontal;
    }
@@ -331,14 +344,12 @@ class QGridLayoutItem
    void insertOrRemoveRows(int row, int delta, Qt::Orientation orientation = Qt::Vertical);
    QSizeF effectiveMaxSize(const QSizeF &constraint) const;
 
-
  private:
    int q_firstRows[GridOrientation_Count];
    int q_rowSpans[GridOrientation_Count];
    int q_stretches[GridOrientation_Count];
    Qt::Alignment q_alignment;
 };
-
 
 class QGridLayoutEngine
 {
@@ -385,7 +396,6 @@ class QGridLayoutEngine
 
    Qt::Alignment effectiveAlignment(const QGridLayoutItem *layoutItem) const;
 
-
    void insertItem(QGridLayoutItem *item, int index);
    void addItem(QGridLayoutItem *item);
    void removeItem(QGridLayoutItem *item);
@@ -393,6 +403,7 @@ class QGridLayoutEngine
    void deleteItems() {
       const QList<QGridLayoutItem *> oldItems = q_items;
       q_items.clear();    // q_items are used as input when the grid is regenerated in removeRows
+
       // The following calls to removeRows are suboptimal
       int rows = rowCount(Qt::Vertical);
       removeRows(0, rows, Qt::Vertical);
@@ -400,11 +411,13 @@ class QGridLayoutEngine
       removeRows(0, rows, Qt::Horizontal);
       qDeleteAll(oldItems);
    }
+
    QGridLayoutItem *itemAt(int row, int column, Qt::Orientation orientation = Qt::Vertical) const;
-   inline void insertRow(int row, Qt::Orientation orientation = Qt::Vertical) {
+   void insertRow(int row, Qt::Orientation orientation = Qt::Vertical) {
       insertOrRemoveRows(row, +1, orientation);
    }
-   inline void removeRows(int row, int count, Qt::Orientation orientation) {
+
+   void removeRows(int row, int count, Qt::Orientation orientation) {
       insertOrRemoveRows(row, -count, orientation);
    }
 
@@ -427,6 +440,8 @@ class QGridLayoutEngine
    void setVisualDirection(Qt::LayoutDirection direction);
    Qt::LayoutDirection visualDirection() const;
 
+ protected:
+   QList<QGridLayoutItem *> q_items;
 
  private:
    enum GridCacheMode {
@@ -441,34 +456,29 @@ class QGridLayoutEngine
 
    void maybeExpandGrid(int row, int column, Qt::Orientation orientation = Qt::Vertical);
    void regenerateGrid();
-   inline int internalGridRowCount() const {
+
+   int internalGridRowCount() const {
       return grossRoundUp(rowCount());
    }
 
-   inline int internalGridColumnCount() const {
+   int internalGridColumnCount() const {
       return grossRoundUp(columnCount());
    }
+
    void setItemAt(int row, int column, QGridLayoutItem *item);
    void insertOrRemoveRows(int row, int delta, Qt::Orientation orientation = Qt::Vertical);
 
-   void fillRowData(QGridLayoutRowData *rowData,
-      const qreal *colPositions, const qreal *colSizes,
-      Qt::Orientation orientation,
-      const QAbstractLayoutStyleInfo *styleInfo) const;
+   void fillRowData(QGridLayoutRowData *rowData, const qreal *colPositions, const qreal *colSizes,
+      Qt::Orientation orientation, const QAbstractLayoutStyleInfo *styleInfo) const;
 
    void ensureEffectiveFirstAndLastRows() const;
 
    void ensureColumnAndRowData(QGridLayoutRowData *rowData, QGridLayoutBox *totalBox,
-      const qreal *colPositions, const qreal *colSizes,
-      Qt::Orientation orientation,
+      const qreal *colPositions, const qreal *colSizes, Qt::Orientation orientation,
       const QAbstractLayoutStyleInfo *styleInfo) const;
 
    void ensureGeometries(const QSizeF &size, const QAbstractLayoutStyleInfo *styleInfo) const;
 
- protected:
-   QList<QGridLayoutItem *> q_items;
-
- private:
    // User input
    QVector<QGridLayoutItem *> q_grid;
    QLayoutParameter<qreal> q_defaultSpacings[GridOrientation_Count];
@@ -478,6 +488,7 @@ class QGridLayoutEngine
    // Configuration
    Qt::Alignment m_defaultAlignment;
    unsigned m_snapToPixelGrid : 1;
+
    // Lazily computed from the above user input
    mutable int q_cachedEffectiveFirstRows[GridOrientation_Count];
    mutable int q_cachedEffectiveLastRows[GridOrientation_Count];

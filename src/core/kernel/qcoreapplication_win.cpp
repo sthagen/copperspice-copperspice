@@ -201,16 +201,16 @@ void QCoreApplicationPrivate::removePostedTimerEvent(QObject *object, int timerI
    for (int i = 0; i < data->postEventList.size(); ++i) {
       const QPostEvent &pe = data->postEventList.at(i);
 
-      if (pe.receiver == object
-            && pe.event
+      if (pe.receiver == object && pe.event
             && (pe.event->type() == QEvent::Timer || pe.event->type() == QEvent::ZeroTimerEvent)
-
             && static_cast<QTimerEvent *>(pe.event)->timerId() == timerId) {
+
          CSInternalEvents::decr_PostedEvents(pe.receiver);
          pe.event->posted = false;
 
          delete pe.event;
          const_cast<QPostEvent &>(pe).event = nullptr;
+
          return;
       }
    }
@@ -218,11 +218,8 @@ void QCoreApplicationPrivate::removePostedTimerEvent(QObject *object, int timerI
 
 #if defined(Q_OS_WIN)
 
-// Convenience functions to convert WM_* messages into human readable strings,
-// including a QDebug operator<< for simple QDebug() << msg output
-
+// convenience functions to convert WM_* messages into human readable strings,
 #include <qdebug.h>
-
 #include <windowsx.h>
 
 #if ! defined(GET_X_LPARAM)
@@ -230,7 +227,7 @@ void QCoreApplicationPrivate::removePostedTimerEvent(QObject *object, int timerI
 #  define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 #endif
 
-// The values below should never change. Note that none of the usual
+// values below should never change, none of the usual
 // WM_...FIRST & WM_...LAST values are in the list, as they normally have other
 // WM_... representations
 

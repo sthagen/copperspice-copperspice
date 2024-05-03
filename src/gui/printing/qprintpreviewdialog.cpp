@@ -51,7 +51,7 @@ class QPrintPreviewMainWindow : public QMainWindow
  public:
    QPrintPreviewMainWindow(QWidget *parent)
       : QMainWindow(parent)
-   {}
+   { }
 
    QMenu *createPopupMenu() override {
       return nullptr;
@@ -62,10 +62,12 @@ class ZoomFactorValidator : public QDoubleValidator
 {
  public:
    ZoomFactorValidator(QObject *parent)
-      : QDoubleValidator(parent) {}
+      : QDoubleValidator(parent)
+   { }
 
    ZoomFactorValidator(qreal bottom, qreal top, int decimals, QObject *parent)
-      : QDoubleValidator(bottom, top, decimals, parent) {}
+      : QDoubleValidator(bottom, top, decimals, parent)
+   { }
 
    State validate(QString &input, int &pos) const override {
       bool replacePercent = false;
@@ -73,18 +75,21 @@ class ZoomFactorValidator : public QDoubleValidator
          input = input.left(input.length() - 1);
          replacePercent = true;
       }
+
       State state = QDoubleValidator::validate(input, pos);
       if (replacePercent) {
          input += QLatin1Char('%');
       }
+
       const int num_size = 4;
       if (state == Intermediate) {
          int i = input.indexOf(QLocale::system().decimalPoint());
-         if ((i == -1 && input.size() > num_size)
-            || (i != -1 && i > num_size)) {
+
+         if ((i == -1 && input.size() > num_size) || (i != -1 && i > num_size)) {
             return Invalid;
          }
       }
+
       return state;
    }
 };
@@ -95,7 +100,8 @@ class LineEdit : public QLineEdit
 
  public:
    LineEdit(QWidget *parent = nullptr)
-      : QLineEdit(parent) {
+      : QLineEdit(parent)
+   {
       setContextMenuPolicy(Qt::NoContextMenu);
       connect(this, &LineEdit::returnPressed, this, &LineEdit::handleReturnPressed);
    }
@@ -107,9 +113,10 @@ class LineEdit : public QLineEdit
    }
 
    void focusOutEvent(QFocusEvent *e) override {
-      if (isModified() && !hasAcceptableInput()) {
+      if (isModified() && ! hasAcceptableInput()) {
          setText(origText);
       }
+
       QLineEdit::focusOutEvent(e);
    }
 
@@ -118,7 +125,6 @@ class LineEdit : public QLineEdit
    GUI_CS_SLOT_2(handleReturnPressed)
 
    QString origText;
-
 };
 
 void LineEdit::handleReturnPressed()
@@ -678,9 +684,6 @@ QPrintPreviewDialog::~QPrintPreviewDialog()
    delete d->printDialog;
 }
 
-/*!
-    \reimp
-*/
 void QPrintPreviewDialog::setVisible(bool visible)
 {
    Q_D(QPrintPreviewDialog);
@@ -692,9 +695,6 @@ void QPrintPreviewDialog::setVisible(bool visible)
    QDialog::setVisible(visible);
 }
 
-/*!
-    \reimp
-*/
 void QPrintPreviewDialog::done(int result)
 {
    Q_D(QPrintPreviewDialog);
@@ -721,26 +721,11 @@ void QPrintPreviewDialog::open(QObject *receiver, const QString &member)
    QDialog::open();
 }
 
-/*!
-    Returns a pointer to the QPrinter object this dialog is currently
-    operating on.
-*/
 QPrinter *QPrintPreviewDialog::printer()
 {
    Q_D(QPrintPreviewDialog);
    return d->printer;
 }
-
-/*!
-    \fn void QPrintPreviewDialog::paintRequested(QPrinter *printer)
-
-    This signal is emitted when the QPrintPreviewDialog needs to generate
-    a set of preview pages.
-
-    The \a printer instance supplied is the paint device onto which you should
-    paint the contents of each page, using the QPrinter instance in the same way
-    as you would when printing directly.
-*/
 
 void QPrintPreviewDialog::_q_fit(QAction *action)
 {
@@ -803,5 +788,3 @@ void QPrintPreviewDialog::_q_zoomFactorChanged()
 }
 
 #endif // QT_NO_PRINTPREVIEWDIALOG
-
-

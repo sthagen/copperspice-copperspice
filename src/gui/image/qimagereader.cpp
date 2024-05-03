@@ -474,9 +474,6 @@ class QImageReaderPrivate
    QImageReader *q;
 };
 
-/*!
-    \internal
-*/
 QImageReaderPrivate::QImageReaderPrivate(QImageReader *qq)
    : autoDetectImageFormat(true), ignoresFormatAndExtension(false)
 {
@@ -490,9 +487,6 @@ QImageReaderPrivate::QImageReaderPrivate(QImageReader *qq)
    q = qq;
 }
 
-/*!
-    \internal
-*/
 QImageReaderPrivate::~QImageReaderPrivate()
 {
    if (deleteDevice) {
@@ -501,9 +495,6 @@ QImageReaderPrivate::~QImageReaderPrivate()
    delete handler;
 }
 
-/*!
-    \internal
-*/
 bool QImageReaderPrivate::initHandler()
 {
    // check some preconditions
@@ -557,9 +548,6 @@ bool QImageReaderPrivate::initHandler()
    return true;
 }
 
-/*!
-    \internal
-*/
 void QImageReaderPrivate::getText()
 {
    if (!text.isEmpty() || (!handler && !initHandler()) || !handler->supportsOption(QImageIOHandler::Description)) {
@@ -992,7 +980,7 @@ bool QImageReader::read(QImage *image)
    }
    static bool disable2xImageLoading = ! qgetenv("QT_HIGHDPI_DISABLE_2X_IMAGE_LOADING").isEmpty();
 
-   if (!disable2xImageLoading && QFileInfo(fileName()).baseName().endsWith("@2x")) {
+   if (! disable2xImageLoading && QFileInfo(fileName()).baseName().endsWith("@2x")) {
       image->setDevicePixelRatio(2.0);
    }
 
@@ -1006,57 +994,61 @@ bool QImageReader::read(QImage *image)
 
 bool QImageReader::jumpToNextImage()
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return false;
    }
+
    return d->handler->jumpToNextImage();
 }
 
-
 bool QImageReader::jumpToImage(int imageNumber)
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return false;
    }
+
    return d->handler->jumpToImage(imageNumber);
 }
 
 int QImageReader::loopCount() const
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return -1;
    }
+
    return d->handler->loopCount();
 }
 
-
 int QImageReader::imageCount() const
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return -1;
    }
+
    return d->handler->imageCount();
 }
 
 int QImageReader::nextImageDelay() const
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return -1;
    }
+
    return d->handler->nextImageDelay();
 }
 
 int QImageReader::currentImageNumber() const
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return -1;
    }
+
    return d->handler->currentImageNumber();
 }
 
 QRect QImageReader::currentImageRect() const
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return QRect();
    }
    return d->handler->currentImageRect();
@@ -1072,20 +1064,23 @@ QString QImageReader::errorString() const
    if (d->errorString.isEmpty()) {
       return QImageReader::tr("Unknown error");
    }
+
    return d->errorString;
 }
 
 bool QImageReader::supportsOption(QImageIOHandler::ImageOption option) const
 {
-   if (!d->initHandler()) {
+   if (! d->initHandler()) {
       return false;
    }
+
    return d->handler->supportsOption(option);
 }
 
 QString QImageReader::imageFormat(const QString &fileName)
 {
    QFile file(fileName);
+
    if (!file.open(QFile::ReadOnly)) {
       return QString();
    }
@@ -1104,6 +1099,7 @@ QString QImageReader::imageFormat(QIODevice *device)
       }
       delete handler;
    }
+
    return format;
 }
 

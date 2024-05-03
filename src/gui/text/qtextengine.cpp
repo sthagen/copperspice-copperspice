@@ -274,14 +274,16 @@ struct QBidiStatus {
 static constexpr const int MaxBidiLevel = 61;
 
 struct QBidiControl {
-   inline QBidiControl(bool rtl)
-      : cCtx(0), base(rtl ? 1 : 0), level(rtl ? 1 : 0), override(false) {}
+   QBidiControl(bool rtl)
+      : cCtx(0), base(rtl ? 1 : 0), level(rtl ? 1 : 0), override(false)
+   { }
 
-   inline void embed(bool rtl, bool o = false) {
+   void embed(bool rtl, bool o = false) {
       unsigned int toAdd = 1;
       if ((level % 2 != 0) == rtl ) {
          ++toAdd;
       }
+
       if (level + toAdd <= MaxBidiLevel) {
          ctx[cCtx].level = level;
          ctx[cCtx].override = override;
@@ -290,26 +292,27 @@ struct QBidiControl {
          level += toAdd;
       }
    }
-   inline bool canPop() const {
+
+   bool canPop() const {
       return cCtx != 0;
    }
 
-   inline void pdf() {
+   void pdf() {
       Q_ASSERT(cCtx);
       --cCtx;
       level = ctx[cCtx].level;
       override = ctx[cCtx].override;
    }
 
-   inline QChar::Direction basicDirection() const {
+   QChar::Direction basicDirection() const {
       return (base ? QChar::DirR : QChar:: DirL);
    }
 
-   inline unsigned int baseLevel() const {
+   unsigned int baseLevel() const {
       return base;
    }
 
-   inline QChar::Direction direction() const {
+   QChar::Direction direction() const {
       return ((level % 2) ? QChar::DirR : QChar:: DirL);
    }
 
@@ -875,6 +878,7 @@ static bool bidiItemize(QTextEngine *engine, QScriptAnalysis *analysis, QBidiCon
 #if (BIDI_DEBUG >= 1)
    qDebug() << "reached end of line current=" << current << ", eor=" << eor;
 #endif
+
    eor = current - 1; // remove dummy char
 
    if (sor <= eor) {
@@ -908,7 +912,7 @@ void QTextEngine::bidiReorder(int numItems, const quint8 *levels, int *visualOrd
 
    // reversing is only done up to the lowest odd level
    if (! (levelLow % 2)) {
-      levelLow++;
+      ++levelLow;
    }
 
    int count = numItems - 1;
@@ -921,26 +925,28 @@ void QTextEngine::bidiReorder(int numItems, const quint8 *levels, int *visualOrd
 
       while (i < count) {
          while (i < count && levels[i] < levelHigh) {
-            i++;
+            ++i;
          }
 
          int start = i;
          while (i <= count && levels[i] >= levelHigh) {
-            i++;
+            ++i;
          }
          int end = i - 1;
 
          if (start != end) {
-            //qDebug() << "reversing from " << start << " to " << end;
+
             for (int j = 0; j < (end - start + 1) / 2; j++) {
                int tmp = visualOrder[start + j];
                visualOrder[start + j] = visualOrder[end - j];
-               visualOrder[end - j] = tmp;
+               visualOrder[end - j]   = tmp;
             }
          }
-         i++;
+
+         ++i;
       }
-      levelHigh--;
+
+      --levelHigh;
    }
 }
 
@@ -1928,8 +1934,6 @@ QFixed QTextEngine::width(int from, int len) const
       int pos = si->position;
       int ilen = length(i);
 
-      // qDebug("item %d: from %d len %d", i, pos, ilen);
-
       if (pos >= from + len) {
          break;
       }
@@ -1965,7 +1969,7 @@ QFixed QTextEngine::width(int from, int len) const
          int glyphStart = logClusters[charFrom];
          if (charFrom > 0 && logClusters[charFrom - 1] == glyphStart)
             while (charFrom < ilen && logClusters[charFrom] == glyphStart) {
-               charFrom++;
+               ++charFrom;
             }
 
          if (charFrom < ilen) {
@@ -1978,18 +1982,18 @@ QFixed QTextEngine::width(int from, int len) const
 
             int glyphEnd = logClusters[charEnd];
             while (charEnd < ilen && logClusters[charEnd] == glyphEnd) {
-               charEnd++;
+               ++charEnd;
             }
+
             glyphEnd = (charEnd == ilen) ? si->num_glyphs : logClusters[charEnd];
 
-            //                 qDebug("char: start=%d end=%d / glyph: start = %d, end = %d", charFrom, charEnd, glyphStart, glyphEnd);
             for (int i = glyphStart; i < glyphEnd; i++) {
                w += glyphs.advances[i] * !glyphs.attributes[i].dontPrint;
             }
          }
       }
    }
-   //     qDebug("   --> w= %d ", w);
+
    return w;
 }
 
@@ -2343,7 +2347,6 @@ static void set(QJustificationPoint *point, int type, const QGlyphLayout &glyph,
 
 void QTextEngine::justify(const QScriptLine &line)
 {
-   //     qDebug("justify: line.gridfitted = %d, line.justified=%d", line.gridfitted, line.justified);
    if (line.gridfitted && line.justified) {
       return;
    }
@@ -2449,8 +2452,8 @@ void QTextEngine::justify(const QScriptLine &line)
 
             case Justification_Arabic_Space:
                if (kashida_pos >= 0) {
-                  //                     qDebug("kashida position at %d in word", kashida_pos);
                   set(&justificationPoints[nPoints], kashida_type, g.mid(kashida_pos), fontEngine(si));
+
                   if (justificationPoints[nPoints].kashidaWidth > 0) {
                      minKashida = qMin(minKashida, justificationPoints[nPoints].kashidaWidth);
                      maxJustify = qMax(maxJustify, justificationPoints[nPoints].type);
@@ -2502,9 +2505,6 @@ void QTextEngine::justify(const QScriptLine &line)
       return;
    }
 
-   //  qDebug("doing justification: textWidth=%x, requested=%x, maxJustify=%d", line.textWidth.value(), line.width.value(), maxJustify);
-   //  qDebug("     minKashida=%f, need=%f", minKashida.toReal(), need.toReal());
-
    // distribute in priority order
    if (maxJustify >= Justification_Arabic_Normal) {
       while (need >= minKashida) {
@@ -2514,10 +2514,8 @@ void QTextEngine::justify(const QScriptLine &line)
                if (justificationPoints[i].type == type && justificationPoints[i].kashidaWidth <= need) {
                   justificationPoints[i].glyph.justifications->nKashidas++;
 
-                  // ############
                   justificationPoints[i].glyph.justifications->space_18d6 += justificationPoints[i].kashidaWidth.value();
                   need -= justificationPoints[i].kashidaWidth;
-                  // qDebug("adding kashida type %d with width %x, neednow %x", type, justificationPoints[i].kashidaWidth, need.value());
                }
             }
          }
@@ -2540,8 +2538,6 @@ void QTextEngine::justify(const QScriptLine &line)
          }
       }
 
-      // qDebug("number of points for justification type %d: %d", type, n);
-
       if (! n) {
          continue;
       }
@@ -2549,7 +2545,6 @@ void QTextEngine::justify(const QScriptLine &line)
       for (int i = 0; i < nPoints; ++i) {
          if (justificationPoints[i].type == type) {
             QFixed add = need / n;
-            //                  qDebug("adding %x to glyph %x", add.value(), justificationPoints[i].glyph->glyph);
             justificationPoints[i].glyph.justifications[0].space_18d6 = add.value();
             need -= add;
             --n;
@@ -2796,7 +2791,6 @@ void QTextEngine::addRequiredBoundaries() const
          const QTextLayout::FormatRange &r = specialData->formats.at(i);
          setBoundary(r.start);
          setBoundary(r.start + r.length);
-         //qDebug("adding boundaries %d %d", r.start, r.start+r.length);
       }
    }
 }
@@ -3834,8 +3828,8 @@ QTextItemInt::QTextItemInt(const QScriptItem &si, QFont *font, const QTextCharFo
    initWithScriptItem(si);
 }
 
-QTextItemInt::QTextItemInt(const QGlyphLayout &g, QFont *font, QString::const_iterator begin, const QString::const_iterator end,
-            QFontEngine *fe, const QTextCharFormat &format)
+QTextItemInt::QTextItemInt(const QGlyphLayout &g, QFont *font, QString::const_iterator begin,
+      const QString::const_iterator end, QFontEngine *fe, const QTextCharFormat &format)
    : flags(Qt::EmptyFlag), justified(false), underlineStyle(QTextCharFormat::NoUnderline), charFormat(format),
      m_iter(begin), m_end(end), logClusters(nullptr), f(font),  glyphs(g), fontEngine(fe)
 {

@@ -84,7 +84,8 @@ class Q_MULTIMEDIA_EXPORT QMediaServiceProviderHint
 Q_DECLARE_OPERATORS_FOR_FLAGS(QMediaServiceProviderHint::Features)
 
 struct Q_MULTIMEDIA_EXPORT QMediaServiceProviderFactoryInterface {
-   virtual ~QMediaServiceProviderFactoryInterface() {}
+   virtual ~QMediaServiceProviderFactoryInterface()
+   { }
 
    virtual QMediaService *create(QString const &key) = 0;
    virtual void release(QMediaService *service) = 0;
@@ -94,7 +95,8 @@ struct Q_MULTIMEDIA_EXPORT QMediaServiceProviderFactoryInterface {
 CS_DECLARE_INTERFACE(QMediaServiceProviderFactoryInterface, QMediaServiceProviderInterface_ID)
 
 struct Q_MULTIMEDIA_EXPORT QMediaServiceSupportedFormatsInterface {
-   virtual ~QMediaServiceSupportedFormatsInterface() {}
+   virtual ~QMediaServiceSupportedFormatsInterface()
+   { }
 
    virtual QMultimedia::SupportEstimate hasSupport(const QString &mimeType, const QStringList &codecs) const = 0;
    virtual QStringList supportedMimeTypes() const = 0;
@@ -104,7 +106,8 @@ struct Q_MULTIMEDIA_EXPORT QMediaServiceSupportedFormatsInterface {
 CS_DECLARE_INTERFACE(QMediaServiceSupportedFormatsInterface, QMediaServiceSupportedFormatsInterface_ID)
 
 struct Q_MULTIMEDIA_EXPORT QMediaServiceSupportedDevicesInterface {
-   virtual ~QMediaServiceSupportedDevicesInterface() {}
+   virtual ~QMediaServiceSupportedDevicesInterface()
+   { }
 
    virtual QList<QString> devices(const QString &service) const = 0;
    virtual QString deviceDescription(const QString &service, const QString &device) = 0;
@@ -124,7 +127,9 @@ CS_DECLARE_INTERFACE(QMediaServiceDefaultDeviceInterface, QMediaServiceDefaultDe
 
 struct Q_MULTIMEDIA_EXPORT QMediaServiceCameraInfoInterface
 {
-   virtual ~QMediaServiceCameraInfoInterface() {}
+   virtual ~QMediaServiceCameraInfoInterface()
+   { }
+
    virtual QCamera::Position cameraPosition(const QString &device) const = 0;
    virtual int cameraOrientation(const QString &device) const = 0;
 };
@@ -132,9 +137,10 @@ struct Q_MULTIMEDIA_EXPORT QMediaServiceCameraInfoInterface
 #define QMediaServiceCameraInfoInterface_ID "com.copperspice.CS.mediaServiceCameraInfo/1.0"
 CS_DECLARE_INTERFACE(QMediaServiceCameraInfoInterface, QMediaServiceCameraInfoInterface_ID)
 
-
 struct Q_MULTIMEDIA_EXPORT QMediaServiceFeaturesInterface {
-   virtual ~QMediaServiceFeaturesInterface() {}
+   virtual ~QMediaServiceFeaturesInterface()
+   { }
+
    virtual QMediaServiceProviderHint::Features supportedFeatures(const QString &service) const = 0;
 };
 
@@ -150,56 +156,10 @@ class Q_MULTIMEDIA_EXPORT QMediaServiceProviderPlugin : public QObject, public Q
    virtual ~QMediaServiceProviderPlugin();
 };
 
-/*!
-    Service with support for media playback
-    Required Controls: QMediaPlayerControl
-    Optional Controls: QMediaPlaylistControl, QAudioDeviceControl
-    Video Output Controls (used by QWideoWidget and QGraphicsVideoItem):
-                        Required: QVideoOutputControl
-                        Optional: QVideoWindowControl, QVideoRendererControl, QVideoWidgetControl
-*/
-#define Q_MEDIASERVICE_MEDIAPLAYER "com.copperspice.CS.mediaPlayer"
-
-/*!
-   Service with support for recording from audio sources
-   Required Controls: QAudioDeviceControl
-   Recording Controls (QMediaRecorder):
-                        Required: QMediaRecorderControl
-                        Recommended: QAudioEncoderSettingsControl
-                        Optional: QMediaContainerControl
-*/
-#define Q_MEDIASERVICE_AUDIOSOURCE "com.copperspice.CS.audioSource"
-
-/*!
-    Service with support for camera use.
-    Required Controls: QCameraControl
-    Optional Controls: QCameraExposureControl, QCameraFocusControl, QCameraImageProcessingControl
-    Still Capture Controls: QCameraImageCaptureControl
-    Video Capture Controls (QMediaRecorder):
-                        Required: QMediaRecorderControl
-                        Recommended: QAudioEncoderSettingsControl, QVideoEncoderSettingsControl, QMediaContainerControl
-    Viewfinder Video Output Controls (used by QCameraViewfinder and QGraphicsVideoItem):
-                        Required: QVideoOutputControl
-                        Optional: QVideoWindowControl, QVideoRendererControl, QVideoWidgetControl
-*/
-#define Q_MEDIASERVICE_CAMERA "com.copperspice.CS.camera"
-
-/*!
-    Service with support for radio tuning.
-    Required Controls: QRadioTunerControl
-    Recording Controls (Optional, used by QMediaRecorder):
-                        Required: QMediaRecorderControl
-                        Recommended: QAudioEncoderSettingsControl
-                        Optional: QMediaContainerControl
-*/
-#define Q_MEDIASERVICE_RADIO "com.copperspice.CS.radio"
-
-/*!
-    Service with support for decoding audio.
-    Required Controls: QAudioDecoderControl
-    Optional: that streams control
-*/
+#define Q_MEDIASERVICE_MEDIAPLAYER  "com.copperspice.CS.mediaPlayer"
+#define Q_MEDIASERVICE_AUDIOSOURCE  "com.copperspice.CS.audioSource"
+#define Q_MEDIASERVICE_CAMERA       "com.copperspice.CS.camera"
+#define Q_MEDIASERVICE_RADIO        "com.copperspice.CS.radio"
 #define Q_MEDIASERVICE_AUDIODECODER "com.copperspice.CS.audioDecoder"
-
 
 #endif

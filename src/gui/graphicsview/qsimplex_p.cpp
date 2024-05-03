@@ -30,7 +30,6 @@
 
 /*!
   \internal
-  \class QSimplex
 
   The QSimplex class is a Linear Programming problem solver based on the two-phase
   simplex method.
@@ -55,24 +54,15 @@
   3.c) Run simplex to optimize the original problem towards its optimal solution.
 */
 
-/*!
-  \internal
-*/
 QSimplex::QSimplex() : objective(nullptr), rows(0), columns(0), firstArtificial(0), matrix(nullptr)
 {
 }
 
-/*!
-  \internal
-*/
 QSimplex::~QSimplex()
 {
    clearDataStructures();
 }
 
-/*!
-  \internal
-*/
 void QSimplex::clearDataStructures()
 {
    if (matrix == nullptr) {
@@ -133,14 +123,11 @@ bool QSimplex::setConstraints(const QList<QSimplexConstraint *> &newConstraints)
       return false;
    }
 
-   ///////////////////////////////////////
-   // Prepare variables and constraints //
-   ///////////////////////////////////////
-
    // Set Variables direct mapping.
    // "variables" is a list that provides a stable, indexed list of all variables
    // used in this problem.
    QSet<QSimplexVariable *> variablesSet;
+
    for (int i = 0; i < constraints.size(); ++i)
       variablesSet += \
          QSet<QSimplexVariable *>::fromList(constraints[i]->variables.keys());
@@ -522,6 +509,7 @@ qreal QSimplex::solver(SolverFactor factor)
    // Set new objective in the first row of the simplex matrix
    qreal resultOffset = 0;
    QHash<QSimplexVariable *, qreal>::const_iterator iter;
+
    for (iter = objective->variables.constBegin();
       iter != objective->variables.constEnd();
       ++iter) {

@@ -36,6 +36,7 @@ QWidgetAnimator::QWidgetAnimator(QMainWindowLayout *layout)
 void QWidgetAnimator::abort(QWidget *w)
 {
 #ifndef QT_NO_ANIMATION
+
    AnimationMap::iterator it = m_animation_map.find(w);
 
    if (it == m_animation_map.end()) {
@@ -53,8 +54,7 @@ void QWidgetAnimator::abort(QWidget *w)
    m_mainWindowLayout->animationFinished(w);
 #endif
 
-
-#endif //QT_NO_ANIMATION
+#endif
 }
 
 #ifndef QT_NO_ANIMATION
@@ -68,6 +68,7 @@ void QWidgetAnimator::animationFinished()
 void QWidgetAnimator::animate(QWidget *widget, const QRect &end_geometry, bool animate)
 {
    QRect r = widget->geometry();
+
    if (r.right() < 0 || r.bottom() < 0) {
       r = QRect();
    }
@@ -102,8 +103,9 @@ void QWidgetAnimator::animate(QWidget *widget, const QRect &end_geometry, bool a
 
    } else
 #endif
+
    {
-      //we do it in one shot
+      // do this in one shot
       widget->setGeometry(final_geometry);
 
 #ifndef QT_NO_MAINWINDOW
@@ -116,5 +118,3 @@ bool QWidgetAnimator::animating() const
 {
    return ! m_animation_map.isEmpty();
 }
-
-

@@ -41,10 +41,9 @@
 #define USE_MANUAL_DEFS
 #endif
 
-// Under OSX (at least up to 10.8) we cannot include our copy of glext.h,
-// but we use the system-wide one, which unfortunately lacks all the needed
-// defines/typedefs. In order to make the code compile, we just add here
-// the GL_KHR_debug defines.
+// Under OSX (at least up to 10.8) we can not include our own copy of glext.h,
+// using the system version unfortunately lacks the needed  defines/typedefs.
+// Work around by adding GL_KHR_debug defines manually
 
 #ifndef GL_KHR_debug
 #define GL_KHR_debug 1
@@ -177,7 +176,7 @@
 typedef void (QOPENGLF_APIENTRY *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,
    GLsizei length,const GLchar *message,const GLvoid *userParam);
 
-#endif /* USE_MANUAL_DEFS */
+#endif
 
 template <typename T, typename U>
 std::enable_if_t<sizeof(T) == sizeof(U) &&
@@ -577,8 +576,6 @@ bool QOpenGLDebugMessage::operator==(const QOpenGLDebugMessage &debugMessage) co
                 && d->message == debugMessage.d->message);
 }
 
-#ifndef QT_NO_DEBUG_STREAM
-
 QDebug operator<<(QDebug debug, QOpenGLDebugMessage::Source source)
 {
    QDebugStateSaver saver(debug);
@@ -621,7 +618,6 @@ QDebug operator<<(QDebug debug, const QOpenGLDebugMessage &message)
     return debug;
 
 }
-#endif // QT_NO_DEBUG_STREAM
 
 typedef void (QOPENGLF_APIENTRYP qt_glDebugMessageControl_t)(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
 

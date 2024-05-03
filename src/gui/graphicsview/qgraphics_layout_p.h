@@ -55,16 +55,20 @@ inline bool qt_graphicsLayoutDebug()
 class QLayoutStyleInfo
 {
  public:
-   inline QLayoutStyleInfo() {
+   QLayoutStyleInfo()
+   {
       invalidate();
    }
 
-   inline QLayoutStyleInfo(QStyle *style, QWidget *widget)
-      : m_valid(true), m_style(style), m_widget(widget) {
+   QLayoutStyleInfo(QStyle *style, QWidget *widget)
+      : m_valid(true), m_style(style), m_widget(widget)
+   {
       Q_ASSERT(style);
-      if (widget) { //###
+
+      if (widget) {
          m_styleOption.initFrom(widget);
       }
+
       m_defaultSpacing[0] = style->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
       m_defaultSpacing[1] = style->pixelMetric(QStyle::PM_LayoutVerticalSpacing);
    }
@@ -101,7 +105,8 @@ class QLayoutStyleInfo
       return m_defaultSpacing[o - 1];
    }
 
-   inline qreal perItemSpacing(QSizePolicy::ControlType control1, QSizePolicy::ControlType control2, Qt::Orientation orientation) const {
+   qreal perItemSpacing(QSizePolicy::ControlType control1, QSizePolicy::ControlType control2,
+         Qt::Orientation orientation) const {
       Q_ASSERT(style());
       return style()->layoutSpacing(control1, control2, orientation, &m_styleOption, widget());
    }
@@ -133,7 +138,6 @@ class QGraphicsLayoutPrivate : public QGraphicsLayoutItemPrivate
    qreal left, top, right, bottom;
    bool activated;
 };
-
 
 #endif //QT_NO_GRAPHICSVIEW
 

@@ -219,7 +219,7 @@ QSize QStyledItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
 }
 
 QWidget *QStyledItemDelegate::createEditor(QWidget *parent,
-   const QStyleOptionViewItem &, const QModelIndex &index) const
+      const QStyleOptionViewItem &, const QModelIndex &index) const
 {
    Q_D(const QStyledItemDelegate);
 
@@ -322,19 +322,17 @@ bool QStyledItemDelegate::eventFilter(QObject *object, QEvent *event)
    return d->editorEventFilter(object, event);
 }
 
-/*!
-  \reimp
-*/
 bool QStyledItemDelegate::editorEvent(QEvent *event,
-   QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
+      QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
    Q_ASSERT(event);
    Q_ASSERT(model);
 
    // make sure that the item is checkable
    Qt::ItemFlags flags = model->flags(index);
+
    if (! (flags & Qt::ItemIsUserCheckable) || !(option.state & QStyle::State_Enabled)
-      || !(flags & Qt::ItemIsEnabled)) {
+         || ! (flags & Qt::ItemIsEnabled)) {
       return false;
    }
 
@@ -349,11 +347,11 @@ bool QStyledItemDelegate::editorEvent(QEvent *event,
 
    // make sure that we have the right event type
    if ((event->type() == QEvent::MouseButtonRelease)
-      || (event->type() == QEvent::MouseButtonDblClick)
-      || (event->type() == QEvent::MouseButtonPress)) {
+         || (event->type() == QEvent::MouseButtonDblClick) || (event->type() == QEvent::MouseButtonPress)) {
 
       QStyleOptionViewItem viewOpt(option);
       initStyleOption(&viewOpt, index);
+
       QRect checkRect = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &viewOpt, widget);
       QMouseEvent *me = static_cast<QMouseEvent *>(event);
 
@@ -362,13 +360,13 @@ bool QStyledItemDelegate::editorEvent(QEvent *event,
       }
 
       if ((event->type() == QEvent::MouseButtonPress)
-         || (event->type() == QEvent::MouseButtonDblClick)) {
+            || (event->type() == QEvent::MouseButtonDblClick)) {
          return true;
       }
 
    } else if (event->type() == QEvent::KeyPress) {
       if (static_cast<QKeyEvent *>(event)->key() != Qt::Key_Space
-         && static_cast<QKeyEvent *>(event)->key() != Qt::Key_Select) {
+            && static_cast<QKeyEvent *>(event)->key() != Qt::Key_Select) {
          return false;
       }
    } else {
@@ -376,6 +374,7 @@ bool QStyledItemDelegate::editorEvent(QEvent *event,
    }
 
    Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
+
    if (flags & Qt::ItemIsUserTristate) {
       state = ((Qt::CheckState)((state + 1) % 3));
    } else {

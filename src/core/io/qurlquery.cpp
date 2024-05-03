@@ -151,8 +151,9 @@ inline bool idempotentRecodeToUser(QUrl::FormattingOptions encoding)
 
 inline QString QUrlQueryPrivate::recodeToUser(const QString &input, QUrl::FormattingOptions encoding) const
 {
-   // our internal formats are stored in "PrettyDecoded" form
+   // internal formats are stored in "PrettyDecoded" form
    // and there are no ambiguous characters
+
    if (idempotentRecodeToUser(encoding)) {
       return input;
    }
@@ -266,7 +267,6 @@ QUrlQuery::QUrlQuery(const QString &queryString)
 QUrlQuery::QUrlQuery(const QUrl &url)
    : d(nullptr)
 {
-   // use internals to avoid unnecessary recoding
    if (url.hasQuery()) {
       d = new QUrlQueryPrivate(url.query());
    }
@@ -322,9 +322,6 @@ bool QUrlQuery::isEmpty() const
    return d ? d->itemList.isEmpty() : true;
 }
 
-/*!
-    \internal
-*/
 bool QUrlQuery::isDetached() const
 {
    return d && d->ref.load() == 1;
@@ -342,7 +339,8 @@ void QUrlQuery::setQuery(const QString &queryString)
    d->setQuery(queryString);
 }
 
-static void recodeAndAppend(QString &to, const QString &input, QUrl::FormattingOptions encoding, const ushort *tableModifications)
+static void recodeAndAppend(QString &to, const QString &input, QUrl::FormattingOptions encoding,
+      const ushort *tableModifications)
 {
    if (!qt_urlRecode(to, input.constBegin(), input.constEnd(), encoding, tableModifications)) {
       to += input;

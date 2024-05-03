@@ -45,9 +45,6 @@ QScrollArea::QScrollArea(QWidget *parent)
    d->layoutChildren();
 }
 
-/*!
-    \internal
-*/
 QScrollArea::QScrollArea(QScrollAreaPrivate &dd, QWidget *parent)
    : QAbstractScrollArea(dd, parent)
 {
@@ -58,11 +55,6 @@ QScrollArea::QScrollArea(QScrollAreaPrivate &dd, QWidget *parent)
    d->layoutChildren();
 }
 
-/*!
-    Destroys the scroll area and its child widget.
-
-    \sa setWidget()
-*/
 QScrollArea::~QScrollArea()
 {
 }
@@ -70,10 +62,13 @@ QScrollArea::~QScrollArea()
 void QScrollAreaPrivate::updateWidgetPosition()
 {
    Q_Q(QScrollArea);
+
    Qt::LayoutDirection dir = q->layoutDirection();
    QRect scrolled = QStyle::visualRect(dir, viewport->rect(), QRect(QPoint(-hbar->value(), -vbar->value()),
             widget->size()));
+
    QRect aligned = QStyle::alignedRect(dir, alignment, widget->size(), viewport->rect());
+
    widget->move(widget->width() < viewport->width() ? aligned.x() : scrolled.x(),
       widget->height() < viewport->height() ? aligned.y() : scrolled.y());
 }
@@ -82,7 +77,7 @@ void QScrollAreaPrivate::updateScrollBars()
 {
    Q_Q(QScrollArea);
 
-   if (!widget) {
+   if (! widget) {
       return;
    }
 
@@ -118,12 +113,6 @@ void QScrollAreaPrivate::updateScrollBars()
 
 }
 
-/*!
-    Returns the scroll area's widget, or 0 if there is none.
-
-    \sa setWidget()
-*/
-
 QWidget *QScrollArea::widget() const
 {
    Q_D(const QScrollArea);
@@ -133,6 +122,7 @@ QWidget *QScrollArea::widget() const
 void QScrollArea::setWidget(QWidget *widget)
 {
    Q_D(QScrollArea);
+
    if (widget == d->widget || !widget) {
       return;
    }
@@ -161,6 +151,7 @@ void QScrollArea::setWidget(QWidget *widget)
 QWidget *QScrollArea::takeWidget()
 {
    Q_D(QScrollArea);
+
    QWidget *w = d->widget;
    d->widget = nullptr;
 
@@ -171,12 +162,10 @@ QWidget *QScrollArea::takeWidget()
    return w;
 }
 
-/*!
-    \reimp
- */
 bool QScrollArea::event(QEvent *e)
 {
    Q_D(QScrollArea);
+
    if (e->type() == QEvent::StyleChange || e->type() == QEvent::LayoutRequest) {
       d->updateScrollBars();
    }
@@ -200,7 +189,8 @@ bool QScrollArea::eventFilter(QObject *o, QEvent *e)
 
 #ifdef QT_KEYPAD_NAVIGATION
    if (d->widget && o != d->widget && e->type() == QEvent::FocusIn
-      && QApplication::keypadNavigationEnabled()) {
+         && QApplication::keypadNavigationEnabled()) {
+
       if (o->isWidgetType()) {
          ensureWidgetVisible(static_cast<QWidget *>(o));
       }
@@ -210,13 +200,11 @@ bool QScrollArea::eventFilter(QObject *o, QEvent *e)
    if (o == d->widget && e->type() == QEvent::Resize) {
       d->updateScrollBars();
    }
+
    return QAbstractScrollArea::eventFilter(o, e);
    return false;
 }
 
-/*!
-    \reimp
- */
 void QScrollArea::resizeEvent(QResizeEvent *)
 {
    Q_D(QScrollArea);
@@ -224,18 +212,15 @@ void QScrollArea::resizeEvent(QResizeEvent *)
 
 }
 
-
-/*!\reimp
- */
 void QScrollArea::scrollContentsBy(int, int)
 {
    Q_D(QScrollArea);
+
    if (!d->widget) {
       return;
    }
    d->updateWidgetPosition();
 }
-
 
 bool QScrollArea::widgetResizable() const
 {
@@ -246,14 +231,12 @@ bool QScrollArea::widgetResizable() const
 void QScrollArea::setWidgetResizable(bool resizable)
 {
    Q_D(QScrollArea);
+
    d->resizable = resizable;
    updateGeometry();
    d->updateScrollBars();
 }
 
-/*!
-    \reimp
- */
 QSize QScrollArea::sizeHint() const
 {
    Q_D(const QScrollArea);
@@ -265,7 +248,9 @@ QSize QScrollArea::sizeHint() const
       if (!d->widgetSize.isValid()) {
          d->widgetSize = d->resizable ? d->widget->sizeHint() : d->widget->size();
       }
+
       sz += d->widgetSize;
+
    } else {
       sz += QSize(12 * h, 8 * h);
    }
@@ -284,9 +269,11 @@ QSize QScrollArea::sizeHint() const
 QSize QScrollArea::viewportSizeHint() const
 {
    Q_D(const QScrollArea);
+
    if (d->widget) {
       return d->resizable ? d->widget->sizeHint() : d->widget->size();
    }
+
    const int h = fontMetrics().height();
    return QSize(6 * h, 4 * h);
 }
@@ -297,17 +284,13 @@ bool QScrollArea::focusNextPrevChild(bool next)
       if (QWidget *fw = focusWidget()) {
          ensureWidgetVisible(fw);
       }
+
       return true;
    }
+
    return false;
 }
 
-/*!
-    Scrolls the contents of the scroll area so that the point (\a x, \a y) is visible
-    inside the region of the viewport with margins specified in pixels by \a xmargin and
-    \a ymargin. If the specified point cannot be reached, the contents are scrolled to
-    the nearest valid position. The default value for both margins is 50 pixels.
-*/
 void QScrollArea::ensureVisible(int x, int y, int xmargin, int ymargin)
 {
    Q_D(QScrollArea);
@@ -366,8 +349,6 @@ void QScrollArea::ensureWidgetVisible(QWidget *childWidget, int xmargin, int yma
    }
 }
 
-
-
 void QScrollArea::setAlignment(Qt::Alignment alignment)
 {
    Q_D(QScrollArea);
@@ -383,6 +364,5 @@ Qt::Alignment QScrollArea::alignment() const
    Q_D(const QScrollArea);
    return d->alignment;
 }
-
 
 #endif // QT_NO_SCROLLAREA

@@ -51,7 +51,6 @@ class QNetworkReplyImpl: public QNetworkReply
 
    void abort() override;
 
-   // reimplemented from QNetworkReply or QIODevice
    void close() override;
    qint64 bytesAvailable() const override;
    void setReadBufferSize(qint64 size) override;
@@ -216,7 +215,8 @@ class QDisabledNetworkReply : public QNetworkReply
    QDisabledNetworkReply(QObject *parent, const QNetworkRequest &req, QNetworkAccessManager::Operation op);
    ~QDisabledNetworkReply();
 
-   void abort() override { }
+   void abort() override {
+   }
 
  protected:
    qint64 readData(char *, qint64) override {

@@ -459,18 +459,16 @@ QUuid QUuid::createUuid()
    }
 
    if (devUrandom->isOpen() && devUrandom->read((char *) data, AmountToRead) == AmountToRead) {
-      // we got what we wanted, nothing more to do
-      ;
+      // nothing more to do
 
    } else
-
 #endif
 
    {
       static constexpr const int intbits = sizeof(int) * 8;
       static int randbits = 0;
 
-      if (!randbits) {
+      if (! randbits) {
          int r = 0;
          int max = RAND_MAX;
 
@@ -514,7 +512,7 @@ QUuid QUuid::createUuid()
 
    return result;
 }
-#endif // !Q_OS_WIN
+#endif
 
 QDebug operator<<(QDebug dbg, const QUuid &id)
 {

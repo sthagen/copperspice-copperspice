@@ -791,6 +791,7 @@ class QWindowsNativeFileDialogEventHandler : public IFileDialogEvents
 
    QWindowsNativeFileDialogEventHandler(QWindowsNativeFileDialogBase *nativeFileDialog) :
       m_ref(1), m_nativeFileDialog(nativeFileDialog) {}
+
    virtual ~QWindowsNativeFileDialogEventHandler() {}
 
  private:
@@ -840,7 +841,7 @@ class QWindowsNativeFileDialogBase : public QWindowsNativeDialogBase
    virtual void setNameFilters(const QStringList &f);
    inline void selectNameFilter(const QString &filter);
 
-   inline void updateSelectedNameFilter() {
+   void updateSelectedNameFilter() {
       selectNameFilter(m_data.selectedNameFilter());
    }
 
@@ -856,9 +857,10 @@ class QWindowsNativeFileDialogBase : public QWindowsNativeDialogBase
 
    void setDefaultSuffix(const QString &s);
 
-   inline bool hasDefaultSuffix() const  {
+   bool hasDefaultSuffix() const  {
       return m_hasDefaultSuffix;
    }
+
    inline void setLabelText(QPlatformFileDialogOptions::DialogLabel l, const QString &text);
 
    // Return the selected files for tracking in OnSelectionChanged().
@@ -2285,6 +2287,7 @@ class QWindowsColorDialogHelper : public QWindowsDialogHelperBase<QPlatformColor
    virtual QColor currentColor() const {
       return *m_currentColor;
    }
+
    virtual void setCurrentColor(const QColor &c) {
       *m_currentColor = c;
    }
@@ -2348,7 +2351,7 @@ QPlatformDialogHelper *createHelper(QPlatformTheme::DialogType type)
 
    switch (type) {
       case QPlatformTheme::FileDialog:
-         // Note: "Windows XP Professional x64 Edition has version number WV_5_2 (WV_2003).
+         // "Windows XP Professional x64 Edition has version number WV_5_2 (WV_2003)
          if (QWindowsIntegration::instance()->options() & QWindowsIntegration::XpNativeDialogs
             || QSysInfo::windowsVersion() <= QSysInfo::WV_2003) {
             return new QWindowsXpFileDialogHelper();
@@ -2378,4 +2381,3 @@ QPlatformDialogHelper *createHelper(QPlatformTheme::DialogType type)
 }
 
 } // namespace
-

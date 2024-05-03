@@ -615,22 +615,24 @@ qreal QBezier::tAtLength(qreal l) const
 {
    qreal len = length();
    qreal t   = qreal(1.0);
+
    const qreal error = qreal(0.01);
+
    if (l > len || qFuzzyCompare(l, len)) {
       return t;
    }
 
    t *= qreal(0.5);
-   //int iters = 0;
-   //qDebug()<<"LEN is "<<l<<len;
+
    qreal lastBigger = qreal(1.0);
 
    while (true) {
-      //qDebug()<<"\tt is "<<t;
       QBezier right = *this;
       QBezier left;
+
       right.parameterSplitLeft(t, &left);
       qreal lLen = left.length();
+
       if (qAbs(lLen - l) < error) {
          break;
       }
@@ -643,7 +645,7 @@ qreal QBezier::tAtLength(qreal l) const
       }
       //++iters;
    }
-   //qDebug()<<"number of iters is "<<iters;
+
    return t;
 }
 

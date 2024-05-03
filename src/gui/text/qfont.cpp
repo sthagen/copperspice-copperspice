@@ -1565,6 +1565,7 @@ void QFontCache::clear()
                FC_DEBUG("QFontCache::clear: engine %p still has refcount %d",
                      static_cast<void *>(engine), engine->m_refCount.load());
             }
+
             it.value().data = nullptr;
          }
       }
@@ -1580,14 +1581,14 @@ void QFontCache::clear()
 
 QFontEngineData *QFontCache::findEngineData(const QFontDef &def) const
 {
-   EngineDataCache::const_iterator it = engineDataCache.constFind(def);
+   EngineDataCache::const_iterator iter = engineDataCache.constFind(def);
 
-   if (it == engineDataCache.constEnd()) {
+   if (iter == engineDataCache.constEnd()) {
       return nullptr;
    }
 
    // found
-   return it.value();
+   return iter.value();
 }
 
 void QFontCache::insertEngineData(const QFontDef &def, QFontEngineData *engineData)
@@ -1596,8 +1597,7 @@ void QFontCache::insertEngineData(const QFontDef &def, QFontEngineData *engineDa
 
    engineData->m_refCount.ref();
 
-   // Decrease now rather than waiting
-
+   // decrease now rather than waiting
    if (total_cost > MinCacheSize * 2 && engineDataCache.size() >= QFONTCACHE_DECREASE_TRIGGER_LIMIT) {
       decreaseCache();
    }
@@ -1638,7 +1638,7 @@ void QFontCache::insertEngine(const Key &key, QFontEngine *engine, bool insertMu
    FC_DEBUG("QFontCache: inserting new engine %p", static_cast<void *>(engine));
    engine->m_refCount.ref();
 
-   // Decrease now rather than waiting
+   // decrease now rather than waiting
    if (total_cost > MinCacheSize * 2 && engineCache.size() >= QFONTCACHE_DECREASE_TRIGGER_LIMIT) {
       decreaseCache();
    }
@@ -1690,6 +1690,7 @@ void QFontCache::decreaseCost(uint cost)
 {
    cost = (cost + 512) / 1024; // cost is stored in kb
    cost = cost > 0 ? cost : 1;
+
    Q_ASSERT(cost <= total_cost);
    total_cost -= cost;
 
@@ -1756,9 +1757,8 @@ void QFontCache::decreaseCache()
    /*
      calculate the new maximum cost for the cache
 
-     NOTE: in_use_cost is *not* correct due to rounding errors in the
-     above algorithm.  instead of worrying about getting the
-     calculation correct, we are more interested in speed, and use
+     in_use_cost is *not* correct due to rounding errors in the above algorithm.
+     instead of trying to get the calculation exact, more interested in speed so
      in_use_cost as a floor for new_max_cost
    */
 
@@ -1776,6 +1776,7 @@ void QFontCache::decreaseCache()
       }
 
       return;
+
    } else if (! fast) {
       FC_DEBUG("  dropping into passing gear");
 

@@ -127,7 +127,7 @@ void FixedColumnMatrix<T, NumColumns>::storageIndexToPosition(int idx, int *rowP
 // special values for unset fields; must not clash with values of FieldGrowthPolicy or
 // RowWrapPolicy
 const uint DefaultFieldGrowthPolicy = 255;
-const uint DefaultRowWrapPolicy = 255;
+const uint DefaultRowWrapPolicy     = 255;
 
 static constexpr const int ColumnCount = 2;
 
@@ -329,12 +329,6 @@ static void updateFormLayoutItem(QFormLayoutItem *item, int userVSpacing,
    item->vSpace = userVSpacing;
 }
 
-/*
-   Iterate over all the controls and gather their size information
-   (min, sizeHint and max). Also work out what the spacing between
-   pairs of controls should be, and figure out the min and sizeHint
-   widths.
-*/
 void QFormLayoutPrivate::updateSizes()
 {
    Q_Q(QFormLayout);
@@ -1129,6 +1123,7 @@ QFormLayout::~QFormLayout()
        m_things so that QLayout and the rest of the world know that we don't babysit
        the layout items anymore and don't care if they are destroyed.
    */
+
    d->m_things.clear();
    qDeleteAll(d->m_matrix.storage());
    d->m_matrix.clear();
@@ -1139,66 +1134,31 @@ void QFormLayout::addRow(QWidget *label, QWidget *field)
    insertRow(-1, label, field);
 }
 
-/*!
-    \overload
-*/
 void QFormLayout::addRow(QWidget *label, QLayout *field)
 {
    insertRow(-1, label, field);
 }
 
-/*!
-    \overload
-
-    This overload automatically creates a QLabel behind the scenes
-    with \a labelText as its text. The \a field is set as the new
-    QLabel's \l{QLabel::setBuddy()}{buddy}.
-*/
 void QFormLayout::addRow(const QString &labelText, QWidget *field)
 {
    insertRow(-1, labelText, field);
 }
 
-/*!
-    \overload
-
-    This overload automatically creates a QLabel behind the scenes
-    with \a labelText as its text.
-*/
 void QFormLayout::addRow(const QString &labelText, QLayout *field)
 {
    insertRow(-1, labelText, field);
 }
 
-/*!
-    \overload
-
-    Adds the specified \a widget at the end of this form layout. The
-    \a widget spans both columns.
-*/
 void QFormLayout::addRow(QWidget *widget)
 {
    insertRow(-1, widget);
 }
 
-/*!
-    \overload
-
-    Adds the specified \a layout at the end of this form layout. The
-    \a layout spans both columns.
-*/
 void QFormLayout::addRow(QLayout *layout)
 {
    insertRow(-1, layout);
 }
 
-/*!
-    Inserts a new row at position \a row in this form layout, with
-    the given \a label and \a field. If \a row is out of bounds, the
-    new row is added at the end.
-
-    \sa addRow()
-*/
 void QFormLayout::insertRow(int row, QWidget *label, QWidget *field)
 {
    Q_D(QFormLayout);
@@ -1217,9 +1177,6 @@ void QFormLayout::insertRow(int row, QWidget *label, QWidget *field)
    invalidate();
 }
 
-/*!
-    \overload
-*/
 void QFormLayout::insertRow(int row, QWidget *label, QLayout *field)
 {
    Q_D(QFormLayout);
@@ -1238,13 +1195,6 @@ void QFormLayout::insertRow(int row, QWidget *label, QLayout *field)
    invalidate();
 }
 
-/*!
-    \overload
-
-    This overload automatically creates a QLabel behind the scenes
-    with \a labelText as its text. The \a field is set as the new
-    QLabel's \l{QLabel::setBuddy()}{buddy}.
-*/
 void QFormLayout::insertRow(int row, const QString &labelText, QWidget *field)
 {
    Q_D(QFormLayout);
@@ -1262,6 +1212,7 @@ void QFormLayout::insertRow(int row, const QString &labelText, QWidget *field)
 #endif
 
    }
+
    insertRow(row, label, field);
 }
 
@@ -1287,13 +1238,6 @@ void QFormLayout::insertRow(int row, QWidget *widget)
    invalidate();
 }
 
-/*!
-    \overload
-
-    Inserts the specified \a layout at position \a row in this form
-    layout. The \a layout spans both columns. If \a row is out of
-    bounds, the widget is added at the end.
-*/
 void QFormLayout::insertRow(int row, QLayout *layout)
 {
    Q_D(QFormLayout);
@@ -1307,9 +1251,6 @@ void QFormLayout::insertRow(int row, QLayout *layout)
    invalidate();
 }
 
-/*!
-    \reimp
-*/
 void QFormLayout::addItem(QLayoutItem *item)
 {
    Q_D(QFormLayout);
@@ -1319,18 +1260,12 @@ void QFormLayout::addItem(QLayoutItem *item)
    invalidate();
 }
 
-/*!
-    \reimp
-*/
 int QFormLayout::count() const
 {
    Q_D(const QFormLayout);
    return d->m_things.count();
 }
 
-/*!
-    \reimp
-*/
 QLayoutItem *QFormLayout::itemAt(int index) const
 {
    Q_D(const QFormLayout);
@@ -1342,9 +1277,6 @@ QLayoutItem *QFormLayout::itemAt(int index) const
    return nullptr;
 }
 
-/*!
-    \reimp
-*/
 QLayoutItem *QFormLayout::takeAt(int index)
 {
    Q_D(QFormLayout);
@@ -1381,9 +1313,6 @@ QLayoutItem *QFormLayout::takeAt(int index)
    return i;
 }
 
-/*!
-    \reimp
-*/
 Qt::Orientations QFormLayout::expandingDirections() const
 {
    Q_D(const QFormLayout);
@@ -1403,9 +1332,6 @@ Qt::Orientations QFormLayout::expandingDirections() const
    return o;
 }
 
-/*!
-    \reimp
-*/
 bool QFormLayout::hasHeightForWidth() const
 {
    Q_D(const QFormLayout);
@@ -1414,9 +1340,6 @@ bool QFormLayout::hasHeightForWidth() const
    return (d->has_hfw || rowWrapPolicy() == WrapLongRows);
 }
 
-/*!
-    \reimp
-*/
 int QFormLayout::heightForWidth(int width) const
 {
    Q_D(const QFormLayout);
@@ -1442,9 +1365,6 @@ int QFormLayout::heightForWidth(int width) const
    }
 }
 
-/*!
-    \reimp
-*/
 void QFormLayout::setGeometry(const QRect &rect)
 {
    Q_D(QFormLayout);
@@ -1471,9 +1391,6 @@ void QFormLayout::setGeometry(const QRect &rect)
    }
 }
 
-/*!
-    \reimp
-*/
 QSize QFormLayout::sizeHint() const
 {
    Q_D(const QFormLayout);
@@ -1484,9 +1401,6 @@ QSize QFormLayout::sizeHint() const
    return d->prefSize;
 }
 
-/*!
-    \reimp
-*/
 QSize QFormLayout::minimumSize() const
 {
    // ### fix minimumSize if hfw
@@ -1498,9 +1412,6 @@ QSize QFormLayout::minimumSize() const
    return d->minSize;
 }
 
-/*!
-    \reimp
-*/
 void QFormLayout::invalidate()
 {
    Q_D(QFormLayout);
@@ -1516,11 +1427,6 @@ void QFormLayout::invalidate()
    QLayout::invalidate();
 }
 
-/*!
-    Returns the number of rows in the form.
-
-    \sa QLayout::count()
-*/
 int QFormLayout::rowCount() const
 {
    Q_D(const QFormLayout);
@@ -1577,12 +1483,6 @@ void QFormLayout::getItemPosition(int index, int *rowPtr, ItemRole *rolePtr) con
    }
 }
 
-/*!
-    Retrieves the row and role (column) of the specified child \a
-    layout. If \a layout is not in the form layout, *\a rowPtr is set
-    to -1; otherwise the row is stored in *\a rowPtr and the role is stored
-    in *\a rolePtr.
-*/
 void QFormLayout::getLayoutPosition(QLayout *layout, int *rowPtr, ItemRole *rolePtr) const
 {
    int n = count();
@@ -1597,26 +1497,11 @@ void QFormLayout::getLayoutPosition(QLayout *layout, int *rowPtr, ItemRole *role
    getItemPosition(index, rowPtr, rolePtr);
 }
 
-/*!
-    Retrieves the row and role (column) of the specified \a widget in
-    the layout. If \a widget is not in the layout, *\a rowPtr is set
-    to -1; otherwise the row is stored in *\a rowPtr and the role is stored
-    in *\a rolePtr.
-
-    \sa getItemPosition(), itemAt()
-*/
 void QFormLayout::getWidgetPosition(QWidget *widget, int *rowPtr, ItemRole *rolePtr) const
 {
    getItemPosition(indexOf(widget), rowPtr, rolePtr);
 }
 
-// ### eliminate labelForField()
-
-/*!
-    Returns the label associated with the given \a field.
-
-    \sa itemAt()
-*/
 QWidget *QFormLayout::labelForField(QWidget *field) const
 {
    Q_D(const QFormLayout);
@@ -1635,9 +1520,6 @@ QWidget *QFormLayout::labelForField(QWidget *field) const
    return nullptr;
 }
 
-/*!
-    \overload
-*/
 QWidget *QFormLayout::labelForField(QLayout *field) const
 {
    Q_D(const QFormLayout);
@@ -1732,7 +1614,6 @@ Qt::Alignment QFormLayout::formAlignment() const
    }
 }
 
-
 void QFormLayout::setHorizontalSpacing(int spacing)
 {
    Q_D(QFormLayout);
@@ -1771,12 +1652,6 @@ int QFormLayout::verticalSpacing() const
    }
 }
 
-/*!
-    This function sets both the vertical and horizontal spacing to
-    \a spacing.
-
-    \sa setVerticalSpacing(), setHorizontalSpacing()
-*/
 void QFormLayout::setSpacing(int spacing)
 {
    Q_D(QFormLayout);
@@ -1784,12 +1659,6 @@ void QFormLayout::setSpacing(int spacing)
    invalidate();
 }
 
-/*!
-    If the vertical spacing is equal to the horizontal spacing,
-    this function returns that value; otherwise it returns -1.
-
-    \sa setSpacing(), verticalSpacing(), horizontalSpacing()
-*/
 int QFormLayout::spacing() const
 {
    int hSpacing = horizontalSpacing();
@@ -1852,11 +1721,13 @@ void QFormLayoutPrivate::arrangeWidgets(const QVector<QLayoutStruct> &layouts, Q
          QSize sz(field->layoutWidth, layouts.at(field->vLayoutIndex).size);
          QPoint p(field->layoutPos + leftOffset + rect.x(), layouts.at(field->vLayoutIndex).pos);
          /*
-                     if ((field->widget() && field->widget()->sizePolicy().horizontalPolicy() & (QSizePolicy::GrowFlag | QSizePolicy::ExpandFlag | QSizePolicy::IgnoreFlag))
-                         || (field->layout() && sz.width() < field->maxSize.width())) {
-                         sz.rwidth() = field->layoutWidth;
-                     }
+            if ((field->widget() && field->widget()->sizePolicy().horizontalPolicy() & (QSizePolicy::GrowFlag
+                  | QSizePolicy::ExpandFlag | QSizePolicy::IgnoreFlag))
+                  || (field->layout() && sz.width() < field->maxSize.width())) {
+                sz.rwidth() = field->layoutWidth;
+            }
          */
+
          if (field->maxSize.isValid()) {
             sz = sz.boundedTo(field->maxSize);
          }
@@ -1866,17 +1737,6 @@ void QFormLayoutPrivate::arrangeWidgets(const QVector<QLayoutStruct> &layouts, Q
    }
 }
 
-/*!
-    Sets the widget in the given \a row for the given \a role to \a widget, extending the
-    layout with empty rows if necessary.
-
-    If the cell is already occupied, the \a widget is not inserted and an error message is
-    sent to the console.
-
-    \bold{Note:} For most applications, addRow() or insertRow() should be used instead of setWidget().
-
-    \sa setLayout()
-*/
 void QFormLayout::setWidget(int row, ItemRole role, QWidget *widget)
 {
    Q_D(QFormLayout);
@@ -1887,17 +1747,6 @@ void QFormLayout::setWidget(int row, ItemRole role, QWidget *widget)
    d->setWidget(row, role, widget);
 }
 
-/*!
-    Sets the sub-layout in the given \a row for the given \a role to \a layout, extending the
-    form layout with empty rows if necessary.
-
-    If the cell is already occupied, the \a layout is not inserted and an error message is
-    sent to the console.
-
-    \bold{Note:} For most applications, addRow() or insertRow() should be used instead of setLayout().
-
-    \sa setWidget()
-*/
 void QFormLayout::setLayout(int row, ItemRole role, QLayout *layout)
 {
    Q_D(QFormLayout);
@@ -1908,19 +1757,6 @@ void QFormLayout::setLayout(int row, ItemRole role, QLayout *layout)
    d->setLayout(row, role, layout);
 }
 
-/*!
-    Sets the item in the given \a row for the given \a role to \a item, extending the
-    layout with empty rows if necessary.
-
-    If the cell is already occupied, the \a item is not inserted and an error message is
-    sent to the console.
-    The \a item spans both columns.
-
-    \warning Do not use this function to add child layouts or child
-    widget items. Use setLayout() or setWidget() instead.
-
-    \sa setLayout()
-*/
 void QFormLayout::setItem(int row, ItemRole role, QLayoutItem *item)
 {
    Q_D(QFormLayout);
@@ -1931,19 +1767,11 @@ void QFormLayout::setItem(int row, ItemRole role, QLayoutItem *item)
    d->setItem(row, role, item);
 }
 
-/*!
-     \internal
- */
-
 void QFormLayout::resetFieldGrowthPolicy()
 {
    Q_D(QFormLayout);
    d->fieldGrowthPolicy = DefaultFieldGrowthPolicy;
 }
-
-/*!
-     \internal
- */
 
 void QFormLayout::resetRowWrapPolicy()
 {
@@ -1951,19 +1779,11 @@ void QFormLayout::resetRowWrapPolicy()
    d->rowWrapPolicy = DefaultRowWrapPolicy;
 }
 
-/*!
-     \internal
- */
-
 void QFormLayout::resetFormAlignment()
 {
    Q_D(QFormLayout);
    d->formAlignment = Qt::EmptyFlag;
 }
-
-/*!
-     \internal
- */
 
 void QFormLayout::resetLabelAlignment()
 {

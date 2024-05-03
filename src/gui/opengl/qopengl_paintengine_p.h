@@ -117,11 +117,11 @@ class Q_GUI_EXPORT QOpenGL2PaintEngineEx : public QPaintEngineEx
     void setState(QPainterState *s) override;
     QPainterState *createState(QPainterState *orig) const override;
 
-    inline QOpenGL2PaintEngineState *state() {
+    QOpenGL2PaintEngineState *state() {
         return static_cast<QOpenGL2PaintEngineState *>(QPaintEngineEx::state());
     }
 
-    inline const QOpenGL2PaintEngineState *state() const {
+    const QOpenGL2PaintEngineState *state() const {
         return static_cast<const QOpenGL2PaintEngineState *>(QPaintEngineEx::state());
     }
 
@@ -252,7 +252,7 @@ class QOpenGL2PaintEngineExPrivate : public QPaintEngineExPrivate
 
     bool vertexAttributeArraysEnabledState[QT_GL_VERTEX_ARRAY_TRACKED_COUNT];
 
-    // Dirty flags
+    // dirty flags
     bool matrixDirty; // Implies matrix uniforms are also dirty
     bool compositionModeDirty;
     bool brushTextureDirty;

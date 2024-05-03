@@ -464,10 +464,10 @@ int QTimerInfoList::timerRemainingTime(int timerId)
 void QTimerInfoList::registerTimer(int timerId, int interval, Qt::TimerType timerType, QObject *object)
 {
    QTimerInfo_Unix *t = new QTimerInfo_Unix;
-   t->id = timerId;
-   t->interval = interval;
-   t->timerType = timerType;
-   t->obj = object;
+   t->id          = timerId;
+   t->interval    = interval;
+   t->timerType   = timerType;
+   t->obj         = object;
    t->activateRef = nullptr;
 
    timespec expected = updateCurrentTime() + interval;
@@ -530,7 +530,6 @@ void QTimerInfoList::registerTimer(int timerId, int interval, Qt::TimerType time
    if (t->timerType != Qt::PreciseTimer)
       qDebug() << "timer" << t->timerType << hex << t->id << dec << "interval" << t->interval << "expected at"
             << t->expected << "will fire first at" << t->timeout;
-
 #endif
 }
 
@@ -618,7 +617,6 @@ int QTimerInfoList::activateTimers()
    firstTimerInfo = nullptr;
 
    timespec currentTime = updateCurrentTime();
-   // qDebug() << "Thread" << QThread::currentThreadId() << "woken up at" << currentTime;
    repairTimersIfNeeded();
 
    // Find out how many timer have expired
@@ -679,7 +677,6 @@ int QTimerInfoList::activateTimers()
                << "(orig" << currentTimerInfo->expected << "scheduled at" << currentTimerInfo->timeout
                << ") off by" << diff << "activation" << currentTimerInfo->count
                << "avg error" << (currentTimerInfo->cumulativeError / currentTimerInfo->count);
-
 #endif
 
       // determine next timeout time
@@ -706,7 +703,6 @@ int QTimerInfoList::activateTimers()
    }
 
    firstTimerInfo = nullptr;
-   // qDebug() << "Thread" << QThread::currentThreadId() << "activated" << n_act << "timers";
 
    return n_act;
 }
