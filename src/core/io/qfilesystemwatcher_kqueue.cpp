@@ -40,13 +40,6 @@
 #include <sys/time.h>
 #include <fcntl.h>
 
-// #define KEVENT_DEBUG
-#ifdef KEVENT_DEBUG
-#  define DEBUG qDebug
-#else
-#  define DEBUG if(false)qDebug
-#endif
-
 QKqueueFileSystemWatcherEngine *QKqueueFileSystemWatcherEngine::create()
 {
    int kqfd = kqueue();
@@ -166,10 +159,15 @@ QStringList QKqueueFileSystemWatcherEngine::addPaths(const QStringList &paths,
          it.remove();
 
          if (id < 0) {
-            DEBUG() << "QKqueueFileSystemWatcherEngine: added directory path" << path;
+#if defined(CS_SHOW_DEBUG_CORE)
+            qDebug() << "QKqueueFileSystemWatcherEngine: Added directory path" << path;
+#endif
             directories->append(path);
+
          } else {
-            DEBUG() << "QKqueueFileSystemWatcherEngine: added file path" << path;
+#if defined(CS_SHOW_DEBUG_CORE)
+            qDebug() << "QKqueueFileSystemWatcherEngine: Added file path" << path;
+#endif
             files->append(path);
          }
 
@@ -244,7 +242,7 @@ void QKqueueFileSystemWatcherEngine::run()
    while (true) {
       int r;
       struct kevent kev;
-      DEBUG() << "QKqueueFileSystemWatcherEngine: waiting for kevents...";
+
       EINTR_LOOP(r, kevent(kqfd, nullptr, 0, &kev, 1, nullptr));
 
       if (r < 0) {
@@ -254,7 +252,9 @@ void QKqueueFileSystemWatcherEngine::run()
       } else {
          int fd = kev.ident;
 
-         DEBUG() << "QKqueueFileSystemWatcherEngine: processing kevent" << kev.ident << kev.filter;
+#if defined(CS_SHOW_DEBUG_CORE)
+         qDebug() << "QKqueueFileSystemWatcherEngine: processing kevent" << kev.ident << kev.filter;
+#endif
 
          if (fd == kqpipe[0]) {
             // read all pending data from the pipe
@@ -280,17 +280,15 @@ void QKqueueFileSystemWatcherEngine::run()
             // handle the command
             switch (cmd) {
                case 'q':
-                  DEBUG() << "QKqueueFileSystemWatcherEngine: thread received 'q', exiting...";
                   return;
 
                case '@':
-                  DEBUG() << "QKqueueFileSystemWatcherEngine: thread received '@', continuing...";
                   break;
 
                default:
-                  DEBUG() << "QKqueueFileSystemWatcherEngine: thread received unknow message" << cmd;
                   break;
             }
+
          } else {
             QMutexLocker locker(&mutex);
 
@@ -303,19 +301,21 @@ void QKqueueFileSystemWatcherEngine::run()
                path = idToPath.value(id);
 
                if (path.isEmpty()) {
-                  DEBUG() << "QKqueueFileSystemWatcherEngine: received a kevent for a file we're not watching";
+#if defined(CS_SHOW_DEBUG_CORE)
+                  qDebug() << "QKqueueFileSystemWatcherEngine: Received a kevent for a file we are not watching";
+#endif
                   continue;
                }
             }
 
             if (kev.filter != EVFILT_VNODE) {
-               DEBUG() << "QKqueueFileSystemWatcherEngine: received a kevent with the wrong filter";
+#if defined(CS_SHOW_DEBUG_CORE)
+               qDebug() << "QKqueueFileSystemWatcherEngine: received a kevent with the wrong filter";
+#endif
                continue;
             }
 
             if ((kev.fflags & (NOTE_DELETE | NOTE_REVOKE | NOTE_RENAME)) != 0) {
-               DEBUG() << path << "removed, removing watch also";
-
                pathToID.remove(path);
                idToPath.remove(id);
                ::close(fd);
@@ -327,7 +327,6 @@ void QKqueueFileSystemWatcherEngine::run()
                }
 
             } else {
-               DEBUG() << path << "changed";
 
                if (id < 0) {
                   emit directoryChanged(path, false);
