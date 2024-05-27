@@ -224,10 +224,8 @@ static QByteArray qt_prettyDebug(const char *data, int len, int maxLength)
                break;
 
             default:
-               QString tmp;
-               tmp.sprintf("\\%o", c);
-               out += tmp.toLatin1().constData();
-         }
+               out += QString("\\%1").formatArgs(c, 8).toLatin1();
+      }
    }
 
    if (len < maxLength) {
@@ -1691,11 +1689,10 @@ qint64 QNativeSocketEnginePrivate::nativeRead(char *data, qint64 maxLength)
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
    if (ret != -2) {
-      qDebug("QNativeSocketEnginePrivate::nativeRead(%p \"%s\", %li) == %li",
+      qDebug("QNativeSocketEnginePrivate::nativeRead(%p \"%s\", %i) == %i",
              data, qt_prettyDebug(data, qMin((int)bytesRead, 16), (int)bytesRead).data(), (int)maxLength, (int)ret);
    } else {
-      qDebug("QNativeSocketEnginePrivate::nativeRead(%p, %li) == -2 (WOULD BLOCK)",
-             data, int(maxLength));
+      qDebug("QNativeSocketEnginePrivate::nativeRead(%p, %i) == -2 (WOULD BLOCK)", data, int(maxLength));
    }
 #endif
 

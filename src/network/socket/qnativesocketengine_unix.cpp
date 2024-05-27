@@ -76,10 +76,8 @@ static QByteArray qt_prettyDebug(const char *data, int len, int maxSize)
                out += "\\t";
                break;
             default:
-               QString tmp;
-               tmp.sprintf("\\%o", c);
-               out += tmp.toLatin1();
-         }
+               out += QString("\\%1").formatArgs(c, 8).toLatin1();
+      }
    }
 
    if (len < maxSize) {
@@ -1217,8 +1215,7 @@ qint64 QNativeSocketEnginePrivate::nativeWrite(const char *data, qint64 len)
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
    qDebug("QNativeSocketEnginePrivate::nativeWrite(%p \"%s\", %llu) == %i",
-          data, qt_prettyDebug(data, qMin((int) len, 16),
-                               (int) len).data(), len, (int) writtenBytes);
+         data, qt_prettyDebug(data, qMin((int) len, 16), (int) len).data(), len, (int) writtenBytes);
 #endif
 
    return qint64(writtenBytes);
@@ -1263,8 +1260,7 @@ qint64 QNativeSocketEnginePrivate::nativeRead(char *data, qint64 maxSize)
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
    qDebug("QNativeSocketEnginePrivate::nativeRead(%p \"%s\", %llu) == %zd",
-          data, qt_prettyDebug(data, qMin(r, ssize_t(16)), r).data(),
-          maxSize, r);
+          data, qt_prettyDebug(data, qMin(r, ssize_t(16)), r).data(), maxSize, r);
 #endif
 
    return qint64(r);
