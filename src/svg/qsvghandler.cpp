@@ -2985,18 +2985,20 @@ static QSvgNode *createImageNode(QSvgNode *parent, const QXmlStreamAttributes &a
    }
 
    if (nwidth <= 0 || nheight <= 0) {
-        qWarning() << "QSvgHandler: Width or height for" << filename << "image was not greater than 0";
+      qWarning() << "QSvgHandler: Width or height for" << filename << "image was not greater than 0";
         return nullptr;
    }
    QImage image;
 
    if (filename.startsWith(QString("data"))) {
       int idx = filename.lastIndexOf(QString("base64,"));
+
       if (idx != -1) {
          idx += 7;
          QString dataStr = filename.mid(idx);
          QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
          image = QImage::fromData(data);
+
       } else {
 
 #if defined(CS_SHOW_DEBUG_SVG)

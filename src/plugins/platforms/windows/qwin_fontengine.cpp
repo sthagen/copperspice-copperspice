@@ -245,16 +245,18 @@ QWindowsFontEngine::QWindowsFontEngine(const QString &name, LOGFONT lf,
 #endif
 
    hfont = CreateFontIndirect(&m_logfont);
+
    if (! hfont) {
-      qErrnoWarning("QWindowsFontEngine(): CreateFontIndirect failed for family '%s'", csPrintable(name));
+      qErrnoWarning("QWindowsFontEngine() CreateFontIndirect failed for family %s", csPrintable(name));
       hfont = QWindowsFontDatabase::systemFont();
    }
 
    HDC hdc = m_fontEngineData->hdc;
    SelectObject(hdc, hfont);
    const BOOL res = GetTextMetrics(hdc, &tm);
+
    if (! res) {
-      qErrnoWarning("QWindowsFontEngine(): GetTextMetrics failed");
+      qErrnoWarning("QWindowsFontEngine() GetTextMetrics failed");
       ZeroMemory(&tm, sizeof(TEXTMETRIC));
    }
 
@@ -292,7 +294,7 @@ QWindowsFontEngine::~QWindowsFontEngine()
    SelectObject(m_fontEngineData->hdc, QWindowsFontDatabase::systemFont());
 
    if (! DeleteObject(hfont)) {
-      qErrnoWarning("~QWindowsFontEngine(): Failed to delete font");
+      qErrnoWarning("~QWindowsFontEngine() Failed to delete font");
    }
 
    if (! uniqueFamilyName.isEmpty()) {
@@ -832,7 +834,7 @@ static bool addGlyphToPath(glyph_t glyph, const QFixedPoint &position, HDC hdc,
             }
 
             default:
-               qWarning("QFontEngineWin::addOutlineToPath, unhandled switch case");
+               qWarning("QFontEngineWin::addOutlineToPath() Unhandled switch case");
          }
          offset += sizeof(TTPOLYCURVE) + (curve->cpfx - 1) * sizeof(POINTFX);
       }
@@ -912,9 +914,11 @@ int QWindowsFontEngine::synthesized() const
          if (tm.tmItalic && !(macStyle & 2)) {
             synthesized_flags = SynthesizedItalic;
          }
+
          if (fontDef.stretch != 100 && ttf) {
             synthesized_flags |= SynthesizedStretch;
          }
+
          if (tm.tmWeight >= 500 && !(macStyle & 1)) {
             synthesized_flags |= SynthesizedBold;
          }

@@ -322,7 +322,7 @@ void QWindowsOleDropSource::createCursors()
       }
 
       if (cursorPixmap.isNull()) {
-         qWarning("%s: Unable to obtain drag cursor for %d.", __FUNCTION__, action);
+         qWarning("QWindowsOleDropSource::createCursors() Unable to obtain drag cursor for %d", action);
          continue;
       }
 
@@ -375,7 +375,9 @@ STDMETHODIMP QWindowsOleDropSource::QueryInterface(REFIID iid, void FAR *FAR *pp
       ++m_refs;
       return NOERROR;
    }
+
    *ppv = nullptr;
+
    return ResultFromScode(E_NOINTERFACE);
 }
 
@@ -444,10 +446,6 @@ QT_ENSURE_STACK_ALIGNED_FOR_SSE STDMETHODIMP QWindowsOleDropSource::QueryContinu
 
    return hr;
 }
-
-/*!
-    \brief Give feedback: Change cursor accoding to action.
-*/
 
 QT_ENSURE_STACK_ALIGNED_FOR_SSE STDMETHODIMP QWindowsOleDropSource::GiveFeedback(DWORD dwEffect)
 {
@@ -720,7 +718,7 @@ Qt::DropAction QWindowsDrag::drag(QDrag *drag)
       // Force it to be a copy if an unsupported operation occurred.
       // This indicates a bug in the drop target.
       if (resultEffect != DROPEFFECT_NONE && !(resultEffect & allowedEffects)) {
-         qWarning("%s: Forcing Qt::CopyAction", __FUNCTION__);
+         qWarning("QWindowsDrag::drag() Forcing Qt::CopyAction");
          dragResult = Qt::CopyAction;
       }
    }

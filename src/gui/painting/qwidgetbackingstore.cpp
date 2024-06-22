@@ -56,11 +56,6 @@ static QPlatformTextureList *qt_dummy_platformTextureList()
 
 #endif
 
-/**
- * Flushes the contents of the \a windowSurface into the screen area of \a widget.
- * \a tlwOffset is the position of the top level widget relative to the window surface.
- * \a region is the region to be updated in \a widget coordinates.
- */
 void QWidgetBackingStore::qt_flush(QWidget *widget, const QRegion &region, QBackingStore *backingStore,
    QWidget *tlw, const QPoint &tlwOffset, QPlatformTextureList *widgetTextures,
    QWidgetBackingStore *widgetBackingStore)
@@ -71,7 +66,7 @@ void QWidgetBackingStore::qt_flush(QWidget *widget, const QRegion &region, QBack
    (void) widgetTextures;
    Q_ASSERT(! region.isEmpty());
 #else
-   Q_ASSERT(!region.isEmpty() || widgetTextures);
+   Q_ASSERT(! region.isEmpty() || widgetTextures);
 #endif
 
    Q_ASSERT(widget);
@@ -896,7 +891,7 @@ static void findAllTextureWidgetsRecursively(QWidget *tlw, QWidget *widget)
 static QPlatformTextureList *widgetTexturesFor(QWidget *tlw, QWidget *widget)
 {
    for (QPlatformTextureList *tl : QWidgetPrivate::get(tlw)->topData()->widgetTextures) {
-      Q_ASSERT(!tl->isEmpty());
+      Q_ASSERT(! tl->isEmpty());
 
       for (int i = 0; i < tl->count(); ++i) {
          QWidget *w = static_cast<QWidget *>(tl->source(i));

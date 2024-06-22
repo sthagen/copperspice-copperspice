@@ -62,6 +62,7 @@ static QByteArray debugWinStyle(DWORD style)
 {
    QByteArray rc = "0x";
    rc += QByteArray::number(quint64(style), 16);
+
    if (style & WS_POPUP) {
       rc += " WS_POPUP";
    }
@@ -99,6 +100,7 @@ static QByteArray debugWinExStyle(DWORD exStyle)
 {
    QByteArray rc = "0x";
    rc += QByteArray::number(quint64(exStyle), 16);
+
    if (exStyle & WS_EX_TOOLWINDOW) {
       rc += " WS_EX_TOOLWINDOW";
    }
@@ -129,6 +131,7 @@ static inline RECT RECTfromQRect(const QRect &rect)
    const int x = rect.left();
    const int y = rect.top();
    RECT result = { x, y, x + rect.width(), y + rect.height() };
+
    return result;
 }
 
@@ -151,8 +154,10 @@ QDebug operator<<(QDebug d, const NCCALCSIZE_PARAMS &p)
 {
    QDebugStateSaver saver(d);
    d.nospace();
+
    d << "NCCALCSIZE_PARAMS " << qrectFromRECT(p.rgrc[0])
       << ' ' << qrectFromRECT(p.rgrc[1]) << ' ' << qrectFromRECT(p.rgrc[2]);
+
    return d;
 }
 
@@ -160,11 +165,13 @@ QDebug operator<<(QDebug d, const MINMAXINFO &i)
 {
    QDebugStateSaver saver(d);
    d.nospace();
+
    d << "MINMAXINFO maxSize=" << i.ptMaxSize.x << ','
       << i.ptMaxSize.y << " maxpos=" << i.ptMaxPosition.x
       << ',' << i.ptMaxPosition.y << " mintrack="
       << i.ptMinTrackSize.x << ',' << i.ptMinTrackSize.y
       << " maxtrack=" << i.ptMaxTrackSize.x << ',' << i.ptMaxTrackSize.y;
+
    return d;
 }
 
@@ -621,6 +628,7 @@ QWindowsWindowData WindowCreationData::create(const QWindow *w, const WindowData
 
       return result;
    }
+
    if ((flags & Qt::WindowType_Mask) == Qt::ForeignWindow) {
       result.hwnd = reinterpret_cast<HWND>(w->winId());
       Q_ASSERT(result.hwnd);
@@ -678,7 +686,7 @@ QWindowsWindowData WindowCreationData::create(const QWindow *w, const WindowData
 #endif
 
    if (! result.hwnd) {
-      qErrnoWarning("WindowCreationData::create(): CreateWindowEx failed");
+      qErrnoWarning("WindowCreationData::create() CreateWindowEx failed");
       return result;
    }
 
@@ -730,7 +738,7 @@ void WindowCreationData::initialize(const QWindow *w, HWND hwnd, bool frameChang
       if ((flags & Qt::WindowStaysOnTopHint) || (type == Qt::ToolTip)) {
          SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, swpFlags);
          if (flags & Qt::WindowStaysOnBottomHint) {
-            qWarning() << "QWidget: Incompatible window flags, window can not be on top and on bottom at the same time";
+            qWarning("QWidget incompatible window flags, window can not be on top and on bottom at the same time");
          }
 
       } else if (flags & Qt::WindowStaysOnBottomHint) {
@@ -804,7 +812,7 @@ QMargins QWindowsGeometryHint::frame(DWORD style, DWORD exStyle)
    style &= ~(WS_OVERLAPPED);
 
    if (! AdjustWindowRectEx(&rect, style, FALSE, exStyle)) {
-      qErrnoWarning("QWindowsGeometryHint::frame(): AdjustWindowRectEx failed");
+      qErrnoWarning("QWindowsGeometryHint::frame() AdjustWindowRectEx failed");
    }
 
    const QMargins result(qAbs(rect.left), qAbs(rect.top), qAbs(rect.right), qAbs(rect.bottom));
@@ -1104,8 +1112,10 @@ QWindowsWindowData QWindowsWindowData::create(const QWindow *w,
    WindowCreationData creationData;
    creationData.fromWindow(w, parameters.flags);
    QWindowsWindowData result = creationData.create(w, parameters, title);
+
    // Force WM_NCCALCSIZE (with wParam=1) via SWP_FRAMECHANGED for custom margin.
    creationData.initialize(w, result.hwnd, !parameters.customMargins.isNull(), 1);
+
    return result;
 }
 
@@ -1432,7 +1442,7 @@ void QWindowsWindow::setGeometry(const QRect &rectIn)
 
       if (! relaxedEqual(m_data.geometry, rect)) {
 
-         qWarning("QWindowsWindow::setGeometry(): Unable to set geometry %dx%d+%d+%d in %s\n"
+         qWarning("QWindowsWindow::setGeometry() Unable to set geometry %dx%d+%d+%d in %s\n"
             "Resulting geometry = %dx%d+%d+%d, Frame = %d, %d, %d, %d \n"
             "Custom margin = %d, %d, %d, %d, Minimum size = %dx%d, Maximum size = %dx%d\n",
             rect.width(), rect.height(), rect.x(), rect.y(),
@@ -2064,7 +2074,7 @@ void QWindowsWindow::requestActivateWindow()
 bool QWindowsWindow::setKeyboardGrabEnabled(bool grab)
 {
    if (! m_data.hwnd) {
-      qWarning("QWindowsWindow::setKeyboardGrabEnabled(): No handle");
+      qWarning("QWindowsWindow::setKeyboardGrabEnabled() No handle");
       return false;
    }
 
@@ -2084,12 +2094,12 @@ bool QWindowsWindow::setKeyboardGrabEnabled(bool grab)
 bool QWindowsWindow::setMouseGrabEnabled(bool grab)
 {
    if (! m_data.hwnd) {
-      qWarning("QWindowsWindow::setMouseGrabEnabled(): No handle");
+      qWarning("QWindowsWindow::setMouseGrabEnabled() No handle");
       return false;
    }
 
    if (! isVisible() && grab) {
-      qWarning("QWindowsWindow::setMouseGrabEnabled(): Unable to set mouse grab for invisible window %s/'%s'",
+      qWarning("QWindowsWindow::setMouseGrabEnabled() Unable to set mouse grab for invisible window %s/'%s'",
          csPrintable(window()->metaObject()->className()), csPrintable(window()->objectName()));
 
       return false;
@@ -2172,7 +2182,7 @@ void QWindowsWindow::getSizeHints(MINMAXINFO *mmi) const
          mmi->ptMaxPosition.x = availableGeometry.x();
          mmi->ptMaxPosition.y = availableGeometry.y();
       } else if (!screen) {
-         qWarning() << "window()->screen() returned a null screen";
+         qWarning("QWindowsWindow::getSizeHints() Screen invalid (nullptr)");
       }
    }
 }
@@ -2495,7 +2505,7 @@ void QWindowsWindow::setHasBorderInFullScreenStatic(QWindow *window, bool border
    if (QPlatformWindow *handle = window->handle()) {
       static_cast<QWindowsWindow *>(handle)->setHasBorderInFullScreen(border);
    } else {
-      qWarning("%s invoked without window handle; call has no effect.", Q_FUNC_INFO);
+      qWarning("QWindowsWindow::setHasBorderInFullScreenStatic() Invoked without window handle, call has no effect");
    }
 }
 

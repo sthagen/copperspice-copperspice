@@ -54,13 +54,11 @@ GLuint QPlatformOpenGLContext::defaultFramebufferObject(QPlatformSurface *) cons
    return 0;
 }
 
-
 QOpenGLContext *QPlatformOpenGLContext::context() const
 {
    Q_D(const QPlatformOpenGLContext);
    return d->context;
 }
-
 
 void QPlatformOpenGLContext::setContext(QOpenGLContext *context)
 {
@@ -72,6 +70,7 @@ bool QPlatformOpenGLContext::parseOpenGLVersion(const QByteArray &versionString,
 {
    bool majorOk = false;
    bool minorOk = false;
+
    QList<QByteArray> parts = versionString.split(' ');
 
    if (versionString.startsWith(QByteArray("OpenGL ES"))) {
@@ -92,7 +91,7 @@ bool QPlatformOpenGLContext::parseOpenGLVersion(const QByteArray &versionString,
 
       } else {
          // If < 3 parts to the name, it is an unrecognised OpenGL ES
-         qWarning("QPlatformOpenGLContext::parseOpenGLVersion() Unrecognised OpenGL ES version");
+         qWarning("QPlatformOpenGLContext::parseOpenGLVersion() Unknown OpenGL ES version");
       }
 
    } else {
@@ -107,7 +106,7 @@ bool QPlatformOpenGLContext::parseOpenGLVersion(const QByteArray &versionString,
    }
 
    if (!majorOk || !minorOk) {
-      qWarning("QPlatformOpenGLContext::parseOpenGLVersion() Unrecognized OpenGL version");
+      qWarning("QPlatformOpenGLContext::parseOpenGLVersion() Unknown OpenGL version");
    }
 
    return (majorOk && minorOk);

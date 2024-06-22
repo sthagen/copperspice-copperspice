@@ -519,7 +519,6 @@ QApplication::~QApplication()
 
    QApplicationPrivate::app_strut = QSize(0, 0);
    QApplicationPrivate::enabledAnimations = QPlatformTheme::GeneralUiEffect;
-   QApplicationPrivate::widgetCount = false;
 
 #if ! defined(QT_NO_STATEMACHINE)
    // trigger unregistering of QStateMachine's GUI types
@@ -928,8 +927,8 @@ static void init_platform(const QString &pluginArgument, const QString &platform
    } else {
       QStringList keys = QPlatformIntegrationFactory::keys(platformPluginPath);
 
-      QString fatalMessage = QString("The application failed to start because the platform plugin was not found or did not load.\n"
-                  "Requested Plugin Key: \"%1\"\n\n").formatArg(pluginKey);
+      QString fatalMessage = QString("The application failed to start because the platform plugin was "
+            "not found or did not load.\nRequested Plugin Key: \"%1\"\n\n").formatArg(pluginKey);
 
       if (! keys.isEmpty()) {
          fatalMessage += QString("Available platform plugins: %1.\n\n").formatArg(keys.join(", "));
@@ -3074,7 +3073,7 @@ QStyle *QApplication::style()
    }
 
    if (! qobject_cast<QApplication *>(QCoreApplication::instance())) {
-      Q_ASSERT(!"No style available without QApplication!");
+      Q_ASSERT(! "No style available without creating a QApplication");
       return nullptr;
    }
 

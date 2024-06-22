@@ -99,7 +99,7 @@ static bool monitorData(HMONITOR hMonitor, QWindowsScreenData *data)
          DeleteDC(hdc);
 
       } else {
-         qWarning("monitorData(): Unable to obtain handle for monitor '%s', defaulting to %g DPI.",
+         qWarning("monitorData() Unable to obtain handle for monitor %s, defaulting to %g DPI.",
             csPrintable(QString::fromStdWString(std::wstring(info.szDevice))), data->dpi.first);
 
       } // CreateDC() failed
@@ -516,11 +516,6 @@ void QWindowsScreenManager::removeScreen(int index)
    }
    QWindowsIntegration::instance()->emitDestroyScreen(m_screens.takeAt(index));
 }
-
-/*!
-    \brief Synchronizes the screen list, adds new screens, removes deleted
-    ones and propagates resolution changes to QWindowSystemInterface.
-*/
 
 bool QWindowsScreenManager::handleScreenChanges()
 {
