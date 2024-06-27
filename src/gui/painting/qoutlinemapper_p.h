@@ -68,7 +68,7 @@ class QOutlineMapper
    void beginOutline(Qt::FillRule fillRule) {
 
 #if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-      printf("QOutlineMapper::beginOutline() rule=%d\n", fillRule);
+      qDebug("QOutlineMapper::beginOutline() rule = %d", fillRule);
 #endif
 
       m_valid = true;
@@ -93,7 +93,7 @@ class QOutlineMapper
    void moveTo(const QPointF &pt) {
 
 #if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-      printf("QOutlineMapper::moveTo() (%f, %f)\n", pt.x(), pt.y());
+      qDebug("QOutlineMapper::moveTo() pointf = (%f, %f)", pt.x(), pt.y());
 #endif
 
       closeSubpath();
@@ -105,7 +105,7 @@ class QOutlineMapper
    void lineTo(const QPointF &pt) {
 
 #if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-      printf("QOutlineMapper::lineTo() (%f, %f)\n", pt.x(), pt.y());
+      qDebug("QOutlineMapper::lineTo() pointf = (%f, %f)", pt.x(), pt.y());
 #endif
 
       m_elements.append(pt);
@@ -119,10 +119,6 @@ class QOutlineMapper
 
       if (element_count > 0) {
          if (m_elements.at(element_count - 1) != m_elements.at(m_subpath_start)) {
-#if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-            printf(" - implicitly closing\n");
-#endif
-
             // Put the object on the stack to avoid the odd case where
             // lineTo reallocs the databuffer and the QPointF & will be invalidated.
             QPointF pt = m_elements.at(m_subpath_start);

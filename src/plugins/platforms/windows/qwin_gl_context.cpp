@@ -446,9 +446,6 @@ static void describeFormats(HDC hdc)
       initPixelFormatDescriptor(&pfd);
       DescribePixelFormat(hdc, i, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
-#if defined(CS_SHOW_DEBUG)
-      qDebug() << '#' << i << '/' << pfiMax << ':' << pfd;
-#endif
 
    }
 }
@@ -783,28 +780,6 @@ static int choosePixelFormat(HDC hdc, const QOpenGLStaticContext &staticContext,
 
       pixelFormat = 0;
    }
-
-#if defined(CS_SHOW_DEBUG)
-
-   QString message;
-   QDebug nsp(&message);
-
-   nsp << __FUNCTION__;
-
-   if (sampleBuffersRequested) {
-      nsp << " samples=" << iAttributes[samplesValuePosition];
-   }
-
-   nsp << " Attributes: " << hex << showbase;
-   for (int ii = 0; ii < i; ++ii) {
-      nsp << iAttributes[ii] << ',';
-   }
-
-   nsp << noshowbase << dec << "\n    obtained px #" << pixelFormat
-      << " of " << numFormats << "\n    " << *obtainedPfd;
-   qDebug() << message;
-
-#endif
 
    return pixelFormat;
 }
@@ -1175,9 +1150,6 @@ QOpenGLStaticContext *QOpenGLStaticContext::create(bool softwareRendering)
 
    QOpenGLStaticContext *result = new QOpenGLStaticContext;
 
-#if defined(CS_SHOW_DEBUG)
-   qDebug() << __FUNCTION__ << *result;
-#endif
 
    return result;
 }
@@ -1279,10 +1251,6 @@ QWindowsGLContext::QWindowsGLContext(QOpenGLStaticContext *staticContext, QOpenG
       hdc = GetDC(dummyWindow);
       if (! hdc) {
          break;
-      }
-
-      if (QWindowsContext::verbose > 1) {
-         describeFormats(hdc);
       }
 
       // Preferably use direct rendering and ARB extensions (unless pixmap
@@ -1469,10 +1437,6 @@ static inline const QOpenGLContextData *findByHWND(const Array<QOpenGLContextDat
 
 void QWindowsGLContext::swapBuffers(QPlatformSurface *surface)
 {
-   if (QWindowsContext::verbose > 1) {
-      qDebug() << "QWindowsGLContext::swapBuffers() " << surface;
-   }
-
    if (const QOpenGLContextData *contextData = findByHWND(m_windowContexts, handleOf(surface))) {
       QOpenGLStaticContext::opengl32.swapBuffers(contextData->hdc);
    } else {
@@ -1482,12 +1446,6 @@ void QWindowsGLContext::swapBuffers(QPlatformSurface *surface)
 
 bool QWindowsGLContext::makeCurrent(QPlatformSurface *surface)
 {
-#ifdef DEBUG_GL
-   if (QWindowsContext::verbose > 1) {
-      qDebug() << __FUNCTION__ << this << m_windowContexts.size() << "contexts";
-   }
-#endif // DEBUG_GL
-
    Q_ASSERT(surface->surface()->supportsOpenGL());
 
    // Do we already have a DC entry for that window?
@@ -1554,12 +1512,6 @@ bool QWindowsGLContext::makeCurrent(QPlatformSurface *surface)
 
 void QWindowsGLContext::doneCurrent()
 {
-#ifdef DEBUG_GL
-   if (QWindowsContext::verbose > 1) {
-      qDebug() << __FUNCTION__ << this << m_windowContexts.size() << "contexts";
-   }
-#endif
-
    QOpenGLStaticContext::opengl32.wglMakeCurrent(nullptr, nullptr);
    releaseDCs();
 }
@@ -1575,10 +1527,12 @@ QWindowsGLContext::FP_Void QWindowsGLContext::getProcAddress(const QByteArray &p
    // The list has to match QOpenGLFunctions
    // Refer to QOpenGLFunctionsPrivate::QOpenGLFunctionsPrivate(QOpenGLContext *).
 
-   static struct StdFunc {
+   struct StdFunc {
       const char *name;
       void *func;
-   } standardFuncs[] = {
+   };
+
+   static StdFunc standardFuncs[] = {
       { "glBindTexture", (void *) QOpenGLStaticContext::opengl32.glBindTexture },
       { "glBlendFunc", (void *) QOpenGLStaticContext::opengl32.glBlendFunc },
       { "glClear", (void *) QOpenGLStaticContext::opengl32.glClear },
@@ -1624,27 +1578,21 @@ QWindowsGLContext::FP_Void QWindowsGLContext::getProcAddress(const QByteArray &p
       { "glTexParameteriv", (void *) QOpenGLStaticContext::opengl32.glTexParameteriv },
       { "glTexSubImage2D", (void *) QOpenGLStaticContext::opengl32.glTexSubImage2D },
       { "glViewport", (void *) QOpenGLStaticContext::opengl32.glViewport },
-
       { "glClearDepth", (void *) QOpenGLStaticContext::opengl32.glClearDepth },
       { "glDepthRange", (void *) QOpenGLStaticContext::opengl32.glDepthRange },
    };
 
-   for (size_t i = 0; i < sizeof(standardFuncs) / sizeof(StdFunc); ++i)
+   for (size_t i = 0; i < sizeof(standardFuncs) / sizeof(StdFunc); ++i) {
       if (procName == standardFuncs[i].name) {
          return reinterpret_cast<FP_Void>(standardFuncs[i].func);
       }
-
-   FP_Void procAddress = reinterpret_cast<FP_Void>(QOpenGLStaticContext::opengl32.wglGetProcAddress(
-            procName.constData()));
-
-   if (QWindowsContext::verbose > 1) {
-      qDebug() << __FUNCTION__ <<  procName << QOpenGLStaticContext::opengl32.wglGetCurrentContext() << "returns" << procAddress;
    }
 
-   if (! procAddress && QWindowsContext::verbose) {
-      qWarning("%s: Unable to resolve '%s'", __FUNCTION__, procName.constData());
+   FP_Void procAddress = reinterpret_cast<FP_Void>(QOpenGLStaticContext::opengl32.wglGetProcAddress(procName.constData()));
+
+   if (procAddress == nullptr) {
+      qWarning("QWindowsGLContext::getProcAddress() Unable to resolve %s", procName.constData());
    }
 
    return procAddress;
 }
-

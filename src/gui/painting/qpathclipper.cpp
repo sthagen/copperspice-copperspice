@@ -1242,7 +1242,8 @@ int QWingedEdge::addEdge(int fi, int si)
    QPathEdge::Direction dirs[2] = { QPathEdge::Backward, QPathEdge::Forward };
 
 #if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-   printf("** Adding edge %d / vertices: %.07f %.07f, %.07f %.07f\n", ei, fp->x, fp->y, sp->x, sp->y);
+   qDebug("QWingedEdge::addEdge() Adding edge %d, vertices = %.07f %.07f, %.07f %.07f",
+         ei, fp->x, fp->y, sp->x, sp->y);
 #endif
 
    for (int i = 0; i < 2; ++i) {
@@ -1692,14 +1693,6 @@ bool QPathClipper::doClip(QWingedEdge &list, ClipperMode mode)
    std::sort(y_coords.begin(), y_coords.end());
    y_coords.erase(std::unique(y_coords.begin(), y_coords.end(), fuzzyCompare), y_coords.end());
 
-#if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-   printf("sorted y coords:\n");
-
-   for (int i = 0; i < y_coords.size(); ++i) {
-      printf("%.9f\n", y_coords[i]);
-   }
-#endif
-
    bool found;
 
    do {
@@ -1755,10 +1748,6 @@ bool QPathClipper::doClip(QWingedEdge &list, ClipperMode mode)
                biggestGap = gap;
             }
          }
-
-#if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-         printf("y: %.9f, gap: %.9f\n", bestY, biggestGap);
-#endif
 
          if (handleCrossingEdges(list, bestY, mode) && mode == CheckMode) {
             return true;
@@ -1905,11 +1894,6 @@ bool QPathClipper::handleCrossingEdges(QWingedEdge &list, qreal y, ClipperMode m
 
       const bool inside = bool_op(inA, inB, op);
       const bool add = inD ^ inside;
-
-#if defined(CS_SHOW_DEBUG_GUI_PAINTING)
-      printf("y %f, x %f, inA: %d, inB: %d, inD: %d, inside: %d, flag: %x, edge: %d\n",
-            y, crossings.at(i).x, inA, inB, inD, inside, edge->flag, ei);
-#endif
 
       if (add) {
          if (mode == CheckMode) {
