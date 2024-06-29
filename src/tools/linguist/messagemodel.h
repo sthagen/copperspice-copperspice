@@ -27,16 +27,16 @@
 #include <translator.h>
 
 #include <qabstractitemmodel.h>
-#include <qlist.h>
-#include <qhash.h>
-#include <qlocale.h>
-#include <qcolor.h>
 #include <qbitmap.h>
+#include <qcolor.h>
+#include <qhash.h>
+#include <qlist.h>
+#include <qlocale.h>
 #include <qxmldefaulthandler.h>
 
 class DataModel;
-class MultiDataModel;
 class MessageModel;
+class MultiDataModel;
 
 class MessageItem
 {
@@ -68,7 +68,7 @@ class MessageItem
    }
 
    QString pluralText() const {
-      return m_message.extra(QLatin1String("po-msgid_plural"));
+      return m_message.extra("po-msgid_plural");
    }
 
    QString comment() const {
