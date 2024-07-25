@@ -107,9 +107,14 @@ static inline void compressMouseMove(MSG *msg)
 
 static inline QTouchDevice *createTouchDevice()
 {
-   enum { QT_SM_TABLETPC = 86, QT_SM_DIGITIZER = 94, QT_SM_MAXIMUMTOUCHES = 95,
-      QT_NID_INTEGRATED_TOUCH = 0x1, QT_NID_EXTERNAL_TOUCH = 0x02,
-      QT_NID_MULTI_INPUT = 0x40, QT_NID_READY = 0x80
+   enum {
+      QT_SM_TABLETPC          = 86,
+      QT_SM_DIGITIZER         = 94,
+      QT_SM_MAXIMUMTOUCHES    = 95,
+      QT_NID_INTEGRATED_TOUCH = 0x1,
+      QT_NID_EXTERNAL_TOUCH   = 0x02,
+      QT_NID_MULTI_INPUT      = 0x40,
+      QT_NID_READY            = 0x80
    };
 
    if (QSysInfo::windowsVersion() < QSysInfo::WV_WINDOWS7) {
@@ -196,12 +201,8 @@ Qt::MouseButtons QWindowsMouseHandler::queryMouseButtons()
 bool QWindowsMouseHandler::translateMouseEvent(QWindow *window, HWND hwnd,
       QtWindows::WindowsEventType et, MSG msg, LRESULT *result)
 {
-#ifdef Q_COMPILER_CLASS_ENUM
-   enum : quint64 { signatureMask = 0xffffff00, miWpSignature = 0xff515700 };
-#else
-   static const quint64 signatureMask = 0xffffff00;
-   static const quint64 miWpSignature = 0xff515700;
-#endif
+   static constexpr const quint64 signatureMask = 0xffffff00;
+   static constexpr const quint64 miWpSignature = 0xff515700;
 
    if (et == QtWindows::MouseWheelEvent) {
       return translateMouseWheelEvent(window, hwnd, msg, result);

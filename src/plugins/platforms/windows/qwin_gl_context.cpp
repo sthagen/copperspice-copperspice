@@ -645,7 +645,7 @@ static int choosePixelFormat(HDC hdc, const QOpenGLStaticContext &staticContext,
    const QSurfaceFormat &format, const QWindowsOpenGLAdditionalFormat &additional,
    PIXELFORMATDESCRIPTOR *obtainedPfd)
 {
-   enum { attribSize = 40 };
+   static constexpr const int attribSize = 40;
    if ((additional.formatFlags & QWindowsGLRenderToPixmap) || !staticContext.hasExtensions()) {
       return 0;
    }
@@ -791,7 +791,7 @@ static int choosePixelFormat(HDC hdc, const QOpenGLStaticContext &staticContext,
 static QSurfaceFormat qSurfaceFormatFromHDC(const QOpenGLStaticContext &staticContext,
    HDC hdc, int pixelFormat, QWindowsOpenGLAdditionalFormat *additionalIn = nullptr)
 {
-   enum { attribSize = 40 };
+   static constexpr const int attribSize = 40;
 
    QSurfaceFormat result;
    result.setRenderableType(QSurfaceFormat::OpenGL);
@@ -868,7 +868,7 @@ static QSurfaceFormat qSurfaceFormatFromHDC(const QOpenGLStaticContext &staticCo
 static HGLRC createContext(const QOpenGLStaticContext &staticContext,
    HDC hdc, const QSurfaceFormat &format, const QWindowsOpenGLAdditionalFormat &, HGLRC shared = nullptr)
 {
-   enum { attribSize = 11 };
+   static constexpr const int attribSize = 11;
 
    if (! staticContext.hasExtensions()) {
       return nullptr;
@@ -1010,13 +1010,17 @@ QWindowsOpenGLContextFormat QWindowsOpenGLContextFormat::current()
 {
    QWindowsOpenGLContextFormat result;
    const QByteArray version = QOpenGLStaticContext::getGlString(GL_VERSION);
-   int major, minor;
-   // v2
+
+   int major;
+   int minor;
+
    if (QPlatformOpenGLContext::parseOpenGLVersion(version, major, minor)) {
       result.m_version = (major << 8) + minor;
    } else {
       result.m_version = 0x0200;
    }
+
+   // v2
    result.profile = QSurfaceFormat::NoProfile;
    if (result.m_version < 0x0300) {
       result.options |= QSurfaceFormat::DeprecatedFunctions;
