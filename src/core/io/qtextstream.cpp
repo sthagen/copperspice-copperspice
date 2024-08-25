@@ -393,7 +393,7 @@ void QTextStreamPrivate::resetReadBuffer()
 
 void QTextStreamPrivate::flushWriteBuffer()
 {
-   // no buffer next to the QString itself; this function should only be called internally, for devices.
+   // no buffer next to the QString itself, should only be called internally for devices.
    if (m_string || ! device) {
       return;
    }
@@ -964,7 +964,6 @@ qint64 QTextStream::pos() const
 void QTextStream::skipWhiteSpace()
 {
    Q_D(QTextStream);
-   CHECK_VALID_STREAM();
 
    d->scan(nullptr, 0, QTextStreamPrivate::NotSpace);
    d->consumeLastToken();
@@ -2159,8 +2158,8 @@ void QTextStream::setCodec(QTextCodec *codec)
    Q_D(QTextStream);
    qint64 seekPos = -1;
 
-   if (!d->readBuffer.isEmpty()) {
-      if (!d->device->isSequential()) {
+   if (! d->readBuffer.isEmpty()) {
+      if (! d->device->isSequential()) {
          seekPos = pos();
       }
    }
