@@ -125,13 +125,13 @@ class Q_NETWORK_EXPORT QHostAddress
    bool isLoopback() const;
    bool isMulticast() const;
 
-   static QPair<QHostAddress, int> parseSubnet(const QString &subnet);
-
    void swap(QHostAddress &other) {
       d.swap(other.d);
    }
 
-   friend Q_NETWORK_EXPORT uint qHash(const QHostAddress &key, uint seed);
+   static QPair<QHostAddress, int> parseSubnet(const QString &subnet);
+
+   static uint hash(const QHostAddress &key, uint seed);
 
  protected:
    QScopedPointer<QHostAddressPrivate> d;

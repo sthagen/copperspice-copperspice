@@ -295,6 +295,8 @@ class Q_CORE_EXPORT QUrl
    static QList<QUrl> fromStringList(const QStringList &urls, ParsingMode mode = TolerantMode);
    static void setIdnWhitelist(const QStringList &list);
 
+   static uint hash(const QUrl &url, uint seed = 0);
+
    using DataPtr = QUrlPrivate *;
 
    DataPtr &data_ptr() {
@@ -302,12 +304,11 @@ class Q_CORE_EXPORT QUrl
    }
 
  private:
-   friend class QUrlQuery;
-   friend Q_CORE_EXPORT uint qHash(const QUrl &url, uint seed);
-
    static QString fromEncodedComponent_helper(const QByteArray &ba);
 
    QUrlPrivate *d;
+
+   friend class QUrlQuery;
 };
 
 Q_DECLARE_SHARED(QUrl)

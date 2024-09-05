@@ -189,6 +189,12 @@ class Q_GUI_EXPORT QKeySequence
 
    bool isDetached() const;
 
+   QKeySequencePrivate * &data_ptr() {
+      return d;
+   }
+
+   static uint hash(const QKeySequence &key, uint seed = 0);
+
  private:
    static int decodeString(const QString &ks);
    static QString encodeString(int key);
@@ -201,17 +207,8 @@ class Q_GUI_EXPORT QKeySequence
 
    friend Q_GUI_EXPORT QDataStream &operator<<(QDataStream &stream, const QKeySequence &ks);
    friend Q_GUI_EXPORT QDataStream &operator>>(QDataStream &stream, QKeySequence &ks);
-   friend Q_GUI_EXPORT uint qHash(const QKeySequence &key, uint seed);
    friend class QShortcutMap;
    friend class QShortcut;
-
- public:
-   typedef QKeySequencePrivate *DataPtr;
-
-   DataPtr &data_ptr() {
-      return d;
-   }
-
 };
 
 Q_GUI_EXPORT QDebug operator<<(QDebug, const QKeySequence &);
