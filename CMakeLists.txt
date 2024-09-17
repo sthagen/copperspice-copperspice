@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18.0 FATAL_ERROR)
 
-cmake_policy(VERSION 3.16..3.23)
+cmake_policy(VERSION 3.18.0..3.29.6)
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19.0")
    # allows spaces in ctest names
@@ -567,7 +567,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
       )
    endif()
 
-   if (WITH_OPENGL)
+   if (WITH_GUI)
       find_package(OpenGL)
       set_package_properties(OpenGL PROPERTIES
          PURPOSE "Required for OpenGL support"
