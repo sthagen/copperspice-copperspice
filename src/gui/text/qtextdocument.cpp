@@ -76,7 +76,6 @@ QTextDocument::QTextDocument(const QString &text, QObject *parent)
    QTextCursor(this).insertText(text);
 }
 
-// internal
 QTextDocument::QTextDocument(QTextDocumentPrivate &dd, QObject *parent)
    : QObject(parent), d_ptr(&dd)
 {
@@ -115,20 +114,14 @@ QTextDocument *QTextDocument::clone(QObject *parent) const
    return doc;
 }
 
-/*!
-    Returns true if the document is empty; otherwise returns false.
-*/
 bool QTextDocument::isEmpty() const
 {
    Q_D(const QTextDocument);
-   /* because if we're empty we still have one single paragraph as
-    * one single fragment */
+
+   // if we are empty we still have one single paragraph as one single fragment
    return d->length() <= 1;
 }
 
-/*!
-  Clears the document.
-*/
 void QTextDocument::clear()
 {
    Q_D(QTextDocument);
@@ -183,13 +176,6 @@ void QTextDocument::appendUndoItem(QAbstractUndoItem *item)
    d->appendUndoItem(item);
 }
 
-/*!
-    \property QTextDocument::undoRedoEnabled
-    \brief whether undo/redo are enabled for this document
-
-    This defaults to true. If disabled, the undo stack is cleared and
-    no items will be added to it.
-*/
 void QTextDocument::setUndoRedoEnabled(bool enable)
 {
    Q_D(QTextDocument);
@@ -793,29 +779,18 @@ QTextObject *QTextDocument::createObject(const QTextFormat &f)
    return obj;
 }
 
-/*!
-    \internal
-
-    Returns the frame that contains the text cursor position \a pos.
-*/
 QTextFrame *QTextDocument::frameAt(int pos) const
 {
    Q_D(const QTextDocument);
    return d->frameAt(pos);
 }
 
-/*!
-    Returns the document's root frame.
-*/
 QTextFrame *QTextDocument::rootFrame() const
 {
    Q_D(const QTextDocument);
    return d->rootFrame();
 }
 
-/*!
-    Returns the text object associated with the given \a objectIndex.
-*/
 QTextObject *QTextDocument::object(int objectIndex) const
 {
    Q_D(const QTextDocument);
@@ -870,16 +845,6 @@ QTextBlock QTextDocument::lastBlock() const
    return QTextBlock(docHandle(), d->blockMap().last().n);
 }
 
-/*!
-    \property QTextDocument::pageSize
-    \brief the page size that should be used for laying out the document
-
-    By default, for a newly-created, empty document, this property contains
-    an undefined size.
-
-    \sa modificationChanged()
-*/
-
 void QTextDocument::setPageSize(const QSizeF &size)
 {
    Q_D(QTextDocument);
@@ -895,17 +860,11 @@ QSizeF QTextDocument::pageSize() const
    return d->pageSize;
 }
 
-/*!
-  returns the number of pages in this document.
-*/
 int QTextDocument::pageCount() const
 {
    return documentLayout()->pageCount();
 }
 
-/*!
-    Sets the default \a font to use in the document layout.
-*/
 void QTextDocument::setDefaultFont(const QFont &font)
 {
    Q_D(QTextDocument);
@@ -915,9 +874,6 @@ void QTextDocument::setDefaultFont(const QFont &font)
    }
 }
 
-/*!
-    Returns the default font to be used in the document layout.
-*/
 QFont QTextDocument::defaultFont() const
 {
    Q_D(const QTextDocument);

@@ -111,8 +111,8 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
       Reset              = 0x04000000,
       RestoreDefaults    = 0x08000000,
 
-      FirstButton        = Ok,                // internal
-      LastButton         = RestoreDefaults,   // internal
+      FirstButton        = Ok,
+      LastButton         = RestoreDefaults,
 
       YesAll             = YesToAll,          // obsolete
       NoAll              = NoToAll,           // obsolete
@@ -122,7 +122,7 @@ class Q_GUI_EXPORT QMessageBox : public QDialog
       FlagMask           = 0x00000300,        // obsolete
       ButtonMask         = ~FlagMask          // obsolete
    };
-   typedef StandardButton Button;  // obsolete
+   typedef StandardButton Button;             // obsolete
 
    using StandardButtons = QFlags<StandardButton>;
 

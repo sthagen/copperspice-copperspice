@@ -42,24 +42,6 @@ class QNameConstructor : public SingleContainer
    SequenceType::Ptr staticType() const override;
    ExpressionVisitorResult::Ptr accept(const ExpressionVisitor::Ptr &visitor) const override;
 
-   /**
-    * Expands @p lexicalQName, which is a lexical representation of a QName such as "x:body", into
-    * a QName using @p nsResolver to supply the namespace bindings.
-    *
-    * If @p lexicalQName is lexically invalid @p InvalidQName is raised via @p context, or if
-    * no namespace binding does not exists for a prefix(if any) in @p lexicalQName, @p NoBinding
-    * is raised via @p context.
-    *
-    * If @p asForAttribute is @c true, the name is considered to be for an
-    * attribute in some way, and @p lexicalQName will not pick up the
-    * default namespace if it doesn't have a prefix.
-    *
-    * @p nsResolver is parameterized meaning the function can be instantiated with either
-    * DynamicContext or StaticContext.
-    *
-    * @see QQNameValue
-    * @see QXmlUtils
-    */
    template<typename TReportContext, const ReportContext::ErrorCode InvalidQName,
             const ReportContext::ErrorCode NoBinding>
 
@@ -69,12 +51,6 @@ class QNameConstructor : public SingleContainer
                         const SourceLocationReflection *const r,
                         const bool asForAttribute = false);
 
-   /**
-    * Resolves the namespace prefix @p prefix to its namespace if it exists, or
-    * raised ReportContext::XPST0081 otherwise.
-    *
-    * @returns the namespace URI corresponding to @p prefix
-    */
    static QXmlName::NamespaceCode namespaceForPrefix(const QXmlName::PrefixCode prefix,
          const StaticContext::Ptr &context,
          const SourceLocationReflection *const r);
@@ -111,7 +87,7 @@ QXmlName QNameConstructor::expandQName(const QString &lexicalQName,
          context->error(QtXmlPatterns::tr("No namespace binding exists for the prefix %1 in %2")
                   .formatArgs(formatKeyword(prefix), formatKeyword(lexicalQName)), NoBinding, r);
 
-         return QXmlName(); /* Silence compiler warning. */
+         return QXmlName();
 
       } else {
          return context->namePool()->allocateQName(context->namePool()->stringForNamespace(nsCode), local, prefix);
@@ -120,7 +96,7 @@ QXmlName QNameConstructor::expandQName(const QString &lexicalQName,
       context->error(QtXmlPatterns::tr("%1 is an invalid %2")
                      .formatArg(formatData(lexicalQName)).formatArg(formatType(context->namePool(), BuiltinTypes::xsQName)), InvalidQName, r);
 
-      return QXmlName(); /* Silence compiler warning. */
+      return QXmlName();
    }
 }
 

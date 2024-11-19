@@ -84,10 +84,10 @@ class Q_GUI_EXPORT QPlatformDialogHelper : public QObject
       Reset              = 0x04000000,
       RestoreDefaults    = 0x08000000,
 
-      FirstButton        = Ok,                // internal
-      LastButton         = RestoreDefaults,   // internal
-      LowestBit          = 10,                // internal: log2(FirstButton)
-      HighestBit         = 27                 // internal: log2(LastButton)
+      FirstButton        = Ok,
+      LastButton         = RestoreDefaults,
+      LowestBit          = 10,                // log2(FirstButton)
+      HighestBit         = 27                 // log2(LastButton)
    };
 
    using StandardButtons = QFlags<StandardButton>;

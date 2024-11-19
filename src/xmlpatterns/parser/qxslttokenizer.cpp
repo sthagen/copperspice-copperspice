@@ -51,7 +51,6 @@ XSLTTokenizer::XSLTTokenizer(QIODevice *const queryDevice,
    , MaintainingReader<XSLTTokenLookup>(createElementDescriptions(), createStandardAttributes(), context, queryDevice)
    , m_location(location)
    , m_namePool(np)
-/* We initialize after all name constants. */
    , m_validationAlternatives(createValidationAlternatives())
    , m_parseInfo(nullptr)
 {
@@ -105,14 +104,14 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
    };
    result.reserve(ReservedForElements);
 
-   /* xsl:apply-templates */
+   // xsl:apply-templates
    {
       ElementDescription<XSLTTokenLookup> &e = result[ApplyTemplates];
       e.optionalAttributes.insert(Select);
       e.optionalAttributes.insert(Mode);
    }
 
-   /* xsl:template */
+   // xsl:template
    {
       ElementDescription<XSLTTokenLookup> &e = result[Template];
       e.optionalAttributes.insert(Match);
@@ -122,14 +121,14 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(As);
    }
 
-   /* xsl:text, xsl:choose and xsl:otherwise */
+   // xsl:text, xsl:choose and xsl:otherwise
    {
       ElementDescription<XSLTTokenLookup> &e = result[Text];
       result.insert(Choose, e);
       result.insert(Otherwise, e);
    }
 
-   /* xsl:stylesheet */
+   // xsl:stylesheet
    {
       ElementDescription<XSLTTokenLookup> &e = result[Stylesheet];
 
@@ -144,19 +143,19 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(InputTypeAnnotations);
    }
 
-   /* xsl:transform */
+   // xsl:transform
    {
       result[Transform] = result[Stylesheet];
    }
 
-   /* xsl:value-of */
+   // xsl:value-of
    {
       ElementDescription<XSLTTokenLookup> &e = result[ValueOf];
       e.optionalAttributes.insert(Separator);
       e.optionalAttributes.insert(Select);
    }
 
-   /* xsl:variable */
+   // xsl:variable
    {
       ElementDescription<XSLTTokenLookup> &e = result[Variable];
 
@@ -166,7 +165,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(As);
    }
 
-   /* xsl:when & xsl:if */
+   // xsl:when & xsl:if
    {
       ElementDescription<XSLTTokenLookup> &e = result[When];
 
@@ -175,7 +174,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       result.insert(If, e);
    }
 
-   /* xsl:sequence, xsl:for-each */
+   // xsl:sequence, xsl:for-each
    {
       ElementDescription<XSLTTokenLookup> &e = result[Sequence];
 
@@ -184,14 +183,14 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       result.insert(ForEach, e);
    }
 
-   /* xsl:comment */
+   // xsl:comment
    {
       ElementDescription<XSLTTokenLookup> &e = result[XSLTTokenLookup::Comment];
 
       e.optionalAttributes.insert(Select);
    }
 
-   /* xsl:processing-instruction */
+   // xsl:processing-instruction
    {
       ElementDescription<XSLTTokenLookup> &e = result[XSLTTokenLookup::ProcessingInstruction];
 
@@ -199,7 +198,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Select);
    }
 
-   /* xsl:document */
+   // xsl:document
    {
       ElementDescription<XSLTTokenLookup> &e = result[Document];
 
@@ -207,7 +206,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Type);
    }
 
-   /* xsl:element */
+   // xsl:element
    {
       ElementDescription<XSLTTokenLookup> &e = result[Element];
 
@@ -220,7 +219,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Type);
    }
 
-   /* xsl:attribute */
+   // xsl:attribute
    {
       ElementDescription<XSLTTokenLookup> &e = result[Attribute];
 
@@ -233,7 +232,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Type);
    }
 
-   /* xsl:function */
+   // xsl:function
    {
       ElementDescription<XSLTTokenLookup> &e = result[Function];
 
@@ -243,7 +242,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Override);
    }
 
-   /* xsl:param */
+   // xsl:param
    {
       ElementDescription<XSLTTokenLookup> &e = result[Param];
 
@@ -255,7 +254,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Tunnel);
    }
 
-   /* xsl:namespace */
+   // xsl:namespace
    {
       ElementDescription<XSLTTokenLookup> &e = result[Namespace];
 
@@ -263,19 +262,19 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Select);
    }
 
-   /* xsl:call-template */
+   // xsl:call-template
    {
       ElementDescription<XSLTTokenLookup> &e = result[CallTemplate];
       e.requiredAttributes.insert(Name);
    }
 
-   /* xsl:perform-sort */
+   // xsl:perform-sort
    {
       ElementDescription<XSLTTokenLookup> &e = result[PerformSort];
       e.requiredAttributes.insert(Select);
    }
 
-   /* xsl:sort */
+   // xsl:sort
    {
       ElementDescription<XSLTTokenLookup> &e = result[Sort];
 
@@ -289,7 +288,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(DataType);
    }
 
-   /* xsl:import-schema */
+   // xsl:import-schema
    {
       ElementDescription<XSLTTokenLookup> &e = result[ImportSchema];
 
@@ -298,7 +297,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(SchemaLocation);
    }
 
-   /* xsl:message */
+   // xsl:message
    {
       ElementDescription<XSLTTokenLookup> &e = result[Message];
 
@@ -307,7 +306,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Terminate);
    }
 
-   /* xsl:copy-of */
+   // xsl:copy-of
    {
       ElementDescription<XSLTTokenLookup> &e = result[CopyOf];
 
@@ -319,7 +318,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Validation);
    }
 
-   /* xsl:copy */
+   // xsl:copy
    {
       ElementDescription<XSLTTokenLookup> &e = result[Copy];
 
@@ -331,7 +330,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Validation);
    }
 
-   /* xsl:output */
+   // xsl:output
    {
       ElementDescription<XSLTTokenLookup> &e = result[Output];
 
@@ -355,7 +354,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Version);
    }
 
-   /* xsl:attribute-set */
+   // xsl:attribute-set
    {
       ElementDescription<XSLTTokenLookup> &e = result[AttributeSet];
 
@@ -363,14 +362,14 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(UseAttributeSets);
    }
 
-   /* xsl:include and xsl:import. */
+   // xsl:include and xsl:import.
    {
       ElementDescription<XSLTTokenLookup> &e = result[Include];
       e.requiredAttributes.insert(Href);
       result[Import] = e;
    }
 
-   /* xsl:with-param */
+   // xsl:with-param
    {
       ElementDescription<XSLTTokenLookup> &e = result[WithParam];
       e.requiredAttributes.insert(Name);
@@ -380,7 +379,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Tunnel);
    }
 
-   /* xsl:strip-space */
+   // xsl:strip-space
    {
       ElementDescription<XSLTTokenLookup> &e = result[StripSpace];
       e.requiredAttributes.insert(Elements);
@@ -388,7 +387,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       result.insert(PreserveSpace, e);
    }
 
-   /* xsl:result-document */
+   // xsl:result-document
    {
       ElementDescription<XSLTTokenLookup> &e = result[ResultDocument];
 
@@ -414,7 +413,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Validation);
    }
 
-   /* xsl:key */
+   // xsl:key
    {
       ElementDescription<XSLTTokenLookup> &e = result[Key];
 
@@ -425,7 +424,7 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Collation);
    }
 
-   /* xsl:analyze-string */
+   // xsl:analyze-string
    {
       ElementDescription<XSLTTokenLookup> &e = result[AnalyzeString];
 
@@ -435,15 +434,15 @@ ElementDescription<XSLTTokenLookup>::Hash XSLTTokenizer::createElementDescriptio
       e.optionalAttributes.insert(Flags);
    }
 
-   /* xsl:matching-substring */
+   // xsl:matching-substring
    {
-      /* We insert a default constructed value. */
+      // We insert a default constructed value.
       result[MatchingSubstring];
    }
 
-   /* xsl:non-matching-substring */
+   // xsl:non-matching-substring
    {
-      /* We insert a default constructed value. */
+      // We insert a default constructed value.
       result[NonMatchingSubstring];
    }
 
@@ -505,7 +504,7 @@ void XSLTTokenizer::unexpectedContent(const ReportContext::ErrorCode code) const
       }
 
       case QXmlStreamReader::Invalid: {
-         /* It's an issue with well-formedness. */
+         // It's an issue with well-formedness.
          message = escape(errorString());
          break;
       }
@@ -552,7 +551,6 @@ QString XSLTTokenizer::readElementText()
 
 int XSLTTokenizer::commenceScanOnly()
 {
-   /* Do nothing, return a dummy value. */
    return 0;
 }
 
@@ -591,7 +589,7 @@ void XSLTTokenizer::handleXSLTVersion(TokenSource::Queue *const to, QStack<Token
       if (version == 2.0) {
          m_processingMode.push(NormalProcessing);
       } else if (version == 1.0) {
-         /* See section 3.6 Stylesheet Element discussing this. */
+         // See section 3.6 Stylesheet Element discussing this.
          warning(QtXmlPatterns::tr("Running an XSL-T 1.0 stylesheet with a 2.0 processor."));
          m_processingMode.push(BackwardsCompatible);
 
@@ -641,7 +639,6 @@ void XSLTTokenizer::handleXMLBase(TokenSource::Queue *const to,
 
 void XSLTTokenizer::handleStandardAttributes(const bool isXSLTElement)
 {
-   /* We're not necessarily StartElement, that's why we have atts passed in. */
    Q_ASSERT(tokenType() == QXmlStreamReader::StartElement);
 
    if (m_hasHandledStandardAttributes) {
@@ -657,17 +654,6 @@ void XSLTTokenizer::handleStandardAttributes(const bool isXSLTElement)
       const QXmlStreamAttribute &att = m_currentAttributes.at(i);
 
       if (att.qualifiedName() == "xml:space") {
-         /* We raise an error if the value is not recognized.
-          *
-          * Extensible Markup Language (XML) 1.0 (Fourth Edition), 2.10
-          * White Space Handling:
-          *
-          * 'This specification does not give meaning to any value of
-          * xml:space other than "default" and "preserve". It is an error
-          * for other values to be specified; the XML processor may report
-          * the error or may recover by ignoring the attribute specification
-          * or by reporting the (erroneous) value to the application.' */
-
          m_stripWhitespace.push(readToggleAttribute("xml:space", "default", "preserve", &m_currentAttributes));
       }
 
@@ -680,8 +666,7 @@ void XSLTTokenizer::handleStandardAttributes(const bool isXSLTElement)
          case Validation:
          case UseAttributeSets:
          case Version:
-            /* These are handled by other function such as
-             * handleValidationAttributes() and handleXSLTVersion(). */
+            // These are handled by other function such as handleValidationAttributes() and handleXSLTVersion().
             continue;
 
          default: {
@@ -714,7 +699,6 @@ void XSLTTokenizer::handleValidationAttributes(const bool isLRE) const
                  formatKeyword(QLatin1String("type"))), ReportContext::XTSE1505);
    }
 
-   /* QXmlStreamReader surely doesn't make this easy. */
    QXmlStreamAttribute validationAttribute;
    int len = m_currentAttributes.count();
 
@@ -728,7 +712,6 @@ void XSLTTokenizer::handleValidationAttributes(const bool isLRE) const
 
    Q_ASSERT_X(! validationAttribute.name().isEmpty(), Q_FUNC_INFO, "We should always find the attribute.");
 
-   /* We don't care about the return value, we just want to check it's a valid one. */
    readAlternativeAttribute(m_validationAlternatives, validationAttribute);
 }
 
@@ -765,7 +748,6 @@ Tokenizer::Token XSLTTokenizer::nextToken(YYLTYPE *const sourceLocator)
          }
       } while (!m_tokenSource.isEmpty());
 
-      /* Now we will resume parsing inside the regular XSL-T(XML) file. */
       return nextToken(sourceLocator);
    }
 }
@@ -784,8 +766,6 @@ inline bool XSLTTokenizer::isXSLT() const
    Q_ASSERT_X(tokenType() == QXmlStreamReader::StartElement ||
               tokenType() == QXmlStreamReader::EndElement,
               Q_FUNC_INFO, "The current token state must be StartElement or EndElement.");
-   /* Possible optimization: let MaintainingReader set an m_isXSLT which we
-    * read. */
    return namespaceUri() == CommonNamespaces::XSLT;
 }
 
@@ -802,20 +782,8 @@ void XSLTTokenizer::outsideDocumentElement()
    while (!atEnd()) {
       switch (readNext()) {
          case QXmlStreamReader::StartElement: {
-            /* First, we synthesize one of the built-in templates,
-             * see section 6.6 Built-in Template Rules.
-             *
-             * Note that insideStylesheetModule() can be called multiple
-             * times so we can't do it there.  */
             {
-               /* Start with the one for text nodes and attributes.
-                * declare template matches (text() | @*) mode #all
-                * {
-                *      text{.}
-                * };
-                */
-
-               /* declare template matches (text() | @*) */
+               // declare template matches (text() | @*)
                queueToken(DECLARE, &m_tokenSource);
                queueToken(TEMPLATE, &m_tokenSource);
                queueToken(MATCHES, &m_tokenSource);
@@ -828,18 +796,16 @@ void XSLTTokenizer::outsideDocumentElement()
                queueToken(STAR, &m_tokenSource);
                queueToken(RPAREN, &m_tokenSource);
 
-               /* mode #all */
+               // mode #all
                queueToken(MODE, &m_tokenSource);
                queueToken(Token(NCNAME, QLatin1String("#all")), &m_tokenSource);
                queueToken(CURLY_LBRACE, &m_tokenSource);
 
-               /* text{.} { */
                queueToken(TEXT, &m_tokenSource);
                queueToken(CURLY_LBRACE, &m_tokenSource);
                queueToken(DOT, &m_tokenSource);
                queueToken(CURLY_RBRACE, &m_tokenSource);
 
-               /* }; */
                queueToken(CURLY_RBRACE, &m_tokenSource);
                queueToken(SEMI_COLON, &m_tokenSource);
             }
@@ -852,13 +818,11 @@ void XSLTTokenizer::outsideDocumentElement()
                validateElement();
                queueNamespaceDeclarations(&m_tokenSource, nullptr, true);
 
-               /* We're a regular stylesheet. */
 
                pushState(InsideStylesheetModule);
                insideStylesheetModule();
 
             } else {
-               /* We're a simplified stylesheet. */
 
                if (!hasAttribute(CommonNamespaces::XSLT, "version")) {
                   error(QtXmlPatterns::tr("In a simplified stylesheet module, attribute %1 must be present.")
@@ -867,8 +831,6 @@ void XSLTTokenizer::outsideDocumentElement()
 
                QStack<Token> onExitTokens;
 
-               /* We synthesize this as exemplified in
-                * 3.7 Simplified Stylesheet Modules. */
                queueToken(DECLARE, &m_tokenSource);
                queueToken(TEMPLATE, &m_tokenSource);
                queueToken(MATCHES, &m_tokenSource);
@@ -896,7 +858,6 @@ void XSLTTokenizer::outsideDocumentElement()
             break;
          }
          default:
-            /* Do nothing. */
             ;
       }
    }
@@ -988,7 +949,7 @@ void XSLTTokenizer::insideTemplate()
    QStack<Token> onExitTokens;
    Q_ASSERT(tokenType() == QXmlStreamReader::StartElement);
 
-   /* queueParams moves the reader so we need to freeze the attributes. */
+   // queueParams moves the reader so we need to freeze the attributes
    const QXmlStreamAttributes atts(m_currentAttributes);
    handleStandardAttributes(true);
    queueToken(LPAREN, &m_tokenSource);
@@ -1154,8 +1115,6 @@ void XSLTTokenizer::insideChoose(TokenSource::Queue *const to)
             continue;
 
          case QXmlStreamReader::Characters: {
-            /* We ignore regardless of what xml:space says, see step 4 in
-             * 4.2 Stripping Whitespace from the Stylesheet. */
             if (isWhitespace()) {
                continue;
             }
@@ -1181,7 +1140,7 @@ bool XSLTTokenizer::queueSelectOrSequenceConstructor(const ReportContext::ErrorC
    if (atts.hasAttribute("select")) {
       queueExpression(atts.value("select").toString(), to);
 
-      /* First, verify that we don't have a body. */
+      // First, verify that we don't have a body.
       if (skipSubTree(true)) {
          error(QtXmlPatterns::tr("When attribute %1 is present on %2, a sequence constructor cannot be used.")
                   .formatArgs(formatKeyword(QLatin1String("select")), formatKeyword(toString(elementName))), code);
@@ -1231,8 +1190,6 @@ void XSLTTokenizer::queueSimpleContentConstructor(const ReportContext::ErrorCode
    if (hasSeparator) {
       queueAVT(separatorAVT, to);
    } else {
-      /* The default value depends on whether the value is from @select, or from
-       * the sequence constructor. */
       queueToken(Token(STRING_LITERAL, viaSelectAttribute ? QString(QLatin1Char(' '))
                        : QString()),
                  to);
@@ -1284,23 +1241,16 @@ void XSLTTokenizer::queueVariableDeclaration(const VariableType variableType,
       return;
    }
 
-   /* We must do this here, because queueSelectOrSequenceConstructor()
-    * advances the reader. */
+   // We must do this here, because queueSelectOrSequenceConstructor() advances the reader.
    const bool hasSelect  = hasAttribute("select");
    const bool isRequired = hasAttribute("required") ? attributeYesNo(QLatin1String("required")) : false;
 
    TokenSource::Queue storage;
    queueSelectOrSequenceConstructor(ReportContext::XTSE0620, true, &storage, nullptr, false);
 
-   /* XSL-T has some wicked rules, see
-    * 9.3 Values of Variables and Parameters. */
-
+   // XSL-T has some wicked rules, see 9.3 Values of Variables and Parameters.
    const bool hasQueuedContent = !storage.isEmpty();
 
-   /* The syntax for global parameters is:
-    *
-    * declare variable $var external := 'defaultValue';
-    */
    if (variableType == GlobalParameter) {
       queueToken(EXTERNAL, to);
    }
@@ -1335,7 +1285,7 @@ void XSLTTokenizer::queueVariableDeclaration(const VariableType variableType,
          }
       }
 
-      /* storage has tokens if hasSelect or hasQueuedContent is true. */
+      // storage has tokens if hasSelect or hasQueuedContent is true.
       if (hasSelect | hasQueuedContent) {
          *to += storage;
       }
@@ -1414,8 +1364,8 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
    bool effectiveInitialAdvance = initialAdvance;
    bool hasWrittenExpression = false;
 
-   /* Buffer which all text nodes, that might be split up by comments,
-    * processing instructions and CDATA sections, are appended to. */
+   // Buffer which all text nodes, that might be split up by comments, processing instructions
+   // and CDATA sections, are appended to.
    QString characters;
 
    while (!atEnd()) {
@@ -1461,7 +1411,6 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      break;
                   }
                   case ValueOf: {
-                     /* We generate a computed text node constructor. */
                      queueToken(TEXT, to);
                      queueToken(CURLY_LBRACE, to);
 
@@ -1487,14 +1436,9 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                   case Variable: {
                      queueVariableDeclaration(VariableInstruction, to);
 
-                     /* We wrap the children in parantheses since we may
-                      * queue several expressions using the comma operator,
-                      * and in that case the let-binding is only in-scope
-                      * for the first expression. */
                      queueToken(LPAREN, to);
 
-                     /* We don't want a comma outputted, we're expecting an
-                      * expression now. */
+                     // do not want a comma outputted, expecting an expression now
                      hasWrittenExpression = false;
 
                      onExitTokens.push(RPAREN);
@@ -1566,38 +1510,22 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      break;
                   }
                   case Copy: {
-                     /* We translate:
-                      *      <xsl:copy>expr</xsl:copy>
-                      * into:
-                      *
-                      *  let $body := expr
-                      *  return
-                      *      if(self::element()) then
-                      *          element internal {node-name()} {$body}
-                      *      else if(self::document-node()) then
-                      *          document internal {$body}
-                      *      else (: This includes comments, processing-instructions,
-                      *              attributes, and comments. :)
-                      *          .
-                      *
-                      * TODO node identity is the same as the old node.
-                      * TODO namespace bindings are lost when elements are constructed
-                      */
 
-                     /* let $body := expr */
+                     // let $body := expr
                      queueToken(LET, to);
                      queueToken(INTERNAL, to);
                      queueToken(DOLLAR, to);
-                     queueToken(Token(NCNAME, QString(QLatin1Char('b'))), to); // TODO we need an internal name
+                     queueToken(Token(NCNAME, QString(QLatin1Char('b'))), to);
                      queueToken(ASSIGN, to);
                      queueToken(LPAREN, to);
                      pushState(InsideSequenceConstructor);
-                     /* Don't queue an empty sequence, we want the dot. */
+
+                     // Don't queue an empty sequence, we want the dot.
                      insideSequenceConstructor(to);
                      queueToken(RPAREN, to);
                      queueToken(RETURN, to);
 
-                     /* if(self::element()) then */
+                     // if(self::element()) then
                      queueToken(IF, to);
                      queueToken(LPAREN, to);
                      queueToken(SELF, to);
@@ -1608,7 +1536,7 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      queueToken(RPAREN, to);
                      queueToken(THEN, to);
 
-                     /* element internal {node-name()} {$body} */
+                     // element internal {node-name()} {$body}
                      queueToken(ELEMENT, to);
                      queueToken(INTERNAL, to);
                      queueToken(CURLY_LBRACE, to);
@@ -1619,10 +1547,10 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      queueToken(CURLY_RBRACE, to);
                      queueToken(CURLY_LBRACE, to);
                      queueToken(DOLLAR, to);
-                     queueToken(Token(NCNAME, QString(QLatin1Char('b'))), to); // TODO we need an internal name
+                     queueToken(Token(NCNAME, QString(QLatin1Char('b'))), to);
                      queueToken(CURLY_RBRACE, to);
 
-                     /* else if(self::document-node()) then */
+                     // else if(self::document-node()) then
                      queueToken(ELSE, to);
                      queueToken(IF, to);
                      queueToken(LPAREN, to);
@@ -1634,15 +1562,15 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      queueToken(RPAREN, to);
                      queueToken(THEN, to);
 
-                     /* document internal {$body} */
+                     // document internal {$body}
                      queueToken(DOCUMENT, to);
                      queueToken(INTERNAL, to);
                      queueToken(CURLY_LBRACE, to);
                      queueToken(DOLLAR, to);
-                     queueToken(Token(NCNAME, QString(QLatin1Char('b'))), to); // TODO we need an internal name
+                     queueToken(Token(NCNAME, QString(QLatin1Char('b'))), to);
                      queueToken(CURLY_RBRACE, to);
 
-                     /* else . */
+                     // else
                      queueToken(ELSE, to);
                      queueToken(DOT, to);
 
@@ -1677,13 +1605,14 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      queueToken(ELEMENT, to);
                      queueToken(INTERNAL, to);
 
-                     /* The name. */
+                     // the name
                      queueToken(CURLY_LBRACE, to);
+
                      // TODO only strings allowed, not qname values.
                      queueAVT(readAttribute(QLatin1String("name")), to);
                      queueToken(CURLY_RBRACE, to);
 
-                     /* The sequence constructor. */
+                     // The sequence constructor.
                      queueToken(CURLY_LBRACE, to);
                      pushState(InsideSequenceConstructor);
                      insideSequenceConstructor(to);
@@ -1697,13 +1626,13 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      queueToken(ATTRIBUTE, to);
                      queueToken(INTERNAL, to);
 
-                     /* The name. */
+                     // the name
                      queueToken(CURLY_LBRACE, to);
                      // TODO only strings allowed, not qname values.
                      queueAVT(readAttribute(QLatin1String("name")), to);
                      queueToken(CURLY_RBRACE, to);
 
-                     /* The sequence constructor. */
+                     // The sequence constructor.
                      queueToken(CURLY_LBRACE, to);
                      queueSimpleContentConstructor(ReportContext::XTSE0840,
                                                    true, to);
@@ -1713,12 +1642,12 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                   case Namespace: {
                      queueToken(NAMESPACE, to);
 
-                     /* The name. */
+                     // the name
                      queueToken(CURLY_LBRACE, to);
                      queueAVT(readAttribute(QLatin1String("name")), to);
                      queueToken(CURLY_RBRACE, to);
 
-                     /* The sequence constructor. */
+                     // The sequence constructor.
                      queueToken(CURLY_LBRACE, to);
                      queueSelectOrSequenceConstructor(ReportContext::XTSE0910,
                                                       false, to);
@@ -1726,26 +1655,8 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                      break;
                   }
                   case PerformSort: {
-                     /* For:
-                      * <xsl:perform-sort select="$in">
-                      *      <xsl:sort select="@key"/>
-                      * </xsl:perform-sort>
-                      *
-                      * we generate:
-                      *
-                      * $in map sort order by @key
-                      *         return .
-                      *         end_sort
-                      */
 
-                     /* In XQuery, the sort keys appear after the expression
-                      * supplying the initial sequence, while in
-                      * xsl:perform-sort, if a sequence constructor is used,
-                      * they appear in the opposite order. Hence, we need to
-                      * reorder it. */
 
-                     /* We store the attributes of xsl:perform-sort, before
-                      * queueSorting() advances the reader. */
                      const QXmlStreamAttributes atts(m_currentAttributes);
 
                      TokenSource::Queue sorts;
@@ -1754,7 +1665,7 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                                                       true,
                                                       to,
                                                       &atts);
-                     /* queueSelectOrSequenceConstructor() positions us on EndElement. */
+                     // queueSelectOrSequenceConstructor() positions us on EndElement.
                      effectiveInitialAdvance = false;
                      queueToken(MAP, to);
                      queueToken(SORT, to);
@@ -1829,7 +1740,7 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                handleStandardAttributes(false);
                handleValidationAttributes(false);
 
-               /* We're generating an element constructor. */
+               // generating an element constructor.
                queueNamespaceDeclarations(to, &onExitTokens); // TODO same in the isXSLT() branch
                queueToken(ELEMENT, to);
                queueToken(INTERNAL, to);
@@ -1840,7 +1751,7 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                for (int i = 0; i < len; ++i) {
                   const QXmlStreamAttribute &at = m_currentAttributes.at(i);
 
-                  /* We don't want to generate constructors for XSL-T attributes. */
+                  // do not want to generate constructors for XSL-T attributes.
                   if (at.namespaceUri() == CommonNamespaces::XSLT) {
                      continue;
                   }
@@ -1919,7 +1830,7 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
                }
 
             } else {
-               /* We're closing a direct element constructor. */
+               // closing a direct element constructor.
                hasWrittenExpression = true;
                queueToken(CURLY_RBRACE, to);
             }
@@ -1931,7 +1842,6 @@ bool XSLTTokenizer::insideSequenceConstructor(TokenSource::Queue *const to,
           [[fallthrough]];
 
          case QXmlStreamReader::Comment:
-            /* do nothing, just ignore them. */
             continue;
 
          case QXmlStreamReader::Characters: {
@@ -2073,7 +1983,6 @@ void XSLTTokenizer::queueParams(const XSLTTokenLookup::NodeName parentName,
 
                if (isTunnel) {
                   if (parentName == Function) {
-                     /* See W3C public report 5650: http://www.w3.org/Bugs/Public/show_bug.cgi?id=5650 */
                      error(QtXmlPatterns::tr("A parameter in a function cannot be declared to be a tunnel."),
                            ReportContext::XTSE0010);
                   } else {
@@ -2202,7 +2111,6 @@ void XSLTTokenizer::insideStylesheetModule()
                handleXSLTVersion(nullptr, nullptr, true, nullptr, false);
                validateElement();
 
-               /* Handle the various declarations. */
                switch (currentElementName()) {
                   case Template:
                      insideTemplate();
@@ -2269,7 +2177,6 @@ void XSLTTokenizer::insideStylesheetModule()
                      }
                }
             } else {
-               /* We have a user-defined data element. See section 3.6.2. */
 
                if (namespaceUri().isEmpty()) {
                   error(QtXmlPatterns::tr("Top level stylesheet elements must be "
@@ -2282,8 +2189,6 @@ void XSLTTokenizer::insideStylesheetModule()
             break;
          }
          case QXmlStreamReader::Characters: {
-            /* Regardless of xml:space, we skip whitespace, see step 4 in
-             * 4.2 Stripping Whitespace from the Stylesheet. */
             if (isWhitespace()) {
                continue;
             }
@@ -2324,7 +2229,6 @@ bool XSLTTokenizer::readToggleAttribute(const QString &localName, const QString 
             .formatArgs(formatKeyword(localName),
              formatKeyword(name()), formatData(isTrue), formatData(isFalse), formatData(value)), ReportContext::XTSE0020);
 
-      /* Silences a compiler warning. */
       return false;
    }
 }
@@ -2341,7 +2245,7 @@ int XSLTTokenizer::readAlternativeAttribute(const QHash<QString, int> &alternati
    error(QtXmlPatterns::tr("Attribute %1 cannot have the value %2.")
          .formatArgs(formatKeyword(attr.name().toString()), formatData(attr.value().toString())), ReportContext::XTSE0020);
 
-   return 0; /* Silence compiler warning. */
+   return 0;
 }
 
 bool XSLTTokenizer::attributeYesNo(const QString &localName) const
@@ -2359,9 +2263,6 @@ void XSLTTokenizer::queueSorting(const bool oneSortRequired, TokenSource::Queue 
    while (!atEnd()) {
       switch (readNext()) {
          case QXmlStreamReader::EndElement: {
-            /* Let's say we have no sequence constructor, but only
-             * ignorable space. In that case we will actually loop
-             * infinitely if we don't have this check. */
             if (isXSLT()) {
                switch (currentElementName()) {
                   case PerformSort:
@@ -2382,7 +2283,6 @@ void XSLTTokenizer::queueSorting(const bool oneSortRequired, TokenSource::Queue 
                   queueToken(COMMA, to);
                }
 
-               /* sorts are by default stable. */
                if (hasAttribute("stable")) {
                   if (hasQueuedOneSort) {
                      error(QtXmlPatterns::tr("The attribute %1 can only appear on the first %2 element.")
@@ -2399,13 +2299,11 @@ void XSLTTokenizer::queueSorting(const bool oneSortRequired, TokenSource::Queue 
                   queueToken(BY, to);
                }
 
-               /* We store a copy such that we can use them after
-                * queueSelectOrSequenceConstructor() advances the reader. */
                const QXmlStreamAttributes atts(m_currentAttributes);
 
                const int before = to->count();
 
-               // TODO This doesn't work as is. @data-type can be an AVT.
+               // TODO This does not work as is, @data-type can be an AVT.
                if (atts.hasAttribute("data-type")) {
                   if (readToggleAttribute("data-type", "text", "number", &atts)) {
                      queueToken(Token(NCNAME, QLatin1String("string")), to);
@@ -2414,14 +2312,8 @@ void XSLTTokenizer::queueSorting(const bool oneSortRequired, TokenSource::Queue 
                   }
                }
 
-               /* We queue these parantheses for the sake of the function
-                * call for attribute data-type. In the case we don't have
-                * such an attribute, the parantheses are just redundant. */
                queueToken(LPAREN, to);
                queueSelectOrSequenceConstructor(ReportContext::XTSE1015, true, to, nullptr, false);
-
-               /* If neither a select attribute or a sequence constructor is supplied,
-                * we are supposed to use the context item. */
                queueToken(RPAREN, to);
 
                if (before == to->count()) {
@@ -2431,7 +2323,7 @@ void XSLTTokenizer::queueSorting(const bool oneSortRequired, TokenSource::Queue 
                // TODO case-order
                // TODO lang
 
-               // TODO This doesn't work as is. @order can be an AVT, and so can case-order and lang.
+               // TODO - does not work as is,  @order can be an AVT, and so can case-order and lang.
                if (atts.hasAttribute("order") && readToggleAttribute("order", "descending", "ascending", &atts)) {
                   queueToken(DESCENDING, to);
 
@@ -2463,7 +2355,6 @@ void XSLTTokenizer::queueSorting(const bool oneSortRequired, TokenSource::Queue 
                continue;
             }
 
-            /* We have an instruction which is a text node, we're done. */
             break;
          }
 
@@ -2500,7 +2391,7 @@ void XSLTTokenizer::insideFunction()
    const QString expectedType(hasAttribute("as") ? readAttribute(QLatin1String("as")) : QString());
 
    if (hasAttribute("override")) {
-      /* We currently have no external functions, so we don't pass it on currently. */
+      // We currently have no external functions, so we don't pass it on currently.
       attributeYesNo(QLatin1String("override"));
    }
 
@@ -2520,8 +2411,6 @@ void XSLTTokenizer::insideFunction()
 
    pushState(InsideSequenceConstructor);
    insideSequenceConstructor(&m_tokenSource, onExitTokens, false);
-   /* We don't queue CURLY_RBRACE, because it's done in
-    * insideSequenceConstructor(). */
 }
 
 YYLTYPE XSLTTokenizer::currentSourceLocator() const

@@ -304,18 +304,12 @@ void QOpenGLWindow::doneCurrent()
    d->context->doneCurrent();
 }
 
-/*!
-  \return The QOpenGLContext used by this window or \c 0 if not yet initialized.
- */
 QOpenGLContext *QOpenGLWindow::context() const
 {
    Q_D(const QOpenGLWindow);
    return d->context.data();
 }
 
-/*!
-  \return The QOpenGLContext requested to be shared with this window's QOpenGLContext.
-*/
 QOpenGLContext *QOpenGLWindow::shareContext() const
 {
    Q_D(const QOpenGLWindow);
@@ -390,9 +384,6 @@ void QOpenGLWindow::resizeEvent(QResizeEvent *event)
    resizeGL(width(), height());
 }
 
-/*!
-  \internal
- */
 int QOpenGLWindow::metric(PaintDeviceMetric metric) const
 {
    Q_D(const QOpenGLWindow);
@@ -409,9 +400,6 @@ int QOpenGLWindow::metric(PaintDeviceMetric metric) const
    return QPaintDeviceWindow::metric(metric);
 }
 
-/*!
-  \internal
- */
 QPaintDevice *QOpenGLWindow::redirected(QPoint *) const
 {
    Q_D(const QOpenGLWindow);

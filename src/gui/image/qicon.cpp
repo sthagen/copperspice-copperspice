@@ -700,15 +700,11 @@ bool QIcon::isNull() const
    return !d;
 }
 
-/*!\internal
- */
 bool QIcon::isDetached() const
 {
    return !d || d->ref.load() == 1;
 }
 
-/*! \internal
- */
 void QIcon::detach()
 {
    if (d) {
@@ -724,15 +720,6 @@ void QIcon::detach()
    }
 }
 
-/*!
-    Adds \a pixmap to the icon, as a specialization for \a mode and
-    \a state.
-
-    Custom icon engines are free to ignore additionally added
-    pixmaps.
-
-    \sa addFile()
-*/
 void QIcon::addPixmap(const QPixmap &pixmap, Mode mode, State state)
 {
    if (pixmap.isNull()) {

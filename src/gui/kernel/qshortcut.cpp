@@ -374,13 +374,6 @@ void QShortcutPrivate::redoGrab(QShortcutMap &map)
    }
 }
 
-/*!
-    Constructs a QShortcut object for the \a parent widget. Since no
-    shortcut key sequence is specified, the shortcut will not emit any
-    signals.
-
-    \sa setKey()
-*/
 QShortcut::QShortcut(QWidget *parent)
    : QObject(parent), d_ptr(new QShortcutPrivate)
 {
@@ -509,9 +502,6 @@ int QShortcut::id() const
    return d->sc_id;
 }
 
-/*!
-    \internal
-*/
 bool QShortcut::event(QEvent *e)
 {
    Q_D(QShortcut);

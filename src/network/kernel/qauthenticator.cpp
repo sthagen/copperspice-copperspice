@@ -84,9 +84,6 @@ QAuthenticator &QAuthenticator::operator=(const QAuthenticator &other)
       return *this;
    }
 
-   // Do not share the d since challenge reponse/based changes
-   // could corrupt the internal store and different network requests
-   // can utilize different types of proxies.
    detach();
 
    if (other.d) {
@@ -146,9 +143,6 @@ void QAuthenticator::setPassword(const QString &password)
    d->password = password;
 }
 
-/*!
-  \internal
-*/
 void QAuthenticator::detach()
 {
    if (!d) {
@@ -758,9 +752,9 @@ QByteArray QAuthenticatorPrivate::digestMd5Response(const QByteArray &challenge,
 //#define NTLMV1_CLIENT
 
 
-//************************Global variables***************************
+// Global variables
 
-const int blockSize = 64;        // as per RFC2104 Block-size is 512 bits
+const int blockSize        = 64;        // as per RFC2104 Block-size is 512 bits
 
 const quint8 respversion = 1;
 const quint8 hirespversion = 1;
@@ -777,7 +771,7 @@ const quint8 hirespversion = 1;
 */
 
 /*
-   TODO:
+   Pending-CS
     - Fix unicode handling
     - add v2 handling
 */

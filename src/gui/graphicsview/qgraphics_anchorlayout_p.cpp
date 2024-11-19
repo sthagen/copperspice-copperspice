@@ -32,12 +32,12 @@
 
 #ifndef QT_NO_GRAPHICSVIEW
 
-// To ensure that all variables inside the simplex solver are non-negative,
-// we limit the size of anchors in the interval [-limit, limit]. Then before
-// sending them to the simplex solver we add "limit" as an offset, so that
-// they are actually calculated in the interval [0, 2 * limit]
-// To avoid numerical errors in platforms where we use single precision,
-// we use a tighter limit for the variables range.
+// To ensure all variables inside the simplex solver are non-negative, we limit the size of anchors
+// in the interval [-limit, limit]. Then before sending them to the simplex solver we add "limit" as
+// an offset, so that they are actually calculated in the interval [0, 2 * limit]
+// To avoid numerical errors in platforms where we use single precision, a tighter limit for the
+// variables range is used
+
 const qreal g_offset = (sizeof(qreal) == sizeof(double)) ? QWIDGETSIZE_MAX : QWIDGETSIZE_MAX / 32;
 
 QGraphicsAnchorPrivate::QGraphicsAnchorPrivate()
@@ -49,8 +49,7 @@ QGraphicsAnchorPrivate::QGraphicsAnchorPrivate()
 QGraphicsAnchorPrivate::~QGraphicsAnchorPrivate()
 {
    if (data) {
-      // The QGraphicsAnchor was already deleted at this moment. We must clean
-      // the dangling pointer to avoid double deletion in the AnchorData dtor.
+      // QGraphicsAnchor was already deleted, must clean up this pointer to avoid a double deletion
       data->graphicsAnchor = nullptr;
 
       layoutPrivate->removeAnchor(data->from, data->to);
@@ -76,7 +75,7 @@ void QGraphicsAnchorPrivate::setSpacing(qreal value)
       return;
    }
 
-   // The anchor has an user-defined size
+   // anchor has an user-defined size
    hasSize = true;
    preferredSize = value;
 
@@ -165,7 +164,7 @@ void AnchorData::refreshSizeHints(const QLayoutStyleInfo *styleInfo)
    qreal maxSizeHint;
 
    if (item) {
-      // It is an internal anchor, fetch size information from the item
+      // this is a CS anchor, fetch size information from the item
       if (isLayoutAnchor) {
          minSize = 0;
          prefSize = 0;
@@ -269,16 +268,6 @@ void ParallelAnchorData::updateChildrenSizes()
    secondEdge->updateChildrenSizes();
 }
 
-/*
-  \internal
-
-  Initialize the parallel anchor size hints using the sizeHint information from
-  its children.
-
-  Note that parallel groups can lead to unfeasibility, so during calculation, we can
-  find out one unfeasibility. Because of that this method return boolean. This can't
-  happen in sequential, so there the method is void.
- */
 bool ParallelAnchorData::calculateSizeHints()
 {
    // Normalize second child sizes.
@@ -389,13 +378,6 @@ bool ParallelAnchorData::calculateSizeHints()
    return true;
 }
 
-/*!
-    \internal
-    returns the factor in the interval [-1, 1].
-    -1 is at Minimum
-     0 is at Preferred
-     1 is at Maximum
-*/
 static QPair<QGraphicsAnchorLayoutPrivate::Interval, qreal> getFactor(qreal value, qreal min,
    qreal minPref, qreal pref,
    qreal maxPref, qreal max)
@@ -713,16 +695,7 @@ AnchorData *QGraphicsAnchorLayoutPrivate::addAnchorMaybeParallel(AnchorData *new
    return newAnchor;
 }
 
-/*!
-    \internal
-
-    Takes the sequence of vertices described by (\a before, \a vertices, \a after) and removes
-    all anchors connected to the vertices in \a vertices, returning one simplified anchor between
-    \a before and \a after.
-
-    Note that this function doesn't add the created anchor to the graph. This should be done by
-    the caller.
-*/
+// does not add the created anchor to the graph. This should be done by the caller
 static AnchorData *createSequence(Graph<AnchorVertex, AnchorData> *graph,
    AnchorVertex *before,
    const QVector<AnchorVertex *> &vertices,
@@ -758,43 +731,6 @@ static AnchorData *createSequence(Graph<AnchorVertex, AnchorData> *graph,
    return sequence;
 }
 
-/*!
-   \internal
-
-   The purpose of this function is to simplify the graph.
-   Simplification serves two purposes:
-   1. Reduce the number of edges in the graph, (thus the number of variables to the equation
-      solver is reduced, and the solver performs better).
-   2. Be able to do distribution of sequences of edges more intelligently (esp. with sequential
-      anchors)
-
-   It is essential that it must be possible to restore simplified anchors back to their "original"
-   form. This is done by restoreSimplifiedAnchor().
-
-   There are two types of simplification that can be done:
-   1. Sequential simplification
-      Sequential simplification means that all sequences of anchors will be merged into one single
-      anchor. Only anhcors that points in the same direction will be merged.
-   2. Parallel simplification
-      If a simplified sequential anchor is about to be inserted between two vertices in the graph
-      and there already exist an anchor between those two vertices, a parallel anchor will be
-      created that serves as a placeholder for the sequential anchor and the anchor that was
-      already between the two vertices.
-
-   The process of simplification can be described as:
-
-   1. Simplify all sequences of anchors into one anchor.
-      If no further simplification was done, go to (3)
-      - If there already exist an anchor where the sequential anchor is supposed to be inserted,
-        take that anchor out of the graph
-      - Then create a parallel anchor that holds the sequential anchor and the anchor just taken
-        out of the graph.
-   2. Go to (1)
-   3. Done
-
-   When creating the parallel anchors, the algorithm might identify unfeasible situations. In this
-   case the simplification process stops and returns false. Otherwise returns true.
-*/
 bool QGraphicsAnchorLayoutPrivate::simplifyGraph(Orientation orientation)
 {
    if (items.isEmpty()) {
@@ -868,9 +804,6 @@ bool QGraphicsAnchorLayoutPrivate::replaceVertex(Orientation orientation, Anchor
    return feasible;
 }
 
-/*!
-    \internal
-*/
 bool QGraphicsAnchorLayoutPrivate::simplifyVertices(Orientation orientation)
 {
    Q_Q(QGraphicsAnchorLayout);
@@ -973,20 +906,6 @@ bool QGraphicsAnchorLayoutPrivate::simplifyVertices(Orientation orientation)
    return true;
 }
 
-/*!
-    \internal
-
-    One iteration of the simplification algorithm. Returns true if another iteration is needed.
-
-    The algorithm walks the graph in depth-first order, and only collects vertices that has two
-    edges connected to it.  If the vertex does not have two edges or if it is a layout edge, it
-    will take all the previously collected vertices and try to create a simplified sequential
-    anchor representing all the previously collected vertices.  Once the simplified anchor is
-    inserted, the collected list is cleared in order to find the next sequence to simplify.
-
-    Note that there are some catches to this that are not covered by the above explanation, see
-    the function comments for more details.
-*/
 bool QGraphicsAnchorLayoutPrivate::simplifyGraphIteration(QGraphicsAnchorLayoutPrivate::Orientation orientation,
    bool *feasible)
 {
@@ -1319,15 +1238,6 @@ QGraphicsAnchorLayoutPrivate::Orientation QGraphicsAnchorLayoutPrivate::edgeOrie
    return edge > Qt::AnchorRight ? Vertical : Horizontal;
 }
 
-/*!
-  \internal
-
-  Create internal anchors to connect the layout edges (Left to Right and
-  Top to Bottom).
-
-  These anchors doesn't have size restrictions, that will be enforced by
-  other anchors and items in the layout.
-*/
 void QGraphicsAnchorLayoutPrivate::createLayoutEdges()
 {
    Q_Q(QGraphicsAnchorLayout);
@@ -1371,7 +1281,7 @@ void QGraphicsAnchorLayoutPrivate::createItemEdges(QGraphicsLayoutItem *item)
 {
    items.append(item);
 
-   // Create horizontal and vertical internal anchors for the item and
+   // Create horizontal and vertical CS anchors for the item and
    // refresh its size hint / policy values.
    AnchorData *data = new AnchorData;
    addAnchor_helper(item, Qt::AnchorLeft, item, Qt::AnchorRight, data);
@@ -1382,17 +1292,6 @@ void QGraphicsAnchorLayoutPrivate::createItemEdges(QGraphicsLayoutItem *item)
    data->refreshSizeHints();
 }
 
-/*!
-  \internal
-
-  By default, each item in the layout is represented internally as
-  a single anchor in each direction. For instance, from Left to Right.
-
-  However, to support anchorage of items to the center of items, we
-  must split this internal anchor into two half-anchors. From Left
-  to Center and then from Center to Right, with the restriction that
-  these anchors must have the same time at all times.
-*/
 void QGraphicsAnchorLayoutPrivate::createCenterAnchors(
    QGraphicsLayoutItem *item, Qt::AnchorPoint centerEdge)
 {
@@ -1523,7 +1422,7 @@ void QGraphicsAnchorLayoutPrivate::removeCenterAnchors(
 
    } else {
       // this is only called from removeAnchors()
-      // first, remove all non-internal anchors
+      // first remove all non CS anchors
       QList<AnchorVertex *> adjacents = g.adjacentVertices(center);
       for (int i = 0; i < adjacents.count(); ++i) {
          AnchorVertex *v = adjacents.at(i);
@@ -1531,9 +1430,10 @@ void QGraphicsAnchorLayoutPrivate::removeCenterAnchors(
             removeAnchor_helper(center, internalVertex(v->m_item, v->m_edge));
          }
       }
-      // when all non-internal anchors is removed it will automatically merge the
-      // center anchor into a left-right (or top-bottom) anchor. We must also delete that.
-      // by this time, the center vertex is deleted and merged into a non-centered internal anchor
+
+      // when all non CS anchors are removed it will automatically merge the
+      // center anchor into a left-right (or top-bottom) anchor. We must also delete this,
+      // by this time, the center vertex is deleted and merged into a non-centered CS anchor
       removeAnchor_helper(first, internalVertex(item, lastEdge));
    }
 
@@ -1546,9 +1446,8 @@ void QGraphicsAnchorLayoutPrivate::removeCenterConstraints(QGraphicsLayoutItem *
    Orientation orientation)
 {
    // Remove the item center constraints associated to this item
-   // ### This is a temporary solution. We should probably use a better
-   // data structure to hold items and/or their associated constraints
-   // so that we can remove those easily
+   // temporary solution - we should probably use a better data structure to hold items
+   // and/or their associated constraints so that we can remove those easily
 
    AnchorVertex *first = internalVertex(item, orientation == Horizontal ?
          Qt::AnchorLeft :
@@ -1557,7 +1456,7 @@ void QGraphicsAnchorLayoutPrivate::removeCenterConstraints(QGraphicsLayoutItem *
          Qt::AnchorHorizontalCenter :
          Qt::AnchorVerticalCenter);
 
-   // Skip if no center constraints exist
+   // skip if no center constraints exist
    if (!center) {
       return;
    }
@@ -1565,7 +1464,7 @@ void QGraphicsAnchorLayoutPrivate::removeCenterConstraints(QGraphicsLayoutItem *
    Q_ASSERT(first);
    AnchorData *internalAnchor = graph[orientation].edgeData(first, center);
 
-   // Look for our anchor in all item center constraints, then remove it
+   // look for our anchor in all item center constraints, then remove it
    for (int i = 0; i < itemCenterConstraints[orientation].size(); ++i) {
       if (itemCenterConstraints[orientation].at(i)->variables.contains(internalAnchor)) {
          delete itemCenterConstraints[orientation].takeAt(i);
@@ -1574,18 +1473,6 @@ void QGraphicsAnchorLayoutPrivate::removeCenterConstraints(QGraphicsLayoutItem *
    }
 }
 
-/*!
- * \internal
- * Implements the high level "addAnchor" feature. Called by the public API
- * addAnchor method.
- *
- * The optional \a spacing argument defines the size of the anchor. If not provided,
- * the anchor size is either 0 or not-set, depending on type of anchor created (see
- * matrix below).
- *
- * All anchors that remain with size not-set will assume the standard spacing,
- * set either by the layout style or through the "setSpacing" layout API.
- */
 QGraphicsAnchor *QGraphicsAnchorLayoutPrivate::addAnchor(QGraphicsLayoutItem *firstItem,
    Qt::AnchorPoint firstEdge,
    QGraphicsLayoutItem *secondItem,
@@ -1614,14 +1501,13 @@ QGraphicsAnchor *QGraphicsAnchorLayoutPrivate::addAnchor(QGraphicsLayoutItem *fi
       return nullptr;
    }
 
-   // In QGraphicsAnchorLayout, items are represented in its internal
-   // graph as four anchors that connect:
+   // In QGraphicsAnchorLayout, items are represented by a CS graph as four anchors which connect
    //  - Left -> HCenter
    //  - HCenter-> Right
    //  - Top -> VCenter
    //  - VCenter -> Bottom
 
-   // Ensure that the internal anchors have been created for both items.
+   // ensure the CS anchors have been created for both items
    if (firstItem != q && !items.contains(firstItem)) {
       createItemEdges(firstItem);
       addChildLayoutItem(firstItem);
@@ -1631,11 +1517,11 @@ QGraphicsAnchor *QGraphicsAnchorLayoutPrivate::addAnchor(QGraphicsLayoutItem *fi
       addChildLayoutItem(secondItem);
    }
 
-   // Create center edges if needed
+   // create center edges if needed
    createCenterAnchors(firstItem, firstEdge);
    createCenterAnchors(secondItem, secondEdge);
 
-   // Use heuristics to find out what the user meant with this anchor.
+   // use heuristics to find out what the user meant with this anchor.
    correctEdgeDirection(firstItem, firstEdge, secondItem, secondEdge);
 
    AnchorData *data = new AnchorData;
@@ -1667,15 +1553,6 @@ QGraphicsAnchor *QGraphicsAnchorLayoutPrivate::addAnchor(QGraphicsLayoutItem *fi
    return graphicsAnchor;
 }
 
-/*
-  \internal
-
-  This method adds an AnchorData to the internal graph. It is responsible for doing
-  the boilerplate part of such task.
-
-  If another AnchorData exists between the mentioned vertices, it is deleted and
-  the new one is inserted.
-*/
 void QGraphicsAnchorLayoutPrivate::addAnchor_helper(QGraphicsLayoutItem *firstItem,
    Qt::AnchorPoint firstEdge,
    QGraphicsLayoutItem *secondItem,
@@ -1695,7 +1572,7 @@ void QGraphicsAnchorLayoutPrivate::addAnchor_helper(QGraphicsLayoutItem *firstIt
       removeAnchor_helper(v1, v2);
    }
 
-   // If its an internal anchor, set the associated item
+   // If this is a CS set the associated item
    if (firstItem == secondItem) {
       data->item = firstItem;
    }
@@ -1712,7 +1589,7 @@ void QGraphicsAnchorLayoutPrivate::addAnchor_helper(QGraphicsLayoutItem *firstIt
    data->name = QString::fromLatin1("%1 --to--> %2").formatArg(v1->toString()).formatArg(v2->toString());
 #endif
 
-   // tracks internal anchors, currently inside AnchorData methods
+   // tracks CS anchors currently inside AnchorData methods
    // access to the 'q' pointer is not available
    data->isLayoutAnchor = (data->item == q);
 
@@ -1722,7 +1599,7 @@ void QGraphicsAnchorLayoutPrivate::addAnchor_helper(QGraphicsLayoutItem *firstIt
 QGraphicsAnchor *QGraphicsAnchorLayoutPrivate::getAnchor(QGraphicsLayoutItem *firstItem,
    Qt::AnchorPoint firstEdge, QGraphicsLayoutItem *secondItem, Qt::AnchorPoint secondEdge)
 {
-   // Do not expose internal anchors
+   // Do not expose CS anchors
    if (firstItem == secondItem) {
       return nullptr;
    }
@@ -1736,23 +1613,17 @@ QGraphicsAnchor *QGraphicsAnchorLayoutPrivate::getAnchor(QGraphicsLayoutItem *fi
    AnchorData *data = graph[orientation].edgeData(v1, v2);
    if (data) {
       // We could use "acquireGraphicsAnchor" here, but to avoid a regression where
-      // an internal anchor was wrongly exposed, I want to ensure no new
-      // QGraphicsAnchor instances are created by this call.
-      // This assumption must hold because anchors are either user-created (and already
-      // have their public object created), or they are internal (and must not reach
-      // this point).
+      // a CS anchor was wrongly exposed, ensure no new QGraphicsAnchor instances are
+      // created by this call. This assumption must hold because anchors are either
+      // user-created (and already have their public object created), or they are
+      // a CS anchor (and must not reach this point).
+
       Q_ASSERT(data->graphicsAnchor);
       graphicsAnchor = data->graphicsAnchor;
    }
    return graphicsAnchor;
 }
 
-/*!
- * \internal
- *
- * Implements the high level "removeAnchor" feature. Called by
- * the QAnchorData destructor.
- */
 void QGraphicsAnchorLayoutPrivate::removeAnchor(AnchorVertex *firstVertex,
    AnchorVertex *secondVertex)
 {
@@ -1828,12 +1699,6 @@ void QGraphicsAnchorLayoutPrivate::removeAnchor(AnchorVertex *firstVertex,
    q->invalidate();
 }
 
-/*
-  \internal
-
-  Implements the low level "removeAnchor" feature. Called by
-  private methods.
-*/
 void QGraphicsAnchorLayoutPrivate::removeAnchor_helper(AnchorVertex *v1, AnchorVertex *v2)
 {
    Q_ASSERT(v1 && v2);
@@ -1862,12 +1727,6 @@ AnchorVertex *QGraphicsAnchorLayoutPrivate::addInternalVertex(QGraphicsLayoutIte
    return v.first;
 }
 
-/**
- * \internal
- *
- * returns the AnchorVertex that was dereferenced, also when it was removed.
- * returns 0 if it did not exist.
- */
 void QGraphicsAnchorLayoutPrivate::removeInternalVertex(QGraphicsLayoutItem *item,
    Qt::AnchorPoint edge)
 {
@@ -1922,30 +1781,6 @@ void QGraphicsAnchorLayoutPrivate::removeAnchors(QGraphicsLayoutItem *item)
    removeVertex(item, Qt::AnchorBottom);
 }
 
-/*!
-  \internal
-
-  Use heuristics to determine the correct orientation of a given anchor.
-
-  After API discussions, we decided we would like expressions like
-  anchor(A, Left, B, Right) to mean the same as anchor(B, Right, A, Left).
-  The problem with this is that anchors could become ambiguous, for
-  instance, what does the anchor A, B of size X mean?
-
-     "pos(B) = pos(A) + X"  or  "pos(A) = pos(B) + X" ?
-
-  To keep the API user friendly and at the same time, keep our algorithm
-  deterministic, we use an heuristic to determine a direction for each
-  added anchor and then keep it. The heuristic is based on the fact
-  that people usually avoid overlapping items, therefore:
-
-     "A, RIGHT to B, LEFT" means that B is to the LEFT of A.
-     "B, LEFT to A, RIGHT" is corrected to the above anchor.
-
-  Special correction is also applied when one of the items is the
-  layout. We handle Layout Left as if it was another items's Right
-  and Layout Right as another item's Left.
-*/
 void QGraphicsAnchorLayoutPrivate::correctEdgeDirection(QGraphicsLayoutItem *&firstItem,
    Qt::AnchorPoint &firstEdge,
    QGraphicsLayoutItem *&secondItem,
@@ -2006,13 +1841,6 @@ QLayoutStyleInfo &QGraphicsAnchorLayoutPrivate::styleInfo() const
    return cachedStyleInfo;
 }
 
-/*!
-  \internal
-
-  Called on activation. Uses Linear Programming to define minimum, preferred
-  and maximum sizes for the layout. Also calculates the sizes that each item
-  should assume when the layout is in one of such situations.
-*/
 void QGraphicsAnchorLayoutPrivate::calculateGraphs()
 {
    if (!calculateGraphCacheDirty) {
@@ -2023,8 +1851,7 @@ void QGraphicsAnchorLayoutPrivate::calculateGraphs()
    calculateGraphCacheDirty = false;
 }
 
-// ### Maybe getGraphParts could return the variables when traversing, at least
-// for trunk...
+// Maybe getGraphParts could return the variables when traversing
 QList<AnchorData *> getVariables(const QList<QSimplexConstraint *> &constraints)
 {
    QSet<AnchorData *> variableSet;
@@ -2038,29 +1865,6 @@ QList<AnchorData *> getVariables(const QList<QSimplexConstraint *> &constraints)
    return variableSet.toList();
 }
 
-/*!
-    \internal
-
-    Calculate graphs is the method that puts together all the helper routines
-    so that the AnchorLayout can calculate the sizes of each item.
-
-    In a nutshell it should do:
-
-    1) Refresh anchor nominal sizes, that is, the size that each anchor would
-       have if no other restrictions applied. This is done by quering the
-       layout style and the sizeHints of the items belonging to the layout.
-
-    2) Simplify the graph by grouping together parallel and sequential anchors
-       into "group anchors". These have equivalent minimum, preferred and maximum
-       sizeHints as the anchors they replace.
-
-    3) Check if we got to a trivial case. In some cases, the whole graph can be
-       simplified into a single anchor. If so, use this information. If not,
-       then call the Simplex solver to calculate the anchors sizes.
-
-    4) Once the root anchors had its sizes calculated, propagate that to the
-       anchors they represent.
-*/
 void QGraphicsAnchorLayoutPrivate::calculateGraphs(
    QGraphicsAnchorLayoutPrivate::Orientation orientation)
 {
@@ -2142,13 +1946,6 @@ void QGraphicsAnchorLayoutPrivate::calculateGraphs(
    }
 }
 
-/*!
-    \internal
-
-    Shift all the constraints by a certain amount. This allows us to deal with negative values in
-    the linear program if they are bounded by a certain limit. Functions should be careful to
-    call it again with a negative amount, to shift the constraints back.
-*/
 static void shiftConstraints(const QList<QSimplexConstraint *> &constraints, qreal amount)
 {
    for (int i = 0; i < constraints.count(); ++i) {
@@ -2162,12 +1959,6 @@ static void shiftConstraints(const QList<QSimplexConstraint *> &constraints, qre
    }
 }
 
-/*!
-    \internal
-
-    Calculate the sizes for all anchors which are part of the trunk. This works
-    on top of a (possibly) simplified graph.
-*/
 bool QGraphicsAnchorLayoutPrivate::calculateTrunk(Orientation orientation, const GraphPath &path,
    const QList<QSimplexConstraint *> &constraints,
    const QList<AnchorData *> &variables)
@@ -2232,9 +2023,6 @@ bool QGraphicsAnchorLayoutPrivate::calculateTrunk(Orientation orientation, const
    return feasible;
 }
 
-/*!
-    \internal
-*/
 bool QGraphicsAnchorLayoutPrivate::calculateNonTrunk(const QList<QSimplexConstraint *> &constraints,
    const QList<AnchorData *> &variables)
 {
@@ -2256,12 +2044,6 @@ bool QGraphicsAnchorLayoutPrivate::calculateNonTrunk(const QList<QSimplexConstra
    return feasible;
 }
 
-/*!
-    \internal
-
-    Traverse the graph refreshing the size hints. Edges will query their associated
-    item or graphicsAnchor for their size hints.
-*/
 void QGraphicsAnchorLayoutPrivate::refreshAllSizeHints(Orientation orientation)
 {
    Graph<AnchorVertex, AnchorData> &g = graph[orientation];
@@ -2274,16 +2056,6 @@ void QGraphicsAnchorLayoutPrivate::refreshAllSizeHints(Orientation orientation)
    }
 }
 
-/*!
-  \internal
-
-  This method walks the graph using a breadth-first search to find paths
-  between the root vertex and each vertex on the graph. The edges
-  directions in each path are considered and they are stored as a
-  positive edge (left-to-right) or negative edge (right-to-left).
-
-  The list of paths is used later to generate a list of constraints.
- */
 void QGraphicsAnchorLayoutPrivate::findPaths(Orientation orientation)
 {
    QQueue<QPair<AnchorVertex *, AnchorVertex *>> queue;
@@ -2328,16 +2100,6 @@ void QGraphicsAnchorLayoutPrivate::findPaths(Orientation orientation)
    identifyFloatItems(visited, orientation);
 }
 
-/*!
-  \internal
-
-  Each vertex on the graph that has more than one path to it
-  represents a contra int to the sizes of the items in these paths.
-
-  This method walks the list of paths to each vertex, generate
-  the constraints and store them in a list so they can be used later
-  by the Simplex solver.
-*/
 void QGraphicsAnchorLayoutPrivate::constraintsFromPaths(Orientation orientation)
 {
    for (AnchorVertex *vertex : graphPaths[orientation].uniqueKeys()) {
@@ -2355,9 +2117,6 @@ void QGraphicsAnchorLayoutPrivate::constraintsFromPaths(Orientation orientation)
    }
 }
 
-/*!
-  \internal
-*/
 void QGraphicsAnchorLayoutPrivate::updateAnchorSizes(Orientation orientation)
 {
    Graph<AnchorVertex, AnchorData> &g = graph[orientation];
@@ -2369,12 +2128,6 @@ void QGraphicsAnchorLayoutPrivate::updateAnchorSizes(Orientation orientation)
    }
 }
 
-/*!
-  \internal
-
-  Create LP constraints for each anchor based on its minimum and maximum
-  sizes, as specified in its size hints
-*/
 QList<QSimplexConstraint *> QGraphicsAnchorLayoutPrivate::constraintsFromSizeHints(
    const QList<AnchorData *> &anchors)
 {
@@ -2441,9 +2194,7 @@ QList<QSimplexConstraint *> QGraphicsAnchorLayoutPrivate::constraintsFromSizeHin
          c->ratio = QSimplexConstraint::MoreOrEqual;
          anchorConstraints += c;
 
-         // We avoid adding restrictions to the layout internal anchors. That's
-         // to prevent unnecessary fair distribution from happening due to this
-         // artificial restriction.
+         // avoid adding restrictions to the layout CS anchors
          if (ad == layoutEdge) {
             continue;
          }
@@ -2470,9 +2221,6 @@ QList<QSimplexConstraint *> QGraphicsAnchorLayoutPrivate::constraintsFromSizeHin
    return anchorConstraints;
 }
 
-/*!
-  \internal
-*/
 QList< QList<QSimplexConstraint *>> QGraphicsAnchorLayoutPrivate::getGraphParts(Orientation orientation)
 {
    Q_ASSERT(layoutFirstVertex[orientation] && layoutLastVertex[orientation]);
@@ -2559,11 +2307,6 @@ QList< QList<QSimplexConstraint *>> QGraphicsAnchorLayoutPrivate::getGraphParts(
    return result;
 }
 
-/*!
- \internal
-
-  Use all visited Anchors on findPaths() so we can identify non-float Items.
-*/
 void QGraphicsAnchorLayoutPrivate::identifyFloatItems(const QSet<AnchorData *> &visited, Orientation orientation)
 {
    QSet<QGraphicsLayoutItem *> nonFloating;
@@ -2581,14 +2324,6 @@ void QGraphicsAnchorLayoutPrivate::identifyFloatItems(const QSet<AnchorData *> &
    m_floatItems[orientation] = allItems - nonFloating;
 }
 
-
-/*!
- \internal
-
-  Given an anchor, if it is an internal anchor and Normal we must mark it's item as non-float.
-  If the anchor is Sequential or Parallel, we must iterate on its children recursively until we reach
-  internal anchors (items).
-*/
 void QGraphicsAnchorLayoutPrivate::identifyNonFloatItems_helper(const AnchorData *ad,
    QSet<QGraphicsLayoutItem *> *nonFloatingItemsIdentifiedSoFar)
 {
@@ -2614,12 +2349,6 @@ void QGraphicsAnchorLayoutPrivate::identifyNonFloatItems_helper(const AnchorData
    }
 }
 
-/*!
-  \internal
-
-  Use the current vertices distance to calculate and set the geometry of
-  each item.
-*/
 void QGraphicsAnchorLayoutPrivate::setItemsGeometries(const QRectF &geom)
 {
    Q_Q(QGraphicsAnchorLayout);
@@ -2675,12 +2404,6 @@ void QGraphicsAnchorLayoutPrivate::setItemsGeometries(const QRectF &geom)
    }
 }
 
-/*!
-  \internal
-
-  Calculate the position of each vertex based on the paths to each of
-  them as well as the current edges sizes.
-*/
 void QGraphicsAnchorLayoutPrivate::calculateVertexPositions(
    QGraphicsAnchorLayoutPrivate::Orientation orientation)
 {
@@ -2722,13 +2445,6 @@ void QGraphicsAnchorLayoutPrivate::calculateVertexPositions(
    }
 }
 
-/*!
-  \internal
-
-  Calculate interpolation parameters based on current Layout Size.
-  Must be called once before calling "interpolateEdgeSize()" for
-  the edges.
-*/
 void QGraphicsAnchorLayoutPrivate::setupEdgesInterpolation(
    Orientation orientation)
 {
@@ -2749,21 +2465,6 @@ void QGraphicsAnchorLayoutPrivate::setupEdgesInterpolation(
    interpolationProgress[orientation] = result.second;
 }
 
-/*!
-    \internal
-
-    Calculate the current Edge size based on the current Layout size and the
-    size the edge is supposed to have when the layout is at its:
-
-    - minimum size,
-    - preferred size,
-    - maximum size.
-
-    These three key values are calculated in advance using linear
-    programming (more expensive) or the simplification algorithm, then
-    subsequential resizes of the parent layout require a simple
-    interpolation.
-*/
 void QGraphicsAnchorLayoutPrivate::interpolateEdge(AnchorVertex *base, AnchorData *edge)
 {
    const Orientation orientation = Orientation(edge->orientation);

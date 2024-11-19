@@ -102,18 +102,6 @@ void QWindowsDragCursorWindow::setPixmap(const QPixmap &p)
    }
 }
 
-/*!
-    \class QWindowsDropMimeData
-    \brief Special mime data class for data retrieval from Drag operations.
-
-    Implementation of QWindowsInternalMimeDataBase which retrieves the
-    current drop data object from QWindowsDrag.
-
-    \sa QWindowsDrag
-    \internal
-    \ingroup qt-lighthouse-win
-*/
-
 IDataObject *QWindowsDropMimeData::retrieveDataObject() const
 {
    return QWindowsDrag::instance()->dropDataObject();
@@ -179,17 +167,6 @@ static inline Qt::KeyboardModifiers toQtKeyboardModifiers(DWORD keyState)
 
    return modifiers;
 }
-
-/*!
-    \class QWindowsOleDropSource
-    \brief Implementation of IDropSource
-
-    Used for drag operations.
-
-    \sa QWindowsDrag
-    \internal
-    \ingroup qt-lighthouse-win
-*/
 
 class QWindowsOleDropSource : public IDropSource
 {
@@ -376,10 +353,6 @@ QWindowsOleDropSource::Release(void)
    }
    return m_refs;
 }
-
-/*!
-    \brief Check for cancel.
-*/
 
 QT_ENSURE_STACK_ALIGNED_FOR_SSE STDMETHODIMP QWindowsOleDropSource::QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState)
 {

@@ -203,7 +203,6 @@ QAbstractItemView::QAbstractItemView(QWidget *parent)
    d_func()->init();
 }
 
-// internal
 QAbstractItemView::QAbstractItemView(QAbstractItemViewPrivate &dd, QWidget *parent)
    : QAbstractScrollArea(dd, parent)
 {
@@ -253,9 +252,9 @@ void QAbstractItemView::setModel(QAbstractItemModel *model)
 
    d->model = (model ? model : QAbstractItemModelPrivate::staticEmptyModel());
 
-   // sserts do basic sanity checking of the model
+   // asserts do basic sanity checking of the model
    Q_ASSERT_X(d->model->index(0, 0) == d->model->index(0, 0), "QAbstractItemView::setModel():",
-      "Model should return the exact same index (including its internal id/pointer) when asked for it twice in a row.");
+      "Model should return the exact same index (including the id pointer) when called twice in a row.");
 
    Q_ASSERT_X(! d->model->index(0, 0).parent().isValid(),
       "QAbstractItemView::setModel():", "Parent of a top level index should be invalid");
@@ -2856,20 +2855,16 @@ QPoint QAbstractItemView::dirtyRegionOffset() const
    return d->scrollDelayOffset;
 }
 
-
-// internal
 void QAbstractItemView::startAutoScroll()
 {
    d_func()->startAutoScroll();
 }
 
-// internal
 void QAbstractItemView::stopAutoScroll()
 {
    d_func()->stopAutoScroll();
 }
 
-// internal
 void QAbstractItemView::doAutoScroll()
 {
    // find how much we should scroll with

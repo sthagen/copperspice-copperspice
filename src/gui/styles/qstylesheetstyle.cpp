@@ -1097,9 +1097,6 @@ QPainterPath QRenderRule::borderClip(QRect r)
    return path;
 }
 
-/*! \internal
-  Clip the painter to the border (in case we are using radius border)
- */
 void QRenderRule::setClip(QPainter *p, const QRect &rect)
 {
    if (clipset++) {
@@ -2405,11 +2402,6 @@ QRect QStyleSheetStyle::positionRect(const QWidget *w, const QRenderRule &rule1,
    return positionRect(w, rule2, pe, originRect, dir);
 }
 
-
-/** \internal
-   For widget that have an embedded widget (such as combobox) return that embedded widget.
-   otherwise return the widget itself
- */
 static QWidget *embeddedWidget(QWidget *w)
 {
 #ifndef QT_NO_COMBOBOX
@@ -2437,18 +2429,10 @@ static QWidget *embeddedWidget(QWidget *w)
    return w;
 }
 
-/** \internal
-  in case w is an embedded widget, return the container widget
-  (i.e, the widget for which the rules actualy apply)
-  (exemple, if w is a lineedit embedded in a combobox, return the combobox)
-
-  if w is not embedded, return w itself
-*/
 static QWidget *containerWidget(const QWidget *w)
 {
 #ifndef QT_NO_LINEEDIT
    if (qobject_cast<const QLineEdit *>(w)) {
-      //if the QLineEdit is an embeddedWidget, we need the rule of the real widget
 
 #ifndef QT_NO_COMBOBOX
       if (qobject_cast<const QComboBox *>(w->parentWidget())) {
@@ -2463,7 +2447,7 @@ static QWidget *containerWidget(const QWidget *w)
 #endif
 
    }
-#endif // QT_NO_LINEEDIT
+#endif
 
 #ifndef QT_NO_SCROLLAREA
    if (const QAbstractScrollArea *sa = qobject_cast<const QAbstractScrollArea *>(w->parentWidget())) {
@@ -2476,9 +2460,6 @@ static QWidget *containerWidget(const QWidget *w)
    return const_cast<QWidget *>(w);
 }
 
-/** \internal
-    returns true if the widget can NOT be styled directly
- */
 static bool unstylable(const QWidget *w)
 {
    if (w->windowType() == Qt::Desktop) {
@@ -2509,7 +2490,7 @@ static bool unstylable(const QWidget *w)
 
 #ifndef QT_NO_TABBAR
    if (w->metaObject() == &QWidget::staticMetaObject() && qobject_cast<const QTabBar *>(w->parentWidget())) {
-      // the moving tab of a QTabBar
+      // moving tab of a QTabBar
       return true;
    }
 #endif
@@ -2540,12 +2521,11 @@ static quint64 extendedPseudoClass(const QWidget *w)
    return pc;
 }
 
-// sets up the geometry of the widget. We set a dynamic property when
-// we modify the min/max size of the widget. The min/max size is restored
-// to their original value when a new stylesheet that does not contain
-// the CSS properties is set and when the widget has this dynamic property set.
-// This way we don't trample on users who had setup a min/max size in code and
-// don't use stylesheets at all.
+// sets up the geometry of the widget. We set a dynamic property when we modify the min/max size
+// of the widget. The min/max size is restored to their original value when a new stylesheet that
+// does not contain the CSS properties is set and when the widget has this dynamic property set.
+// This way we do not trample on users who had setup a min/max size and do not use stylesheets.
+
 void QStyleSheetStyle::setGeometry(QWidget *w)
 {
    QRenderRule rule = renderRule(w, PseudoElement_None, QCss::PseudoClass_Enabled | extendedPseudoClass(w));
@@ -2814,10 +2794,6 @@ void QStyleSheetStyleCaches::styleDestroyed(QObject *o)
    styleSheetCache.remove(o);
 }
 
-/*!
- *  Make sure that the cache will be clean by connecting destroyed if needed.
- *  return false if the widget is not stylable;
- */
 bool QStyleSheetStyle::initObject(const QObject *obj) const
 {
    if (! obj) {

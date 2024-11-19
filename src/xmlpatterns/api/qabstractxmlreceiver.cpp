@@ -39,25 +39,16 @@ void QAbstractXmlReceiver::sendFromAxis(const QXmlNodeModelIndex &node)
    }
 }
 
-/*!
- \internal
- */
 QAbstractXmlReceiver::QAbstractXmlReceiver(QAbstractXmlReceiverPrivate *d)
    : d_ptr(d)
 {
 }
 
-/*!
-  Constructs an abstract xml receiver.
- */
 QAbstractXmlReceiver::QAbstractXmlReceiver()
    : d_ptr(nullptr)
 {
 }
 
-/*!
-  Destroys the xml receiver.
- */
 QAbstractXmlReceiver::~QAbstractXmlReceiver()
 {
 }
@@ -120,9 +111,6 @@ void QAbstractXmlReceiver::whitespaceOnly(QStringView value)
    characters(QStringView(v));
 }
 
-/*!
-  \internal
- */
 void QAbstractXmlReceiver::item(const QPatternist::Item &item)
 {
    if (item.isNode()) {

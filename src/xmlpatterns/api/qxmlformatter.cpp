@@ -39,11 +39,6 @@ class QXmlFormatterPrivate : public QXmlSerializerPrivate
    int             currentDepth;
    QString         characterBuffer;
    QString         indentString;
-
-   /**
-    * Whether we /have/ sent nodes like processing instructions and comments
-    * to QXmlSerializer.
-    */
    QStack<bool>    canIndent;
 };
 
@@ -60,9 +55,6 @@ QXmlFormatter::QXmlFormatter(const QXmlQuery &query, QIODevice *outputDevice)
 {
 }
 
-/*!
-  \internal
- */
 void QXmlFormatter::startFormattingContent()
 {
    Q_D(QXmlFormatter);
@@ -82,9 +74,6 @@ void QXmlFormatter::startFormattingContent()
    d->characterBuffer.clear();
 }
 
-/*!
-  \reimp
- */
 void QXmlFormatter::startElement(const QXmlName &name)
 {
    Q_D(QXmlFormatter);
@@ -96,9 +85,6 @@ void QXmlFormatter::startElement(const QXmlName &name)
    QXmlSerializer::startElement(name);
 }
 
-/*!
-  \reimp
- */
 void QXmlFormatter::endElement()
 {
    Q_D(QXmlFormatter);
@@ -116,17 +102,11 @@ void QXmlFormatter::endElement()
    QXmlSerializer::endElement();
 }
 
-/*!
-  \reimp
- */
 void QXmlFormatter::attribute(const QXmlName &name, QStringView value)
 {
    QXmlSerializer::attribute(name, value);
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::comment(const QString &value)
 {
    Q_D(QXmlFormatter);
@@ -135,9 +115,6 @@ void QXmlFormatter::comment(const QString &value)
    d->canIndent.top() = true;
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::characters(QStringView value)
 {
    Q_D(QXmlFormatter);
@@ -145,9 +122,6 @@ void QXmlFormatter::characters(QStringView value)
    d->characterBuffer += value.toString();
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::processingInstruction(const QXmlName &name,
       const QString &value)
 {
@@ -157,9 +131,6 @@ void QXmlFormatter::processingInstruction(const QXmlName &name,
    d->canIndent.top() = true;
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::atomicValue(const QVariant &value)
 {
    Q_D(QXmlFormatter);
@@ -167,33 +138,21 @@ void QXmlFormatter::atomicValue(const QVariant &value)
    QXmlSerializer::atomicValue(value);
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::startDocument()
 {
    QXmlSerializer::startDocument();
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::endDocument()
 {
    QXmlSerializer::endDocument();
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::startOfSequence()
 {
    QXmlSerializer::startOfSequence();
 }
 
-/*!
- \reimp
- */
 void QXmlFormatter::endOfSequence()
 {
    Q_D(QXmlFormatter);
@@ -207,9 +166,6 @@ void QXmlFormatter::endOfSequence()
    QXmlSerializer::endOfSequence();
 }
 
-/*!
- \internal
- */
 void QXmlFormatter::item(const QPatternist::Item &item)
 {
    Q_D(QXmlFormatter);
@@ -226,24 +182,12 @@ void QXmlFormatter::item(const QPatternist::Item &item)
    QXmlSerializer::item(item);
 }
 
-/*!
-  Returns the number of spaces QXmlFormatter will output for each
-  indentation level. The default is four.
-
- \sa setIndentationDepth()
- */
 int QXmlFormatter::indentationDepth() const
 {
    Q_D(const QXmlFormatter);
    return d->indentationDepth;
 }
 
-/*!
-  Sets \a depth to be the number of spaces QXmlFormatter will
-  output for level of indentation. The default is four.
-
- \sa indentationDepth()
- */
 void QXmlFormatter::setIndentationDepth(int depth)
 {
    Q_D(QXmlFormatter);

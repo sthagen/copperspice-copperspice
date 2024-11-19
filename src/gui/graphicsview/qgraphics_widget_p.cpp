@@ -76,7 +76,6 @@ qreal QGraphicsWidgetPrivate::titleBarHeight(const QStyleOptionTitleBar &options
    return (qreal)height;
 }
 
-// internal
 QGraphicsWidgetPrivate::~QGraphicsWidgetPrivate()
 {
    // Remove any lazily allocated data
@@ -85,12 +84,7 @@ QGraphicsWidgetPrivate::~QGraphicsWidgetPrivate()
    delete windowData;
 }
 
-/*!
-    \internal
-
-     Ensures that margins is allocated.
-     This function must be called before any dereferencing.
-*/
+// must be called before any dereferencing
 void QGraphicsWidgetPrivate::ensureMargins() const
 {
    if (!margins) {
@@ -101,12 +95,7 @@ void QGraphicsWidgetPrivate::ensureMargins() const
    }
 }
 
-/*!
-    \internal
-
-     Ensures that windowFrameMargins is allocated.
-     This function must be called before any dereferencing.
-*/
+// must be called before any dereferencing
 void QGraphicsWidgetPrivate::ensureWindowFrameMargins() const
 {
    if (!windowFrameMargins) {
@@ -117,12 +106,7 @@ void QGraphicsWidgetPrivate::ensureWindowFrameMargins() const
    }
 }
 
-/*!
-    \internal
-
-     Ensures that windowData is allocated.
-     This function must be called before any dereferencing.
-*/
+// must be called before any dereferencing
 void QGraphicsWidgetPrivate::ensureWindowData()
 {
    if (!windowData) {
@@ -405,15 +389,6 @@ void QGraphicsWidgetPrivate::windowFrameMousePressEvent(QGraphicsSceneMouseEvent
    event->setAccepted(windowData->grabbedSection != Qt::NoSection);
 }
 
-/*!
-  Used to calculate the
-  Precondition:
-  \a widget should support either hfw or wfh
-
-  If \a heightForWidth is set to false, this function will query the width for height
-  instead. \a width will then be interpreted as height, \a minh and \a maxh will be interpreted
-  as minimum width and maximum width.
- */
 static qreal minimumHeightForWidth(qreal width, qreal minh, qreal maxh,
    const QGraphicsWidget *widget,
    bool heightForWidth = true)

@@ -57,7 +57,6 @@ QGraphicsWidget::QGraphicsWidget(QGraphicsItem *parent, Qt::WindowFlags flags)
    d->init(parent, flags);
 }
 
-// internal
 QGraphicsWidget::QGraphicsWidget(QGraphicsWidgetPrivate &dd, QGraphicsItem *parent, Qt::WindowFlags wFlags)
    : QGraphicsObject(dd, nullptr), QGraphicsLayoutItem(nullptr, false)
 {
@@ -65,7 +64,6 @@ QGraphicsWidget::QGraphicsWidget(QGraphicsWidgetPrivate &dd, QGraphicsItem *pare
    d->init(parent, wFlags);
 }
 
-// internal
 class QGraphicsWidgetStyles
 {
  public:
@@ -645,11 +643,9 @@ void QGraphicsWidget::updateGeometry()
          }
 
       } else {
-         /**
-          * If this is the topmost widget, post a LayoutRequest event to the widget.
-          * When the event is received, it will start flowing all the way down to the leaf
-          * widgets in one go. This will make a relayout flicker-free.
-          */
+         // If this is the topmost widget, post a LayoutRequest event to the widget.
+         // When the event is received, it will start flowing all the way down to the leaf
+         // widgets in one go. This will make a relayout flicker-free.
 
          if (QGraphicsLayout::instantInvalidatePropagation()) {
 
@@ -737,7 +733,6 @@ QVariant QGraphicsWidget::itemChange(GraphicsItemChange change, const QVariant &
    return QGraphicsItem::itemChange(change, value);
 }
 
-// internal
 QVariant QGraphicsWidget::propertyChange(const QString &propertyName, const QVariant &value)
 {
    (void) propertyName;

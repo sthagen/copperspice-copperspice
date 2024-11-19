@@ -32,10 +32,6 @@
 using namespace QPatternist;
 
 namespace QPatternist {
-/**
- * This operator is needed for the s_whenAxisNodeKindEmpty array. The @c int constructors
- * ensure we invoke another operator| such that we don't get an infinite loop.
- */
 static inline QXmlNodeModelIndex::NodeKind operator|(const QXmlNodeModelIndex::NodeKind &op1,
       const QXmlNodeModelIndex::NodeKind &op2)
 {
@@ -43,9 +39,9 @@ static inline QXmlNodeModelIndex::NodeKind operator|(const QXmlNodeModelIndex::N
 }
 }
 
-/**
- * @note The order is significant. It is of the same order as the values in QXmlNodeModelIndex::Axis is declared.
- */
+
+// order is significant. It is of the same order as the values in QXmlNodeModelIndex::Axis is declared.
+
 const QXmlNodeModelIndex::NodeKind AxisStep::s_whenAxisNodeKindEmpty[] = {
    QXmlNodeModelIndex::Attribute | QXmlNodeModelIndex::Text | QXmlNodeModelIndex::ProcessingInstruction | QXmlNodeModelIndex::Comment | QXmlNodeModelIndex::Namespace, // child;
    QXmlNodeModelIndex::Attribute | QXmlNodeModelIndex::Text | QXmlNodeModelIndex::ProcessingInstruction | QXmlNodeModelIndex::Comment | QXmlNodeModelIndex::Namespace, // descendant;
@@ -72,8 +68,7 @@ AxisStep::AxisStep(const QXmlNodeModelIndex::Axis a,
    m_nodeTest(nt)
 {
    Q_ASSERT(m_nodeTest);
-   Q_ASSERT_X(BuiltinTypes::node->xdtTypeMatches(m_nodeTest), Q_FUNC_INFO,
-              "We assume we're a node type.");
+   Q_ASSERT_X(BuiltinTypes::node->xdtTypeMatches(m_nodeTest), Q_FUNC_INFO, "Assume we are a node type.");
 }
 
 Item AxisStep::mapToItem(const QXmlNodeModelIndex &node,
@@ -94,8 +89,6 @@ Item AxisStep::mapToItem(const QXmlNodeModelIndex &node,
 
 Item::Iterator::Ptr AxisStep::evaluateSequence(const DynamicContext::Ptr &context) const
 {
-   /* If we don't have a focus, it's either a bug or our parent isn't a Path
-    * that have advanced the focus iterator. Hence, attempt to advance the focus on our own. */
    if (!context->contextItem()) {
       context->focusIterator()->next();
    }
@@ -109,8 +102,6 @@ Item::Iterator::Ptr AxisStep::evaluateSequence(const DynamicContext::Ptr &contex
 
 Item AxisStep::evaluateSingleton(const DynamicContext::Ptr &context) const
 {
-   /* If we don't have a focus, it's either a bug or our parent isn't a Path
-    * that have advanced the focus iterator. Hence, attempt to advance the focus on our own. */
    if (!context->contextItem()) {
       context->focusIterator()->next();
    }
@@ -137,7 +128,6 @@ Expression::Ptr AxisStep::typeCheck(const StaticContext::Ptr &context,
                                     const SequenceType::Ptr &reqType)
 {
    if (m_axis == QXmlNodeModelIndex::AxisParent && *m_nodeTest == *BuiltinTypes::node) {
-      /* We only rewrite parent::node() to ParentNodeAxis. */
       return rewrite(Expression::Ptr(new ParentNodeAxis()), context)->typeCheck(context, reqType);
    }
    /* TODO temporarily disabled
@@ -195,7 +185,6 @@ QString AxisStep::axisName(const QXmlNodeModelIndex::Axis axis)
    const char *result = nullptr;
 
    switch (axis) {
-      /* These must not be translated. */
       case QXmlNodeModelIndex::AxisAncestorOrSelf:
          result = "ancestor-or-self";
          break;

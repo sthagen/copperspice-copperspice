@@ -464,7 +464,6 @@ void QListView::resizeContents(int width, int height)
    d->setContentsSize(width, height);
 }
 
-// internal
 QSize QListView::contentsSize() const
 {
    Q_D(const QListView);
@@ -2131,12 +2130,12 @@ bool QListModeViewBase::doBatchedItemLayout(const QListViewLayoutInfo &info, int
       flowPositions.resize(flowPositions.count());
       segmentPositions.resize(segmentPositions.count());
       segmentStartRows.resize(segmentStartRows.count());
-      return true; // done
+      return true;
    }
-   return false; // not done
+
+   return false;
 }
 
-// internal only
 static inline int cs_vector_query(const QVector<int> &vector, int item, int start, int end)
 {
    int i = (start + end + 1) >> 1;

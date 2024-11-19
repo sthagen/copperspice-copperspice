@@ -92,7 +92,6 @@ QAbstractEventDispatcher::QAbstractEventDispatcher(QObject *parent)
    d_ptr->q_ptr = this;
 }
 
-// internal
 QAbstractEventDispatcher::QAbstractEventDispatcher(QAbstractEventDispatcherPrivate &dd, QObject *parent)
    : QObject(parent), d_ptr(&dd)
 {
@@ -117,13 +116,11 @@ int QAbstractEventDispatcher::registerTimer(int interval, Qt::TimerType timerTyp
    return id;
 }
 
-// ### Are these called when the _application_ starts/stops or just when the current _event loop_ starts/stops?
+// ### are these called when the _application_ starts/stops or just when the current _event loop_ starts/stops?
 
-// internal
 void QAbstractEventDispatcher::startingUp()
 { }
 
-// internal
 void QAbstractEventDispatcher::closingDown()
 { }
 

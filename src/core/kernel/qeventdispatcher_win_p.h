@@ -100,7 +100,7 @@ struct QSockFd {
 };
 using QSFDict = QHash<int, QSockFd>;
 
-struct WinTimerInfo {                           // internal timer info
+struct WinTimerInfo {
    QObject *dispatcher;
    int timerId;
    int interval;
@@ -137,7 +137,7 @@ class Q_CORE_EXPORT QEventDispatcherWin32Private : public QAbstractEventDispatch
    bool interrupt;
    bool closingDown;
 
-   // internal window handle used for socketnotifiers/timers/etc
+   // window handle is used for socketnotifiers and timers
    HWND internalHwnd;
    HHOOK getMessageHook;
 

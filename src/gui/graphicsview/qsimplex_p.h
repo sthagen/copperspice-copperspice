@@ -34,17 +34,6 @@ struct QSimplexVariable {
    int index;
 };
 
-/*
-  internal
-
-  Representation of a LP constraint like:
-
-    (c1 * X1) + (c2 * X2) + ...  =  K
-                             or <=  K
-                             or >=  K
-
-    Where (ci, Xi) are the pairs in "variables" and K the real "constant".
-*/
 struct QSimplexConstraint {
    enum Ratio {
       LessOrEqual = 0,
@@ -130,8 +119,6 @@ class QSimplex
 
    bool setConstraints(const QList<QSimplexConstraint *> &constraints);
    void setObjective(QSimplexConstraint *objective);
-
-   void dumpMatrix();
 
  private:
    enum SolverFactor {

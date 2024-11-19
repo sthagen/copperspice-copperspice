@@ -53,7 +53,7 @@ struct QEditorInfo {
    bool isStatic;
 };
 
-//  Fast associativity between Persistent editors and indices.
+// Fast associativity between Persistent editors and indices.
 typedef QHash<QWidget *, QPersistentModelIndex> QEditorIndexHash;
 typedef QHash<QPersistentModelIndex, QEditorInfo> QIndexEditorHash;
 
@@ -344,10 +344,6 @@ class QAbstractItemViewPrivate : public QAbstractScrollAreaPrivate
       return QPoint(q->horizontalOffset(), q->verticalOffset());
    }
 
-   /**
-    * For now, assume that we have few editors, if we need a more efficient implementation
-    * we should add a QMap<QAbstractItemDelegate*, int> member.
-    */
    int delegateRefCount(const QAbstractItemDelegate *delegate) const {
       int ref = 0;
       if (itemDelegate == delegate) {
@@ -444,20 +440,20 @@ class QAbstractItemViewPrivate : public QAbstractScrollAreaPrivate
    QBasicTimer autoScrollTimer;
    int autoScrollMargin;
    int autoScrollCount;
-   bool shouldScrollToCurrentOnShow; //used to know if we should scroll to current on show event
-   bool shouldClearStatusTip; //if there is a statustip currently shown that need to be cleared when leaving.
+   bool shouldScrollToCurrentOnShow;    // used to know if we should scroll to current on show event
+   bool shouldClearStatusTip;           // if there is a statustip currently shown that need to be cleared when leaving.
 
    bool alternatingColors;
 
    QSize iconSize;
    Qt::TextElideMode textElideMode;
 
-   QRegion updateRegion; // used for the internal update system
+   QRegion updateRegion;
    QPoint scrollDelayOffset;
 
    QBasicTimer updateTimer;
    QBasicTimer delayedEditing;
-   QBasicTimer delayedAutoScroll; //used when an item is clicked
+   QBasicTimer delayedAutoScroll;       // used when an item is clicked
    QBasicTimer delayedReset;
 
    QAbstractItemView::ScrollMode verticalScrollMode;

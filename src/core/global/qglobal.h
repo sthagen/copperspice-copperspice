@@ -759,13 +759,11 @@ constexpr inline bool qFuzzyCompare(float p1, float p2)
    return (qAbs(p1 - p2) <= 0.00001f * qMin(qAbs(p1), qAbs(p2)));
 }
 
-// internal
 constexpr inline bool qFuzzyIsNull(double d)
 {
    return qAbs(d) <= 0.000000000001;
 }
 
-// internal
 constexpr inline bool qFuzzyIsNull(float f)
 {
    return qAbs(f) <= 0.00001f;
@@ -1045,7 +1043,7 @@ typename Wrapper::pointer qGetPtrHelper(const Wrapper &p)
 #define QT_TR_NOOP(text)                            cs_mark_tr_old(text)
 #define QT_TRANSLATE_NOOP3(context, text, comment)  cs_mark_tr_old(text, comment)
 
-// used internally
+// used internally by copperspice
 #define QT_TRANSLATE_NOOP(context, text)            cs_mark_tr_old(text)
 
 // not used in copperspice

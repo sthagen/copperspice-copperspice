@@ -74,41 +74,6 @@ struct Tga32Reader : public TgaReader
     }
 };
 
-/*!
-    \class QTgaFile
-    \since 4.8
-    \internal
-
-    File data container for a TrueVision Graphics format file.
-
-    Format is as described here:
-    http://local.wasp.uwa.edu.au/~pbourke/dataformats/tga/
-    http://netghost.narod.ru/gff2/graphics/summary/tga.htm
-
-    Usage is:
-    \code
-    QTgaFile tga(myFile);
-    QImage tgaImage;
-    if (tga.isValid())
-        tgaImage = tga.readImage();
-    \endcode
-
-    The class is designed to handle sequential and non-sequential
-    sources, so during construction the mHeader is read.  Then during
-    the readImage() call the rest of the data is read.
-
-    After passing myFile to the constructor, if the QIODevice *myFile
-    is read, or has seek() called, the results are undefined - so don't
-    do that.
-*/
-
-/*!
-    Construct a new QTgaFile object getting data from \a device.
-
-    The object does not take ownership of the \a device, but until the
-    object is destroyed do not do any non-const operations, eg seek or
-    read on the device.
-*/
 QTgaFile::QTgaFile(QIODevice *device)
     : mDevice(device)
 {
@@ -171,28 +136,10 @@ QTgaFile::QTgaFile(QIODevice *device)
     }
 }
 
-/*!
-    \internal
-    Destroy the device, recovering any resources.
-*/
 QTgaFile::~QTgaFile()
 {
 }
 
-/*!
-    \internal
-    Reads an image file from the QTgaFile's device, and returns it.
-
-    This method seeks to the absolute position of the image data in the file,
-    so no assumptions are made about where the devices read pointer is when this
-    method is called.  For this reason only random access devices are supported.
-
-    If the constructor completed successfully, such that isValid() returns true,
-    then this method is likely to succeed, unless the file is somehow corrupted.
-
-    In the case that the read fails, the QImage returned will be null, such that
-    QImage::isNull() will be true.
-*/
 QImage QTgaFile::readImage()
 {
     if (!isValid())
