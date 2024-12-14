@@ -29,6 +29,7 @@
 #include <qstringfwd.h>
 
 namespace QPatternist {
+
 class Cardinality
 {
  public:
@@ -72,16 +73,13 @@ class Cardinality
    }
 
    static Cardinality fromCount(const Count count) {
-      Q_ASSERT_X(count > -1, Q_FUNC_INFO,
-                 "A count smaller than 0 makes no sense.");
+      Q_ASSERT_X(count > -1, Q_FUNC_INFO, "Count smaller than 0 is not allowed");
       return Cardinality(count, count);
    }
 
    static Cardinality fromRange(const Count minimum, const Count maximum) {
-      Q_ASSERT_X(minimum > -1, Q_FUNC_INFO,
-                 "minimum should never be less than 0.");
-      Q_ASSERT_X(minimum <= maximum || maximum == -1, Q_FUNC_INFO,
-                 "minimum cannot be larger than maximum.");
+      Q_ASSERT_X(minimum > -1, Q_FUNC_INFO, "Minimum should never be less than 0");
+      Q_ASSERT_X(minimum <= maximum || maximum == -1, Q_FUNC_INFO, "Minimum can not be larger than maximum");
 
       return Cardinality(minimum, maximum);
    }
@@ -112,20 +110,22 @@ class Cardinality
    }
 
    Cardinality toWithoutMany() const {
-      return m_min == 0 ? Cardinality(0, 1)
-             : Cardinality(1, 1);
+      return m_min == 0 ? Cardinality(0, 1) : Cardinality(1, 1);
    }
 
    bool isMatch(const Cardinality &other) const {
       Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid.");
+
       if (other.m_min < m_min) {
          return false;
+
       } else {
-         /* Ok, we now know the minimum will always be ok. */
+         // we now know the minimum will always be ok.
+
          if (m_max == -1) {
-            return true;   /* We allow infinite, so anything can match. */
+            return true;                     // allow infinite so anything can match
          } else if (other.m_max == -1) {
-            return false;   /* other allows infinity, while we don't. */
+            return false;                    // other allows infinity while we do not
          } else {
             return m_max >= other.m_max;
          }
@@ -134,6 +134,7 @@ class Cardinality
 
    bool canMatch(const Cardinality &other) const {
       Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid.");
+
       if (m_max == -1) {
          return m_min <= other.m_min || other.m_max >= m_min || other.m_max == -1;
       } else {
@@ -141,41 +142,42 @@ class Cardinality
             return true;
          } else if (m_max > other.m_min) {
             return other.m_max >= m_min || other.m_max == -1;
-         } else { /* m_max < other.m_min */
+         } else {
+            // m_max < other.m_min
             return false;
          }
       }
    }
 
    bool isEmpty() const {
-      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "The cardinality is invalid.");
+      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "Cardinality is invalid");
       return m_min == 0 && m_max == 0;
    }
 
    bool isZeroOrOne() const {
-      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "The cardinality is invalid.");
+      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "Cardinality is invalid");
       return m_min == 0 && m_max == 1;
    }
 
    bool isExactlyOne() const {
-      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "The cardinality is invalid.");
+      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "Cardinality is invalid");
       return m_min == 1 && m_max == 1;
    }
 
    bool isOneOrMore() const {
-      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "The cardinality is invalid.");
+      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "Cardinality is invalid");
       return m_min > 0 && (m_max == -1 || m_max >= 1);
    }
 
    bool isExact() const {
-      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "The cardinality is invalid.");
+      Q_ASSERT_X(m_min != -1, Q_FUNC_INFO, "Cardinality is invalid");
       return m_min == m_max;
    }
 
    QString displayName(const CustomizeDisplayName explanation) const;
 
    Cardinality operator|(const Cardinality &other) const {
-      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid.");
+      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid");
       if (m_max == -1 || other.m_max == -1) {
          return Cardinality(qMin(m_min, other.m_min), -1);
       } else {
@@ -184,7 +186,7 @@ class Cardinality
    }
 
    Cardinality &operator|=(const Cardinality &other) {
-      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid.");
+      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid");
       m_min = qMin(m_min, other.m_min);
 
       if (m_max == -1) {
@@ -199,7 +201,7 @@ class Cardinality
    }
 
    Cardinality operator&(const Cardinality &other) const {
-      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid.");
+      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid");
 
       if (m_max < other.m_min) { /* No intersection. */
          return empty();
@@ -217,7 +219,7 @@ class Cardinality
    }
 
    Cardinality operator+(const Cardinality &other) const {
-      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid.");
+      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid");
       if (m_max == -1 || other.m_max == -1) {
          return Cardinality(m_min + other.m_min, -1);
       } else {
@@ -226,8 +228,7 @@ class Cardinality
    }
 
    Cardinality &operator+=(const Cardinality &other) {
-      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO,
-                 "One of the cardinalities are invalid.");
+      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid");
       m_min += other.m_min;
 
       if (m_max == -1) {
@@ -243,8 +244,8 @@ class Cardinality
    }
 
    Cardinality operator*(const Cardinality &other) const {
-      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO,
-                 "One of the cardinalities are invalid.");
+      Q_ASSERT_X(m_min != -1 && other.m_min != -1, Q_FUNC_INFO, "One of the cardinalities are invalid");
+
       if (m_max == -1 || other.m_max == -1) {
          return Cardinality(m_min * other.m_min, -1);
       } else {
@@ -253,7 +254,7 @@ class Cardinality
    }
 
    Cardinality &operator=(const Cardinality &other) {
-      Q_ASSERT_X(this != &other, Q_FUNC_INFO, "Assigning to oneself makes no sense.");
+      Q_ASSERT_X(this != &other, Q_FUNC_INFO, "Assigning to oneself is not allowed");
       m_min = other.m_min;
       m_max = other.m_max;
       return *this;
@@ -277,6 +278,7 @@ class Cardinality
    Count m_min;
    Count m_max;
 };
+
 }
 
 #endif

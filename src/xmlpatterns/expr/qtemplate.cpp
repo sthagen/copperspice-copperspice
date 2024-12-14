@@ -71,9 +71,7 @@ DynamicContext::Ptr Template::createContext(const TemplateInvoker *const invoker
 
    const DynamicContext::TemplateParameterHash::iterator end(sewnTogether.end());
 
-   for (DynamicContext::TemplateParameterHash::iterator it(sewnTogether.begin());
-         it != end;
-         ++it) {
+   for (DynamicContext::TemplateParameterHash::iterator it(sewnTogether.begin()); it != end; ++it) {
       Expression::Ptr &param = it.value();
 
       WithParam::Ptr &withParam = withParams[it.key()];
@@ -88,7 +86,6 @@ DynamicContext::Ptr Template::createContext(const TemplateInvoker *const invoker
    }
 
    if (isCallTemplate) {
-
       const WithParam::Hash::const_iterator end(withParams.constEnd());
 
       for (WithParam::Hash::const_iterator it(withParams.constBegin()); it != end; ++it) {
@@ -126,25 +123,32 @@ Expression::Properties Template::properties() const
    // having issues with recursion detection, this path currently loops infintely.
    return Expression::DisableElimination;
 
+/*
+   // dead code, out for right now
+
    Expression::Properties collect(body->properties());
 
    VariableDeclaration::List::const_iterator end(templateParameters.constEnd());
 
-   for (VariableDeclaration::List::const_iterator it(templateParameters.constBegin());
-         it != end;
-         ++it) {
+   for (VariableDeclaration::List::const_iterator it(templateParameters.constBegin()); it != end; ++it) {
       if ((*it)->expression()) {
          collect |= (*it)->expression()->properties();
       }
    }
 
    return collect & (Expression::RequiresFocus | Expression::IsEvaluated | Expression::DisableElimination);
+*/
+
 }
 
 Expression::Properties Template::dependencies() const
 {
    // having issues with recursion detection, this path currently loops infintely.
    return Expression::DisableElimination;
+
+
+/*
+   // dead code, out for right now
 
    Expression::Properties collect(body->dependencies());
 
@@ -159,4 +163,6 @@ Expression::Properties Template::dependencies() const
    }
 
    return collect & (Expression::RequiresFocus | Expression::IsEvaluated | Expression::DisableElimination);
+*/
+
 }

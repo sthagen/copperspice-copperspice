@@ -35,42 +35,15 @@
 #include <qprimitives_p.h>
 
 namespace QPatternist {
+
 class NamePool : public QSharedData
 {
  public:
    typedef QExplicitlySharedDataPointer<NamePool> Ptr;
 
- private:
-   friend class StandardNamespaces;
-
-   enum {
-      NoSuchValue         = -1,
-      StandardNamespaceCount = 11,
-      StandardPrefixCount = 9,
-      StandardLocalNameCount = 141
-   };
-
-   QVector<QString> m_prefixes;
-   QVector<QString> m_namespaces;
-   QVector<QString> m_localNames;
-
-   QHash<QString, QXmlName::PrefixCode> m_prefixMapping;
-
-   QHash<QString, QXmlName::NamespaceCode> m_namespaceMapping;
-
-   QHash<QString, QXmlName::LocalNameCode> m_localNameMapping;
-
-   enum DefaultCapacities {
-      DefaultPrefixCapacity = 10,
-      DefaultURICapacity = DefaultPrefixCapacity,
-      DefaultLocalNameCapacity = 60
-   };
-
- public:
    NamePool();
 
    QXmlName allocateBinding(const QString &prefix, const QString &uri);
-
    QXmlName allocateQName(const QString &uri, const QString &localName, const QString &prefix = QString());
 
    QXmlName allocateQName(const QXmlName::NamespaceCode uri, const QString &ln) {
@@ -126,6 +99,25 @@ class NamePool : public QSharedData
    QXmlName fromClarkName(const QString &clarkName);
 
  private:
+   static constexpr const int NoSuchValue            = -1;
+   static constexpr const int StandardNamespaceCount = 11;
+   static constexpr const int StandardPrefixCount    = 9;
+   static constexpr const int StandardLocalNameCount = 141;
+
+   enum DefaultCapacities {
+      DefaultPrefixCapacity    = 10,
+      DefaultURICapacity       = DefaultPrefixCapacity,
+      DefaultLocalNameCapacity = 60
+   };
+
+   QVector<QString> m_prefixes;
+   QVector<QString> m_namespaces;
+   QVector<QString> m_localNames;
+
+   QHash<QString, QXmlName::PrefixCode> m_prefixMapping;
+   QHash<QString, QXmlName::NamespaceCode> m_namespaceMapping;
+   QHash<QString, QXmlName::LocalNameCode> m_localNameMapping;
+
    QXmlName::NamespaceCode unlockedAllocateNamespace(const QString &uri);
    QXmlName::LocalNameCode unlockedAllocateLocalName(const QString &ln);
    QXmlName::PrefixCode unlockedAllocatePrefix(const QString &prefix);
@@ -136,6 +128,8 @@ class NamePool : public QSharedData
    const QString &displayPrefix(const QXmlName::NamespaceCode nc) const;
 
    mutable QReadWriteLock lock;
+
+   friend class StandardNamespaces;
 };
 
 static inline QString formatKeyword(const NamePool::Ptr &np, const QXmlName name)
@@ -163,7 +157,6 @@ class StandardNamespaces
    };
 };
 
-// const QString * a = &*qset.insert("foo");
 class StandardLocalNames
 {
  public:
@@ -327,6 +320,7 @@ class StandardPrefixes
       StopNamespaceInheritance
    };
 };
+
 }
 
 inline QXmlName::LocalNameCode QXmlName::localName() const
@@ -379,11 +373,8 @@ inline QXmlName::Code QXmlName::code() const
    return m_qNameCode;
 }
 
-inline QXmlName::QXmlName(const NamespaceCode uri,
-                          const LocalNameCode ln,
-                          const PrefixCode p) : m_qNameCode((uri << NamespaceOffset) +
-                                   (ln << LocalNameOffset)  +
-                                   (p << PrefixOffset))
+inline QXmlName::QXmlName(const NamespaceCode uri, const LocalNameCode ln, const PrefixCode p)
+   : m_qNameCode((uri << NamespaceOffset) + (ln << LocalNameOffset)  + (p << PrefixOffset))
 {
    Q_ASSERT_X(p <= MaximumPrefixes, "",
               csPrintable(QString("NamePool prefix limits: max is %1, therefore %2 exceeds.").formatArg(MaximumPrefixes).formatArg(p)));
