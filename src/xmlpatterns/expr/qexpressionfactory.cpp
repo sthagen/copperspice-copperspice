@@ -256,9 +256,8 @@ Expression::Ptr ExpressionFactory::createExpression(const Tokenizer::Ptr &tokeni
          }
       }
 
-      /* Type check and compress template rules. */
+      // Type check and compress template rules
       {
-         QHashIterator<QXmlName, TemplateMode::Ptr> it(info->templateRules);
 
          /* Since a pattern can exist of AxisStep, its typeCheck() stage
           * requires a focus. In the case that we're invoked with a name but
@@ -267,29 +266,27 @@ Expression::Ptr ExpressionFactory::createExpression(const Tokenizer::Ptr &tokeni
           * expression, since the static type of the pattern is used as the
           * static type for the focus of the template body. */
          StaticContext::Ptr patternContext;
+
          if (hasExternalFocus) {
             patternContext = context;
          } else {
             patternContext = StaticContext::Ptr(new StaticFocusContext(BuiltinTypes::node, context));
          }
 
-         /* For each template pattern. */
-         while (it.hasNext()) {
-            it.next();
-            const TemplateMode::Ptr &mode = it.value();
+         // For each template pattern
+         for (const auto &mode : info->templateRules) {
             const int len = mode->templatePatterns.count();
+
             TemplatePattern::ID currentTemplateID = -1;
             bool hasDoneItOnce = false;
 
-            /* For each template pattern. */
             for (int i = 0; i < len; ++i) {
-               /* We can't use references for these two members, since we
-                * assign to them. */
+               // do not use references for these two members since we assign to them
+
                const TemplatePattern::Ptr &pattern = mode->templatePatterns.at(i);
                Expression::Ptr matchPattern(pattern->matchPattern());
 
-               processTemplateRule(pattern->templateTarget()->body,
-                                   pattern, mode->name(), TemplateInitial);
+               processTemplateRule(pattern->templateTarget()->body, pattern, mode->name(), TemplateInitial);
 
                matchPattern = matchPattern->typeCheck(patternContext, CommonSequenceTypes::ZeroOrMoreItems);
                matchPattern = matchPattern->compress(patternContext);
@@ -298,22 +295,21 @@ Expression::Ptr ExpressionFactory::createExpression(const Tokenizer::Ptr &tokeni
                if (currentTemplateID == -1 && hasDoneItOnce) {
                   currentTemplateID = pattern->id();
                   continue;
+
                } else if (currentTemplateID == pattern->id() && hasDoneItOnce) {
                   hasDoneItOnce = false;
                   continue;
+
                }
 
                hasDoneItOnce = true;
                currentTemplateID = pattern->id();
                Expression::Ptr body(pattern->templateTarget()->body);
 
-               /* Patterns for a new template has started, we must
-                * deal with the body & parameters. */
+               // Patterns for a new template has started, we must deal with the body & parameters
                {
-                  /* TODO type is wrong, it has to be the union of all
-                   * patterns. */
-                  const StaticContext::Ptr focusContext(new StaticFocusContext(matchPattern->staticType()->itemType(),
-                                                        context));
+                  // type may be incorrect, it should be the union of all patterns
+                  const StaticContext::Ptr focusContext(new StaticFocusContext(matchPattern->staticType()->itemType(), context));
                   body = body->typeCheck(focusContext, CommonSequenceTypes::ZeroOrMoreItems);
 
                   pattern->templateTarget()->compileParameters(focusContext);

@@ -45,10 +45,8 @@ typename XsdStateMachine<TransitionType>::StateId XsdStateMachine<TransitionType
 #if defined(QT_DEBUG)
    // make sure we don't have two start states
    if (type == StartState) {
-      QHashIterator<StateId, StateType> it(m_states);
-      while (it.hasNext()) {
-         it.next();
-         Q_ASSERT(it.value() != StartState && it.value() != StartEndState);
+      for (auto item : m_states) {
+         Q_ASSERT(item != StartState && item != StartEndState);
       }
    }
 #endif
@@ -87,8 +85,10 @@ void XsdStateMachine<TransitionType>::reset()
 {
    // reset the machine to the start state
    QHashIterator<StateId, StateType> it(m_states);
+
    while (it.hasNext()) {
       it.next();
+
       if (it.value() == StartState || it.value() == StartEndState) {
          m_currentState = it.key();
          return;
@@ -296,11 +296,11 @@ typename XsdStateMachine<TransitionType>::StateId XsdStateMachine<TransitionType
    // state, in that case our new DFA state will be a
    // Start or End state as well
    StateType type = InternalState;
-   QSetIterator<StateId> it(nfaState);
+
    bool hasStartState = false;
-   bool hasEndState = false;
-   while (it.hasNext()) {
-      const StateId state = it.next();
+   bool hasEndState   = false;
+
+   for (const auto &state : nfaState) {
       if (m_states.value(state) == EndState) {
          hasEndState = true;
       } else if (m_states.value(state) == StartState) {
@@ -364,15 +364,11 @@ XsdStateMachine<TransitionType> XsdStateMachine<TransitionType>::toDFA() const
       // mark as processed
       isMarked.append(states);
 
-      // select a list of all inputs that are possible for
-      // the 'states' set
+      // select a list of all inputs that are possible for the 'states' set
       QList<TransitionType> input;
 
-      {
-         QSetIterator<StateId> it(states);
-         while (it.hasNext()) {
-            input << m_transitions.value(it.next()).keys();
-         }
+      for (const auto &item : states ) {
+         input.append(m_transitions.value(item).keys());
       }
 
       // get the state in DFA that corresponds to the 'states' set in the NFA

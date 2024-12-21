@@ -24,10 +24,11 @@
 #ifndef QXsdStateMachine_P_H
 #define QXsdStateMachine_P_H
 
+#include <qhash.h>
+#include <qset.h>
+#include <qtextstream.h>
+
 #include <qnamepool_p.h>
-#include <QHash>
-#include <QSet>
-#include <QTextStream>
 
 class QIODevice;
 
@@ -124,13 +125,11 @@ class XsdStateMachine
       return result;
    }
 
-   QSet<StateId> move(const QSet<StateId> &states, TransitionType input) const {
+   QSet<StateId> move(const QSet<StateId> &states, TransitionType input) const
+   {
       QSet<StateId> result;
 
-      QSetIterator<StateId> it(states);
-      while (it.hasNext()) { // iterate over all given states
-         const StateId state = it.next();
-
+      for (const auto &state : states) {
          // get the transition table for the current state
          const QHash<TransitionType, QVector<StateId> > transitions = m_transitions.value(state);
 
