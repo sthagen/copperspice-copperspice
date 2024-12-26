@@ -4573,7 +4573,7 @@ CopperSpice is licensed under the GNU LGPL version 2.1</source>
         <location filename="../src/gui/printing/qprintdialog_unix.cpp" line="806"/>
         <source>%1 is a directory.
 Please choose a different file name.</source>
-        <translation>%1 je priečinok. 
+        <translation>%1 je priečinok.
 Prosím zvoľte iný názov súboru.</translation>
     </message>
     <message>
@@ -7417,13 +7417,13 @@ Please turn one of those options off.</source>
     </message>
     <message>
         <location filename="../src/xmlpatterns/api/qcoloringmessagehandler.cpp" line="100"/>
-        <source>Error %1 in %2, at line %3, column %4 
+        <source>Error %1 in %2, at line %3, column %4
    Description: %5</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/xmlpatterns/api/qcoloringmessagehandler.cpp" line="108"/>
-        <source>Error %1 in &quot;%2&quot; 
+        <source>Error %1 in %2
    Description: %3</source>
         <translation type="unfinished"></translation>
     </message>
