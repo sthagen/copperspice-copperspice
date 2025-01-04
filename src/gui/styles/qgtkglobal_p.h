@@ -24,12 +24,9 @@
 #ifndef QGTKGLOBAL_P_H
 #define QGTKGLOBAL_P_H
 
-
 #include <qglobal.h>
 
 #if !defined(QT_NO_STYLE_GTK)
-
-#undef signals // Collides with GTK symbols
 
 #include <gtk/gtk.h>
 
