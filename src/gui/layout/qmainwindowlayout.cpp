@@ -2536,26 +2536,27 @@ void QMainWindowLayout::hover(QLayoutItem *widgetItem, const QPoint &mousePos)
       // Check if we are over another floating dock widget
       QVarLengthArray<QWidget *, 10> candidates;
 
-      for (QObject *c : parentWidget()->children()) {
-         QWidget *w = qobject_cast<QWidget *>(c);
+      for (QObject *childWidget : parentWidget()->children()) {
+         QWidget *w = qobject_cast<QWidget *>(childWidget);
 
-         if (!w) {
+         if (! w) {
             continue;
          }
 
-         if (!qobject_cast<QDockWidget *>(w) && !qobject_cast<QDockWidgetGroupWindow *>(w)) {
+         if (! qobject_cast<QDockWidget *>(w) && ! qobject_cast<QDockWidgetGroupWindow *>(w)) {
             continue;
          }
 
-         if (w != widget && w->isTopLevel() && w->isVisible() && !w->isMinimized()) {
+         if (w != widget && w->isTopLevel() && w->isVisible() && ! w->isMinimized()) {
             candidates << w;
          }
 
          if (QDockWidgetGroupWindow *group = qobject_cast<QDockWidgetGroupWindow *>(w)) {
             // Sometimes, there are floating QDockWidget that have a QDockWidgetGroupWindow as a parent.
-            for (QObject *c : group->children()) {
-               if (QDockWidget *dw = qobject_cast<QDockWidget *>(c)) {
-                  if (dw != widget && dw->isFloating() && dw->isVisible() && !dw->isMinimized()) {
+
+            for (QObject *childGroup : group->children()) {
+               if (QDockWidget *dw = qobject_cast<QDockWidget *>(childGroup)) {
+                  if (dw != widget && dw->isFloating() && dw->isVisible() && ! dw->isMinimized()) {
                      candidates << dw;
                   }
                }
