@@ -35,21 +35,21 @@ public:
     enum TimingFunctionType {
         LinearFunction, CubicBezierFunction, StepsFunction
     };
-    
+
     virtual ~TimingFunction() { }
-    
+
     bool isLinearTimingFunction() const { return m_type == LinearFunction; }
     bool isCubicBezierTimingFunction() const { return m_type == CubicBezierFunction; }
     bool isStepsTimingFunction() const { return m_type == StepsFunction; }
-    
-    virtual bool operator==(const TimingFunction& other) = 0;
+
+    virtual bool operator==(const TimingFunction& other) const = 0;
 
 protected:
     TimingFunction(TimingFunctionType type)
         : m_type(type)
     {
     }
-    
+
     TimingFunctionType m_type;
 };
 
@@ -59,21 +59,21 @@ public:
     {
         return adoptRef(new LinearTimingFunction);
     }
-    
+
     ~LinearTimingFunction() { }
-    
-    virtual bool operator==(const TimingFunction& other)
+
+    bool operator==(const TimingFunction& other) const override
     {
         return other.isLinearTimingFunction();
     }
-    
+
 private:
     LinearTimingFunction()
         : TimingFunction(LinearFunction)
     {
     }
 };
-    
+
 class CubicBezierTimingFunction : public TimingFunction {
 public:
     static PassRefPtr<CubicBezierTimingFunction> create(double x1, double y1, double x2, double y2)
@@ -87,8 +87,8 @@ public:
     }
 
     ~CubicBezierTimingFunction() { }
-    
-    virtual bool operator==(const TimingFunction& other)
+
+    bool operator==(const TimingFunction& other) const override
     {
         if (other.isCubicBezierTimingFunction()) {
             const CubicBezierTimingFunction* ctf = static_cast<const CubicBezierTimingFunction*>(&other);
@@ -101,13 +101,13 @@ public:
     double y1() const { return m_y1; }
     double x2() const { return m_x2; }
     double y2() const { return m_y2; }
-    
+
     static const CubicBezierTimingFunction* defaultTimingFunction()
     {
         static const CubicBezierTimingFunction* dtf = create().leakRef();
         return dtf;
     }
-    
+
 private:
     CubicBezierTimingFunction(double x1 = 0.25, double y1 = 0.1, double x2 = 0.25, double y2 = 1.0)
         : TimingFunction(CubicBezierFunction)
@@ -130,10 +130,10 @@ public:
     {
         return adoptRef(new StepsTimingFunction(steps, stepAtStart));
     }
-    
+
     ~StepsTimingFunction() { }
-    
-    virtual bool operator==(const TimingFunction& other)
+
+    bool operator==(const TimingFunction& other) const override
     {
         if (other.isStepsTimingFunction()) {
             const StepsTimingFunction* stf = static_cast<const StepsTimingFunction*>(&other);
@@ -141,10 +141,10 @@ public:
         }
         return false;
     }
-    
+
     int numberOfSteps() const { return m_steps; }
     bool stepAtStart() const { return m_stepAtStart; }
-    
+
 private:
     StepsTimingFunction(int steps, bool stepAtStart)
         : TimingFunction(StepsFunction)
@@ -152,11 +152,11 @@ private:
         , m_stepAtStart(stepAtStart)
     {
     }
-    
+
     int m_steps;
     bool m_stepAtStart;
 };
-    
+
 } // namespace WebCore
 
 #endif // TimingFunction_h

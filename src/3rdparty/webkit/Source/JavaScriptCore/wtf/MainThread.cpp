@@ -49,9 +49,10 @@ struct FunctionWithContext {
         : function(function)
         , context(context)
         , syncFlag(syncFlag)
-    { 
+    {
     }
-    bool operator == (const FunctionWithContext& o)
+
+    bool operator == (const FunctionWithContext& o) const
     {
         return function == o.function
             && context == o.context
@@ -209,7 +210,7 @@ void cancelCallOnMainThread(MainThreadFunction* function, void* context)
     FunctionWithContextFinder pred(FunctionWithContext(function, context));
 
     while (true) {
-        // We must redefine 'i' each pass, because the itererator's operator= 
+        // We must redefine 'i' each pass, because the itererator's operator=
         // requires 'this' to be valid, and remove() invalidates all iterators
         FunctionQueue::iterator i(functionQueue().findIf(pred));
         if (i == functionQueue().end())
