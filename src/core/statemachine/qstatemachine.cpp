@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -2383,7 +2383,7 @@ void QStateMachinePrivate::registerEventTransition(QEventTransition *transition)
 
    QList<QPointer<QObject>> &eventFilters = CSInternalEvents::get_m_EventFilters(object);
 
-   if (! eventFilters.contains(q)) {
+   if (! eventFilters.contains(QPointer<QObject>(q))) {
       object->installEventFilter(q);
    }
 

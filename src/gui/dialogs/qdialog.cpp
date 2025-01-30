@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -292,7 +292,8 @@ int QDialog::exec()
 
    show();
 
-   QPointer<QDialog> guard = this;
+   QPointer<QDialog> guard = QPointer<QDialog>(this);
+
    if (d->nativeDialogInUse) {
       d->platformHelper()->exec();
    } else {
@@ -377,7 +378,7 @@ void QDialog::contextMenuEvent(QContextMenuEvent *e)
    }
 
    if (w != nullptr) {
-      QPointer<QMenu> p = new QMenu(this);
+      QPointer<QMenu> p = QPointer<QMenu>(new QMenu(this));
       QAction *wt = p.data()->addAction(tr("What's This?"));
 
       if (p.data()->exec(e->globalPos()) == wt) {
@@ -439,7 +440,7 @@ void QDialog::closeEvent(QCloseEvent *e)
 #endif
 
    if (isVisible()) {
-      QPointer<QObject> that = this;
+      QPointer<QObject> that = QPointer<QObject>(this);
       reject();
 
       if (that && isVisible()) {

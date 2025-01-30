@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -686,8 +686,8 @@ void QObject::installEventFilter(QObject *obj)
    // clean up unused items in the list
    m_eventFilters.removeAll( QPointer<QObject>(nullptr) );
 
-   m_eventFilters.removeAll(obj);
-   m_eventFilters.prepend(obj);
+   m_eventFilters.removeAll(QPointer<QObject>(obj));
+   m_eventFilters.prepend(QPointer<QObject>(obj));
 }
 
 bool QObject::inherits(const QString8 &classname) const

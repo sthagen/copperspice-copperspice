@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -765,7 +765,7 @@ void QAction::activate(ActionEvent event)
    Q_D(QAction);
 
    if (event == Trigger) {
-      QPointer<QObject> guard = this;
+      QPointer<QObject> guard = QPointer<QObject>(this);
 
       if (d->checkable) {
          // the checked action of an exclusive group cannot be  unchecked

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -984,7 +984,7 @@ void QSocks5SocketEnginePrivate::_q_emitPendingReadNotification()
    readNotificationPending = false;
    if (readNotificationEnabled) {
       QSOCKS5_D_DEBUG << "emitting readNotification";
-      QPointer<QSocks5SocketEngine> qq = q;
+      QPointer<QSocks5SocketEngine> qq = QPointer<QSocks5SocketEngine>(q);
       emit q->readNotification();
       if (!qq) {
          return;

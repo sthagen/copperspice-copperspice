@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -1193,14 +1193,14 @@ void QMenuBarPrivate::handleReparent()
    // At this point, newParent is the next one to be added to newParents
    while (newParent && newParent != newWindow) {
       //install event filters all the way up to (excluding) the window
-      newParents.append(newParent);
+      newParents.append(QPointer<QWidget>(newParent));
       newParent->installEventFilter(q);
       newParent = newParent->parentWidget();
    }
 
    if (newParent && newWindow) {
       // Install the event filter on the window
-      newParents.append(newParent);
+      newParents.append(QPointer<QWidget>(newParent));
       newParent->installEventFilter(q);
    }
    oldParents = newParents;

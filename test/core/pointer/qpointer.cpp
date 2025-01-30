@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * This file is part of CopperSpice.
 *
@@ -50,8 +50,8 @@ TEST_CASE("QPointer destructor", "[qpointer]")
 {
    QObject *obj = new QObject;
 
-   QPointer<QObject> p1 = obj;
-   QPointer<QObject> p2 = obj;
+   QPointer<QObject> p1 = QPointer<QObject>(obj);
+   QPointer<QObject> p2 = QPointer<QObject>(obj);
 
    REQUIRE(p1 == QPointer<QObject>(obj));
    REQUIRE(p2 == QPointer<QObject>(obj));

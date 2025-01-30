@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -185,8 +185,8 @@ void QAbstractTransition::setTargetStates(const QList<QAbstractState *> &targets
    } else {
       QVector<QPointer<QAbstractState>> copy(d->targetStates);
 
-      for (int i = 0; i < targets.size(); ++i) {
-         sameList = sameList && copy.removeOne(targets.at(i));
+      for (auto item : targets) {
+         sameList = sameList && copy.removeOne(QPointer<QAbstractState>(item));
 
          if (! sameList) {
             break;   // we now know the lists are not the same, so stop the loop

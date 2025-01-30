@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -242,7 +242,7 @@ void QScrollBar::contextMenuEvent(QContextMenuEvent *event)
 
 #ifndef QT_NO_MENU
    bool horiz = HORIZONTAL;
-   QPointer<QMenu> menu = new QMenu(this);
+   QPointer<QMenu> menu = QPointer<QMenu>(new QMenu(this));
    QAction *actScrollHere = menu->addAction(tr("Scroll here"));
 
    menu->addSeparator();

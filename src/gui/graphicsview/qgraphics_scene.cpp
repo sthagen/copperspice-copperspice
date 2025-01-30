@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2024 Barbara Geller
-* Copyright (c) 2012-2024 Ansel Sermersheim
+* Copyright (c) 2012-2025 Barbara Geller
+* Copyright (c) 2012-2025 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -5154,8 +5154,9 @@ void QGraphicsScenePrivate::gestureEventHandler(QGestureEvent *event)
 
       // deliver conflicted gestures as override events AND remember initial gesture targets
       if (! conflictedGestures.isEmpty()) {
-         for (int i = 0; i < cachedTargetItems.size(); ++i) {
-            QPointer<QGraphicsObject> item = cachedTargetItems.at(i);
+
+         for (auto element : cachedTargetItems) {
+            QPointer<QGraphicsObject> item = QPointer<QGraphicsObject>(element);
 
             // get gestures to deliver to the current item
             QSet<QGesture *> gestures = conflictedGestures & cachedItemGestures.value(item.data());
@@ -5263,7 +5264,8 @@ void QGraphicsScenePrivate::gestureEventHandler(QGestureEvent *event)
    std::sort(cachedTargetItems.begin(), cachedTargetItems.end(), qt_closestItemFirst);
 
    for (int i = 0; i < cachedTargetItems.size(); ++i) {
-      QPointer<QGraphicsObject> receiver = cachedTargetItems.at(i);
+      QPointer<QGraphicsObject> receiver = QPointer<QGraphicsObject>(cachedTargetItems.at(i));
+
       QSet<QGesture *> gestures = undeliveredGestures & cachedItemGestures.value(receiver.data());
       gestures -= cachedAlreadyDeliveredGestures.value(receiver.data());
 
