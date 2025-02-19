@@ -17,18 +17,17 @@
 *
 ***********************************************************************/
 
-#ifndef CS_CATCH_DEFINES_H
-#define CS_CATCH_DEFINES_H
+#include <qtextobject.h>
 
-#include <version>
+#include <cs_catch2.h>
 
-#if ( __cpp_lib_chrono >= 201907L ) ||  \
-    ( defined(__GNUC__) && (__GNUC__ >= 11) ) ||  \
-    ( defined(__apple_build_version__) && (__clang_major__>= 15) ) ||  \
-    ( defined(__clang__) && (__clang_major__ >= 14) )
+TEST_CASE("QTextBlock::iterator traits", "[qtextblock::iterator]")
+{
+   REQUIRE(std::is_copy_constructible_v<QTextBlock::iterator> == true);
+   REQUIRE(std::is_move_constructible_v<QTextBlock::iterator> == true);
 
-#define CS_CHRONO_TYPES_CATCH_YMD
+   REQUIRE(std::is_copy_assignable_v<QTextBlock::iterator> == true);
+   REQUIRE(std::is_move_assignable_v<QTextBlock::iterator> == true);
 
-#endif
-
-#endif
+   REQUIRE(std::has_virtual_destructor_v<QTextBlock::iterator> == false);
+}

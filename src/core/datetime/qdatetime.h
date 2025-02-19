@@ -30,13 +30,11 @@
 #include <qtimezone.h>
 
 #include <chrono>
+#include <compare>
 #include <limits>
 #include <optional>
 
 class QDateTimePrivate;
-#if __cpp_lib_chrono >= 201907L
-#define CS_CHRONO_TYPES
-#endif
 
 #ifdef Q_OS_DARWIN
 
@@ -77,13 +75,9 @@ class Q_CORE_EXPORT QDate
    [[nodiscard]] QDate addMonths(qint64 months) const;
    [[nodiscard]] QDate addYears(qint64 years) const;
 
-#if defined(CS_CHRONO_TYPES) || defined(CS_CHRONO_TYPES_CATCH)
-   // c++20
-
    [[nodiscard]] QDate addDuration(std::chrono::days days) const {
       return addDays(days.count());
    }
-#endif
 
    qint64 daysTo(const QDate &value) const;
 
@@ -124,51 +118,20 @@ class Q_CORE_EXPORT QDate
 
    QDateTime startOfDay(const QTimeZone &zone = default_tz()) const;
 
-#if defined(CS_CHRONO_TYPES) || defined(CS_CHRONO_TYPES_CATCH)
-   // c++20
-
    std::chrono::sys_days toStdSysDays() const {
       const QDate epoch(EPOCH_JD);
       return std::chrono::sys_days(std::chrono::days(epoch.daysTo(*this)));
    }
-#endif
 
-   bool operator==(const QDate &other) const {
-      return jd == other.jd;
-   }
-
-   bool operator!=(const QDate &other) const {
-      return jd != other.jd;
-   }
-
-   bool operator<(const QDate &other) const {
-      return jd < other.jd;
-   }
-
-   bool operator<=(const QDate &other) const {
-      return jd <= other.jd;
-   }
-
-   bool operator>(const QDate &other) const {
-      return jd > other.jd;
-   }
-
-   bool operator>=(const QDate &other) const {
-      return jd >= other.jd;
-   }
+   auto operator<=>(const QDate &other) const = default;
 
    static QDate currentDate();
-
    static const QTimeZone &default_tz();
-
-#if defined(CS_CHRONO_TYPES) || defined(CS_CHRONO_TYPES_CATCH)
-   // c++20
 
    static QDate fromStdSysDays(const std::chrono::sys_days &days) {
       const QDate epoch(EPOCH_JD);
       return epoch.addDays(days.time_since_epoch().count());
    }
-#endif
 
    static QDate fromString(const QString &str, Qt::DateFormat format = Qt::TextDate);
    static QDate fromString(const QString &str, const QString &format);
@@ -245,29 +208,7 @@ class Q_CORE_EXPORT QTime
    QString toString(Qt::DateFormat format = Qt::TextDate) const;
    QString toString(const QString &format) const;
 
-   bool operator==(const QTime &value) const {
-      return mds == value.mds;
-   }
-
-   bool operator!=(const QTime &value) const {
-      return mds != value.mds;
-   }
-
-   bool operator<(const QTime &value) const {
-      return mds < value.mds;
-   }
-
-   bool operator<=(const QTime &value) const {
-      return mds <= value.mds;
-   }
-
-   bool operator>(const QTime &value) const {
-      return mds > value.mds;
-   }
-
-   bool operator>=(const QTime &value) const {
-      return mds >= value.mds;
-   }
+   auto operator<=>(const QTime &other) const = default;
 
    static QTime fromMSecsSinceStartOfDay(int msecs) {
       return QTime(msecs);
@@ -384,23 +325,23 @@ class Q_CORE_EXPORT QDateTime
 
    QDateTime toUTC() const;
 
-   bool operator==(const QDateTime &value) const;
+   bool operator==(const QDateTime &other) const;
+   bool operator<(const QDateTime &other) const;
 
-   bool operator!=(const QDateTime &value) const {
-      return !(*this == value);
+   bool operator!=(const QDateTime &other) const {
+      return ! (*this == other);
    }
 
-   bool operator<(const QDateTime &value) const;
-   bool operator<=(const QDateTime &value) const {
-      return !(value < *this);
+   bool operator<=(const QDateTime &other) const {
+      return ! (other < *this);
    }
 
-   bool operator>(const QDateTime &value) const {
-      return value < *this;
+   bool operator>(const QDateTime &other) const {
+      return other < *this;
    }
 
-   bool operator>=(const QDateTime &value) const {
-      return !(*this < value);
+   bool operator>=(const QDateTime &other) const {
+      return ! (*this < other);
    }
 
    static QDateTime currentDateTime(const QTimeZone &zone = QDate::default_tz());
@@ -417,14 +358,10 @@ class Q_CORE_EXPORT QDateTime
    static QDateTime fromString(const QString &str, Qt::DateFormat format = Qt::TextDate);
    static QDateTime fromString(const QString &str, const QString &format);
 
-#if defined(CS_CHRONO_TYPES) || defined(CS_CHRONO_TYPES_CATCH)
-   // c++20
-
    static QDateTime fromStdLocalTime(const std::chrono::local_time<std::chrono::milliseconds> &msecs) {
       QDateTime retval(QDate(1970, 1, 1), QTime(0, 0, 0));
       return retval.addMSecs(msecs.time_since_epoch().count());
    }
-#endif
 
 #if defined(Q_OS_DARWIN)
    static QDateTime fromCFDate(CFDateRef date);

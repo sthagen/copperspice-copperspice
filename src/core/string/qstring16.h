@@ -50,80 +50,6 @@ class QStringParser;
 class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
 {
    public:
-      class iterator : public CsString::CsString_utf16::iterator
-      {
-       public:
-         using value_type  = QChar32;
-         using pointer     = QChar32 *;
-         using reference   = QChar32 &;
-
-         iterator() = default;
-
-         iterator(CsString::CsString_utf16::iterator iter)
-            : CsString::CsString_utf16::iterator(std::move(iter)) {
-         }
-
-         // operators
-         QChar32 operator*() const {
-            return CsString::CsString_utf16::iterator::operator*();
-         }
-
-         QChar32Arrow operator->() const {
-            return CsString::CsString_utf16::iterator::operator->();
-         }
-
-         QChar32 operator[](size_type n) const {
-            return CsString::CsString_utf16::iterator::operator[](n);
-         }
-
-         bool operator==(iterator other) const {
-            return CsString::CsString_utf16::iterator::operator==(other);
-         }
-
-         bool operator!=(iterator other) const {
-            return CsString::CsString_utf16::iterator::operator!=(other);
-         }
-
-         iterator &operator+=(size_type n) {
-            CsString::CsString_utf16::iterator::operator+=(n);
-            return *this;
-         }
-
-         iterator &operator-=(size_type n) {
-            CsString::CsString_utf16::iterator::operator-=(n);
-            return *this;
-         }
-
-         iterator operator+(size_type n) const {
-            return CsString::CsString_utf16::iterator::operator+(n);
-         }
-
-         iterator operator-(size_type n) const {
-            return CsString::CsString_utf16::iterator::operator-(n);
-         }
-
-         size_type operator-(iterator other) const {
-            return CsString::CsString_utf16::iterator::operator-(other);
-         }
-
-         iterator &operator++() {
-            CsString::CsString_utf16::iterator::operator++();
-            return *this;
-         }
-
-         iterator operator++(int n) {
-            return CsString::CsString_utf16::iterator::operator++(n);
-         }
-
-         iterator &operator--() {
-            CsString::CsString_utf16::iterator::operator--();
-            return *this;
-         }
-
-         iterator operator--(int n) {
-            return CsString::CsString_utf16::iterator::operator--(n);
-         }
-      };
 
       class const_iterator : public CsString::CsString_utf16::const_iterator
       {
@@ -135,10 +61,6 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
          const_iterator() = default;
 
          const_iterator(CsString::CsString_utf16::const_iterator iter)
-            : CsString::CsString_utf16::const_iterator(std::move(iter)) {
-         }
-
-         const_iterator(iterator iter)
             : CsString::CsString_utf16::const_iterator(std::move(iter)) {
          }
 
@@ -155,12 +77,8 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
             return CsString::CsString_utf16::const_iterator::operator[](n);
          }
 
-         bool operator==(const_iterator other) const {
+         bool operator==(const const_iterator &other) const {
             return CsString::CsString_utf16::const_iterator::operator==(other);
-         }
-
-         bool operator!=(const_iterator other) const {
-            return CsString::CsString_utf16::const_iterator::operator!=(other);
          }
 
          const_iterator &operator+=(size_type n) {
@@ -204,6 +122,13 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
          }
       };
 
+      // strings can not be modified in place, disallow using an iterator to write to a string
+      // all iterators are actually a const_itertor
+
+#if ! defined (CS_DOXYPRESS)
+      using iterator = const_iterator;
+#endif
+
       enum NormalizationForm {
          NormalizationForm_D,
          NormalizationForm_C,
@@ -221,8 +146,28 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
 
       QString16() = default;
 
+      QString16(const char8_t *data)
+        : CsString::CsString_utf16(data)
+      { }
+
+      QString16(const char8_t *data, size_type size)
+         : CsString::CsString_utf16(data, size)
+      { }
+
       QString16(const char16_t *data)
          : CsString::CsString_utf16(data)
+      { }
+
+      QString16(const char16_t *data, size_type size)
+         : CsString::CsString_utf16(data, size)
+      { }
+
+      QString16(const char32_t *data)
+         : CsString::CsString_utf16(data)
+      { }
+
+      QString16(const char32_t *data, size_type size)
+         : CsString::CsString_utf16(data, size)
       { }
 
       QString16(const QString16 &other) = default;
@@ -291,15 +236,6 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
 
       ~QString16() = default;
 
-#if defined(__cpp_char8_t)
-      // support new data type added in C++20
-
-      inline QString16(const char8_t *str);
-      inline QString16(const char8_t *str, size_type size);
-
-      static inline QString16 fromUtf8(const char8_t *str, size_type numOfChars = -1);
-#endif
-
       using CsString::CsString_utf16::append;
       using CsString::CsString_utf16::operator=;
       using CsString::CsString_utf16::operator+=;
@@ -317,6 +253,21 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
 
       QString16 &append(const QString16 &other)  {
          CsString::CsString_utf16::append(other);
+         return *this;
+      }
+
+      QString16 &append(const char8_t *data)  {
+         CsString::CsString_utf16::append(data);
+         return *this;
+      }
+
+      QString16 &append(const char16_t *data)  {
+         CsString::CsString_utf16::append(data);
+         return *this;
+      }
+
+      QString16 &append(const char32_t *data)  {
+         CsString::CsString_utf16::append(data);
          return *this;
       }
 
@@ -797,6 +748,7 @@ class Q_CORE_EXPORT QString16 : public CsString::CsString_utf16
       static QString16 fromLatin1(const QByteArray &str);
       static QString16 fromLatin1(const char *data, size_type numOfChars = -1);
 
+      static QString16 fromUtf8(const char8_t *data, size_type numOfChars = -1);
       static QString16 fromUtf8(const QByteArray &str);
       static QString16 fromUtf8(const char *data, size_type numOfChars = -1);
       static QString16 fromUtf8(const QString8 &str);
@@ -1213,24 +1165,5 @@ inline void swap(QString16 &a, QString16 &b) {
 
 QString16 cs_internal_string_normalize(const QString16 &data, QString16::NormalizationForm mode,
                   QChar32::UnicodeVersion version, int from);
-
-#if defined(__cpp_char8_t)
-   // support new data type added in C++20
-
-   inline QString16::QString16(const char8_t *str)
-   {
-      *this = QString16::fromUtf8(str, -1);
-   }
-
-   inline QString16::QString16(const char8_t *str, size_type size)
-   {
-      *this = QString16::fromUtf8(str, size);
-   }
-
-   inline QString16 QString16::fromUtf8(const char8_t *str, size_type numOfChars)
-   {
-      return CsString::CsString_utf16::fromUtf8(str, numOfChars);
-   }
-#endif
 
 #endif
