@@ -112,8 +112,9 @@ class QDockAreaLayoutInfo
    };
 
    QDockAreaLayoutInfo();
-   QDockAreaLayoutInfo(const int *_sep, QInternal::DockPosition _dockPos, Qt::Orientation _o,
-      int tbhape, QMainWindow *window);
+
+   QDockAreaLayoutInfo(const int *sep, QInternal::DockPosition dockPos, Qt::Orientation orientation,
+         int tbhape, QMainWindow *window);
 
    QSize minimumSize() const;
    QSize maximumSize() const;
@@ -149,6 +150,7 @@ class QDockAreaLayoutInfo
    bool isEmpty() const;
    bool hasFixedSize() const;
    QList<int> findSeparator(const QPoint &pos) const;
+
    int next(int idx) const;
    int prev(int idx) const;
 
@@ -167,27 +169,14 @@ class QDockAreaLayoutInfo
 
    QMainWindowLayout *mainWindowLayout() const;
 
-   const int *sep;
-   mutable QVector<QWidget *> separatorWidgets;
-   QInternal::DockPosition dockPos;
-   Qt::Orientation o;
-   QRect rect;
-   QMainWindow *mainWindow;
-   QList<QDockAreaLayoutItem> item_list;
-
 #ifndef QT_NO_TABBAR
    void updateSeparatorWidgets() const;
    QSet<QWidget *> usedSeparatorWidgets() const;
-#endif
 
-#ifndef QT_NO_TABBAR
    quintptr currentTabId() const;
    void setCurrentTab(QWidget *widget);
    void setCurrentTabId(quintptr id);
    QRect tabContentRect() const;
-   bool tabbed;
-   QTabBar *tabBar;
-   int tabBarShape;
 
    void reparentWidgets(QWidget *p);
    bool updateTabBar() const;
@@ -198,6 +187,23 @@ class QDockAreaLayoutInfo
    QSet<QTabBar *> usedTabBars() const;
    int tabIndexToListIndex(int) const;
    void moveTab(int from, int to);
+#endif
+
+   const int *m_dockAreaSep;
+   mutable QVector<QWidget *> separatorWidgets;
+   QInternal::DockPosition m_dockPos;
+
+   Qt::Orientation m_dockAreaOrientation;
+
+   QMainWindow *mainWindow;
+
+   QRect m_dockAreaInfoRect;
+   QList<QDockAreaLayoutItem> item_list;
+
+#ifndef QT_NO_TABBAR
+   bool tabbed;
+   QTabBar *tabBar;
+   int tabBarShape;
 #endif
 };
 
@@ -212,20 +218,7 @@ class QDockAreaLayout
       FloatingDockWidgetTabMarker = 0xf9
    };
 
-   Qt::DockWidgetArea corners[4];      // use a Qt::Corner for indexing
-   QRect rect;
-   QLayoutItem *centralWidgetItem;
-   QMainWindow *mainWindow;
-   QRect centralWidgetRect;
    QDockAreaLayout(QMainWindow *win);
-   QDockAreaLayoutInfo docks[4];
-   int sep;                            // separator extent
-
-   // determines if we should use the sizehint for the dock areas
-   // (true until the layout is restored or the central widget is set)
-   bool fallbackToSizeHints;
-
-   mutable QVector<QWidget *> separatorWidgets;
 
    bool isValid() const;
 
@@ -262,15 +255,13 @@ class QDockAreaLayout
 
    void addDockWidget(QInternal::DockPosition pos, QDockWidget *dockWidget, Qt::Orientation orientation);
    bool restoreDockWidget(QDockWidget *dockWidget);
-   void splitDockWidget(QDockWidget *after, QDockWidget *dockWidget,
-      Qt::Orientation orientation);
+   void splitDockWidget(QDockWidget *after, QDockWidget *dockWidget, Qt::Orientation orientation);
    void tabifyDockWidget(QDockWidget *first, QDockWidget *second);
    void resizeDocks(const QList<QDockWidget *> &docks, const QList<int> &sizes, Qt::Orientation o);
 
    void apply(bool animate);
 
-   void paintSeparators(QPainter *p, QWidget *widget, const QRegion &clip,
-      const QPoint &mouse) const;
+   void paintSeparators(QPainter *p, QWidget *widget, const QRegion &clip, const QPoint &mouse) const;
    QRegion separatorRegion() const;
    int separatorMove(const QList<int> &separator, const QPoint &origin, const QPoint &dest);
 
@@ -295,6 +286,23 @@ class QDockAreaLayout
 #endif
 
    void styleChangedEvent();
+
+   // determines if we should use the sizehint for the dock areas
+   // (true until the layout is restored or the central widget is set)
+   bool fallbackToSizeHints;
+
+   mutable QVector<QWidget *> separatorWidgets;
+
+   Qt::DockWidgetArea corners[4];      // use a Qt::Corner for indexing
+
+   QRect m_dockAreaRect;
+   QLayoutItem *centralWidgetItem;
+   QMainWindow *mainWindow;
+   QRect centralWidgetRect;
+
+   QDockAreaLayoutInfo m_docks[4];
+
+   int sep;                            // separator extent
 };
 
 #endif // QT_NO_QDOCKWIDGET

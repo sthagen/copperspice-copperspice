@@ -97,11 +97,11 @@ class Q_GUI_EXPORT QPlatformPixmap
    virtual QImage *buffer();
 
    int width() const {
-      return w;
+      return m_pixmap_w;
    }
 
    int height() const {
-      return h;
+      return m_pixmap_h;
    }
 
    int colorCount() const {
@@ -109,7 +109,7 @@ class Q_GUI_EXPORT QPlatformPixmap
    }
 
    int depth() const {
-      return d;
+      return m_pixmap_d;
    }
 
    bool isNull() const {
@@ -131,15 +131,17 @@ class Q_GUI_EXPORT QPlatformPixmap
  protected:
    void setSerialNumber(int serNo);
    void setDetachNumber(int detNo);
-   int w;
-   int h;
-   int d;
+
+   int m_pixmap_w;
+   int m_pixmap_h;
+   int m_pixmap_d;
+
    bool is_null;
 
  private:
    friend class QPixmap;
-   friend class QImagePixmapCleanupHooks; // Needs to set is_cached
-   friend class QOpenGLTextureCache; //Needs to check the reference count
+   friend class QImagePixmapCleanupHooks;          // Needs to set is_cached
+   friend class QOpenGLTextureCache;               // Needs to check the reference count
    friend class QExplicitlySharedDataPointer<QPlatformPixmap>;
 
    QAtomicInt ref;

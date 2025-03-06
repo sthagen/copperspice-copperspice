@@ -83,7 +83,10 @@ class QBoxLayoutPrivate : public QLayoutPrivate
    Q_DECLARE_PUBLIC(QBoxLayout)
 
  public:
-   QBoxLayoutPrivate() : hfwWidth(-1), dirty(true), spacing(-1) { }
+   QBoxLayoutPrivate()
+      : hfwWidth(-1), m_spacing(-1), dirty(true)
+   { }
+
    ~QBoxLayoutPrivate();
 
    void setDirty() {
@@ -92,21 +95,6 @@ class QBoxLayoutPrivate : public QLayoutPrivate
       hfwHeight = -1;
       dirty = true;
    }
-
-   QList<QBoxLayoutItem *> list;
-   QVector<QLayoutStruct> geomArray;
-   int hfwWidth;
-   int hfwHeight;
-   int hfwMinHeight;
-   QSize sizeHint;
-   QSize minSize;
-   QSize maxSize;
-   int leftMargin, topMargin, rightMargin, bottomMargin;
-   Qt::Orientations expanding;
-   uint hasHfw : 1;
-   uint dirty : 1;
-   QBoxLayout::Direction dir;
-   int spacing;
 
    void deleteAll() {
       while (! list.isEmpty()) {
@@ -119,6 +107,31 @@ class QBoxLayoutPrivate : public QLayoutPrivate
 
    void effectiveMargins(int *left, int *top, int *right, int *bottom) const;
    QLayoutItem *replaceAt(int index, QLayoutItem *) override;
+
+   QList<QBoxLayoutItem *> list;
+   QVector<QLayoutStruct> geomArray;
+
+   int hfwWidth;
+   int hfwHeight;
+   int hfwMinHeight;
+
+   int m_spacing;
+
+   int leftMargin;
+   int topMargin;
+   int rightMargin;
+   int bottomMargin;
+
+   uint hasHfw : 1;
+   uint dirty : 1;
+
+   QSize sizeHint;
+   QSize minSize;
+   QSize maxSize;
+
+   Qt::Orientations expanding;
+
+   QBoxLayout::Direction dir;
 };
 
 QBoxLayoutPrivate::~QBoxLayoutPrivate()
@@ -487,29 +500,31 @@ int QBoxLayout::spacing() const
 {
    Q_D(const QBoxLayout);
 
-   if (d->spacing >= 0) {
-      return d->spacing;
+   if (d->m_spacing >= 0) {
+      return d->m_spacing;
 
    } else {
       return qSmartSpacing(this, d->dir == LeftToRight || d->dir == RightToLeft
-            ? QStyle::PM_LayoutHorizontalSpacing
-            : QStyle::PM_LayoutVerticalSpacing);
+            ? QStyle::PM_LayoutHorizontalSpacing : QStyle::PM_LayoutVerticalSpacing);
    }
 }
 
 void QBoxLayout::setSpacing(int spacing)
 {
    Q_D(QBoxLayout);
-   d->spacing = spacing;
+
+   d->m_spacing = spacing;
    invalidate();
 }
 
 QSize QBoxLayout::sizeHint() const
 {
    Q_D(const QBoxLayout);
+
    if (d->dirty) {
       const_cast<QBoxLayout *>(this)->d_func()->setupGeom();
    }
+
    return d->sizeHint;
 }
 

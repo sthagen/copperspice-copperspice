@@ -282,9 +282,10 @@ void QToolBarLayout::updateGeomArray() const
    Qt::Orientation o = tb->orientation();
 
    that->minSize = QSize(0, 0);
-   that->hint = QSize(0, 0);
+   that->m_toolBarLayoutHint = QSize(0, 0);
+
    rperp(o, that->minSize) = style->pixelMetric(QStyle::PM_ToolBarHandleExtent, &opt, tb);
-   rperp(o, that->hint) = style->pixelMetric(QStyle::PM_ToolBarHandleExtent, &opt, tb);
+   rperp(o, that->m_toolBarLayoutHint) = style->pixelMetric(QStyle::PM_ToolBarHandleExtent, &opt, tb);
 
    that->expanding = false;
    that->empty = false;
@@ -321,11 +322,11 @@ void QToolBarLayout::updateGeomArray() const
          rperp(o, that->minSize) = qMax(s, perp(o, min));
 
          // only add spacing before item, not before the first one
-         rpick(o, that->hint) += (count == 0 ? 0 : spacing) + pick(o, hint);
+         rpick(o, that->m_toolBarLayoutHint) += (count == 0 ? 0 : spacing) + pick(o, hint);
 
+         s = perp(o, that->m_toolBarLayoutHint);
+         rperp(o, that->m_toolBarLayoutHint) = qMax(s, perp(o, hint));
 
-         s = perp(o, that->hint);
-         rperp(o, that->hint) = qMax(s, perp(o, hint));
          ++count;
       }
 
@@ -353,8 +354,8 @@ void QToolBarLayout::updateGeomArray() const
       rpick(o, that->minSize) += spacing + extensionExtent;
    }
 
-   rpick(o, that->hint) += handleExtent;
-   that->hint += QSize(2 * margin, 2 * margin);
+   rpick(o, that->m_toolBarLayoutHint) += handleExtent;
+   that->m_toolBarLayoutHint += QSize(2 * margin, 2 * margin);
    that->dirty = false;
 }
 
@@ -620,13 +621,13 @@ bool QToolBarLayout::layoutActions(const QSize &size)
 
    extension->setEnabled(popupMenu == nullptr || !extensionMenuContainsOnlyWidgetActions);
 
-   // we have to do the show/hide here, because it triggers more calls to setGeometry :(
-   for (int i = 0; i < showWidgets.count(); ++i) {
-      showWidgets.at(i)->show();
+   // do the show/hide here because it triggers more calls to setGeometry
+   for (int j = 0; j < showWidgets.count(); ++j) {
+      showWidgets.at(j)->show();
    }
 
-   for (int i = 0; i < hideWidgets.count(); ++i) {
-      hideWidgets.at(i)->hide();
+   for (int j = 0; j < hideWidgets.count(); ++j) {
+      hideWidgets.at(j)->hide();
    }
 
    return ranOutOfSpace;
@@ -689,7 +690,7 @@ QSize QToolBarLayout::expandedSize(const QSize &size) const
    int i = 0;
 
    while (i < items.count()) {
-      int count = 0;
+      int countItems = 0;
 
       int size     = 0;
       int prev     = -1;
@@ -700,11 +701,11 @@ QSize QToolBarLayout::expandedSize(const QSize &size) const
             continue;
          }
 
-         int newSize = size + (count == 0 ? 0 : spacing) + geomArray[i].minimumSize;
+         int newSize = size + (countItems == 0 ? 0 : spacing) + geomArray[i].minimumSize;
          rowHeight = qMax(rowHeight, perp(o, items.at(i)->sizeHint()));
 
          if (prev != -1 && newSize > space) {
-            if (count > 1 && size + spacing + extensionExtent > space) {
+            if (countItems > 1 && size + spacing + extensionExtent > space) {
                size -= spacing + geomArray[prev].minimumSize;
                i = prev;
             }
@@ -714,7 +715,8 @@ QSize QToolBarLayout::expandedSize(const QSize &size) const
 
          size = newSize;
          prev = i;
-         ++count;
+
+         ++countItems;
       }
 
       w = qMax(size, w);
@@ -785,7 +787,8 @@ QSize QToolBarLayout::sizeHint() const
    if (dirty) {
       updateGeomArray();
    }
-   return hint;
+
+   return m_toolBarLayoutHint;
 }
 
 QToolBarItem *QToolBarLayout::createItem(QAction *action)
