@@ -171,7 +171,7 @@ ByteStream::ByteStream(QByteArray *byteArray, bool fileBacking)
 }
 
 ByteStream::ByteStream(bool fileBacking)
-   : dev(new QBuffer(&ba)), fileBackingEnabled(fileBacking), fileBackingActive(false), handleDirty(false)
+   : dev(new QBuffer(&m_pdfByteArray)), fileBackingEnabled(fileBacking), fileBackingActive(false), handleDirty(false)
 {
    dev->open(QIODevice::ReadWrite);
 }
@@ -318,7 +318,7 @@ void ByteStream::prepareBuffer()
       delete dev;
       dev = newFile;
 
-      ba.clear();
+      m_pdfByteArray.clear();
       fileBackingActive = true;
    }
 
@@ -1163,7 +1163,7 @@ void QPdfEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
 
    const QTextItemInt &ti = static_cast<const QTextItemInt &>(textItem);
 
-   Q_ASSERT(ti.fontEngine->type() != QFontEngine::Multi);
+   Q_ASSERT(ti.m_textItemFontEngine->type() != QFontEngine::Multi);
 
    d->drawTextItem(p, ti);
    d->hasPen = hp;
@@ -1911,8 +1911,8 @@ void QPdfEnginePrivate::embedFont(QFontSubset *font)
 
    {
       addXrefEntry(fontObject);
-      QByteArray font;
-      QPdf::ByteStream s(&font);
+      QByteArray newFont;
+      QPdf::ByteStream s(&newFont);
 
       s << "<< /Type /Font\n"
             "/Subtype /Type0\n"
@@ -1923,7 +1923,7 @@ void QPdfEnginePrivate::embedFont(QFontSubset *font)
             ">>\n"
             "endobj\n";
 
-      write(font);
+      write(newFont);
    }
 }
 
@@ -2710,7 +2710,7 @@ int QPdfEnginePrivate::addConstantAlphaObject(int brushAlpha, int penAlpha)
    return object;
 }
 
-int QPdfEnginePrivate::addBrushPattern(const QTransform &m, bool *specifyColor, int *gStateObject)
+int QPdfEnginePrivate::addBrushPattern(const QTransform &transformMatrix, bool *specifyColor, int *gStateObject)
 {
    int paintType = 2;             // Uncolored tiling
    int w = 8;
@@ -2719,7 +2719,7 @@ int QPdfEnginePrivate::addBrushPattern(const QTransform &m, bool *specifyColor, 
    *specifyColor = true;
    *gStateObject = 0;
 
-   QTransform matrix = m;
+   QTransform matrix = transformMatrix;
    matrix.translate(brushOrigin.x(), brushOrigin.y());
    matrix = matrix * pageMatrix();
 
@@ -2757,10 +2757,10 @@ int QPdfEnginePrivate::addBrushPattern(const QTransform &m, bool *specifyColor, 
          w = image.width();
          h = image.height();
 
-         QTransform m(w, 0, 0, -h, 0, h);
+         QTransform newMatrix(w, 0, 0, -h, 0, h);
          QPdf::ByteStream s(&pattern);
 
-         s << QPdf::generateMatrix(m);
+         s << QPdf::generateMatrix(newMatrix);
          s << "/Im" << imageObject << " Do\n";
       }
    }
@@ -2966,9 +2966,9 @@ void QPdfEnginePrivate::drawTextItem(const QPointF &p, const QTextItemInt &ti)
    Q_Q(QPdfEngine);
 
    if (ti.charFormat.isAnchor()) {
-      qreal size      = ti.fontEngine->fontDef.pixelSize;
-      int synthesized = ti.fontEngine->synthesized();
-      qreal stretch   = synthesized & QFontEngine::SynthesizedStretch ? ti.fontEngine->fontDef.stretch / 100. : 1.;
+      qreal size      = ti.m_textItemFontEngine->fontDef.pixelSize;
+      int synthesized = ti.m_textItemFontEngine->synthesized();
+      qreal stretch   = synthesized & QFontEngine::SynthesizedStretch ? ti.m_textItemFontEngine->fontDef.stretch / 100. : 1.;
 
       QTransform trans;
 
@@ -3018,7 +3018,7 @@ void QPdfEnginePrivate::drawTextItem(const QPointF &p, const QTextItemInt &ti)
       }
    }
 
-   QFontEngine *fe = ti.fontEngine;
+   QFontEngine *fe = ti.m_textItemFontEngine;
 
    QFontEngine::FaceId face_id = fe->faceId();
    bool noEmbed = false;
@@ -3050,20 +3050,20 @@ void QPdfEnginePrivate::drawTextItem(const QPointF &p, const QTextItemInt &ti)
       currentPage->fonts.append(font->object_id);
    }
 
-   qreal size = ti.fontEngine->fontDef.pixelSize;
+   qreal size = ti.m_textItemFontEngine->fontDef.pixelSize;
 
    QVarLengthArray<glyph_t> glyphs;
    QVarLengthArray<QFixedPoint> positions;
    QTransform m = QTransform::fromTranslate(p.x(), p.y());
 
-   ti.fontEngine->getGlyphPositions(ti.glyphs, m, ti.flags, glyphs, positions);
+   ti.m_textItemFontEngine->getGlyphPositions(ti.glyphs, m, ti.flags, glyphs, positions);
 
    if (glyphs.size() == 0) {
       return;
    }
 
-   int synthesized = ti.fontEngine->synthesized();
-   qreal stretch   = synthesized & QFontEngine::SynthesizedStretch ? ti.fontEngine->fontDef.stretch / 100. : 1.;
+   int synthesized = ti.m_textItemFontEngine->synthesized();
+   qreal stretch   = synthesized & QFontEngine::SynthesizedStretch ? ti.m_textItemFontEngine->fontDef.stretch / 100. : 1.;
 
    *currentPage << "BT\n"
          << "/F" << font->object_id << size << "Tf "

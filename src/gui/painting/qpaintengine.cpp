@@ -74,8 +74,8 @@ QFont QTextItem::font() const
 
 void QPaintEngine::syncState()
 {
-   Q_ASSERT(state);
-   updateState(*state);
+   Q_ASSERT(m_engineState);
+   updateState(*m_engineState);
 
    if (isExtended()) {
       static_cast<QPaintEngineEx *>(this)->sync();
@@ -306,14 +306,13 @@ void QPaintEngine::drawImage(const QRectF &r, const QImage &image, const QRectF 
 }
 
 QPaintEngine::QPaintEngine(PaintEngineFeatures caps)
-   : state(nullptr), gccaps(caps), active(0), selfDestruct(false), extended(false),
-     d_ptr(new QPaintEnginePrivate)
+   : m_engineState(nullptr), gccaps(caps), active(0), selfDestruct(false), extended(false), d_ptr(new QPaintEnginePrivate)
 {
    d_ptr->q_ptr = this;
 }
 
 QPaintEngine::QPaintEngine(QPaintEnginePrivate &dptr, PaintEngineFeatures caps)
-   : state(nullptr), gccaps(caps), active(0), selfDestruct(false), extended(false), d_ptr(&dptr)
+   : m_engineState(nullptr), gccaps(caps), active(0), selfDestruct(false), extended(false), d_ptr(&dptr)
 {
    d_ptr->q_ptr = this;
 }
@@ -324,7 +323,7 @@ QPaintEngine::~QPaintEngine()
 
 QPainter *QPaintEngine::painter() const
 {
-   return state ? state->painter() : nullptr;
+   return m_engineState ? m_engineState->painter() : nullptr;
 }
 
 void QPaintEngine::drawPath(const QPainterPath &)
@@ -342,7 +341,7 @@ void QPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
    path.setFillRule(Qt::WindingFill);
 
    if (ti.glyphs.numGlyphs) {
-      ti.fontEngine->addOutlineToPath(0, 0, ti.glyphs, &path, ti.flags);
+      ti.m_textItemFontEngine->addOutlineToPath(0, 0, ti.glyphs, &path, ti.flags);
    }
 
    if (! path.isEmpty()) {
@@ -364,7 +363,7 @@ void QPaintEngine::drawLines(const QLineF *linePtr, int lineCount)
       QPointF pts[2] = { linePtr[i].p1(), linePtr[i].p2() };
 
       if (pts[0] == pts[1]) {
-         if (state->pen().capStyle() != Qt::FlatCap) {
+         if (m_engineState->pen().capStyle() != Qt::FlatCap) {
             drawPoints(pts, 1);
          }
 
@@ -438,7 +437,7 @@ void QPaintEngine::drawRects(const QRect *rectPtr, int rectCount)
 
 void QPaintEngine::drawRects(const QRectF *rectPtr, int rectCount)
 {
-   if (hasFeature(PainterPaths) && ! state->penNeedsResolving() && ! state->brushNeedsResolving()) {
+   if (hasFeature(PainterPaths) && ! m_engineState->penNeedsResolving() && ! m_engineState->brushNeedsResolving()) {
       for (int i = 0; i < rectCount; ++i) {
          QPainterPath path;
          path.addRect(rectPtr[i]);
@@ -517,11 +516,12 @@ void QPaintEnginePrivate::drawBoxTextItem(const QPointF &p, const QTextItemInt &
    }
 
    // any fixes here should probably also be done in QFontEngineBox::draw
-   const int size = qRound(ti.fontEngine->ascent());
+   const int size = qRound(ti.m_textItemFontEngine->ascent());
+
    QVarLengthArray<QFixedPoint> positions;
    QVarLengthArray<glyph_t> glyphs;
    QTransform matrix = QTransform::fromTranslate(p.x(), p.y() - size);
-   ti.fontEngine->getGlyphPositions(ti.glyphs, matrix, ti.flags, glyphs, positions);
+   ti.m_textItemFontEngine->getGlyphPositions(ti.glyphs, matrix, ti.flags, glyphs, positions);
 
    if (glyphs.size() == 0) {
       return;
@@ -529,11 +529,12 @@ void QPaintEnginePrivate::drawBoxTextItem(const QPointF &p, const QTextItemInt &
 
    QSize s(size - 3, size - 3);
 
-   QPainter *painter = q_func()->state->painter();
+   QPainter *painter = q_func()->m_engineState->painter();
    painter->save();
    painter->setBrush(Qt::NoBrush);
+
    QPen pen = painter->pen();
-   pen.setWidthF(ti.fontEngine->lineThickness().toReal());
+   pen.setWidthF(ti.m_textItemFontEngine->lineThickness().toReal());
    painter->setPen(pen);
 
    for (int k = 0; k < positions.size(); k++) {

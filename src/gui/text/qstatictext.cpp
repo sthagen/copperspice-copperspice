@@ -203,7 +203,7 @@ class DrawTextItemRecorder: public QPaintEngine
       const QTextItemInt &ti = static_cast<const QTextItemInt &>(textItem);
 
       QStaticTextItem currentItem;
-      currentItem.setFontEngine(ti.fontEngine);
+      currentItem.setFontEngine(ti.m_textItemFontEngine);
 
       currentItem.font           = ti.font();
       currentItem.glyphOffset    = m_glyphs.size();    // Store offset into glyph pool
@@ -215,12 +215,12 @@ class DrawTextItemRecorder: public QPaintEngine
          currentItem.color = m_currentColor;
       }
 
-      QTransform matrix = m_untransformedCoordinates ? QTransform() : state->transform();
+      QTransform matrix = m_untransformedCoordinates ? QTransform() : m_engineState->transform();
       matrix.translate(position.x(), position.y());
 
       QVarLengthArray<glyph_t> glyphs;
       QVarLengthArray<QFixedPoint> positions;
-      ti.fontEngine->getGlyphPositions(ti.glyphs, matrix, ti.flags, glyphs, positions);
+      ti.m_textItemFontEngine->getGlyphPositions(ti.glyphs, matrix, ti.flags, glyphs, positions);
 
       int size = glyphs.size();
       Q_ASSERT(size == positions.size());
