@@ -1468,8 +1468,8 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
 #ifdef Q_OS_DARWIN
       if (actualFontEngine->type() == QFontEngine::Mac) {
 
-         if (actualFontEngine->fontDef.stretch != 100) {
-            QFixed stretch = QFixed(int(actualFontEngine->fontDef.stretch)) / QFixed(100);
+         if (actualFontEngine->m_fontDef.stretch != 100) {
+            QFixed stretch = QFixed(int(actualFontEngine->m_fontDef.stretch)) / QFixed(100);
 
             for (uint i = 0; i < num_glyphs; ++i) {
                g.advances[i] *= stretch;
@@ -1479,7 +1479,7 @@ int QTextEngine::shapeTextWithHarfbuzz(const QScriptItem &si, QStringView str, Q
 #endif
 
       if (! actualFontEngine->supportsSubPixelPositions() ||
-                  (actualFontEngine->fontDef.styleStrategy & QFont::ForceIntegerMetrics)) {
+            (actualFontEngine->m_fontDef.styleStrategy & QFont::ForceIntegerMetrics)) {
          for (uint i = 0; i < num_glyphs; ++i) {
             g.advances[i] = g.advances[i].round();
          }
@@ -3820,9 +3820,9 @@ QTextItemInt::QTextItemInt(const QScriptItem &si, QFont *font, const QTextCharFo
 }
 
 QTextItemInt::QTextItemInt(const QGlyphLayout &g, QFont *font, QString::const_iterator begin,
-      const QString::const_iterator end, QFontEngine *fe, const QTextCharFormat &format)
+      const QString::const_iterator end, QFontEngine *fontEngine, const QTextCharFormat &format)
    : flags(Qt::EmptyFlag), justified(false), underlineStyle(QTextCharFormat::NoUnderline), charFormat(format),
-     m_iter(begin), m_end(end), logClusters(nullptr), f(font),  glyphs(g), m_textItemFontEngine(fe)
+     m_iter(begin), m_end(end), logClusters(nullptr), f(font),  glyphs(g), m_textItemFontEngine(fontEngine)
 {
 }
 
