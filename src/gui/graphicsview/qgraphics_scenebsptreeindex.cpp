@@ -156,10 +156,12 @@ void QGraphicsSceneBspTreeIndexPrivate::resetIndex()
          unindexedItems << item;
       }
    }
+
    indexedItems.clear();
    freeItemIndexes.clear();
    untransformableItems.clear();
    regenerateIndex = true;
+
    startIndexTimer();
 }
 
@@ -203,9 +205,11 @@ void QGraphicsSceneBspTreeIndexPrivate::_q_updateSortCache()
 
    QList<QGraphicsItem *> topLevels;
    const QList<QGraphicsItem *> items = q->items();
+
    for (int i = 0; i < items.size(); ++i) {
       QGraphicsItem *item = items.at(i);
-      if (item && !item->d_ptr->parent) {
+
+      if (item && !item->d_ptr->m_itemParent) {
          topLevels << item;
       }
    }
@@ -312,6 +316,7 @@ QList<QGraphicsItem *> QGraphicsSceneBspTreeIndexPrivate::estimateItems(const QR
    bool onlyTopLevelItems)
 {
    Q_Q(QGraphicsSceneBspTreeIndex);
+
    if (onlyTopLevelItems && rect.isNull()) {
       return q->QGraphicsSceneIndex::estimateTopLevelItems(rect, order);
    }
@@ -321,10 +326,12 @@ QList<QGraphicsItem *> QGraphicsSceneBspTreeIndexPrivate::estimateItems(const QR
    Q_ASSERT(unindexedItems.isEmpty());
 
    QList<QGraphicsItem *> rectItems = bsp.items(rect, onlyTopLevelItems);
+
    if (onlyTopLevelItems) {
       for (int i = 0; i < untransformableItems.size(); ++i) {
          QGraphicsItem *item = untransformableItems.at(i);
-         if (!item->d_ptr->parent) {
+
+         if (!item->d_ptr->m_itemParent) {
             rectItems << item;
          } else {
             item = item->topLevelItem();
@@ -333,6 +340,7 @@ QList<QGraphicsItem *> QGraphicsSceneBspTreeIndexPrivate::estimateItems(const QR
             }
          }
       }
+
    } else {
       rectItems += untransformableItems;
    }

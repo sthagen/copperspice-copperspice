@@ -76,13 +76,12 @@ class Q_GUI_EXPORT QLayoutPrivate
    uint autoNewChild : 1;
 
    QLayout::SizeConstraint constraint;
-   QRect rect;
+   QRect m_layoutRect;
 
    QWidget *menubar;
 
  protected:
    QLayout *q_ptr;
-
 };
 
 #endif

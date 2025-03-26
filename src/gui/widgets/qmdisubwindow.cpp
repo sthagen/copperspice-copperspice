@@ -655,10 +655,12 @@ void ControlContainer::showButtonsInMenuBar(QMenuBar *menuBar)
    if (!menuBar || !mdiChild || mdiChild->windowFlags() & Qt::FramelessWindowHint) {
       return;
    }
+
    m_menuBar = menuBar;
 
    if (m_menuLabel && mdiChild->windowFlags() & Qt::WindowSystemMenuHint) {
       QWidget *currentLeft = menuBar->cornerWidget(Qt::TopLeftCorner);
+
       if (currentLeft) {
          currentLeft->hide();
       }
@@ -910,8 +912,8 @@ void QMdiSubWindowPrivate::removeBaseWidget()
    Q_Q(QMdiSubWindow);
    baseWidget->removeEventFilter(q);
 
-   if (layout) {
-      layout->removeWidget(baseWidget);
+   if (m_widgetLayout != nullptr) {
+      m_widgetLayout->removeWidget(baseWidget);
    }
 
    if (baseWidget->windowTitle() == q->windowTitle()) {
@@ -2160,12 +2162,12 @@ void QMdiSubWindowPrivate::setSizeGrip(QSizeGrip *newSizeGrip)
       return;
    }
 
-   if (layout && layout->indexOf(newSizeGrip) != -1) {
+   if (m_widgetLayout != nullptr && m_widgetLayout->indexOf(newSizeGrip) != -1) {
       return;
    }
 
    newSizeGrip->setFixedSize(newSizeGrip->sizeHint());
-   bool putSizeGripInLayout = layout ? true : false;
+   bool putSizeGripInLayout = m_widgetLayout ? true : false;
 
 #if defined(Q_OS_DARWIN) && !defined(QT_NO_STYLE_MAC)
    if (qobject_cast<QMacStyle *>(q->style())) {
@@ -2174,8 +2176,8 @@ void QMdiSubWindowPrivate::setSizeGrip(QSizeGrip *newSizeGrip)
 #endif
 
    if (putSizeGripInLayout) {
-      layout->addWidget(newSizeGrip);
-      layout->setAlignment(newSizeGrip, Qt::AlignBottom | Qt::AlignRight);
+      m_widgetLayout->addWidget(newSizeGrip);
+      m_widgetLayout->setAlignment(newSizeGrip, Qt::AlignBottom | Qt::AlignRight);
 
    } else {
       newSizeGrip->setParent(q);

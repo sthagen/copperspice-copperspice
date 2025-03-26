@@ -613,16 +613,18 @@ QRect QGraphicsViewPrivate::mapToViewRect(const QGraphicsItem *item, const QRect
          break;
       }
 
-      offset += itemd->pos;
+      offset += itemd->m_itemPos;
 
-   } while ((parentItem = itemd->parent));
+   } while ((parentItem = itemd->m_itemParent));
 
    QRectF baseRect = rect.translated(offset.x(), offset.y());
+
    if (! parentItem) {
       if (identityMatrix) {
          baseRect.translate(-scrollX, -scrollY);
          return baseRect.toAlignedRect();
       }
+
       return matrix.mapRect(baseRect).translated(-scrollX, -scrollY).toAlignedRect();
    }
 

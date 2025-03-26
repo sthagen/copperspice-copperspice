@@ -158,10 +158,11 @@ void QGraphicsWidget::resize(const QSizeF &size)
 
 void QGraphicsWidget::setGeometry(const QRectF &rect)
 {
-   QGraphicsWidgetPrivate *wd = QGraphicsWidget::d_func();
+   QGraphicsWidgetPrivate *wd    = QGraphicsWidget::d_func();
    QGraphicsLayoutItemPrivate *d = QGraphicsLayoutItem::d_ptr.data();
    QRectF newGeom;
-   QPointF oldPos = d->geom.topLeft();
+
+   QPointF oldPos = d->m_layoutItemRect.topLeft();
 
    if (!wd->inSetPos) {
       setAttribute(Qt::WA_Resized);
@@ -169,23 +170,24 @@ void QGraphicsWidget::setGeometry(const QRectF &rect)
       newGeom.setSize(rect.size().expandedTo(effectiveSizeHint(Qt::MinimumSize))
          .boundedTo(effectiveSizeHint(Qt::MaximumSize)));
 
-      if (newGeom == d->geom) {
+      if (newGeom == d->m_layoutItemRect) {
          goto relayoutChildrenAndReturn;
       }
 
       // setPos triggers ItemPositionChange, which can adjust position
       wd->inSetGeometry = 1;
       setPos(newGeom.topLeft());
+
       wd->inSetGeometry = 0;
       newGeom.moveTopLeft(pos());
 
-      if (newGeom == d->geom) {
+      if (newGeom == d->m_layoutItemRect) {
          goto relayoutChildrenAndReturn;
       }
 
       // Update and prepare to change the geometry (remove from index) if the size has changed.
-      if (wd->scene) {
-         if (rect.topLeft() == d->geom.topLeft()) {
+      if (wd->m_itemScene) {
+         if (rect.topLeft() == d->m_layoutItemRect.topLeft()) {
             prepareGeometryChange();
          }
       }
@@ -194,19 +196,23 @@ void QGraphicsWidget::setGeometry(const QRectF &rect)
    // Update the layout item geometry
    {
       bool moved = oldPos != pos();
+
       if (moved) {
          // Send move event.
          QGraphicsSceneMoveEvent event;
          event.setOldPos(oldPos);
          event.setNewPos(pos());
          QApplication::sendEvent(this, &event);
+
          if (wd->inSetPos) {
             //set the new pos
-            d->geom.moveTopLeft(pos());
+            d->m_layoutItemRect.moveTopLeft(pos());
+
             emit geometryChanged();
             goto relayoutChildrenAndReturn;
          }
       }
+
       QSizeF oldSize = size();
       QGraphicsLayoutItem::setGeometry(newGeom);
 
@@ -577,10 +583,13 @@ void QGraphicsWidget::setStyle(QStyle *style)
 QFont QGraphicsWidget::font() const
 {
    Q_D(const QGraphicsWidget);
-   QFont fnt = d->font;
+
+   QFont fnt = d->m_graphicsFont;
    fnt.resolve(fnt.resolve() | d->inheritedFontResolveMask);
+
    return fnt;
 }
+
 void QGraphicsWidget::setFont(const QFont &font)
 {
    Q_D(QGraphicsWidget);
@@ -594,8 +603,9 @@ void QGraphicsWidget::setFont(const QFont &font)
 QPalette QGraphicsWidget::palette() const
 {
    Q_D(const QGraphicsWidget);
-   return d->palette;
+   return d->m_graphicsPalette;
 }
+
 void QGraphicsWidget::setPalette(const QPalette &palette)
 {
    Q_D(QGraphicsWidget);
@@ -831,6 +841,7 @@ Qt::WindowFrameSection QGraphicsWidget::windowFrameSectionAt(const QPointF &pos)
 bool QGraphicsWidget::event(QEvent *event)
 {
    Q_D(QGraphicsWidget);
+
    // Forward the event to the layout first.
    if (d->layout) {
       d->layout->widgetEvent(event);
@@ -841,32 +852,40 @@ bool QGraphicsWidget::event(QEvent *event)
       case QEvent::GraphicsSceneMove:
          moveEvent(static_cast<QGraphicsSceneMoveEvent *>(event));
          break;
+
       case QEvent::GraphicsSceneResize:
          resizeEvent(static_cast<QGraphicsSceneResizeEvent *>(event));
          break;
+
       case QEvent::Show:
          showEvent(static_cast<QShowEvent *>(event));
          break;
+
       case QEvent::Hide:
          hideEvent(static_cast<QHideEvent *>(event));
          break;
+
       case QEvent::Polish:
          polishEvent();
          d->polished = true;
-         if (!d->font.isCopyOf(QApplication::font())) {
-            d->updateFont(d->font);
+
+         if (! d->m_graphicsFont.isCopyOf(QApplication::font())) {
+            d->updateFont(d->m_graphicsFont);
          }
          break;
+
       case QEvent::WindowActivate:
       case QEvent::WindowDeactivate:
          update();
          break;
+
       case QEvent::StyleAnimationUpdate:
          if (isVisible()) {
             event->accept();
             update();
          }
          break;
+
       // Taken from QWidget::event
       case QEvent::ActivationChange:
       case QEvent::EnabledChange:
@@ -982,29 +1001,37 @@ void QGraphicsWidget::focusInEvent(QFocusEvent *event)
 bool QGraphicsWidget::focusNextPrevChild(bool next)
 {
    Q_D(QGraphicsWidget);
+
    // Let the parent's focusNextPrevChild implementation decide what to do.
    QGraphicsWidget *parent = nullptr;
-   if (!isWindow() && (parent = parentWidget())) {
+
+   if (! isWindow() && (parent = parentWidget())) {
       return parent->focusNextPrevChild(next);
    }
-   if (!d->scene) {
+
+   if (! d->m_itemScene) {
       return false;
    }
-   if (d->scene->focusNextPrevChild(next)) {
+
+   if (d->m_itemScene->focusNextPrevChild(next)) {
       return true;
    }
+
    if (isWindow()) {
       setFocus(next ? Qt::TabFocusReason : Qt::BacktabFocusReason);
+
       if (hasFocus()) {
          return true;
       }
    }
+
    return false;
 }
 
 void QGraphicsWidget::focusOutEvent(QFocusEvent *event)
 {
    (void) event;
+
    if (focusPolicy() != Qt::NoFocus) {
       update();
    }
@@ -1084,6 +1111,7 @@ void QGraphicsWidget::setWindowFlags(Qt::WindowFlags flags)
    if (d->m_flags == flags) {
       return;
    }
+
    bool wasPopup = (d->m_flags & Qt::WindowType_Mask) == Qt::Popup;
 
    d->adjustWindowFlags(&flags);
@@ -1097,18 +1125,18 @@ void QGraphicsWidget::setWindowFlags(Qt::WindowFlags flags)
 
    bool isPopup = (d->m_flags & Qt::WindowType_Mask) == Qt::Popup;
 
-   if (d->scene && isVisible() && wasPopup != isPopup) {
+   if (d->m_itemScene && isVisible() && wasPopup != isPopup) {
       // Popup state changed; update implicit mouse grab.
       if (! isPopup) {
-         d->scene->d_func()->removePopup(this);
+         d->m_itemScene->d_func()->removePopup(this);
       } else {
-         d->scene->d_func()->addPopup(this);
+         d->m_itemScene->d_func()->addPopup(this);
       }
    }
 
-   if (d->scene && d->scene->d_func()->allItemsIgnoreHoverEvents && d->hasDecoration()) {
-      d->scene->d_func()->allItemsIgnoreHoverEvents = false;
-      d->scene->d_func()->enableMouseTrackingOnViews();
+   if (d->m_itemScene && d->m_itemScene->d_func()->allItemsIgnoreHoverEvents && d->hasDecoration()) {
+      d->m_itemScene->d_func()->allItemsIgnoreHoverEvents = false;
+      d->m_itemScene->d_func()->enableMouseTrackingOnViews();
    }
 }
 

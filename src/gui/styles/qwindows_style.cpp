@@ -610,10 +610,11 @@ int QWindowsStyle::styleHint(StyleHint hint, const QStyleOption *opt, const QWid
                   ret = 1;
                }
          }
+
 #ifndef QT_NO_ACCESSIBILITY
-         if (!ret && opt && opt->type == QStyleOption::SO_MenuItem
-            && QStyleHelper::isInstanceOf(opt->styleObject, QAccessible::MenuItem)
-            && opt->styleObject->property("_q_showUnderlined").toBool()) {
+         if (! ret && opt && opt->m_styleType == QStyleOption::SO_MenuItem
+               && QStyleHelper::isInstanceOf(opt->styleObject, QAccessible::MenuItem)
+               && opt->styleObject->property("_q_showUnderlined").toBool()) {
             ret = 1;
          }
 #endif
