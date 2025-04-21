@@ -231,6 +231,14 @@ TEST_CASE("QStringView8 operator", "[qstringview8]")
    REQUIRE(view[11] == "d");
 }
 
+TEST_CASE("QStringView8 remaining", "[qstringview8]")
+{
+   QString8 str      = "A wacky fox and sizeable pig jumped halfway over a blue moon";
+   QStringView8 view = str;
+
+   REQUIRE(view.remaining(36)  == "halfway over a blue moon");
+}
+
 TEST_CASE("QStringView8 right", "[qstringview8]")
 {
    QString8 str      = "A wacky fox and sizeable pig jumped halfway over a blue moon";
@@ -248,6 +256,14 @@ TEST_CASE("QStringView8 starts_with", "[qstringview8]")
    REQUIRE(view.startsWith("on a clear") == false);
 
    REQUIRE(view.startsWith("on a clear", Qt::CaseInsensitive) == true);
+}
+
+TEST_CASE("QStringView8 toUtf8", "[qstringview8]")
+{
+   QString8 str      = "On a clear day you can see forever";
+   QStringView8 view = str;
+
+   REQUIRE(view.toUtf8() == "On a clear day you can see forever");
 }
 
 TEST_CASE("QStringView8 trimmed", "[qstringview8]")
