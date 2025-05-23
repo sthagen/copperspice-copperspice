@@ -81,6 +81,7 @@ target_sources(CsCoreTest
    ${CMAKE_CURRENT_SOURCE_DIR}/io/qdatastream.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/io/qdebug.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/io/qdir.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/io/qdiriterator.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/io/qfile.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/io/qfiledevice.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/io/qfileinfo.cpp
@@ -112,8 +113,8 @@ target_sources(CsCoreTest
    ${CMAKE_CURRENT_SOURCE_DIR}/pointer/qpointer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/pointer/qscopedarraypointer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/pointer/qscopedpointer.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/pointer/qsharedpointer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/pointer/qsharedarraypointer.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/pointer/qsharedpointer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/pointer/qweakpointer.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/string/qchar.cpp
