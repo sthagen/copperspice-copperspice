@@ -139,10 +139,10 @@ bool QFSFileEnginePrivate::nativeOpen(QIODevice::OpenMode fileOpenMode)
       }
 
       if (! (fileOpenMode & QIODevice::WriteOnly)) {
-         // we don't need this check if we tried to open for writing because then
+         // do not need this check if we tried to open for writing because then
          // we had received EISDIR anyway.
-         if (QFileSystemEngine::fillMetaData(fd, metaData)
-               && metaData.isDirectory()) {
+
+         if (QFileSystemEngine::fillMetaData(fd, metaData) && metaData.isDirectory()) {
             q->setError(QFile::OpenError, "file to open is a directory");
             QT_CLOSE(fd);
             return false;
@@ -182,10 +182,10 @@ bool QFSFileEnginePrivate::nativeOpen(QIODevice::OpenMode fileOpenMode)
       }
 
       if (! (fileOpenMode & QIODevice::WriteOnly)) {
-         // we don't need this check if we tried to open for writing because then
+         // do not need this check if we tried to open for writing because then
          // we had received EISDIR anyway.
-         if (QFileSystemEngine::fillMetaData(QT_FILENO(fh), metaData)
-               && metaData.isDirectory()) {
+
+         if (QFileSystemEngine::fillMetaData(QT_FILENO(fh), metaData) && metaData.isDirectory()) {
             q->setError(QFile::OpenError, "file to open is a directory");
             fclose(fh);
             return false;

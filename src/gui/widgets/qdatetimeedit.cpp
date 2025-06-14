@@ -475,7 +475,7 @@ void QDateTimeEdit::setDisplayFormat(const QString &format)
          }
 
          d->displayFormat += d->separators.at(0);
-         d->separators = reverse(d->separators);
+         d->separators   = reverse(d->separators);
          d->sectionNodes = reverse(d->sectionNodes);
       }
 
@@ -488,7 +488,7 @@ void QDateTimeEdit::setDisplayFormat(const QString &format)
       const bool dateShown = (d->sections & DateSections_Mask);
       Q_ASSERT(dateShown || timeShown);
 
-      if (timeShown && !dateShown) {
+      if (timeShown && ! dateShown) {
          QTime time = d->m_spinBoxValue.toTime();
          setDateRange(d->m_spinBoxValue.toDate(), d->m_spinBoxValue.toDate());
 
@@ -499,7 +499,7 @@ void QDateTimeEdit::setDisplayFormat(const QString &format)
             setTime(time);
          }
 
-      } else if (dateShown && !timeShown) {
+      } else if (dateShown && ! timeShown) {
          setTimeRange(QDATETIME_TIME_MIN, QDATETIME_TIME_MAX);
          d->m_spinBoxValue= QDateTime(d->m_spinBoxValue.toDate(), QTime(), d->m_timeZone);
       }
@@ -1000,8 +1000,7 @@ QDateTimeEdit::StepEnabled QDateTimeEdit::stepEnabled() const
          return StepEnabled(StepUpEnabled | StepDownEnabled);
       }
 
-      // 3 cases.  date, time, datetime.  each case look
-      // at just the relavant component.
+      // 3 cases.  date, time, datetime. each case looks at just the relavant component
       QVariant max, min, val;
       if (!(d->sections & DateSections_Mask)) {
          // time only, no date

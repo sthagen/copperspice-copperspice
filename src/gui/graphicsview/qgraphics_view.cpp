@@ -2661,15 +2661,14 @@ void QGraphicsView::paintEvent(QPaintEvent *event)
    const QTransform viewTransform = painter.worldTransform();
 
    // Draw background
-   if ((d->cacheMode & CacheBackground)
+   if ((d->cacheMode & CacheBackground)) {
+      // Recreate the background pixmap, and flag the whole background as exposed
 
-   ) {
-      // Recreate the background pixmap, and flag the whole background as
-      // exposed.
       if (d->mustResizeBackgroundPixmap) {
          d->backgroundPixmap = QPixmap(viewport()->size());
          QBrush bgBrush = viewport()->palette().brush(viewport()->backgroundRole());
-         if (!bgBrush.isOpaque()) {
+
+         if (! bgBrush.isOpaque()) {
             d->backgroundPixmap.fill(Qt::transparent);
          }
          QPainter p(&d->backgroundPixmap);
@@ -2679,7 +2678,7 @@ void QGraphicsView::paintEvent(QPaintEvent *event)
       }
 
       // Redraw exposed areas
-      if (!d->backgroundPixmapExposed.isEmpty()) {
+      if (! d->backgroundPixmapExposed.isEmpty()) {
          QPainter backgroundPainter(&d->backgroundPixmap);
          backgroundPainter.setClipRegion(d->backgroundPixmapExposed, Qt::ReplaceClip);
          if (viewTransformed) {
@@ -2732,7 +2731,8 @@ void QGraphicsView::paintEvent(QPaintEvent *event)
 
    } else {
       // Make sure we don't have unpolished items before we draw
-      if (!d->scene->d_func()->unpolishedItems.isEmpty()) {
+
+      if (! d->scene->d_func()->unpolishedItems.isEmpty()) {
          d->scene->d_func()->_q_polishItems();
       }
       // We reset updateAll here (after we've issued polish events)
@@ -2743,7 +2743,7 @@ void QGraphicsView::paintEvent(QPaintEvent *event)
       bool allItems = false;
       QList<QGraphicsItem *> itemList = d->findItems(d->m_exposedRegion, &allItems, viewTransform);
 
-      if (!itemList.isEmpty()) {
+      if (! itemList.isEmpty()) {
          // Generate the style options.
          const int numItems = itemList.size();
          QGraphicsItem **itemArray = &itemList[0]; // Relies on QList internals, but is perfectly valid.
@@ -2757,8 +2757,8 @@ void QGraphicsView::paintEvent(QPaintEvent *event)
             // Cache the item's area in view coordinates.
             // Note that we have to do this here in case the base class implementation
             // (QGraphicsScene::drawItems) is not called. If it is, we'll do this
-            // operation twice, but that's the price one has to pay for using indirect
-            // painting :-/.
+            // operation twice, but that's the price one has to pay for using indirect painting
+
             const QRectF brect = adjustedItemEffectiveBoundingRect(item);
             if (!itemd->itemIsUntransformable()) {
                transform = item->sceneTransform();

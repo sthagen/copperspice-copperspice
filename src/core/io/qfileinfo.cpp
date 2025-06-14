@@ -37,15 +37,17 @@ QString QFileInfoPrivate::getFileName(QAbstractFileEngine::FileName name) const
    QString ret;
 
    if (fileEngine == nullptr) {
-      // local file; use the QFileSystemEngine directly
+      // local file, use the QFileSystemEngine directly
 
       switch (name) {
          case QAbstractFileEngine::CanonicalName:
          case QAbstractFileEngine::CanonicalPathName: {
             QFileSystemEntry entry = QFileSystemEngine::canonicalName(fileEntry, metaData);
 
-            if (cache_enabled) { // be smart and store both
-               fileNames[QAbstractFileEngine::CanonicalName] = entry.filePath();
+            if (cache_enabled) {
+               // be smart and store both
+
+               fileNames[QAbstractFileEngine::CanonicalName]     = entry.filePath();
                fileNames[QAbstractFileEngine::CanonicalPathName] = entry.path();
             }
 
@@ -258,9 +260,6 @@ bool QFileInfo::operator==(const QFileInfo &fileinfo) const
 {
    Q_D(const QFileInfo);
 
-   // TODO: understand long and short file names on Windows
-   // ### (GetFullPathName())
-
    if (fileinfo.d_ptr == d_ptr) {
       return true;
    }
@@ -269,7 +268,7 @@ bool QFileInfo::operator==(const QFileInfo &fileinfo) const
       return false;
    }
 
-   // Assume files are the same if path is the same
+   // assume files are the same if path is the same
    if (d->fileEntry.filePath() == fileinfo.d_ptr->fileEntry.filePath()) {
       return true;
    }
@@ -277,7 +276,8 @@ bool QFileInfo::operator==(const QFileInfo &fileinfo) const
    Qt::CaseSensitivity sensitive;
 
    if (d->fileEngine == nullptr || fileinfo.d_ptr->fileEngine == nullptr) {
-      if (d->fileEngine != fileinfo.d_ptr->fileEngine) { // one is native, the other is a custom file-engine
+      if (d->fileEngine != fileinfo.d_ptr->fileEngine) {
+         // one is native, the other is a custom file-engine
          return false;
       }
 
@@ -291,7 +291,8 @@ bool QFileInfo::operator==(const QFileInfo &fileinfo) const
       sensitive = d->fileEngine->caseSensitive() ? Qt::CaseSensitive : Qt::CaseInsensitive;
    }
 
-   if (fileinfo.size() != size()) { //if the size isn't the same...
+   if (fileinfo.size() != size()) {
+      // if the size is not the same
       return false;
    }
 
@@ -539,7 +540,7 @@ bool QFileInfo::isReadable() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::UserReadPermission)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::UserReadPermission)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::UserReadPermission);
       }
 
@@ -558,7 +559,7 @@ bool QFileInfo::isWritable() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::UserWritePermission)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::UserWritePermission)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::UserWritePermission);
       }
 
@@ -649,7 +650,7 @@ bool QFileInfo::isDir() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::DirectoryType)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::DirectoryType)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::DirectoryType);
       }
 
@@ -668,7 +669,7 @@ bool QFileInfo::isBundle() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (! d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::BundleType)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::BundleType)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::BundleType);
       }
 
@@ -687,7 +688,7 @@ bool QFileInfo::isSymLink() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::LegacyLinkType)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::LegacyLinkType)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::LegacyLinkType);
       }
 
@@ -851,14 +852,14 @@ qint64 QFileInfo::size() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::SizeAttribute)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::SizeAttribute)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::SizeAttribute);
       }
 
       return d->metaData.size();
    }
 
-   if (!d->getCachedFlag(QFileInfoPrivate::CachedSize)) {
+   if (! d->getCachedFlag(QFileInfoPrivate::CachedSize)) {
       d->setCachedFlag(QFileInfoPrivate::CachedSize);
       d->fileSize = d->fileEngine->size();
    }
@@ -875,7 +876,7 @@ QDateTime QFileInfo::created() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::CreationTime)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::CreationTime)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::CreationTime);
       }
 
@@ -894,7 +895,7 @@ QDateTime QFileInfo::lastModified() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::ModificationTime)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::ModificationTime)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::ModificationTime);
       }
 
@@ -913,7 +914,7 @@ QDateTime QFileInfo::lastRead() const
    }
 
    if (d->fileEngine == nullptr) {
-      if (!d->cache_enabled || !d->metaData.hasFlags(QFileSystemMetaData::AccessTime)) {
+      if (! d->cache_enabled || ! d->metaData.hasFlags(QFileSystemMetaData::AccessTime)) {
          QFileSystemEngine::fillMetaData(d->fileEntry, d->metaData, QFileSystemMetaData::AccessTime);
       }
 

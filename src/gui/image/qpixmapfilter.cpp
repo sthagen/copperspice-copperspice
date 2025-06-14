@@ -680,7 +680,8 @@ Q_GUI_EXPORT extern bool qt_scaleForTransform(const QTransform &transform, qreal
 void QPixmapBlurFilter::draw(QPainter *painter, const QPointF &p, const QPixmap &src, const QRectF &rectF) const
 {
    Q_D(const QPixmapBlurFilter);
-   if (!painter->isActive()) {
+
+   if (! painter->isActive()) {
       return;
    }
 
@@ -720,13 +721,12 @@ void QPixmapBlurFilter::draw(QPainter *painter, const QPointF &p, const QPixmap 
    painter->setWorldTransform(transform);
 }
 
-// grayscales the image to dest (could be same). If rect isn't defined
-// destination image size is used to determine the dimension of grayscaling
-// process.
+// grayscales the image to dest (could be same). If rect is not defined
+// destination image size is used to determine the dimension of grayscaling rocess.
 static void grayscale(const QImage &image, QImage &dest, const QRect &rect = QRect())
 {
    QRect destRect = rect;
-   QRect srcRect = rect;
+   QRect srcRect  = rect;
    if (rect.isNull()) {
       srcRect = dest.rect();
       destRect = dest.rect();
