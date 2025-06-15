@@ -839,13 +839,14 @@ void QWingedEdge::intersectAndAdd()
       int second = m_segments.segmentAt(i).vb;
 
       int last = first;
-      for (int j = 0; j < intersections.size(); ++j) {
-         const QPathSegments::Intersection &isect = intersections.at(j);
 
-         QPathEdge *ep = edge(addEdge(last, isect.vertex));
+      for (int j = 0; j < intersections.size(); ++j) {
+         const QPathSegments::Intersection &span = intersections.at(j);
+
+         QPathEdge *ep = edge(addEdge(last, span.vertex));
 
          if (ep) {
-            const int dir = m_segments.pointAt(last).y() < m_segments.pointAt(isect.vertex).y() ? 1 : -1;
+            const int dir = m_segments.pointAt(last).y() < m_segments.pointAt(span.vertex).y() ? 1 : -1;
 
             if (pathId == 0) {
                ep->windingA += dir;
@@ -854,7 +855,7 @@ void QWingedEdge::intersectAndAdd()
             }
          }
 
-         last = isect.vertex;
+         last = span.vertex;
       }
 
       QPathEdge *ep = edge(addEdge(last, second));
@@ -1779,7 +1780,6 @@ static void traverse(QWingedEdge &list, int edge, QPathEdge::Traversal traversal
       int flag = status.traversal == QPathEdge::LeftTraversal ? 1 : 2;
 
       QPathEdge *ep = list.edge(status.edge);
-
       ep->flag |= (flag | (flag << 4));
 
 #if defined(CS_SHOW_DEBUG_GUI_PAINTING)
@@ -1791,11 +1791,11 @@ static void traverse(QWingedEdge &list, int edge, QPathEdge::Traversal traversal
 }
 
 struct QCrossingEdge {
-   int edge;
-   qreal x;
+   int m_edge;
+   qreal m_x;
 
    bool operator<(const QCrossingEdge &edge) const {
-      return x < edge.x;
+      return m_x < edge.m_x;
    }
 };
 
@@ -1849,17 +1849,21 @@ bool QWingedEdge::isInside(qreal x, qreal y) const
 static QVector<QCrossingEdge> findCrossings(const QWingedEdge &list, qreal y)
 {
    QVector<QCrossingEdge> crossings;
+
    for (int i = 0; i < list.edgeCount(); ++i) {
-      const QPathEdge *edge = list.edge(i);
-      QPointF a = *list.vertex(edge->first);
-      QPointF b = *list.vertex(edge->second);
+      const QPathEdge *edge_A = list.edge(i);
+
+      QPointF a = *list.vertex(edge_A->first);
+      QPointF b = *list.vertex(edge_A->second);
 
       if ((a.y() < y && b.y() > y) || (a.y() > y && b.y() < y)) {
          const qreal intersection = a.x() + (b.x() - a.x()) * (y - a.y()) / (b.y() - a.y());
-         const QCrossingEdge edge = { i, intersection };
-         crossings << edge;
+
+         const QCrossingEdge edge_B = { i, intersection };
+         crossings << edge_B;
       }
    }
+
    return crossings;
 }
 
@@ -1880,7 +1884,7 @@ bool QPathClipper::handleCrossingEdges(QWingedEdge &list, qreal y, ClipperMode m
 #endif
 
    for (int i = 0; i < crossings.size() - 1; ++i) {
-      int ei = crossings.at(i).edge;
+      int ei = crossings.at(i).m_edge;
       const QPathEdge *edge = list.edge(ei);
 
       windingA += edge->windingA;

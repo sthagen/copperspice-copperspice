@@ -343,6 +343,7 @@ void QT_FASTCALL comp_func_solid_SourceOver_sse2(uint *destPixels, int length, u
          dstVector = _mm_add_epi8(colorVector, dstVector);
          _mm_store_si128((__m128i *)&dst[x], dstVector);
       }
+
       for (; x < length; ++x) {
          destPixels[x] = color + BYTE_MUL(destPixels[x], minusAlphaOfColor);
       }
@@ -378,10 +379,10 @@ void qt_memfill16(quint16 *dest, quint16 value, int count)
    }
 }
 
-void qt_bitmapblit32_sse2_base(QRasterBuffer *rasterBuffer, int x, int y, quint32 color,
-   const uchar *src, int width, int height, int stride)
+void qt_bitmapblit32_sse2_base(QRasterBuffer *rasterBuffer, int xOffSet, int yOffSet, quint32 color,
+      const uchar *src, int width, int height, int stride)
 {
-   quint32 *dest = reinterpret_cast<quint32 *>(rasterBuffer->scanLine(y)) + x;
+   quint32 *dest = reinterpret_cast<quint32 *>(rasterBuffer->scanLine(yOffSet)) + xOffSet;
    const int destStride = rasterBuffer->bytesPerLine() / sizeof(quint32);
 
    const __m128i c128 = _mm_set1_epi32(color);
@@ -395,6 +396,7 @@ void qt_bitmapblit32_sse2_base(QRasterBuffer *rasterBuffer, int x, int y, quint3
             0x04040404, 0x08080808);
       const __m128i maskadd2 = _mm_set_epi32(0x7f7f7f7f, 0x7e7e7e7e,
             0x7c7c7c7c, 0x78787878);
+
       while (height--) {
          for (int x = 0; x < width; x += 8) {
             const quint8 s = src[x >> 3];
@@ -402,28 +404,34 @@ void qt_bitmapblit32_sse2_base(QRasterBuffer *rasterBuffer, int x, int y, quint3
             if (! s) {
                continue;
             }
+
             __m128i mask1 = _mm_set1_epi8(s);
             __m128i mask2 = mask1;
 
             mask1 = _mm_and_si128(mask1, maskmask1);
             mask1 = _mm_add_epi8(mask1, maskadd1);
             _mm_maskmoveu_si128(c128, mask1, (char *)(dest + x));
+
             mask2 = _mm_and_si128(mask2, maskmask2);
             mask2 = _mm_add_epi8(mask2, maskadd2);
             _mm_maskmoveu_si128(c128, mask2, (char *)(dest + x + 4));
          }
+
          dest += destStride;
          src  += stride;
       }
+
    } else {
       while (height--) {
          const quint8 s = *src;
+
          if (s) {
             __m128i mask1 = _mm_set1_epi8(s);
             mask1 = _mm_and_si128(mask1, maskmask1);
             mask1 = _mm_add_epi8(mask1, maskadd1);
             _mm_maskmoveu_si128(c128, mask1, (char *)(dest));
          }
+
          dest += destStride;
          src  += stride;
       }
@@ -442,11 +450,11 @@ void qt_bitmapblit8888_sse2(QRasterBuffer *rasterBuffer, int x, int y, const QRg
    qt_bitmapblit32_sse2_base(rasterBuffer, x, y, ARGB2RGBA(color.toArgb32()), src, width, height, stride);
 }
 
-void qt_bitmapblit16_sse2(QRasterBuffer *rasterBuffer, int x, int y, const QRgba64 &color,
+void qt_bitmapblit16_sse2(QRasterBuffer *rasterBuffer, int xOffSet, int yOffSet, const QRgba64 &color,
    const uchar *src, int width, int height, int stride)
 {
    const quint16 c = qConvertRgb32To16(color.toArgb32());
-   quint16 *dest = reinterpret_cast<quint16 *>(rasterBuffer->scanLine(y)) + x;
+   quint16 *dest = reinterpret_cast<quint16 *>(rasterBuffer->scanLine(yOffSet)) + xOffSet;
    const int destStride = rasterBuffer->bytesPerLine() / sizeof(quint16);
 
    const __m128i c128     = _mm_set1_epi16(c);
@@ -456,9 +464,11 @@ void qt_bitmapblit16_sse2(QRasterBuffer *rasterBuffer, int x, int y, const QRgba
    while (height--) {
       for (int x = 0; x < width; x += 8) {
          const quint8 s = src[x >> 3];
+
          if (!s) {
             continue;
          }
+
          __m128i mask = _mm_set1_epi8(s);
          mask = _mm_and_si128(mask, maskmask);
          mask = _mm_add_epi8(mask, maskadd);
