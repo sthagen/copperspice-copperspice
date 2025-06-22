@@ -1739,10 +1739,10 @@ void QGuiApplicationPrivate::processMouseEvent(QWindowSystemInterfacePrivate::Mo
 
       points << point;
 
-      QEvent::Type type;
-      QList<QTouchEvent::TouchPoint> touchPoints = QWindowSystemInterfacePrivate::fromNativeTouchPoints(points, window, &type);
+      QEvent::Type typeValue;
+      QList<QTouchEvent::TouchPoint> touchPoints = QWindowSystemInterfacePrivate::fromNativeTouchPoints(points, window, &typeValue);
 
-      QWindowSystemInterfacePrivate::TouchEvent fake(window, e->timestamp, type, m_fakeTouchDevice, touchPoints, e->modifiers);
+      QWindowSystemInterfacePrivate::TouchEvent fake(window, e->timestamp, typeValue, m_fakeTouchDevice, touchPoints, e->modifiers);
       fake.flags |= QWindowSystemInterfacePrivate::WindowSystemEvent::Synthetic;
       processTouchEvent(&fake);
    }
@@ -1790,7 +1790,7 @@ void QGuiApplicationPrivate::processWheelEvent(QWindowSystemInterfacePrivate::Wh
       return;
    }
 
-   QWheelEvent ev(localPoint, globalPoint, e->pixelDelta, e->angleDelta, buttons, e->modifiers, e->phase, e->source);
+   QWheelEvent ev(localPoint, globalPoint, e->pixelDelta, e->angleDelta, buttons, e->modifiers, e->m_phaseValue, e->source);
 
    ev.setTimestamp(e->timestamp);
    QGuiApplication::sendSpontaneousEvent(window, &ev);
@@ -2033,8 +2033,8 @@ void QGuiApplicationPrivate::processGeometryChangeEvent(QWindowSystemInterfacePr
    window->d_func()->geometry = newRect;
 
    if (isResize || window->d_func()->resizeEventPending) {
-      QResizeEvent e(newRect.size(), oldRect.size());
-      QGuiApplication::sendSpontaneousEvent(window, &e);
+      QResizeEvent eventResize(newRect.size(), oldRect.size());
+      QGuiApplication::sendSpontaneousEvent(window, &eventResize);
 
       window->d_func()->resizeEventPending = false;
 
@@ -2048,8 +2048,8 @@ void QGuiApplicationPrivate::processGeometryChangeEvent(QWindowSystemInterfacePr
 
    if (isMove) {
       //### frame geometry
-      QMoveEvent e(newRect.topLeft(), oldRect.topLeft());
-      QGuiApplication::sendSpontaneousEvent(window, &e);
+      QMoveEvent eventMove(newRect.topLeft(), oldRect.topLeft());
+      QGuiApplication::sendSpontaneousEvent(window, &eventMove);
 
       if (oldRect.x() != newRect.x()) {
          window->xChanged(newRect.x());
@@ -2649,13 +2649,13 @@ void QGuiApplicationPrivate::reportRefreshRateChange(QWindowSystemInterfacePriva
    }
 }
 
-void QGuiApplicationPrivate::processExposeEvent(QWindowSystemInterfacePrivate::ExposeEvent *e)
+void QGuiApplicationPrivate::processExposeEvent(QWindowSystemInterfacePrivate::ExposeEvent *eventExpose)
 {
-   if (!e->exposed) {
+   if (! eventExpose->m_exposed) {
       return;
    }
 
-   QWindow *window = e->exposed.data();
+   QWindow *window = eventExpose->m_exposed.data();
    if (!window) {
       return;
    }
@@ -2674,9 +2674,9 @@ void QGuiApplicationPrivate::processExposeEvent(QWindowSystemInterfacePrivate::E
       p->receivedExpose = true;
    }
 
-   p->exposed = e->isExposed && window->screen();
+   p->exposed = eventExpose->isExposed && window->screen();
 
-   QExposeEvent exposeEvent(e->region);
+   QExposeEvent exposeEvent(eventExpose->m_exposeRegion);
    QCoreApplication::sendSpontaneousEvent(window, &exposeEvent);
 }
 
