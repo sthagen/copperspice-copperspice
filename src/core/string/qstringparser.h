@@ -34,6 +34,7 @@
 #include <qregularexpression.h>
 
 #include <cctype>
+#include <charconv>
 #include <ios>
 #include <iomanip>
 #include <limits>
@@ -82,7 +83,7 @@ class Q_CORE_EXPORT QStringParser
          SkipEmptyParts
       };
 
-      // V is data type quint64, long, short, etc
+      // V is data type char, uchar, int, long, short, long long, etc
       template <typename T, typename V, typename = typename std::enable_if<std::is_integral<V>::value>::type>
       [[nodiscard]] static T formatArg(const T &str, V value, int fieldwidth = 0, int base = 10, QChar32 fillChar = QChar32(' '))
       {
@@ -97,46 +98,66 @@ class Q_CORE_EXPORT QStringParser
             return str;
          }
 
-         std::basic_ostringstream<char> stream;
-         stream << std::setbase(base);
-
          T arg;
          T locale_arg;
 
-         if (d.occurrences > d.locale_occurrences) {
-            stream << value;
+         if constexpr(std::is_same_v<bool, std::remove_cv_t<V>>)  {
+            // V type of bool must be handled differently
 
-            std::string s1 = stream.str();
-            const char *s2 = s1.c_str();
+            T data;
 
-            arg = T::fromUtf8(s2);
+            if (value) {
+               data = "1";
+            } else {
+               data = "0";
+            }
 
-         }
+            if (d.occurrences > d.locale_occurrences) {
+               arg = data;
+            }
 
-         if (d.locale_occurrences > 0) {
-            stream << value;
+            if (d.locale_occurrences > 0) {
+               locale_arg = data;
+            }
 
-            std::string s1 = stream.str();
-            const char *s2 = s1.c_str();
+            return replaceArgEscapes(str, d, fieldwidth, arg, locale_arg, fillChar);
 
-            locale_arg = T::fromUtf8(s2);
+         } else {
 
-            QLocale locale;
+            if (d.occurrences > d.locale_occurrences) {
+               std::string buffer = std::string(32, '\0');
+               auto result = std::to_chars(buffer.data(), buffer.data() + 32, value, base);
 
-            // add thousand marker
-            bool thousands_group = !( locale.numberOptions() & QLocale::OmitGroupSeparator);
-            T separator = locale.groupSeparator();
-
-            if (thousands_group && base == 10) {
-               int strLen = locale_arg.size();
-
-               for (int i = strLen - 3; i > 0; i -= 3) {
-                  locale_arg.insert(i, separator);
+               if (result.ec == std::errc()) {
+                  arg = T::fromUtf8(buffer.c_str());
                }
             }
-         }
 
-         return replaceArgEscapes(str, d, fieldwidth, arg, locale_arg, fillChar);
+            if (d.locale_occurrences > 0) {
+               std::string buffer = std::string(32, '\0');
+               auto result = std::to_chars(buffer.data(), buffer.data() + 32, value, base);
+
+               if (result.ec == std::errc()) {
+                  locale_arg = T::fromUtf8(buffer.c_str());
+               }
+
+               QLocale locale;
+
+               // add thousand marker
+               bool thousands_group = !( locale.numberOptions() & QLocale::OmitGroupSeparator);
+               T separator = locale.groupSeparator();
+
+               if (thousands_group && base == 10) {
+                  int strLen = locale_arg.size();
+
+                  for (int i = strLen - 3; i > 0; i -= 3) {
+                     locale_arg.insert(i, separator);
+                  }
+               }
+            }
+
+            return replaceArgEscapes(str, d, fieldwidth, arg, locale_arg, fillChar);
+         }
       }
 
       // V data type is double, float, long double
@@ -241,9 +262,9 @@ class Q_CORE_EXPORT QStringParser
          return replaceArgEscapes(str, d, fieldwidth, arg, locale_arg, fillChar);
       }
 
-      // V data type is char, string
+      // V data type is QChar, QString
       template <typename T, typename V,
-                  typename = typename std::enable_if<! std::is_arithmetic<typename std::remove_reference<V>::type>::value>::type>
+            typename = typename std::enable_if<! std::is_arithmetic<typename std::remove_reference<V>::type>::value>::type>
 
       [[nodiscard]] static T formatArg(const T &str, V &&value, int fieldwidth = 0, QChar32 fillChar = QChar32(' '))
       {
@@ -262,7 +283,7 @@ class Q_CORE_EXPORT QStringParser
          return replaceArgEscapes(str, d, fieldwidth, tmp, tmp, fillChar);
       }
 
-      // a4
+      // multiple arguments
       template <typename T, typename ...Ts>
       [[nodiscard]] static T formatArgs(const T &str, Ts... args)
       {
@@ -273,8 +294,7 @@ class Q_CORE_EXPORT QStringParser
       template <typename T, typename V>
       static T join(const QList<T> &list, const V &separator);
 
-
-      // b1  value - quint64, long, short, etc
+      // V data type is char, uchar, long, short, quint64, etc
       template <typename T = QString8, typename V>
       [[nodiscard]] static T number(V value, int base  = 10)
       {
@@ -295,7 +315,7 @@ class Q_CORE_EXPORT QStringParser
          return retval;
       }
 
-      // b2  value
+      // value is double, float
       template <typename T = QString8>
       [[nodiscard]] static T number(double value, char format = 'g', int precision = 6)
       {
@@ -343,37 +363,37 @@ class Q_CORE_EXPORT QStringParser
 
       template <typename T>
       static T section(const T &str, QChar32 separator, int firstSection, int lastSection = -1,
-               SectionFlags flags = SectionDefault) {
+            SectionFlags flags = SectionDefault) {
          return section(str, T(separator), firstSection, lastSection, flags);
       }
 
       template <typename T, int N>
       static T section(const T &str, const char (&separator)[N], int firstSection, int lastSection = -1,
-               SectionFlags flags = SectionDefault) {
+            SectionFlags flags = SectionDefault) {
          return section(str, T(separator), firstSection, lastSection, flags);
       }
 
       template <typename T>
       static T section(const T &str, const T &separator, int firstSection, int lastSection = -1,
-               SectionFlags flags = SectionDefault);
+            SectionFlags flags = SectionDefault);
 
 #if defined (CS_DOXYPRESS)
       template <typename T>
       static T section(const T &str, const QRegularExpression &separator, int firstSection, int lastSection = -1,
-               SectionFlags flags = SectionDefault);
+            SectionFlags flags = SectionDefault);
 #else
       template <typename T>
       static T section(const T &str, const Cs::QRegularExpression<T> &separator, int firstSection, int lastSection = -1,
-               SectionFlags flags = SectionDefault);
+            SectionFlags flags = SectionDefault);
 #endif
 
       template <typename T>
       static QList<T> split(const T &str, QChar32 separator, SplitBehavior behavior = KeepEmptyParts,
-               Qt::CaseSensitivity cs = Qt::CaseSensitive);
+            Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
       template <typename T>
       static QList<T> split(const T &str, const T &separator, SplitBehavior behavior = KeepEmptyParts,
-               Qt::CaseSensitivity cs = Qt::CaseSensitive);
+            Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
 #if defined (CS_DOXYPRESS)
       template <typename T>
