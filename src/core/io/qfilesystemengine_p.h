@@ -66,6 +66,8 @@ class QFileSystemEngine
 
 #if defined(Q_OS_UNIX)
    static bool fillMetaData(int fd, QFileSystemMetaData &data); // what = PosixStatFlags
+
+   static bool setFileTime(int fd, const QDateTime &newTime, QFileDevice::FileTimeType type, QSystemError &error);
 #endif
 
 #if defined(Q_OS_WIN)
@@ -75,6 +77,8 @@ class QFileSystemEngine
    static bool fillPermissions(const QFileSystemEntry &entry, QFileSystemMetaData &data, QFileSystemMetaData::MetaDataFlags what);
    static QString owner(const QFileSystemEntry &entry, QAbstractFileEngine::FileOwner own);
    static QString nativeAbsoluteFilePath(const QString &path);
+
+   static bool setFileTime(HANDLE fHandle, const QDateTime &newTime, QFileDevice::FileTimeType type, QSystemError &error);
 #endif
 
    static QString homePath();

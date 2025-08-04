@@ -1449,13 +1449,60 @@ bool QFileSystemEngine::setPermissions(const QFileSystemEntry &entry, QFileDevic
    return retval;
 }
 
+bool QFileSystemEngine::setFileTime(HANDLE fHandle, const QDateTime &newTime, QFileDevice::FileTimeType type, QSystemError &error)
+{
+   FILETIME fileTime;
+
+   QDateTime utc = newTime.toUTC();
+
+   QDate tmpDate = utc.date();
+   QTime tmpTime = utc.time();
+
+   SYSTEMTIME sTime;
+   sTime.wYear   = tmpDate.year();
+   sTime.wMonth  = tmpDate.month();
+   sTime.wDay    = tmpDate.day();
+
+   sTime.wHour   = tmpTime.hour();
+   sTime.wMinute = tmpTime.minute();
+   sTime.wSecond = tmpTime.second();
+   sTime.wMilliseconds = tmpTime.msec();
+
+   SystemTimeToFileTime(&sTime, &fileTime);
+
+   bool retval = false;
+
+   switch (type) {
+      case QFileDevice::FileTimeType::CreateTime:
+         retval = SetFileTime(fHandle, &fileTime, nullptr, nullptr);
+         break;
+
+      case QFileDevice::FileTimeType::ModifiedTime:
+         retval = SetFileTime(fHandle, nullptr, nullptr, &fileTime);
+         break;
+
+      case QFileDevice::FileTimeType::AccessTime:
+         retval = SetFileTime(fHandle, nullptr, &fileTime, nullptr);
+         break;
+   }
+
+   if (! retval) {
+      error = QSystemError(GetLastError(), QSystemError::NativeError);
+   }
+
+   return retval;
+}
+
 static inline QDateTime fileTimeToQDateTime(const FILETIME *time)
 {
    QDateTime retval;
 
-   SYSTEMTIME sTime, lTime;
+   SYSTEMTIME sTime;
+   SYSTEMTIME lTime;
+
    FileTimeToSystemTime(time, &sTime);
    SystemTimeToTzSpecificLocalTime(nullptr, &sTime, &lTime);
+
    retval.setDate(QDate(lTime.wYear, lTime.wMonth, lTime.wDay));
    retval.setTime(QTime(lTime.wHour, lTime.wMinute, lTime.wSecond, lTime.wMilliseconds));
 

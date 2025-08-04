@@ -37,6 +37,7 @@ class Q_CORE_EXPORT QFSFileEngine : public QAbstractFileEngine
  public:
    QFSFileEngine();
    explicit QFSFileEngine(const QString &file);
+
    ~QFSFileEngine();
 
    bool open(QIODevice::OpenMode openMode) override;
@@ -67,7 +68,10 @@ class Q_CORE_EXPORT QFSFileEngine : public QAbstractFileEngine
    QString fileName(FileName file) const override;
    uint ownerId(FileOwner own) const override;
    QString owner(FileOwner own) const override;
-   QDateTime fileTime(FileTime time) const override;
+
+   QDateTime fileTime(QFileDevice::FileTimeType type) const override;
+   bool setFileTime(const QDateTime &newTime, QFileDevice::FileTimeType type) override;
+
    void setFileName(const QString &file) override;
    int handle() const override;
 

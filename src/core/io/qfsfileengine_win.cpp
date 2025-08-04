@@ -863,7 +863,7 @@ bool QFSFileEngine::setSize(qint64 size)
       return false;
    }
 
-   if (!d->fileEntry.isEmpty()) {
+   if (! d->fileEntry.isEmpty()) {
       // resize file on disk
       QFile file(d->fileEntry.filePath());
 
@@ -881,15 +881,57 @@ bool QFSFileEngine::setSize(qint64 size)
    return false;
 }
 
-QDateTime QFSFileEngine::fileTime(FileTime time) const
+QDateTime QFSFileEngine::fileTime(QFileDevice::FileTimeType type) const
 {
    Q_D(const QFSFileEngine);
 
    if (d->doStat(QFileSystemMetaData::Times)) {
-      return d->metaData.fileTime(time);
+      return d->metaData.fileTime(type);
    }
 
    return QDateTime();
+}
+
+bool QFSFileEngine::setFileTime(const QDateTime &newTime, QFileDevice::FileTimeType type)
+{
+   Q_D(QFSFileEngine);
+
+   if (d->openMode == QIODevice::NotOpen) {
+      setError(QFileDevice::PermissionsError, qt_error_string(ERROR_ACCESS_DENIED));
+      return false;
+   }
+
+   if (! newTime.isValid()) {
+      setError(QFile::UnspecifiedError, qt_error_string(ERROR_INVALID_PARAMETER));
+      return false;
+   }
+
+   HANDLE handle = d->fileHandle;
+
+   if (handle == INVALID_HANDLE_VALUE && d->fh) {
+      handle = (HANDLE)::_get_osfhandle(QT_FILENO(d->fh));
+
+   } else if (handle == INVALID_HANDLE_VALUE && d->fd != -1) {
+      handle = (HANDLE)::_get_osfhandle(d->fd);
+
+   }
+
+   if (handle == INVALID_HANDLE_VALUE) {
+      setError(QFileDevice::PermissionsError, qt_error_string(ERROR_ACCESS_DENIED));
+      return false;
+   }
+
+   QSystemError error;
+   bool ok = QFileSystemEngine::setFileTime(handle, newTime, type, error);
+
+   if (ok) {
+      d->metaData.clearFlags(QFileSystemMetaData::Times);
+      return true;
+
+   } else {
+      setError(QFileDevice::PermissionsError, error.toString());
+      return false;
+   }
 }
 
 uchar *QFSFileEnginePrivate::map(qint64 offset, qint64 size, QFile::MemoryMapFlags flags)
