@@ -21,16 +21,14 @@
 *
 ***********************************************************************/
 
-#include "avfcameraexposurecontrol.h"
-#include "avfcamerautility.h"
-#include "avfcamerasession.h"
-#include "avfcameraservice.h"
-#include "avfcameradebug.h"
+#include <avfcameraexposurecontrol.h>
 
-#include <qvariant.h>
-#include <qpointer.h>
-#include <qdebug.h>
+#include <avfcameraservice.h>
+#include <avfcamerasession.h>
+#include <avfcamerautility.h>
 #include <qpair.h>
+#include <qpointer.h>
+#include <qvariant.h>
 
 #include <AVFoundation/AVFoundation.h>
 

@@ -21,17 +21,17 @@
 *
 ***********************************************************************/
 
-#include "avfcameraviewfindersettingscontrol.h"
-#include "avfimageencodercontrol.h"
-#include "avfimagecapturecontrol.h"
-#include "avfcamerautility.h"
-#include "avfcamerasession.h"
-#include "avfcameraservice.h"
-#include "avfcameradebug.h"
-#include "avfcameracontrol.h"
+#include <avfimageencodercontrol.h>
+
+#include <avfcameracontrol.h>
+#include <avfcameraservice.h>
+#include <avfcamerasession.h>
+#include <avfcamerautility.h>
+#include <avfcameraviewfindersettingscontrol.h>
+#include <avfimagecapturecontrol.h>
+#include <qdebug.h>
 #include <qmediaencodersettings.h>
 #include <qsysinfo.h>
-#include <qdebug.h>
 
 #include <AVFoundation/AVFoundation.h>
 
@@ -101,14 +101,19 @@ QImageEncoderSettings AVFImageEncoderControl::imageSettings() const
 
         AVCaptureDevice *captureDevice = m_service->session()->videoCaptureDevice();
         if (!captureDevice.activeFormat) {
-            qDebugCamera() << Q_FUNC_INFO << "no active format";
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+            qDebug() << Q_FUNC_INFO << "no active format";
+#endif
+
             return settings;
         }
 
         QSize res(qt_device_format_resolution(captureDevice.activeFormat));
 
         if (res.isNull() || !res.isValid()) {
-            qDebugCamera() << Q_FUNC_INFO << "failed to exctract the image resolution";
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+            qDebug() << Q_FUNC_INFO << "failed to exctract the image resolution";
+#endif
             return settings;
         }
 
@@ -142,19 +147,28 @@ bool AVFImageEncoderControl::applySettings()
 
     if (!m_service->imageCaptureControl()
         || !m_service->imageCaptureControl()->stillImageOutput()) {
-        qDebugCamera() << Q_FUNC_INFO << "no still image output";
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+        qDebug() << Q_FUNC_INFO << "no still image output";
+#endif
+
         return false;
     }
 
     if (m_settings.codec().size()
         && m_settings.codec() != QLatin1String("jpeg")) {
-        qDebugCamera() << Q_FUNC_INFO << "unsupported codec:" << m_settings.codec();
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+        qDebug() << Q_FUNC_INFO << "unsupported codec:" << m_settings.codec();
+#endif
+
         return false;
     }
 
     QSize res(m_settings.resolution());
     if (res.isNull()) {
-        qDebugCamera() << Q_FUNC_INFO << "invalid resolution:" << res;
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+        qDebug() << Q_FUNC_INFO << "invalid resolution:" << res;
+#endif
+
         return false;
     }
 
@@ -173,7 +187,10 @@ bool AVFImageEncoderControl::applySettings()
                                                                      m_service->session()->defaultCodec());
 
         if (!match) {
-            qDebugCamera() << Q_FUNC_INFO << "unsupported resolution:" << res;
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+            qDebug() << Q_FUNC_INFO << "unsupported resolution:" << res;
+#endif
+
             return false;
         }
 

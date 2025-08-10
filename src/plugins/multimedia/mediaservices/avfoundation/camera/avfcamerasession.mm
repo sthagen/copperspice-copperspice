@@ -21,21 +21,21 @@
 *
 ***********************************************************************/
 
-#include "avfcameradebug.h"
-#include "avfcamerasession.h"
-#include "avfcameraservice.h"
-#include "avfcameracontrol.h"
-#include "avfcamerarenderercontrol.h"
-#include "avfcameradevicecontrol.h"
-#include "avfaudioinputselectorcontrol.h"
-#include "avfmediavideoprobecontrol.h"
-#include "avfcameraviewfindersettingscontrol.h"
-#include "avfimageencodercontrol.h"
-#include "avfcamerautility.h"
+#include <avfcamerasession.h>
+
+#include <avfaudioinputselectorcontrol.h>
+#include <avfcameracontrol.h>
+#include <avfcameradevicecontrol.h>
+#include <avfcamerarenderercontrol.h>
+#include <avfcameraservice.h>
+#include <avfcamerautility.h>
+#include <avfcameraviewfindersettingscontrol.h>
+#include <avfimageencodercontrol.h>
+#include <avfmediavideoprobecontrol.h>
 #include <qdatetime.h>
-#include <qurl.h>
-#include <qelapsedtimer.h>
 #include <qdebug.h>
+#include <qelapsedtimer.h>
+#include <qurl.h>
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/Foundation.h>
@@ -259,7 +259,9 @@ void AVFCameraSession::setState(QCamera::State newState)
     if (m_state == newState)
         return;
 
-    qDebugCamera() << Q_FUNC_INFO << m_state << " -> " << newState;
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+    qDebug() << Q_FUNC_INFO << m_state << " -> " << newState;
+#endif
 
     QCamera::State oldState = m_state;
     m_state = newState;
@@ -301,12 +303,12 @@ void AVFCameraSession::setState(QCamera::State newState)
 void AVFCameraSession::processRuntimeError()
 {
     qWarning() << tr("Runtime camera error");
+
     Q_EMIT error(QCamera::CameraError, tr("Runtime camera error"));
 }
 
 void AVFCameraSession::processSessionStarted()
 {
-    qDebugCamera() << Q_FUNC_INFO;
     if (!m_active) {
         m_active = true;
         Q_EMIT activeChanged(m_active);
@@ -316,7 +318,6 @@ void AVFCameraSession::processSessionStarted()
 
 void AVFCameraSession::processSessionStopped()
 {
-    qDebugCamera() << Q_FUNC_INFO;
     if (m_active) {
         m_active = false;
         Q_EMIT activeChanged(m_active);

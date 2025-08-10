@@ -21,15 +21,15 @@
 *
 ***********************************************************************/
 
-#include "avfcamerazoomcontrol.h"
-#include "avfcameraservice.h"
-#include "avfcamerautility.h"
-#include "avfcamerasession.h"
-#include "avfcameracontrol.h"
-#include "avfcameradebug.h"
-#include <qsysinfo.h>
-#include <qglobal.h>
+#include <avfcamerazoomcontrol.h>
+
+#include <avfcameracontrol.h>
+#include <avfcameraservice.h>
+#include <avfcamerasession.h>
+#include <avfcamerautility.h>
 #include <qdebug.h>
+#include <qglobal.h>
+#include <qsysinfo.h>
 
 AVFCameraZoomControl::AVFCameraZoomControl(AVFCameraService *service)
     : m_session(service->session()), m_maxZoomFactor(1.), m_zoomFactor(1.), m_requestedZoomFactor(1.)
@@ -107,8 +107,12 @@ void AVFCameraZoomControl::cameraStateChanged()
 
     AVCaptureDevice *captureDevice = m_session->videoCaptureDevice();
     if (! captureDevice || !captureDevice.activeFormat) {
-        qDebugCamera() << Q_FUNC_INFO << "camera state is active, but"
+
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+        qDebug() << Q_FUNC_INFO << "camera state is active, but"
                        << "video capture device and/or active format is nil";
+#endif
+
         return;
     }
 
@@ -155,7 +159,10 @@ void AVFCameraZoomControl::zoomToRequestedDigital()
 
     const AVFConfigurationLock lock(captureDevice);
     if (! lock) {
-        qDebugCamera() << Q_FUNC_INFO << "failed to lock for configuration";
+#if defined(CS_SHOW_DEBUG_PLUGINS_AVF)
+        qDebug() << Q_FUNC_INFO << "failed to lock for configuration";
+#endif
+
         return;
     }
 
