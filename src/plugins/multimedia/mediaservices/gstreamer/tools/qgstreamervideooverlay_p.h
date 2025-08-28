@@ -24,14 +24,13 @@
 #ifndef QGSTREAMERVIDEOOVERLAY_P_H
 #define QGSTREAMERVIDEOOVERLAY_P_H
 
-#include <qgstreamerbushelper_p.h>
-#include <qgstreamerbufferprobe_p.h>
-#include <qwindowdefs.h>
 #include <qsize.h>
+#include <qwindowdefs.h>
 
-class QGstreamerVideoOverlay
-   : public QObject, public QGstreamerSyncMessageFilter
-   , public QGstreamerBusMessageFilter, private QGstreamerBufferProbe
+#include <qgstreamerbufferprobe_p.h>
+#include <qgstreamerbushelper_p.h>
+
+class QGstreamerVideoOverlay : public QObject, public QGstreamerSyncMessageFilter, public QGstreamerBusMessageFilter, private QGstreamerBufferProbe
 {
    CS_OBJECT_MULTIPLE(QGstreamerVideoOverlay, QObject)
 

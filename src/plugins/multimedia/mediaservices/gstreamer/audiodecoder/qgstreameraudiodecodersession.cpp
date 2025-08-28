@@ -25,11 +25,10 @@
 
 #include <qdatetime.h>
 #include <qdebug.h>
-#include <qsize.h>
-#include <qtimer.h>
-#include <qdebug.h>
 #include <qdir.h>
+#include <qsize.h>
 #include <qstandardpaths.h>
+#include <qtimer.h>
 #include <qurl.h>
 
 #include <qgstreamerbushelper_p.h>
@@ -113,9 +112,11 @@ QGstreamerAudioDecoderSession::~QGstreamerAudioDecoderSession()
       stop();
 
       delete m_busHelper;
+
 #if defined(HAVE_GST_APPSRC)
       delete m_appSrc;
 #endif
+
       gst_object_unref(GST_OBJECT(m_bus));
       gst_object_unref(GST_OBJECT(m_playbin));
    }
@@ -240,7 +241,9 @@ bool QGstreamerAudioDecoderSession::processBusMessage(const QGstreamerMessage &m
                GError *err;
                gchar *debug;
                gst_message_parse_info (gm, &err, &debug);
+
                qDebug() << "Info:" << QString::fromUtf8(err->message);
+
                g_error_free (err);
                g_free (debug);
             }
@@ -612,4 +615,3 @@ qint64 QGstreamerAudioDecoderSession::getPositionFromBuffer(GstBuffer *buffer)
 
    return position;
 }
-

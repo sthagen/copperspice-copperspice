@@ -23,15 +23,14 @@
 
 #include <camera_control.h>
 
+#include <camera_audioencoder.h>
+#include <camera_container.h>
+#include <camera_imageencoder.h>
+#include <camera_resourcepolicy.h>
+#include <camera_videoencoder.h>
 #include <qdebug.h>
 #include <qfile.h>
 #include <qmetaobject.h>
-
-#include <camera_container.h>
-#include <camera_audioencoder.h>
-#include <camera_videoencoder.h>
-#include <camera_imageencoder.h>
-#include <camera_resourcepolicy.h>
 
 #define ENUM_NAME(c,e,v) (c::staticMetaObject().enumerator(c::staticMetaObject().indexOfEnumerator(e)).valueToKey((v)))
 
@@ -271,4 +270,3 @@ void CameraBinControl::setViewfinderColorSpaceConversion(bool enabled)
 
    g_object_set(G_OBJECT(m_session->cameraBin()), "flags", flags, NULL);
 }
-

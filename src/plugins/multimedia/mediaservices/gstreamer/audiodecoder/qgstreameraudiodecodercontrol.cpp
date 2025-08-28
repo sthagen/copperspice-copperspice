@@ -26,7 +26,6 @@
 #include <qdir.h>
 #include <qsocketnotifier.h>
 #include <qurl.h>
-#include <qdebug.h>
 
 #include <qgstreameraudiodecodersession.h>
 
@@ -117,5 +116,3 @@ qint64 QGstreamerAudioDecoderControl::duration() const
 {
    return m_session->duration();
 }
-
-

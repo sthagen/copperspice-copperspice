@@ -22,7 +22,6 @@
 ***********************************************************************/
 
 #include <camera_metadata.h>
-#include <qdebug.h>
 #include <qmediametadata.h>
 
 #include <gst/gst.h>
@@ -264,4 +263,3 @@ QStringList CameraBinMetaData::availableMetaData() const
 
    return res;
 }
-

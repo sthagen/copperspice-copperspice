@@ -22,6 +22,7 @@
 ***********************************************************************/
 
 #include <qgstreameravailabilitycontrol.h>
+
 #include <qmediaresourceset_p.h>
 
 QGStreamerAvailabilityControl::QGStreamerAvailabilityControl(QMediaPlayerResourceSetInterface *resources, QObject *parent)
@@ -40,4 +41,3 @@ QMultimedia::AvailabilityStatus QGStreamerAvailabilityControl::availability() co
 {
    return m_resources->isAvailable() ? QMultimedia::Available : QMultimedia::Busy;
 }
-

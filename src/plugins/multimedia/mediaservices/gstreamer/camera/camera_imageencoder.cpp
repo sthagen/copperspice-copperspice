@@ -23,7 +23,6 @@
 
 #include <camera_imageencoder.h>
 #include <camera_session.h>
-#include <qdebug.h>
 
 CameraBinImageEncoder::CameraBinImageEncoder(CameraBinSession *session)
    : QImageEncoderControl(session), m_session(session)
@@ -67,4 +66,3 @@ void CameraBinImageEncoder::setImageSettings(const QImageEncoderSettings &settin
    m_settings = settings;
    emit settingsChanged();
 }
-

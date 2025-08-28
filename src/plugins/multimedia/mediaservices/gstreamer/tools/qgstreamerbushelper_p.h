@@ -25,9 +25,12 @@
 #define QGSTREAMERBUSHELPER_P_H
 
 #include <qobject.h>
+
 #include <qgstreamermessage_p.h>
 
 #include <gst/gst.h>
+
+class QGstreamerBusHelperPrivate;
 
 class QGstreamerSyncMessageFilter
 {
@@ -39,7 +42,6 @@ class QGstreamerSyncMessageFilter
 #define QGstreamerSyncMessageFilter_iid "com.copperspice.CS.gstreamerSyncMessageFilter/1.0"
 CS_DECLARE_INTERFACE(QGstreamerSyncMessageFilter, QGstreamerSyncMessageFilter_iid)
 
-
 class QGstreamerBusMessageFilter
 {
  public:
@@ -50,13 +52,9 @@ class QGstreamerBusMessageFilter
 #define QGstreamerBusMessageFilter_iid "com.copperspice.CS.gstreamerBusMessagefilter/1.0"
 CS_DECLARE_INTERFACE(QGstreamerBusMessageFilter, QGstreamerBusMessageFilter_iid)
 
-
-class QGstreamerBusHelperPrivate;
-
 class QGstreamerBusHelper : public QObject
 {
    CS_OBJECT(QGstreamerBusHelper)
-   friend class QGstreamerBusHelperPrivate;
 
  public:
    QGstreamerBusHelper(GstBus *bus, QObject *parent = nullptr);
@@ -70,6 +68,8 @@ class QGstreamerBusHelper : public QObject
 
  private:
    QGstreamerBusHelperPrivate *d;
+
+   friend class QGstreamerBusHelperPrivate;
 };
 
 #endif

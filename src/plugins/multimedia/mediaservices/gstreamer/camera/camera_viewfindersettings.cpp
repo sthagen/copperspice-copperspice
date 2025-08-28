@@ -21,8 +21,8 @@
 *
 ***********************************************************************/
 
-#include <camera_viewfindersettings.h>
 #include <camera_session.h>
+#include <camera_viewfindersettings.h>
 
 CameraBinViewfinderSettings::CameraBinViewfinderSettings(CameraBinSession *session)
    : QCameraViewfinderSettingsControl(session), m_session(session)
@@ -98,4 +98,3 @@ void CameraBinViewfinderSettings::setViewfinderParameter(ViewfinderParameter par
 
    m_session->setViewfinderSettings(settings);
 }
-

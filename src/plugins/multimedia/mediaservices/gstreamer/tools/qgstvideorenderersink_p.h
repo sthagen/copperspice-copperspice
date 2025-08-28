@@ -24,19 +24,19 @@
 #ifndef QGSTVIDEORENDERERSINK_P_H
 #define QGSTVIDEORENDERERSINK_P_H
 
-#include <gst/video/gstvideosink.h>
-#include <gst/video/video.h>
-
+#include <qabstractvideobuffer.h>
 #include <qlist.h>
 #include <qmutex.h>
-#include <qqueue.h>
 #include <qpointer.h>
-#include <qwaitcondition.h>
-#include <qvideosurfaceformat.h>
+#include <qqueue.h>
 #include <qvideoframe.h>
-#include <qabstractvideobuffer.h>
+#include <qvideosurfaceformat.h>
+#include <qwaitcondition.h>
 
 #include <qgstvideorendererplugin_p.h>
+
+#include <gst/video/gstvideosink.h>
+#include <gst/video/video.h>
 
 class QAbstractVideoSurface;
 
@@ -83,12 +83,6 @@ class QVideoSurfaceGstDelegate : public QObject
    bool event(QEvent *event) override;
 
  private:
-   CS_SLOT_1(Private, bool handleEvent(QMutexLocker *locker))
-   CS_SLOT_2(handleEvent)
-
-   CS_SLOT_1(Private, void updateSupportedFormats())
-   CS_SLOT_2(updateSupportedFormats)
-
    void notify();
    bool waitForAsyncEvent(QMutexLocker *locker, QWaitCondition *condition, unsigned long time);
 
@@ -109,6 +103,12 @@ class QVideoSurfaceGstDelegate : public QObject
    bool m_notified;
    bool m_stop;
    bool m_flush;
+
+   CS_SLOT_1(Private, bool handleEvent(QMutexLocker *locker))
+   CS_SLOT_2(handleEvent)
+
+   CS_SLOT_1(Private, void updateSupportedFormats())
+   CS_SLOT_2(updateSupportedFormats)
 };
 
 class QGstVideoRendererSink
@@ -141,7 +141,6 @@ class QGstVideoRendererSink
 
    QVideoSurfaceGstDelegate *delegate;
 };
-
 
 class QGstVideoRendererSinkClass
 {

@@ -26,15 +26,14 @@
 
 #include <qvideowidgetcontrol.h>
 
-#include <qgstreamervideorendererinterface_p.h>
 #include <qgstreamerbushelper_p.h>
 #include <qgstreamervideooverlay_p.h>
+#include <qgstreamervideorendererinterface_p.h>
 
 class QGstreamerVideoWidget;
 
-class QGstreamerVideoWidgetControl
-   : public QVideoWidgetControl, public QGstreamerVideoRendererInterface
-   , public QGstreamerSyncMessageFilter, public QGstreamerBusMessageFilter
+class QGstreamerVideoWidgetControl : public QVideoWidgetControl, public QGstreamerVideoRendererInterface,
+      public QGstreamerSyncMessageFilter, public QGstreamerBusMessageFilter
 {
    CS_OBJECT_MULTIPLE(QGstreamerVideoWidgetControl, QVideoWidgetControl)
 
