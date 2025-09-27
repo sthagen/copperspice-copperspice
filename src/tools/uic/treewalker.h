@@ -26,47 +26,46 @@
 
 #include <qlist.h>
 
-class DomUI;
-class DomLayoutDefault;
-class DomLayoutFunction;
-class DomTabStops;
-class DomLayout;
-class DomLayoutItem;
-class DomWidget;
-class DomSpacer;
-class DomColor;
-class DomColorGroup;
-class DomPalette;
-class DomFont;
-class DomPoint;
-class DomRect;
-class DomSizePolicy;
-class DomSize;
-class DomDate;
-class DomTime;
-class DomDateTime;
-class DomProperty;
-class DomCustomWidgets;
-class DomCustomWidget;
 class DomAction;
 class DomActionGroup;
 class DomActionRef;
-class DomImages;
+class DomButtonGroup;
+class DomButtonGroups;
+class DomColor;
+class DomColorGroup;
+class DomConnection;
+class DomConnectionHint;
+class DomConnectionHints;
+class DomConnections;
+class DomCustomWidget;
+class DomCustomWidgets;
+class DomDate;
+class DomDateTime;
+class DomFont;
 class DomImage;
-class DomItem;
-class DomIncludes;
+class DomImages;
 class DomInclude;
-class DomString;
+class DomIncludes;
+class DomItem;
+class DomLayout;
+class DomLayoutDefault;
+class DomLayoutFunction;
+class DomLayoutItem;
+class DomPalette;
+class DomPoint;
+class DomProperty;
+class DomRect;
+class DomResource;
 class DomResourcePixmap;
 class DomResources;
-class DomResource;
-class DomConnections;
-class DomConnection;
-class DomConnectionHints;
-class DomConnectionHint;
-class DomScript;
-class DomButtonGroups;
-class DomButtonGroup;
+class DomSize;
+class DomSizePolicy;
+class DomSpacer;
+class DomString;
+class DomTabStops;
+class DomTime;
+class DomUI;
+class DomWidget;
 
 struct TreeWalker {
    virtual ~TreeWalker()
@@ -95,9 +94,9 @@ struct TreeWalker {
    virtual void acceptTime(DomTime *time);
    virtual void acceptDateTime(DomDateTime *dateTime);
    virtual void acceptProperty(DomProperty *property);
-   typedef QList<DomScript *> DomScripts;
-   typedef QList<DomWidget *> DomWidgets;
-   virtual void acceptWidgetScripts(const DomScripts &, DomWidget *node, const  DomWidgets &childWidgets);
+
+   using DomWidgets = QList<DomWidget *>;
+
    virtual void acceptImages(DomImages *images);
    virtual void acceptImage(DomImage *image);
    virtual void acceptIncludes(DomIncludes *includes);

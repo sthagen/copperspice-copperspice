@@ -23,17 +23,17 @@
 
 #include <write_initialization.h>
 
+#include <qdebug.h>
+#include <qstringfwd.h>
+#include <qtextstream.h>
+
 #include <databaseinfo.h>
 #include <driver.h>
-#include <globaldefs.h>
+
 #include <ui4.h>
 #include <uic.h>
 #include <utils.h>
 #include <write_iconinitialization.h>
-
-#include <qdebug.h>
-#include <qstringfwd.h>
-#include <qtextstream.h>
 
 namespace {
 
@@ -43,8 +43,8 @@ QString whatsThisDefineC     = "QT_NO_WHATSTHIS";
 QString statusTipDefineC     = "QT_NO_STATUSTIP";
 QString shortcutDefineC      = "QT_NO_SHORTCUT";
 
-// fix an enumeration name, was "BottomToolBarArea" instead of "Qt::BottomToolBarArea"
-void fixQtEnumerationName(QString &name)
+// change "BottomToolBarArea" to "Qt::BottomToolBarArea"
+static void addEnumPrefix(QString &name)
 {
    static const QString prefix("Qt::");
 
@@ -59,7 +59,7 @@ QString toolBarAreaStringFromDOMAttributes(const CPP::WriteInitialization::DomPr
 {
    const DomProperty *pstyle = attributes.value("toolBarArea");
 
-   if (! pstyle) {
+   if (pstyle == nullptr) {
       return QString();
    }
 
@@ -73,7 +73,7 @@ QString toolBarAreaStringFromDOMAttributes(const CPP::WriteInitialization::DomPr
 
       case DomProperty::Enum: {
          QString area = pstyle->elementEnum();
-         fixQtEnumerationName(area);
+         addEnumPrefix(area);
          area += ", ";
          return area;
       }
@@ -141,12 +141,6 @@ template <class Value>
 void writeSetter(const QString &indent, const QString &varName, const QString &setter, Value v, QTextStream &str)
 {
    str << indent << varName << "->" << setter << '(' << v << ");\n";
-}
-
-void writeSetupUIScriptVariableDeclarations(const QString &indent, QTextStream &str)
-{
-   str << indent << "ScriptContext scriptContext;\n"
-       << indent << "QWidgetList childWidgets;\n";
 }
 
 static inline bool iconHasStatePixmaps(const DomResourceIcon *i)
@@ -428,7 +422,7 @@ WriteInitialization::LayoutDefaultHandler::LayoutDefaultHandler()
 
 void WriteInitialization::LayoutDefaultHandler::acceptLayoutDefault(DomLayoutDefault *node)
 {
-   if (! node) {
+   if (node == nullptr) {
       return;
    }
 
@@ -445,7 +439,7 @@ void WriteInitialization::LayoutDefaultHandler::acceptLayoutDefault(DomLayoutDef
 
 void WriteInitialization::LayoutDefaultHandler::acceptLayoutFunction(DomLayoutFunction *node)
 {
-   if (!node) {
+   if (node == nullptr) {
       return;
    }
 
@@ -545,14 +539,14 @@ void WriteInitialization::LayoutDefaultHandler::writeProperties(const QString &i
 template <class DomElement>
 static bool needsTranslation(const DomElement *element)
 {
-   if (! element) {
+   if (element == nullptr) {
       return false;
    }
 
    return ! element->hasAttributeNotr() || ! toBool(element->attributeNotr());
 }
 
-WriteInitialization::WriteInitialization(Uic *uic, bool activateScripts)
+WriteInitialization::WriteInitialization(Uic *uic)
    : m_uic(uic), m_driver(uic->driver()), m_output(uic->output()), m_option(uic->option()),
      m_indent(m_option.indent + m_option.indent),
      m_dindent(m_indent + m_option.indent), m_stdsetdef(true),
@@ -560,8 +554,7 @@ WriteInitialization::WriteInitialization(Uic *uic, bool activateScripts)
      m_delayedOut(&m_delayedInitialization, QIODevice::WriteOnly),
      m_refreshOut(&m_refreshInitialization, QIODevice::WriteOnly),
      m_actionOut(&m_delayedActionInitialization, QIODevice::WriteOnly),
-     m_activateScripts(activateScripts), m_layoutWidget(false),
-     m_firstThemeIcon(true)
+     m_layoutWidget(false), m_firstThemeIcon(true)
 {
 }
 
@@ -604,10 +597,6 @@ void WriteInitialization::acceptUI(DomUI *node)
 
    m_output << m_option.indent << "void " << "setupUi(" << widgetClassName << " *" << varName << ")\n"
       << m_option.indent << "{\n";
-
-   if (m_activateScripts) {
-      writeSetupUIScriptVariableDeclarations(m_indent, m_output);
-   }
 
    for (const auto &connection : m_uic->databaseInfo()->connections()) {
       if (connection == "(default)") {
@@ -879,12 +868,10 @@ void WriteInitialization::acceptWidget(DomWidget *node)
       autoTrOutput(plabelString, pageDefaultString) << m_indent << parentWidget << "->setItemText("
          << parentWidget << "->indexOf(" << varName << "), " << autoTrCall(plabelString, pageDefaultString) << ");\n";
 
-#ifndef QT_NO_TOOLTIP
       if (DomProperty *ptoolTip = attributes.value("toolTip")) {
          autoTrOutput(ptoolTip->elementString()) << m_indent << parentWidget << "->setItemToolTip("
             << parentWidget << "->indexOf(" << varName << "), " << autoTrCall(ptoolTip->elementString()) << ");\n";
       }
-#endif
 
    } else if (m_uic->customWidgetsInfo()->extends(parentClass, "QTabWidget")) {
 
@@ -903,20 +890,15 @@ void WriteInitialization::acceptWidget(DomWidget *node)
       autoTrOutput(ptitleString, pageDefaultString) << m_indent << parentWidget << "->setTabText("
          << parentWidget << "->indexOf(" << varName << "), " << autoTrCall(ptitleString, pageDefaultString) << ");\n";
 
-#ifndef QT_NO_TOOLTIP
       if (const DomProperty *ptoolTip = attributes.value("toolTip")) {
          autoTrOutput(ptoolTip->elementString()) << m_indent << parentWidget << "->setTabToolTip("
             << parentWidget << "->indexOf(" << varName << "), " << autoTrCall(ptoolTip->elementString()) << ");\n";
       }
-#endif
 
-#ifndef QT_NO_WHATSTHIS
       if (const DomProperty *pwhatsThis = attributes.value("whatsThis")) {
          autoTrOutput(pwhatsThis->elementString()) << m_indent << parentWidget << "->setTabWhatsThis("
             << parentWidget << "->indexOf(" << varName << "), " << autoTrCall(pwhatsThis->elementString()) << ");\n";
       }
-#endif
-
    }
 
    // Special handling for qtableview/qtreeview fake header attributes
@@ -999,7 +981,7 @@ void WriteInitialization::addButtonGroup(const DomWidget *buttonNode, const QStr
    // Look up the button group name as specified in the attribute and find the uniquified name
    const DomProperty *prop = attributes.value("buttonGroup");
 
-   if (! prop) {
+   if (prop == nullptr) {
       return;
    }
 
@@ -1195,7 +1177,7 @@ void WriteInitialization::acceptLayoutItem(DomLayoutItem *node)
 
    DomLayout *layout = m_layoutChain.top();
 
-   if (! layout) {
+   if (layout == nullptr) {
       return;
    }
 
@@ -2033,7 +2015,7 @@ QString WriteInitialization::domColor2QString(const DomColor *c)
 
 void WriteInitialization::writeColorGroup(DomColorGroup *colorGroup, const QString &group, const QString &paletteName)
 {
-   if (! colorGroup) {
+   if (colorGroup == nullptr) {
       return;
    }
 
@@ -2713,7 +2695,7 @@ QString WriteInitialization::trCall(DomString *str, const QString &defaultString
    QString value = defaultString;
    QString comment;
 
-   if (str) {
+   if (str != nullptr) {
       value   = toString(str);
       comment = str->attributeComment();
    }
@@ -2725,11 +2707,11 @@ QString WriteInitialization::noTrCall(DomString *str, const QString &defaultStri
 {
    QString value = defaultString;
 
-   if (!str && defaultString.isEmpty()) {
+   if (str == nullptr && defaultString.isEmpty()) {
       return QString();
    }
 
-   if (str) {
+   if (str != nullptr) {
       value = str->text();
    }
 
@@ -2742,7 +2724,7 @@ QString WriteInitialization::noTrCall(DomString *str, const QString &defaultStri
 
 QString WriteInitialization::autoTrCall(DomString *str, const QString &defaultString) const
 {
-   if ((!str && !defaultString.isEmpty()) || needsTranslation(str)) {
+   if ((str == nullptr && ! defaultString.isEmpty()) || needsTranslation(str)) {
       return trCall(str, defaultString);
    }
 
@@ -2761,7 +2743,7 @@ QTextStream &WriteInitialization::autoTrOutput(const DomProperty *property)
 
 QTextStream &WriteInitialization::autoTrOutput(const DomString *str, const QString &defaultString)
 {
-   if ((!str && !defaultString.isEmpty()) || needsTranslation(str)) {
+   if ((str == nullptr && ! defaultString.isEmpty()) || needsTranslation(str)) {
       return m_refreshOut;
    }
 
@@ -2838,54 +2820,6 @@ void WriteInitialization::acceptImage(DomImage *image)
    }
 
    m_registeredImages.insert(image->attributeName(), image);
-}
-
-void WriteInitialization::acceptWidgetScripts(const DomScripts &widgetScripts, DomWidget *node,
-   const  DomWidgets &childWidgets)
-{
-   // Add the per-class custom scripts to the per-widget ones.
-   DomScripts scripts(widgetScripts);
-
-   if (DomScript *customWidgetScript = m_uic->customWidgetsInfo()->customWidgetScript(node->attributeClass())) {
-      scripts.push_front(customWidgetScript);
-   }
-
-   if (scripts.empty()) {
-      return;
-   }
-
-   // concatenate script snippets
-   QString script;
-
-   for (const DomScript *domScript : scripts) {
-      const QString snippet = domScript->text();
-
-      if (!snippet.isEmpty()) {
-         script += snippet.trimmed();
-         script += '\n';
-      }
-   }
-
-   if (script.isEmpty()) {
-      return;
-   }
-
-   // Build the list of children and insert call
-   m_output << m_indent << "childWidgets.clear();\n";
-
-   if (! childWidgets.empty()) {
-      m_output << m_indent <<  "childWidgets";
-
-      for (DomWidget *child : childWidgets) {
-         m_output << " << " << m_driver->findOrInsertWidget(child);
-      }
-
-      m_output << ";\n";
-   }
-
-   m_output << m_indent << "scriptContext.run(QString::fromUtf8("
-      << fixString(script, m_dindent) << "), "
-      << m_driver->findOrInsertWidget(node) << ", childWidgets);\n";
 }
 
 static void generateMultiDirectiveBegin(QTextStream &outputStream, const QSet<QString> &directives)
@@ -3081,4 +3015,4 @@ void WriteInitialization::Item::addChild(Item *child)
    }
 }
 
-} // namespace CPP
+}   // namespace

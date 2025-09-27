@@ -24,24 +24,25 @@
 #ifndef UIC_H
 #define UIC_H
 
-#include <customwidgetsinfo.h>
-#include <databaseinfo.h>
 #include <qhash.h>
 #include <qstack.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qxmlstreamreader.h>
 
-class QTextStream;
-class QIODevice;
+#include <customwidgetsinfo.h>
+#include <databaseinfo.h>
 
-class Driver;
-class DomUI;
-class DomWidget;
-class DomSpacer;
+class QIODevice;
+class QTextStream;
+
+class DomItem;
 class DomLayout;
 class DomLayoutItem;
-class DomItem;
+class DomSpacer;
+class DomUI;
+class DomWidget;
+class Driver;
 
 struct Option;
 
@@ -90,14 +91,7 @@ class Uic
    }
 
    bool write(QIODevice *in);
-
-#ifdef QT_UIC_JAVA_GENERATOR
-   bool jwrite(DomUI *ui);
-#endif
-
-#ifdef QT_UIC_CPP_GENERATOR
    bool write(DomUI *ui);
-#endif
 
    bool isMainWindow(const QString &className) const;
    bool isToolBar(const QString &className) const;
@@ -113,11 +107,9 @@ class Uic
    void writeCopyrightHeader(DomUI *ui);
    DomUI *parseUiFile(QXmlStreamReader &reader);
 
-#ifdef QT_UIC_CPP_GENERATOR
    // header protection
    void writeHeaderProtectionStart();
    void writeHeaderProtectionEnd();
-#endif
 
    Driver *drv;
    QTextStream &out;

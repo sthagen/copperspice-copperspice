@@ -21,14 +21,14 @@
 *
 ***********************************************************************/
 
-#ifndef CPPWRITEICONDATA_H
-#define CPPWRITEICONDATA_H
-
-#include <treewalker.h>
+#ifndef WRITE_ICONDATA_H
+#define WRITE_ICONDATA_H
 
 #include <qiodevice.h>
 #include <qstring.h>
 #include <qtextstream.h>
+
+#include <treewalker.h>
 
 class Driver;
 class Uic;
@@ -55,6 +55,6 @@ class WriteIconData : public TreeWalker
    const Option &option;
 };
 
-} // namespace CPP
+}   // namespace
 
 #endif

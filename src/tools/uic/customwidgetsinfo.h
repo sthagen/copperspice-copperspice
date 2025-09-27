@@ -26,10 +26,10 @@
 
 #include <qmap.h>
 #include <qstringlist.h>
+
 #include <treewalker.h>
 
 class Driver;
-class DomScript;
 
 class CustomWidgetsInfo : public TreeWalker
 {
@@ -53,15 +53,14 @@ class CustomWidgetsInfo : public TreeWalker
       return m_customWidgets.value(name);
    }
 
-   DomScript *customWidgetScript(const QString &name) const;
-
    QString customWidgetAddPageMethod(const QString &name) const;
    QString realClassName(const QString &className) const;
    bool extends(const QString &className, const QString &baseClassName) const;
    bool isCustomWidgetContainer(const QString &className) const;
 
  private:
-   typedef QMap<QString, DomCustomWidget *> NameCustomWidgetMap;
+
+   using NameCustomWidgetMap = QMap<QString, DomCustomWidget*>;
    NameCustomWidgetMap m_customWidgets;
 };
 

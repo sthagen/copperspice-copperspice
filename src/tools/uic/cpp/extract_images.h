@@ -21,17 +21,17 @@
 *
 ***********************************************************************/
 
-#ifndef CPPEXTRACTIMAGES_H
-#define CPPEXTRACTIMAGES_H
-
-#include <treewalker.h>
+#ifndef EXTRACT_IMAGES_H
+#define EXTRACT_IMAGES_H
 
 #include <qdir.h>
 
-class Driver;
-class Uic;
+#include <treewalker.h>
 
 class QTextStream;
+
+class Driver;
+class Uic;
 
 struct Option;
 
@@ -52,6 +52,6 @@ class ExtractImages : public TreeWalker
    QDir m_imagesDir;
 };
 
-} // namespace CPP
+}   // namespace
 
 #endif

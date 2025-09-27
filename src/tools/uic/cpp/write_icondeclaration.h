@@ -21,12 +21,12 @@
 *
 ***********************************************************************/
 
-#ifndef CPPWRITEICONDECLARATION_H
-#define CPPWRITEICONDECLARATION_H
-
-#include <treewalker.h>
+#ifndef WRITE_ICONDECLARATION_H
+#define WRITE_ICONDECLARATION_H
 
 #include <qtextstream.h>
+
+#include <treewalker.h>
 
 class Driver;
 class Uic;
@@ -50,6 +50,6 @@ class WriteIconDeclaration : public TreeWalker
    const Option &option;
 };
 
-} // namespace CPP
+}   // namespace
 
 #endif

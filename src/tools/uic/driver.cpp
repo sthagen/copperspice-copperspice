@@ -25,6 +25,7 @@
 
 #include <qdebug.h>
 #include <qfileinfo.h>
+
 #include <ui4.h>
 #include <uic.h>
 
@@ -108,7 +109,7 @@ QString Driver::findOrInsertAction(DomAction *ui_action)
 
 QString Driver::findOrInsertButtonGroup(const DomButtonGroup *ui_group)
 {
-   ButtonGroupNameHash::iterator iter = m_buttonGroups.find(ui_group);
+   auto iter = m_buttonGroups.find(ui_group);
 
    if (iter == m_buttonGroups.end()) {
       iter = m_buttonGroups.insert(ui_group, unique(ui_group->attributeName(), "QButtonGroup"));
@@ -120,7 +121,7 @@ QString Driver::findOrInsertButtonGroup(const DomButtonGroup *ui_group)
 // Find a group by its non-uniqified name
 const DomButtonGroup *Driver::findButtonGroup(const QString &attributeName) const
 {
-   const ButtonGroupNameHash::const_iterator cend = m_buttonGroups.constEnd();
+   auto cend = m_buttonGroups.constEnd();
 
    for (auto iter = m_buttonGroups.constBegin(); iter != cend; ++iter)  {
       if (iter.key()->attributeName() == attributeName) {
@@ -280,14 +281,7 @@ bool Driver::uic(const QString &fileName, DomUI *ui, QTextStream *out)
    }
 
    Uic tool(this);
-   bool retval = false;
-
-#ifdef QT_UIC_CPP_GENERATOR
-   retval = tool.write(ui);
-#else
-   (void) ui;
-   fprintf(stderr, "Uic: option to generate cpp code not compiled in [%s:%d]\n", __FILE__, __LINE__);
-#endif
+   bool retval = tool.write(ui);
 
    m_output = oldOutput;
 

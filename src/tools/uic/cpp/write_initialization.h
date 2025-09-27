@@ -24,8 +24,6 @@
 #ifndef WRITE_INITIALIZATION_H
 #define WRITE_INITIALIZATION_H
 
-#include <treewalker.h>
-
 #include <qhash.h>
 #include <qmap.h>
 #include <qpair.h>
@@ -33,13 +31,15 @@
 #include <qstack.h>
 #include <qtextstream.h>
 
-class Driver;
-class Uic;
+#include <treewalker.h>
+
 class DomBrush;
 class DomFont;
 class DomResourceIcon;
 class DomSizePolicy;
 class DomStringList;
+class Driver;
+class Uic;
 
 struct Option;
 
@@ -113,12 +113,11 @@ struct WriteInitialization : public TreeWalker
    using DomPropertyList = QList<DomProperty *>;
    using DomPropertyMap  = QHash<QString, DomProperty *>;
 
-   WriteInitialization(Uic *uic, bool activateScripts);
+   WriteInitialization(Uic *uic);
 
    // widgets
    void acceptUI(DomUI *node) override;
    void acceptWidget(DomWidget *node) override;
-   void acceptWidgetScripts(const DomScripts &, DomWidget *node, const  DomWidgets &childWidgets) override;
 
    void acceptLayout(DomLayout *node) override;
    void acceptSpacer(DomSpacer *node) override;
@@ -317,15 +316,15 @@ struct WriteInitialization : public TreeWalker
    QHash<QString, DomImage *> m_registeredImages;
    QHash<QString, DomAction *> m_registeredActions;
 
-   typedef QHash<uint, QString> ColorBrushHash;
+   using ColorBrushHash = QHash<uint, QString>;
    ColorBrushHash m_colorBrushHash;
 
    // Map from font properties to  font variable name for reuse
    // Map from size policy to  variable for reuse
 
-   typedef QMap<FontHandle, QString> FontPropertiesNameMap;
-   typedef QMap<IconHandle, QString> IconPropertiesNameMap;
-   typedef QMap<SizePolicyHandle, QString> SizePolicyNameMap;
+   using FontPropertiesNameMap = QMap<FontHandle, QString>;
+   using IconPropertiesNameMap = QMap<IconHandle, QString>;
+   using SizePolicyNameMap     = QMap<SizePolicyHandle, QString>;
 
    FontPropertiesNameMap m_fontPropertiesNameMap;
    IconPropertiesNameMap m_iconPropertiesNameMap;
@@ -370,12 +369,11 @@ struct WriteInitialization : public TreeWalker
 
    QString m_delayedActionInitialization;
    QTextStream m_actionOut;
-   const bool m_activateScripts;
 
    bool m_layoutWidget;
    bool m_firstThemeIcon;
 };
 
-} // namespace CPP
+}   // namespace
 
 #endif

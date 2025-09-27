@@ -21,12 +21,12 @@
 *
 ***********************************************************************/
 
-#ifndef CPPWRITEDECLARATION_H
-#define CPPWRITEDECLARATION_H
+#ifndef WRITE_DECLARATION_H
+#define WRITE_DECLARATION_H
 
 #include <treewalker.h>
 
-#include <qtextstream.h>
+class QTextStream;
 
 class Driver;
 class Uic;
@@ -36,7 +36,7 @@ struct Option;
 namespace CPP {
 
 struct WriteDeclaration : public TreeWalker {
-   WriteDeclaration(Uic *uic, bool activateScripts);
+   WriteDeclaration(Uic *uic);
 
    void acceptUI(DomUI *node) override;
    void acceptWidget(DomWidget *node) override;
@@ -51,9 +51,8 @@ struct WriteDeclaration : public TreeWalker {
    Driver *m_driver;
    QTextStream &m_output;
    const Option &m_option;
-   const bool m_activateScripts;
 };
 
-} // namespace CPP
+}  // namespace
 
 #endif

@@ -24,20 +24,21 @@
 #ifndef DRIVER_H
 #define DRIVER_H
 
-#include <option.h>
 #include <qhash.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qtextstream.h>
 
-class DomUI;
-class DomWidget;
-class DomSpacer;
+#include <option.h>
+
+class DomAction;
+class DomActionGroup;
+class DomButtonGroup;
 class DomLayout;
 class DomLayoutItem;
-class DomActionGroup;
-class DomAction;
-class DomButtonGroup;
+class DomSpacer;
+class DomUI;
+class DomWidget;
 
 class Driver
 {
@@ -119,9 +120,7 @@ class Driver
    QHash<DomLayout *, QString> m_layouts;
    QHash<DomActionGroup *, QString> m_actionGroups;
 
-   typedef QHash<const DomButtonGroup *, QString> ButtonGroupNameHash;
-   ButtonGroupNameHash m_buttonGroups;
-
+   QHash<const DomButtonGroup *, QString> m_buttonGroups;
    QHash<DomAction *, QString> m_actions;
    QHash<QString, bool> m_nameRepository;
    QHash<QString, bool> m_pixmaps;

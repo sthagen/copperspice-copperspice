@@ -23,12 +23,13 @@
 
 #define UIC_VERSION_STR "1.0.0"
 
-#include <driver.h>
-#include <option.h>
 #include <qdir.h>
 #include <qfile.h>
 #include <qtextcodec.h>
 #include <qtextstream.h>
+
+#include <driver.h>
+#include <option.h>
 #include <uic.h>
 
 static const char *error = nullptr;
@@ -49,7 +50,6 @@ void showHelp(const char *appName)
       "  -tr <func>                use func() for i18n\n"
       "  -p, -no-protection        disable header protection\n"
       "  -n, -no-implicit-includes disable generation of #include-directives\n"
-      "  -g <name>                 change generator\n"
       "\n", appName);
 }
 
@@ -107,16 +107,7 @@ int runUic(int argc, char *argv[])
 
          driver.option().translateFunction = QString::fromUtf8(argv[arg]);
 
-      } else if (opt == "-g" || opt == "-generator") {
-         ++arg;
 
-         if (! argv[arg]) {
-            showHelp(argv[0]);
-            return 1;
-         }
-
-         QString name = QString::fromUtf8(argv[arg]).toLower();
-         driver.option().generator = (name == "java") ? Option::JavaGenerator : Option::CppGenerator;
 
       } else if (! fileName) {
          fileName = argv[arg];

@@ -23,11 +23,11 @@
 
 #include <write_icondeclaration.h>
 
+#include <qtextstream.h>
+
 #include <driver.h>
 #include <ui4.h>
 #include <uic.h>
-
-#include <qtextstream.h>
 
 namespace CPP {
 
@@ -57,5 +57,5 @@ void WriteIconDeclaration::acceptImage(DomImage *image)
    output << option.indent << option.indent << name << "_ID,\n";
 }
 
-} // namespace CPP
+}   // namespace
 

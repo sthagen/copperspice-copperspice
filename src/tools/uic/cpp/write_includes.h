@@ -21,17 +21,18 @@
 *
 ***********************************************************************/
 
-#ifndef CPPWRITEINCLUDES_H
-#define CPPWRITEINCLUDES_H
-
-#include <treewalker.h>
+#ifndef WRITE_INCLUDES_H
+#define WRITE_INCLUDES_H
 
 #include <qhash.h>
 #include <qmap.h>
 #include <qset.h>
 #include <qstring.h>
 
+#include <treewalker.h>
+
 class QTextStream;
+
 class Driver;
 class Uic;
 
@@ -45,7 +46,6 @@ struct WriteIncludes : public TreeWalker {
    void acceptLayout(DomLayout *node) override;
    void acceptSpacer(DomSpacer *node) override;
    void acceptProperty(DomProperty *node) override;
-   void acceptWidgetScripts(const DomScripts &, DomWidget *, const DomWidgets &) override;
 
    // custom widgets
    void acceptCustomWidgets(DomCustomWidgets *node) override;
@@ -55,37 +55,29 @@ struct WriteIncludes : public TreeWalker {
    void acceptIncludes(DomIncludes *node) override;
    void acceptInclude(DomInclude *node) override;
 
-   bool scriptsActivated() const {
-      return m_scriptsActivated;
-   }
-
  private:
    void add(const QString &className, bool determineHeader = true, const QString &header = QString(), bool global = false);
 
-   typedef QMap<QString, bool> OrderedSet;
    void insertIncludeForClass(const QString &className, QString header = QString(), bool global = false);
    void insertInclude(const QString &header, bool global);
-   void writeHeaders(const OrderedSet &headers, bool global);
+   void writeHeaders(const QMap<QString, bool> &headers, bool global);
    QString headerForClassName(const QString &className) const;
-   void activateScripts();
 
    const Uic *m_uic;
    QTextStream &m_output;
 
-   OrderedSet m_localIncludes;
-   OrderedSet m_globalIncludes;
+   QMap<QString, bool> m_localIncludes;
+   QMap<QString, bool> m_globalIncludes;
    QSet<QString> m_includeBaseNames;
 
    QSet<QString> m_knownClasses;
 
-   typedef QMap<QString, QString> StringMap;
-   StringMap m_classToHeader;
-   StringMap m_oldHeaderToNewHeader;
+   QMap<QString, QString> m_classToHeader;
+   QMap<QString, QString> m_oldHeaderToNewHeader;
 
-   bool m_scriptsActivated;
    bool m_laidOut;
 };
 
-} // namespace CPP
+}   // namespace
 
-#endif // CPPWRITEINCLUDES_H
+#endif
