@@ -158,9 +158,10 @@ struct WriteInitialization : public TreeWalker
    };
 
  private:
-   enum { WritePropertyIgnoreMargin     = 1,
-          WritePropertyIgnoreSpacing    = 2,
-          WritePropertyIgnoreObjectName = 4
+   enum {
+      WritePropertyIgnoreMargin     = 1,
+      WritePropertyIgnoreSpacing    = 2,
+      WritePropertyIgnoreObjectName = 4
    };
 
    static QString domColor2QString(const DomColor *c);
@@ -218,7 +219,8 @@ struct WriteInitialization : public TreeWalker
       }
 
     private:
-      struct ItemData {
+      struct ItemData
+      {
          ItemData()
             : policy(DontGenerate)
          { }
@@ -244,6 +246,7 @@ struct WriteInitialization : public TreeWalker
 
       const QString m_itemClassName;
       const QString m_indent;
+
       QTextStream &m_setupUiStream;
       QTextStream &m_retranslateUiStream;
       Driver *m_driver;
@@ -296,11 +299,11 @@ struct WriteInitialization : public TreeWalker
    QString m_dindent;
    bool m_stdsetdef;
 
-   struct Buddy {
+   struct Buddy
+   {
       Buddy(const QString &oN, const QString &b)
          : objName(oN), buddy(b)
-      {
-      }
+      { }
 
       QString objName;
       QString buddy;
@@ -312,6 +315,7 @@ struct WriteInitialization : public TreeWalker
    QList<Buddy> m_buddies;
 
    QSet<QString> m_buttonGroups;
+
    QHash<QString, DomWidget *> m_registeredWidgets;
    QHash<QString, DomImage *> m_registeredImages;
    QHash<QString, DomAction *> m_registeredActions;
@@ -346,8 +350,17 @@ struct WriteInitialization : public TreeWalker
          const QString &propertyName, const QString &setter, int defaultStyleValue,
          bool suppressDefault, QTextStream &str) const;
 
-      enum Properties { Margin, Spacing, NumProperties };
-      enum StateFlags { HasDefaultValue = 1, HasDefaultFunction = 2};
+      enum Properties {
+         Margin,
+         Spacing,
+         NumProperties
+      };
+
+      enum StateFlags {
+         HasDefaultValue = 1,
+         HasDefaultFunction = 2
+      };
+
       unsigned m_state[NumProperties];
       int m_defaultValues[NumProperties];
       QString m_functions[NumProperties];
