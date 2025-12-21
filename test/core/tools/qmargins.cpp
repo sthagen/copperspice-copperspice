@@ -36,20 +36,13 @@ TEST_CASE("QMargins constructor", "[qmargins]")
 {
    QMargins data(5, 10, 100, 200);
 
-   REQUIRE(! data.isNull());
+   REQUIRE(data.isNull() == false);
 
    REQUIRE(data.left()   == 5);
    REQUIRE(data.top()    == 10);
 
    REQUIRE(data.right()  == 100);
    REQUIRE(data.bottom() == 200);
-}
-
-TEST_CASE("QMargin is_null", "[qmargins]")
-{
-   QMargins data;
-
-   REQUIRE(data.isNull());
 }
 
 TEST_CASE("QMargins copy_assign", "[qmargins]")
@@ -68,7 +61,14 @@ TEST_CASE("QMargins copy_assign", "[qmargins]")
    REQUIRE(data_c == QMargins{25, 14, 100, 50});
 }
 
-TEST_CASE("QMargin math", "[qmargins]")
+TEST_CASE("QMargins is_null", "[qmargins]")
+{
+   QMargins data;
+
+   REQUIRE(data.isNull() == true);
+}
+
+TEST_CASE("QMargins math", "[qmargins]")
 {
    QMargins data1(25, 14, 100, 50);
    QMargins data2(2, 3, 4, 5);
@@ -164,7 +164,7 @@ TEST_CASE("QMargins move_assign", "[qmargins]")
    REQUIRE(data_c == QMargins{25, 14, 100, 50});
 }
 
-TEST_CASE("QMargin set", "[qmargins]")
+TEST_CASE("QMargins set", "[qmargins]")
 {
    QMargins data;
 

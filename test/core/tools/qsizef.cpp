@@ -32,16 +32,34 @@ TEST_CASE("QSizeF traits", "[qsizef]")
    REQUIRE(std::has_virtual_destructor_v<QSizeF> == false);
 }
 
+TEST_CASE("QSizeF bound_expandedTo", "[qsizef]")
+{
+   QSizeF data_a(53, 60);
+   QSizeF data_b(80, 35);
+
+   QSizeF result;
+
+   //
+   result = data_a.expandedTo(data_b);
+
+   REQUIRE(result == QSizeF(80, 60));
+
+   //
+   result = data_a.boundedTo(data_b);
+
+   REQUIRE(result == QSizeF(53, 35));
+}
+
 TEST_CASE("QSizeF constructor", "[qsizef]")
 {
-   QSizeF data(50, 125);
+   QSizeF data(50, 125.5);
 
    REQUIRE(data.isEmpty() == false);
    REQUIRE(data.isNull()  == false);
    REQUIRE(data.isValid() == true);
 
    REQUIRE(data.width()  == 50);
-   REQUIRE(data.height() == 125);
+   REQUIRE(data.height() == 125.5);
 
    //
    data = QSizeF(-25, -10);
@@ -89,24 +107,6 @@ TEST_CASE("QSizeF empty", "[qsizef]")
 
    REQUIRE(QSizeF(0, 5).isValid() == true);
    REQUIRE(QSizeF(5, 0).isValid() == true);
-}
-
-TEST_CASE("QSizeF bound_expandedTo", "[qsizef]")
-{
-   QSizeF data_a(53, 60);
-   QSizeF data_b(80, 35);
-
-   QSizeF result;
-
-   //
-   result = data_a.expandedTo(data_b);
-
-   REQUIRE(result == QSizeF(80, 60));
-
-   //
-   result = data_a.boundedTo(data_b);
-
-   REQUIRE(result == QSizeF(53, 35));
 }
 
 TEST_CASE("QSizeF move_assign", "[qsizef]")
@@ -227,23 +227,23 @@ TEST_CASE("QSizeF set", "[qsizef]")
 
 TEST_CASE("QSizeF transpose", "[qsizef]")
 {
-   QSizeF data_a(40, 75);
+   QSizeF data_a(40.1, 75);
 
    //
-   REQUIRE(data_a.width()  == 40);
+   REQUIRE(data_a.width()  == 40.1);
    REQUIRE(data_a.height() == 75);
 
    data_a.transpose();
 
    REQUIRE(data_a.width()  == 75);
-   REQUIRE(data_a.height() == 40);
+   REQUIRE(data_a.height() == 40.1);
 
    //
    QSizeF data_b = data_a.transposed();
 
    REQUIRE(data_a.width()  == 75);
-   REQUIRE(data_a.height() == 40);
+   REQUIRE(data_a.height() == 40.1);
 
-   REQUIRE(data_b.width()  == 40);
+   REQUIRE(data_b.width()  == 40.1);
    REQUIRE(data_b.height() == 75);
 }
