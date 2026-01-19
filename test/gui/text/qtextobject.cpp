@@ -21,13 +21,13 @@
 
 #include <cs_catch2.h>
 
-TEST_CASE("QTextBlock::iterator traits", "[qtextblock::iterator]")
+TEST_CASE("QTextObject traits", "[qtextobject]")
 {
-   REQUIRE(std::is_copy_constructible_v<QTextBlock::iterator> == true);
-   REQUIRE(std::is_move_constructible_v<QTextBlock::iterator> == true);
+   REQUIRE(std::is_copy_constructible_v<QTextObject> == false);
+   REQUIRE(std::is_move_constructible_v<QTextObject> == false);
 
-   REQUIRE(std::is_copy_assignable_v<QTextBlock::iterator> == true);
-   REQUIRE(std::is_move_assignable_v<QTextBlock::iterator> == true);
+   REQUIRE(std::is_copy_assignable_v<QTextObject> == false);
+   REQUIRE(std::is_move_assignable_v<QTextObject> == false);
 
-   REQUIRE(std::has_virtual_destructor_v<QTextBlock::iterator> == false);
+   REQUIRE(std::has_virtual_destructor_v<QTextObject> == true);
 }

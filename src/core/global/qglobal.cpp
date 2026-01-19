@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2025 Barbara Geller
-* Copyright (c) 2012-2025 Ansel Sermersheim
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -104,6 +104,10 @@ QSysInfo::MacVersion QSysInfo::macVersion()
 
    } else if (osVersion.major == 15) {
       retval = MacVersion::MV_15;
+
+   // **
+   } else if (osVersion.major == 26) {
+      retval = MacVersion::MV_26;
 
    } else {
       retval = QSysInfo::MV_Unknown;
