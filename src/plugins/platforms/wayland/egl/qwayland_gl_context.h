@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2025 Barbara Geller
-* Copyright (c) 2012-2025 Ansel Sermersheim
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -53,7 +53,7 @@ class QWaylandGLContext : public QPlatformOpenGLContext
       return m_format;
    }
 
-   void (*getProcAddress(const QByteArray &procName)) () override;
+   FP_Void getProcAddress(const QByteArray &procName) override;
 
    bool isSharing() const override;
    bool isValid() const override;

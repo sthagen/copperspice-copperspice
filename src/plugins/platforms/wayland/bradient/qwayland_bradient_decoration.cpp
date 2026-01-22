@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2025 Barbara Geller
-* Copyright (c) 2012-2025 Ansel Sermersheim
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -260,7 +260,7 @@ void QWaylandBradientDecoration::paint(QPaintDevice *device)
    p.setRenderHint(QPainter::Antialiasing);
 
    // Title bar
-   QPoint gradCenter(top.center() + QPoint(30, 60));
+   // unused:  QPoint gradCenter(top.center() + QPoint(30, 60));
    QLinearGradient grad(top.topLeft(), top.bottomLeft());
 
    QColor base(m_backgroundColor);

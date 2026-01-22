@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2025 Barbara Geller
-* Copyright (c) 2012-2025 Ansel Sermersheim
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -54,10 +54,11 @@ public:
         CVPixelBufferRelease(m_buffer);
     }
 
-    MapMode mapMode() const { return m_mode; }
+    MapMode mapMode() const override {
+      return m_mode;
+    }
 
-    int map(QAbstractVideoBuffer::MapMode mode, int *numBytes, int bytesPerLine[4], uchar *data[4])
-    {
+    int map(QAbstractVideoBuffer::MapMode mode, int *numBytes, int bytesPerLine[4], uchar *data[4]) override {
         // We only support RGBA or NV12 (or Apple's version of NV12),
         // they are either 0 planes or 2.
         const size_t nPlanes = CVPixelBufferGetPlaneCount(m_buffer);
@@ -94,8 +95,7 @@ public:
         return nPlanes;
     }
 
-    uchar *map(MapMode mode, int *numBytes, int *bytesPerLine)
-    {
+    uchar *map(MapMode mode, int *numBytes, int *bytesPerLine) override {
         if (mode != NotMapped && m_mode == NotMapped) {
             CVPixelBufferLockBaseAddress(m_buffer, mode == QAbstractVideoBuffer::ReadOnly
                                                                ? kCVPixelBufferLock_ReadOnly
@@ -113,8 +113,7 @@ public:
         }
     }
 
-    void unmap()
-    {
+    void unmap() override  {
         if (m_mode != NotMapped) {
             CVPixelBufferUnlockBaseAddress(m_buffer, m_mode == QAbstractVideoBuffer::ReadOnly
                                                                    ? kCVPixelBufferLock_ReadOnly
@@ -123,8 +122,7 @@ public:
         }
     }
 
-    QVariant handle() const
-    {
+    QVariant handle() const override {
 #ifdef Q_OS_IOS
         // Called from the render thread, so there is a current OpenGL context
 

@@ -1212,10 +1212,11 @@ QByteArray QFontSubset::toTruetype() const
 
    qreal ppem = fontEngine->m_fontDef.pixelSize;
 
-#define TO_TTF(x) qRound(x * 2048. / ppem)
+#define TO_TTF(x) qRound(x * 2048.0 / ppem)
 
    QFontEngine::Properties properties = fontEngine->properties();
-   // initialize some stuff needed in createWidthArray
+
+   // initialize vars needed in createWidthArray
    emSquare = 2048;
    widths.resize(nGlyphs());
 
@@ -1253,19 +1254,22 @@ QByteArray QFontSubset::toTruetype() const
 
    QVector<QTtfGlyph> glyphs;
 
-   uint sumAdvances = 0;
    for (int i = 0; i < numGlyphs; ++i) {
       glyph_t g = glyph_indices.at(i);
+
       QPainterPath path;
       glyph_metrics_t metric;
+
       fontEngine->getUnscaledGlyph(g, &path, &metric);
 
       if (noEmbed) {
          path = QPainterPath();
+
          if (g == 0) {
             path.addRect(QRectF(0, 0, 1000, 1000));
          }
       }
+
       QTtfGlyph glyph = generateGlyph(i, path, metric.xoff.toReal(), metric.x.toReal(), properties.emSquare.toReal());
 
       font.head.xMin = qMin(font.head.xMin, glyph.xMin);
@@ -1275,17 +1279,12 @@ QByteArray QFontSubset::toTruetype() const
 
       font.hhea.xMaxExtent = qMax(font.hhea.xMaxExtent, (qint16)(glyph.lsb + glyph.xMax - glyph.xMin));
 
-      font.maxp.maxPoints = qMax(font.maxp.maxPoints, glyph.numPoints);
+      font.maxp.maxPoints   = qMax(font.maxp.maxPoints, glyph.numPoints);
       font.maxp.maxContours = qMax(font.maxp.maxContours, glyph.numContours);
-
-      if (glyph.xMax > glyph.xMin) {
-         sumAdvances += glyph.xMax - glyph.xMin;
-      }
 
       glyphs.append(glyph);
       widths[i] = glyph.advanceWidth;
    }
-
 
    QVector<QTtfTable> tables = generateGlyphTables(font, glyphs);
    tables.append(generateHead(font.head));
@@ -1296,7 +1295,7 @@ QByteArray QFontSubset::toTruetype() const
    QTtfTable name_table;
    name_table.tag = MAKE_TAG('n', 'a', 'm', 'e');
 
-   if (!noEmbed) {
+   if (! noEmbed) {
       name_table.data = fontEngine->getSfntTable(name_table.tag);
    }
 
@@ -1316,10 +1315,11 @@ QByteArray QFontSubset::toTruetype() const
    }
    tables.append(name_table);
 
-   if (!noEmbed) {
+   if (! noEmbed) {
       QTtfTable os2;
       os2.tag = MAKE_TAG('O', 'S', '/', '2');
       os2.data = fontEngine->getSfntTable(os2.tag);
+
       if (!os2.data.isEmpty()) {
          tables.append(os2);
       }

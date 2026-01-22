@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2025 Barbara Geller
-* Copyright (c) 2012-2025 Ansel Sermersheim
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -458,7 +458,7 @@ void QCoreTextFontEngine::draw(CGContextRef ctx, qreal x, qreal y, const QTextIt
    CGAffineTransform oldTextMatrix = CGContextGetTextMatrix(ctx);
    CGAffineTransform cgMatrix      = CGAffineTransformMake(1, 0, 0, -1, 0, -paintDeviceHeight);
 
-   CGAffineTransformConcat(cgMatrix, oldTextMatrix);
+   (void) CGAffineTransformConcat(cgMatrix, oldTextMatrix);
 
    if (synthesisFlags & QFontEngine::SynthesizedItalic) {
       cgMatrix = CGAffineTransformConcat(cgMatrix, CGAffineTransformMake(1, 0, -SYNTHETIC_ITALIC_SKEW, 1, 0, 0));

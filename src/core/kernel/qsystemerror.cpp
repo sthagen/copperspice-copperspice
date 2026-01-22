@@ -36,17 +36,17 @@
 
 namespace {
 
-static inline QString fromstrerror_helper(int, const QByteArray &buf)
+[[maybe_unused]] static inline QString fromstrerror_helper(int, const QByteArray &buffer)
 {
-   return QString::fromUtf8(buf);
+   return QString::fromUtf8(buffer);
 }
 
-static inline QString fromstrerror_helper(const char *str, const QByteArray &)
+[[maybe_unused]] static inline QString fromstrerror_helper(const char *str, const QByteArray &)
 {
    return QString::fromUtf8(str);
 }
 
-}     // end namespace
+}   // end namespace
 #endif
 
 #ifdef Q_OS_WIN

@@ -562,12 +562,12 @@ void QPlatformCursorImage::set(const uchar *data, const uchar *mask,
    cursorImage.setColor(2, 0x00000000);
 
    int bytesPerLine = (width + 7) / 8;
+
    int p = 0;
    int d;
    int m;
 
    int x = -1;
-   int w = 0;
 
    uchar *cursor_data = cursorImage.bits();
    int bpl = cursorImage.bytesPerLine();
@@ -578,36 +578,33 @@ void QPlatformCursorImage::set(const uchar *data, const uchar *mask,
             d = *data & (1 << b);
             m = *mask & (1 << b);
 
-            if (d && m) {
+            if (d != 0 && m != 0) {
                p = 0;
 
-            } else if (!d && m) {
+            } else if (d == 0 && m != 0) {
                p = 1;
 
             } else {
                p = 2;
             }
+
             cursor_data[j * 8 + b] = p;
 
             // calc region
-            if (x < 0 && m) {
+            if (x < 0 && m != 0) {
                x = j * 8 + b;
-            } else if (x >= 0 && !m) {
+
+            } else if (x >= 0 && m == 0) {
                x = -1;
-               w = 0;
-            }
-            if (m) {
-               w++;
+
             }
          }
       }
 
       if (x >= 0) {
          x = -1;
-         w = 0;
       }
 
       cursor_data += bpl;
    }
-
 }

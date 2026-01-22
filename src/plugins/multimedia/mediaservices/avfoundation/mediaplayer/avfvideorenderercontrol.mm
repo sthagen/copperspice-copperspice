@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2025 Barbara Geller
-* Copyright (c) 2012-2025 Ansel Sermersheim
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -85,15 +85,18 @@ class TextureVideoBuffer : public QAbstractVideoBuffer
    virtual ~TextureVideoBuffer() {
    }
 
-   MapMode mapMode() const {
+   MapMode mapMode() const override {
       return NotMapped;
    }
-   uchar *map(MapMode, int *, int *) {
+
+   uchar *map(MapMode, int *, int *) override {
       return nullptr;
    }
-   void unmap() {}
 
-   QVariant handle() const {
+   void unmap() override {
+   }
+
+   QVariant handle() const override {
       return QVariant::fromValue<unsigned int>(m_texture);
    }
 

@@ -1,7 +1,7 @@
 /***********************************************************************
 *
-* Copyright (c) 2012-2025 Barbara Geller
-* Copyright (c) 2012-2025 Ansel Sermersheim
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
 *
 * Copyright (c) 2015 The Qt Company Ltd.
 * Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
@@ -439,7 +439,7 @@ void QWaylandInputDevice::Keyboard::keyboard_keymap(uint32_t format, int32_t fd,
       return;
    }
 
-   char *map_str = (char *)mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+   char *map_str = (char *)mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0);
 
    if (map_str == MAP_FAILED) {
       close(fd);
