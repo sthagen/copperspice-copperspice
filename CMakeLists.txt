@@ -22,7 +22,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 project(copperspice)
 
 set(BUILD_MAJOR "2")
-set(BUILD_MINOR "0")
+set(BUILD_MINOR "1")
 set(BUILD_MICRO "0")
 
 set(BUILD_ABI ${BUILD_MAJOR}.${BUILD_MINOR})
@@ -542,7 +542,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
 
       find_package(X11 COMPONENTS ICE SM Xcursor Xext Xfixes Xi Xinerama Xrandr Xrender)
       set_package_properties(X11 PROPERTIES
-         PURPOSE "Required for the X11 disply plugin"
+         PURPOSE "Required for the X11 display plugin"
          DESCRIPTION "Open source implementation of the X Window System"
          URL "https://www.x.org"
          TYPE REQUIRED
