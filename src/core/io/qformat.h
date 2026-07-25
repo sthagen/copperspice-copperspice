@@ -1,0 +1,301 @@
+/***********************************************************************
+*
+* Copyright (c) 2012-2026 Barbara Geller
+* Copyright (c) 2012-2026 Ansel Sermersheim
+*
+* Copyright (c) 2015 The Qt Company Ltd.
+* Copyright (c) 2012-2016 Digia Plc and/or its subsidiary(-ies).
+* Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
+*
+* This file is part of CopperSpice.
+*
+* CopperSpice is free software. You can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public License
+* version 2.1 as published by the Free Software Foundation.
+*
+* CopperSpice is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*
+* https://www.gnu.org/licenses/
+*
+***********************************************************************/
+
+#ifndef QFORMAT_H
+#define QFORMAT_H
+
+#include <qbytearray.h>
+#include <qdebug.h>
+#include <qlist.h>
+#include <qline.h>
+#include <qmargins.h>
+#include <qpair.h>
+#include <qpoint.h>
+#include <qrect.h>
+#include <qsize.h>
+#include <qstring.h>
+
+#include <format>
+#include <stdio.h>
+
+// specializations for specific custom data types
+
+// containers
+template<typename T>
+struct std::formatter<QList<T>> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QList<T> &list, Context &ctx) const {
+
+      bool first = true;
+
+      std::string output;
+      output.append("[");
+
+      for (const auto &item : list) {
+
+         if (first) {
+            first = false;
+
+         } else {
+            output.append(", ");
+
+         }
+
+         output += std::format("{}", item);
+      }
+
+      output.append("]");
+
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<typename T>
+struct std::formatter<QVector<T>> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QVector<T> &vector, Context &ctx) const {
+
+      bool first = true;
+
+      std::string output;
+      output.append("[");
+
+      for (const auto &item : vector) {
+
+         if (first) {
+            first = false;
+
+         } else {
+            output.append(", ");
+
+         }
+
+         output += std::format("{}", item);
+      }
+
+      output.append("]");
+
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+// string types
+template<>
+struct std::formatter<QByteArray> : std::formatter<const char *>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QByteArray &str, Context &ctx) const {
+      return std::formatter<const char *>::format(str.constData(), ctx);
+   }
+};
+
+template<>
+struct std::formatter<QString> : std::formatter<const char *>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QString &str, Context &ctx) const {
+      return std::formatter<const char *>::format(csPrintable(str), ctx);
+   }
+};
+
+//
+template<typename T1, typename T2>
+struct std::formatter<QPair<T1, T2>> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QPair<T1, T2> &pair, Context &ctx) const {
+      std::string output = std::format("[{}, {}]", pair.first, pair.second);
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+// tools
+template<>
+struct std::formatter<QLine> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QLine &line, Context &ctx) const {
+      std::string output = std::format("[{}, {}, {}, {}]", line.x1(), line.y1(), line.x2(), line.y2());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QLineF> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QLineF &line, Context &ctx) const {
+      std::string output = std::format("[{}, {}, {}, {}]", line.x1(), line.y1(), line.x2(), line.y2());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QMargins> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QMargins &data, Context &ctx) const {
+      std::string output = std::format("[{}, {}, {}, {}]", data.left(), data.top(), data.right(), data.bottom());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QMarginsF> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QMarginsF &data, Context &ctx) const {
+      std::string output = std::format("[{}, {}, {}, {}]", data.left(), data.top(), data.right(), data.bottom());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QRect> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QRect &rect, Context &ctx) const {
+      std::string output = std::format("[{}, {}, {}, {}]", rect.x(), rect.y(), rect.width(), rect.height());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QRectF> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QRectF &rect, Context &ctx) const {
+      std::string output = std::format("[{}, {}, {}, {}]", rect.x(), rect.y(), rect.width(), rect.height());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QPoint> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QPoint &pt, Context &ctx) const {
+      std::string output = std::format("[{}, {}]", pt.x(), pt.y());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QPointF> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QPointF &pt, Context &ctx) const {
+      std::string output = std::format("[{}, {}]", pt.x(), pt.y());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QSize> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QSize &size, Context &ctx) const {
+      std::string output = std::format("[{}, {}]", size.width(), size.height());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+template<>
+struct std::formatter<QSizeF> : std::formatter<std::string>
+{
+   // format data, delegate formatting to the base class
+   template<typename Context>
+   auto format(const QSizeF &size, Context &ctx) const {
+      std::string output = std::format("[{}, {}]", size.width(), size.height());
+      return std::formatter<std::string>::format(output, ctx);
+   }
+};
+
+// free functions
+template <typename... Args>
+void formatCritical(std::format_string<Args...> fmt, Args &&... args)
+{
+   std::string tmp = std::format(fmt, std::forward<Args>(args)...);
+
+   QString msg = QString::fromStdString(tmp);
+   qt_message_output(QtCriticalMsg, msg);
+}
+
+template <typename... Args>
+void formatDebug(std::format_string<Args...> fmt, Args &&... args)
+{
+   std::string tmp = std::format(fmt, std::forward<Args>(args)...);
+
+   QString msg = QString::fromStdString(tmp);
+   qt_message_output(QtDebugMsg, msg);
+}
+
+template <typename... Args>
+void formatFatal(std::format_string<Args...> fmt, Args &&... args)
+{
+   std::string tmp = std::format(fmt, std::forward<Args>(args)...);
+
+   QString msg = QString::fromStdString(tmp);
+   qt_message_output(QtFatalMsg, msg);
+}
+
+template <typename... Args>
+void formatWarning(std::format_string<Args...> fmt, Args &&... args)
+{
+   std::string tmp = std::format(fmt, std::forward<Args>(args)...);
+
+   QString msg = QString::fromStdString(tmp);
+   qt_message_output(QtWarningMsg, msg);
+}
+
+template <typename... Args>
+QString formatToQString(std::format_string<Args...> fmt, Args &&... args)
+{
+   std::string tmp = std::format(fmt, std::forward<Args>(args)...);
+   return QString::fromStdString(tmp);
+}
+
+template <typename... Args>
+void formatPrint(std::format_string<Args...> fmt, Args &&... args)
+{
+   std::string tmp = std::format(fmt, std::forward<Args>(args)...);
+   fputs(tmp.c_str(), stdout);
+}
+
+#endif

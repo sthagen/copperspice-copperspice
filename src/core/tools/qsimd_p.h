@@ -28,11 +28,11 @@
 
 #include <atomic>
 
-#if defined(__MINGW64_VERSION_MAJOR) || defined(Q_CC_MSVC)
+#if defined(Q_OS_WIN) && ( __has_include(<intrin.h>) )
 #include <intrin.h>
 #endif
 
-#define QT_COMPILER_SUPPORTS(x)     (QT_COMPILER_SUPPORTS_ ## x - 0)
+#define QT_COMPILER_SUPPORTS(x)   (QT_COMPILER_SUPPORTS_ ## x - 0)
 
 #if defined(Q_CC_INTEL) || defined(Q_CC_MSVC) || (defined(Q_CC_GNU) && ! defined(Q_CC_CLANG))
 
@@ -40,7 +40,7 @@
 #  define QT_COMPILER_SUPPORTS_HERE(x)    QT_COMPILER_SUPPORTS(x)
 
 #  if defined(Q_CC_GNU) && ! defined(Q_CC_INTEL)
-// GCC requires attributes for a function
+     // GCC requires attributes for a function
 #    define QT_FUNCTION_TARGET(x)  __attribute__((__target__(QT_FUNCTION_TARGET_STRING_ ## x)))
 #  else
 #    define QT_FUNCTION_TARGET(x)

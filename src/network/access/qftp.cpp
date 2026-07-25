@@ -29,6 +29,7 @@
 
 #include <qcoreapplication.h>
 #include <qfileinfo.h>
+#include <qformat.h>
 #include <qhash.h>
 #include <qlocale.h>
 #include <qregularexpression.h>
@@ -418,7 +419,7 @@ void QFtpDTP::writeData()
    if (is_ba) {
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-      qDebug("QFtpDTP::writeData: write %d bytes", data.ba->size());
+      formatDebug("QFtpDTP::writeData() About to write {:d} bytes", data.ba->size());
 #endif
 
       if (data.ba->size() == 0) {
@@ -438,7 +439,7 @@ void QFtpDTP::writeData()
       qint64 read = data.dev->read(buf, blockSize);
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-      qDebug("QFtpDTP::writeData: write() of size %lli bytes", read);
+      formatDebug("QFtpDTP::writeData() About to write {:d} bytes", read);
 #endif
 
       if (read > 0) {
@@ -480,7 +481,7 @@ inline void QFtpDTP::clearError()
 void QFtpDTP::abortConnection()
 {
 #if defined(CS_SHOW_DEBUG_NETWORK)
-   qDebug("QFtpDTP::abortConnection, bytesAvailable == %lli", socket ? socket->bytesAvailable() : (qint64) 0);
+   formatDebug("QFtpDTP::abortConnection() {:d} bytes available", socket ? socket->bytesAvailable() : (qint64) 0);
 #endif
 
    callWriteData = false;
@@ -715,7 +716,7 @@ void QFtpDTP::socketReadyRead()
          QByteArray line = socket->readLine();
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-         qDebug("QFtpDTP read (list): '%s'", line.constData());
+         formatDebug("QFtpDTP::socketReadyRead() Read line: {:s}", line.constData());
 #endif
 
          if (parseDir(line, QString(), &i)) {
@@ -748,7 +749,7 @@ void QFtpDTP::socketReadyRead()
             m_bytesDone += bytesRead;
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-            qDebug("QFtpDTP read: %lli bytes (total %lli bytes)", bytesRead, m_bytesDone);
+            formatDebug("QFtpDTP::socketReadyRead() {:d} bytes read of {:d} total bytes", bytesRead, m_bytesDone);
 #endif
             if (data.dev) {     // make sure it wasn't deleted in the slot
                data.dev->write(ba);
@@ -762,7 +763,7 @@ void QFtpDTP::socketReadyRead()
 
       } else {
 #if defined(CS_SHOW_DEBUG_NETWORK)
-         qDebug("QFtpDTP readyRead: %lli bytes available (total %lli bytes read)", bytesAvailable(), m_bytesDone);
+         formatDebug("QFtpDTP readyRead() {:d} bytes available of {:d} total bytes read", bytesAvailable(), m_bytesDone);
 #endif
 
          emit dataTransferProgress(m_bytesDone + socket->bytesAvailable(), m_bytesTotal);
@@ -815,7 +816,7 @@ void QFtpDTP::socketBytesWritten(qint64 bytes)
    m_bytesDone += bytes;
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-   qDebug("QFtpDTP::bytesWritten(%lli)", m_bytesDone);
+   formatDebug("QFtpDTP::socketBytesWritten() Total bytes written {:d}", m_bytesDone);
 #endif
 
    emit dataTransferProgress(m_bytesDone, m_bytesTotal);
@@ -1046,11 +1047,11 @@ bool QFtpPI::processReply()
 {
 #if defined(CS_SHOW_DEBUG_NETWORK)
    if (m_replyText.length() < 400) {
-      qDebug("QFtpPI recv: %d %s", 100 * m_replyCode[0] + 10 * m_replyCode[1] + m_replyCode[2],
+      qDebug("QFtpPI::processReply() Received: %d %s", 100 * m_replyCode[0] + 10 * m_replyCode[1] + m_replyCode[2],
             m_replyText.toLatin1().constData());
 
    } else {
-      qDebug("QFtpPI recv: %d (text skipped)", 100 * m_replyCode[0] + 10 * m_replyCode[1] + m_replyCode[2]);
+      qDebug("QFtpPI::processReply() Received: %d (text skipped)", 100 * m_replyCode[0] + 10 * m_replyCode[1] + m_replyCode[2]);
    }
 #endif
 
@@ -1135,7 +1136,7 @@ bool QFtpPI::processReply()
          // this error should be reported
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-         qDebug("QFtp: bad 227 response -- address and port information missing");
+         qDebug("QFtp::processReply() Bad 227 response, address and port information missing");
 #endif
 
       } else {
@@ -1155,7 +1156,7 @@ bool QFtpPI::processReply()
       if (portPos == -1) {
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-         qDebug("QFtp: bad 229 response, port information missing");
+         qDebug("QFtp::processReply() Bad 229 response, port information missing");
 #endif
          // this error should be reported
 
@@ -1247,7 +1248,7 @@ bool QFtpPI::startNextCmd()
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
    if (state != Idle) {
-      qDebug("QFtpPI startNextCmd() Internal error, QFtpPI called in non-Idle state %d", state);
+      qDebug("QFtpPI::startNextCmd() Internal error, QFtpPI called in non-Idle state %d", state);
    }
 #endif
 
@@ -1305,7 +1306,7 @@ bool QFtpPI::startNextCmd()
    pendingCommands.pop_front();
 
 #if defined(CS_SHOW_DEBUG_NETWORK)
-   qDebug("QFtpPI send: %s", currentCmd.left(currentCmd.length() - 2).toLatin1().constData());
+   qDebug("QFtpPI::startNextCmd() Send: %s", currentCmd.left(currentCmd.length() - 2).toLatin1().constData());
 #endif
 
    state = Waiting;

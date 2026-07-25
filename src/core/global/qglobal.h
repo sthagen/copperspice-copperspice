@@ -308,8 +308,8 @@
 // ******
 #if defined(__clang__)
 
-#  if ( __clang_major__ < 6)
-#    error "CopperSpice requires Clang 6 or newer"
+#  if ( __clang_major__ < 15)
+#    error "CopperSpice requires Clang 15 or newer"
 #  endif
 
 #  define Q_CC_CLANG
@@ -328,8 +328,8 @@
 #elif defined(__GNUC__)
 //  ****
 
-#  if (__GNUC__ < 7) || (__GNUC__ == 7 && __GNUC_MINOR__ < 3)
-#    error "CopperSpice requires GCC 7.3 or newer"
+#  if (__GNUC__ < 13) || (__GNUC__ == 13 && __GNUC_MINOR__ < 2)
+#    error "CopperSpice requires GCC 13.2 or newer"
 #  endif
 
 #  define Q_CC_GNU
@@ -359,8 +359,8 @@
 #elif defined(_MSC_VER)
 //  ****
 
-#  if _MSC_VER < 1926
-#    error "CopperSpice requires Visual Studio 2019 Version 16.6 or newer"
+#  if _MSC_VER < 1944
+#    error "CopperSpice requires Visual Studio 2022 Version 17.14 or newer"
 #  endif
 
 #  define Q_CC_MSVC         (_MSC_VER)
