@@ -123,8 +123,8 @@ static void printUsage()
 }
 
 static void updateTsFiles(const Translator &fetchedTor, const QStringList &tsFileNames,
-                          const QStringList &alienFiles, const QString &sourceLanguage, const QString &targetLanguage,
-                          UpdateOptions options, bool *fail)
+      const QStringList &alienFiles, const QString &sourceLanguage, const QString &targetLanguage,
+      UpdateOptions options, bool *fail)
 {
    for (int i = 0; i < fetchedTor.messageCount(); i++) {
       const TranslatorMessage &msg = fetchedTor.constMessage(i);
@@ -135,19 +135,21 @@ static void updateTsFiles(const Translator &fetchedTor, const QStringList &tsFil
    }
 
    QList<Translator> aliens;
+
    for (const QString &fileName : alienFiles) {
       ConversionData cd;
-      Translator tor;
+      Translator trObj;
 
-      if (! tor.load(fileName, cd, "auto")) {
+      if (! trObj.load(fileName, cd, "auto")) {
          printErr(cd.error());
          *fail = true;
          continue;
       }
 
-      tor.resolveDuplicates();
-      aliens << tor;
+      trObj.resolveDuplicates();
+      aliens << trObj;
    }
+
    QDir dir;
    QString err;
 
@@ -155,82 +157,90 @@ static void updateTsFiles(const Translator &fetchedTor, const QStringList &tsFil
       QString fn = dir.relativeFilePath(fileName);
 
       ConversionData cd;
-      Translator tor;
+      Translator trObj;
+
       cd.m_sortContexts = ! (options & NoSorting);
 
       if (QFile(fileName).exists()) {
-         if (! tor.load(fileName, cd, "auto")) {
+         if (! trObj.load(fileName, cd, "auto")) {
             printErr(cd.error());
             *fail = true;
+
             continue;
          }
 
-         tor.resolveDuplicates();
+         trObj.resolveDuplicates();
          cd.clearErrors();
 
-         if (!targetLanguage.isEmpty() && targetLanguage != tor.languageCode())
+         if (! targetLanguage.isEmpty() && targetLanguage != trObj.languageCode()) {
             printErr(QString("lupdate warning: Specified target language '%1' disagrees with"
-                             " existing file's language '%2'. Ignoring.\n").formatArgs(targetLanguage, tor.languageCode()));
+                  " existing file's language '%2'. Ignoring.\n").formatArgs(targetLanguage, trObj.languageCode()));
+         }
 
-         if (! sourceLanguage.isEmpty() && sourceLanguage != tor.sourceLanguageCode())
+         if (! sourceLanguage.isEmpty() && sourceLanguage != trObj.sourceLanguageCode()) {
             printErr(QString("lupdate warning: Specified source language '%1' disagrees with"
-                             " existing file's language '%2'. Ignoring.\n").formatArgs(sourceLanguage, tor.sourceLanguageCode()));
+                  " existing file's language '%2'. Ignoring.\n").formatArgs(sourceLanguage, trObj.sourceLanguageCode()));
+         }
 
       } else {
          if (! targetLanguage.isEmpty()) {
-            tor.setLanguageCode(targetLanguage);
+            trObj.setLanguageCode(targetLanguage);
 
          } else {
-            tor.setLanguageCode(Translator::guessLanguageCodeFromFileName(fileName));
+            trObj.setLanguageCode(Translator::guessLanguageCodeFromFileName(fileName));
          }
 
-         if (!sourceLanguage.isEmpty()) {
-            tor.setSourceLanguageCode(sourceLanguage);
+         if (! sourceLanguage.isEmpty()) {
+            trObj.setSourceLanguageCode(sourceLanguage);
          }
       }
 
-      tor.makeFileNamesAbsolute(QFileInfo(fileName).absoluteDir());
+      trObj.makeFileNamesAbsolute(QFileInfo(fileName).absoluteDir());
 
-      if (options & NoLocations) {
-         tor.setLocationsType(Translator::NoLocations);
-      } else if (options & RelativeLocations) {
-         tor.setLocationsType(Translator::RelativeLocations);
-      } else if (options & AbsoluteLocations) {
-         tor.setLocationsType(Translator::AbsoluteLocations);
+      if (options & UpdateOption::NoLocations) {
+         trObj.setLocationType(Translator::LocationType::None);
+
+      } else if (options & UpdateOption::RelativeLocations) {
+         trObj.setLocationType(Translator::LocationType::Relative);
+
+      } else if (options & UpdateOption::AbsoluteLocations) {
+         trObj.setLocationType(Translator::LocationType::Absolute);
+
       }
 
-      if (options & Verbose) {
+      if (options & UpdateOption::Verbose) {
          printOut(QString("Updating '%1'...\n").formatArg(fn));
       }
 
-      UpdateOptions theseOptions = options;
-      if (tor.locationsType() == Translator::NoLocations) {
+      UpdateOptions newOptions = options;
+
+      if (trObj.locationType() == Translator::LocationType::None) {
          // Could be set from file
-         theseOptions |= NoLocations;
+         newOptions |= UpdateOption::NoLocations;
       }
 
-      Translator out = merge(tor, fetchedTor, aliens, theseOptions, err);
+      Translator out = merge(trObj, fetchedTor, aliens, newOptions, err);
 
-      if ((options & Verbose) && !err.isEmpty()) {
+      if ((options & UpdateOption::Verbose) && ! err.isEmpty()) {
          printOut(err);
          err.clear();
       }
 
-      if (options & PluralOnly) {
-         if (options & Verbose) {
+      if (options & UpdateOption::PluralOnly) {
+         if (options & UpdateOption::Verbose) {
             printOut(QString("Stripping non plural forms in '%1'...\n").formatArg(fn));
          }
          out.stripNonPluralForms();
       }
 
-      if (options & NoObsolete) {
+      if (options & UpdateOption::NoObsolete) {
          out.stripObsoleteMessages();
       }
 
       out.stripEmptyContexts();
 
       out.normalizeTranslations(cd);
-      if (!cd.errors().isEmpty()) {
+      if (! cd.errors().isEmpty()) {
          printErr(cd.error());
          cd.clearErrors();
       }
@@ -246,10 +256,10 @@ static bool processTs(Translator &fetchedTor, const QString &file, ConversionDat
 {
    for (const Translator::FileFormat &fmt : Translator::registeredFileFormats()) {
       if (file.endsWith('.' + fmt.extension, Qt::CaseInsensitive)) {
-         Translator tor;
+         Translator trObj;
 
-         if (tor.load(file, cd, fmt.extension)) {
-            for (TranslatorMessage msg : tor.messages()) {
+         if (trObj.load(file, cd, fmt.extension)) {
+            for (TranslatorMessage msg : trObj.messages()) {
                msg.setType(TranslatorMessage::Type::Unfinished);
                msg.setTranslations(QStringList());
                msg.setTranslatorComment(QString());
@@ -614,6 +624,7 @@ int main(int argc, char **argv)
 
             } else {
                QString fn = QDir::cleanPath(fi.absoluteFilePath());
+
                if (fn.endsWith(".qrc", Qt::CaseInsensitive)) {
                   resourceFiles << fn;
 
@@ -636,9 +647,9 @@ int main(int argc, char **argv)
       return 1;
    }
 
-   if (! targetLanguage.isEmpty() && tsFileNames.count() != 1)
-      printErr("lupdate warning: -target-language usually only"
-               " makes sense with exactly one TS file.\n");
+   if (! targetLanguage.isEmpty() && tsFileNames.count() != 1) {
+      printErr("lupdate warning: -target-language usually only makes sense with exactly one TS file.\n");
+   }
 
    bool fail = false;
 

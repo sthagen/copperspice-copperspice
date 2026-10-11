@@ -118,26 +118,21 @@ static inline void setCoOccurence(CoMatrix &m, char c, char d)
 
 CoMatrix::CoMatrix(const QString &str)
 {
-   QByteArray ba = str.toUtf8();
+   QByteArray ba    = str.toUtf8();
    const char *text = ba.constData();
+
    char c = '\0', d;
    memset( b, 0, 52 );
 
-   /*
-     The Knuth books are not in the office only for show; they help make
-     loops 30% faster and 20% as readable.
-   */
-
-   while ( (d = *text) != '\0' ) {
+   while ((d = *text) != '\0') {
       setCoOccurence(*this, c, d);
 
-      if ( (c = *++text) != '\0' ) {
+      if ((c = *++text) != '\0') {
          setCoOccurence(*this, d, c);
-         text++;
+         ++text;
       }
    }
 }
-
 
 static inline int worth(const CoMatrix &m)
 {
@@ -183,54 +178,57 @@ int StringSimilarityMatcher::getSimilarityScore(const QString &strCandidate)
    CoMatrix cmTarget(strCandidate);
    int delta = qAbs(m_length - strCandidate.size());
 
-   int score = ( (worth(intersection(m_cm, cmTarget)) + 1) << 10 ) /
-               ( worth(reunion(m_cm, cmTarget)) + (delta << 1) + 1 );
+   int score = ( (worth(intersection(m_cm, cmTarget)) + 1) << 10 ) / ( worth(reunion(m_cm, cmTarget)) + (delta << 1) + 1 );
 
    return score;
 }
 
-QList<Candidate> similarTextHeuristicCandidates(const Translator *tor, const QString &text, int maxCandidates)
+QList<Candidate> similarTextHeuristicCandidates(const Translator *trObj, const QString &text, int maxCandidates)
 {
-   QList<int> scores;
+   QList<int> scoreList;
 
-   QList<Candidate> candidates;
+   QList<Candidate> candidateList;
    StringSimilarityMatcher matcher(text);
 
-   for (const TranslatorMessage &mtm : tor->messages()) {
-      if (mtm.type() == TranslatorMessage::Type::Unfinished || mtm.translation().isEmpty()) {
+   for (const TranslatorMessage &msg : trObj->messages()) {
+      if (msg.type() == TranslatorMessage::Type::Unfinished || msg.translation().isEmpty()) {
          continue;
       }
 
-      QString s = mtm.sourceText();
-      int score = matcher.getSimilarityScore(s);
+      QString sourceMsg = msg.sourceText();
+      int scoreCnt = matcher.getSimilarityScore(sourceMsg);
 
-      if (candidates.size() == maxCandidates && score > scores[maxCandidates - 1] ) {
-         candidates.removeLast();
+      if (candidateList.size() == maxCandidates && scoreCnt > scoreList[maxCandidates - 1] ) {
+         candidateList.removeLast();
       }
 
-      if (candidates.size() < maxCandidates && score >= textSimilarityThreshold) {
-         Candidate cand(s, mtm.translation() );
+      if (candidateList.size() < maxCandidates && scoreCnt >= textSimilarityThreshold) {
+         Candidate item(sourceMsg, msg.translation() );
 
          int i;
-         for (i = 0; i < candidates.size(); i++) {
-            if (score >= scores.at(i)) {
-               if (score == scores.at(i)) {
-                  if (candidates.at(i) == cand) {
+
+         for (i = 0; i < candidateList.size(); i++) {
+            if (scoreCnt >= scoreList.at(i)) {
+
+               if (scoreCnt == scoreList.at(i)) {
+                  if (candidateList.at(i) == item) {
                      goto continue_outer_loop;
                   }
 
                } else {
                   break;
                }
+
             }
          }
-         scores.insert(i, score);
-         candidates.insert(i, cand);
+
+         scoreList.insert(i, scoreCnt);
+         candidateList.insert(i, item);
       }
 
    continue_outer_loop:
       ;
    }
 
-   return candidates;
+   return candidateList;
 }

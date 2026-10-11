@@ -257,16 +257,20 @@ class QDESIGNER_UILIB_EXPORT DomUI
    QString elementClass() const {
       return m_class;
    }
+
    void setElementClass(const QString &a);
    bool hasElementClass() const {
       return m_children & Class;
    }
+
    void clearElementClass();
 
    DomWidget *elementWidget() const {
       return m_widget;
    }
+
    DomWidget *takeElementWidget();
+
    void setElementWidget(DomWidget *a);
    bool hasElementWidget() const {
       return m_children & Widget;
@@ -276,17 +280,22 @@ class QDESIGNER_UILIB_EXPORT DomUI
    DomLayoutDefault *elementLayoutDefault() const {
       return m_layoutDefault;
    }
+
    DomLayoutDefault *takeElementLayoutDefault();
+
    void setElementLayoutDefault(DomLayoutDefault *a);
    bool hasElementLayoutDefault() const {
       return m_children & LayoutDefault;
    }
+
    void clearElementLayoutDefault();
 
    DomLayoutFunction *elementLayoutFunction() const {
       return m_layoutFunction;
    }
+
    DomLayoutFunction *takeElementLayoutFunction();
+
    void setElementLayoutFunction(DomLayoutFunction *a);
    bool hasElementLayoutFunction() const {
       return m_children & LayoutFunction;
@@ -296,56 +305,71 @@ class QDESIGNER_UILIB_EXPORT DomUI
    QString elementPixmapFunction() const {
       return m_pixmapFunction;
    }
+
    void setElementPixmapFunction(const QString &a);
    bool hasElementPixmapFunction() const {
       return m_children & PixmapFunction;
    }
+
    void clearElementPixmapFunction();
 
    DomCustomWidgets *elementCustomWidgets() const {
       return m_customWidgets;
    }
+
    DomCustomWidgets *takeElementCustomWidgets();
    void setElementCustomWidgets(DomCustomWidgets *a);
    bool hasElementCustomWidgets() const {
       return m_children & CustomWidgets;
    }
+
    void clearElementCustomWidgets();
 
    DomTabStops *elementTabStops() const {
       return m_tabStops;
    }
+
    DomTabStops *takeElementTabStops();
+
    void setElementTabStops(DomTabStops *a);
    bool hasElementTabStops() const {
       return m_children & TabStops;
    }
+
    void clearElementTabStops();
 
    DomImages *elementImages() const {
       return m_images;
    }
+
    DomImages *takeElementImages();
+
    void setElementImages(DomImages *a);
    bool hasElementImages() const {
       return m_children & Images;
    }
+
    void clearElementImages();
 
    DomIncludes *elementIncludes() const {
       return m_includes;
    }
+
    DomIncludes *takeElementIncludes();
+
    void setElementIncludes(DomIncludes *a);
    bool hasElementIncludes() const {
       return m_children & Includes;
    }
+
    void clearElementIncludes();
 
    DomResources *elementResources() const {
       return m_resources;
    }
+
    DomResources *takeElementResources();
+
    void setElementResources(DomResources *a);
    bool hasElementResources() const {
       return m_children & Resources;
@@ -355,7 +379,9 @@ class QDESIGNER_UILIB_EXPORT DomUI
    DomConnections *elementConnections() const {
       return m_connections;
    }
+
    DomConnections *takeElementConnections();
+
    void setElementConnections(DomConnections *a);
    bool hasElementConnections() const {
       return m_children & Connections;
@@ -400,8 +426,33 @@ class QDESIGNER_UILIB_EXPORT DomUI
    void clearElementButtonGroups();
 
  private:
-   QString m_text;
+   enum Child {
+      Author         = 1,
+      Comment        = 2,
+      ExportMacro    = 4,
+      Class          = 8,
+      Widget         = 16,
+      LayoutDefault  = 32,
+      LayoutFunction = 64,
+      PixmapFunction = 128,
+      CustomWidgets  = 256,
+      TabStops       = 512,
+      Images         = 1024,
+      Includes       = 2048,
+      Resources      = 4096,
+      Connections    = 8192,
+      Designerdata   = 16384,
+      Slots          = 32768,
+      ButtonGroups   = 65536
+   };
+
+   DomUI(const DomUI &other);
+
+   void operator=(const DomUI &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_version;
@@ -425,11 +476,11 @@ class QDESIGNER_UILIB_EXPORT DomUI
    QString m_comment;
    QString m_exportMacro;
    QString m_class;
+   QString m_pixmapFunction;
 
    DomWidget *m_widget;
    DomLayoutDefault *m_layoutDefault;
    DomLayoutFunction *m_layoutFunction;
-   QString m_pixmapFunction;
    DomCustomWidgets *m_customWidgets;
    DomTabStops *m_tabStops;
    DomImages *m_images;
@@ -439,29 +490,6 @@ class QDESIGNER_UILIB_EXPORT DomUI
    DomDesignerData *m_designerdata;
    DomSlots *m_slots;
    DomButtonGroups *m_buttonGroups;
-
-   enum Child {
-      Author = 1,
-      Comment = 2,
-      ExportMacro = 4,
-      Class = 8,
-      Widget = 16,
-      LayoutDefault = 32,
-      LayoutFunction = 64,
-      PixmapFunction = 128,
-      CustomWidgets = 256,
-      TabStops = 512,
-      Images = 1024,
-      Includes = 2048,
-      Resources = 4096,
-      Connections = 8192,
-      Designerdata = 16384,
-      Slots = 32768,
-      ButtonGroups = 65536
-   };
-
-   DomUI(const DomUI &other);
-   void operator = (const DomUI &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomIncludes
@@ -482,27 +510,20 @@ class QDESIGNER_UILIB_EXPORT DomIncludes
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomInclude *> elementInclude() const {
       return m_include;
    }
+
    void setElementInclude(const QList<DomInclude *> &a);
 
  private:
-   QString m_text;
+   DomIncludes(const DomIncludes &other);
+   void operator=(const DomIncludes &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomInclude *> m_include;
-   enum Child {
-      Include = 1
-   };
-
-   DomIncludes(const DomIncludes &other);
-   void operator = (const DomIncludes &other);
+   QString m_text;
+   QList<DomInclude *> m_include;       // child element data
 };
 
 class QDESIGNER_UILIB_EXPORT DomInclude
@@ -559,21 +580,19 @@ class QDESIGNER_UILIB_EXPORT DomInclude
    }
 
  private:
-   QString m_text;
+   DomInclude(const DomInclude &other);
+   void operator=(const DomInclude &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_location;
-   bool m_has_attr_location;
-
    QString m_attr_impldecl;
+
+   bool m_has_attr_location;
    bool m_has_attr_impldecl;
 
-   // child element data
    uint m_children;
-
-   DomInclude(const DomInclude &other);
-   void operator = (const DomInclude &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomResources
@@ -615,26 +634,21 @@ class QDESIGNER_UILIB_EXPORT DomResources
    QList<DomResource *> elementInclude() const {
       return m_include;
    }
+
    void setElementInclude(const QList<DomResource *> &a);
 
  private:
-   QString m_text;
+   DomResources(const DomResources &other);
+   void operator=(const DomResources &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_name;
+
    bool m_has_attr_name;
 
-   // child element data
-   uint m_children;
    QList<DomResource *> m_include;
-
-   enum Child {
-      Include = 1
-   };
-
-   DomResources(const DomResources &other);
-   void operator = (const DomResources &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomResource
@@ -654,7 +668,6 @@ class QDESIGNER_UILIB_EXPORT DomResource
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeLocation() const {
       return m_has_attr_location;
    }
@@ -673,18 +686,15 @@ class QDESIGNER_UILIB_EXPORT DomResource
    }
 
  private:
-   QString m_text;
+   DomResource(const DomResource &other);
+   void operator=(const DomResource &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_location;
+
    bool m_has_attr_location;
-
-   // child element data
-   uint m_children;
-
-   DomResource(const DomResource &other);
-   void operator = (const DomResource &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomActionGroup
@@ -704,7 +714,6 @@ class QDESIGNER_UILIB_EXPORT DomActionGroup
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeName() const {
       return m_has_attr_name;
    }
@@ -722,7 +731,6 @@ class QDESIGNER_UILIB_EXPORT DomActionGroup
       m_has_attr_name = false;
    }
 
-   // child element accessors
    QList<DomAction *> elementAction() const {
       return m_action;
    }
@@ -747,29 +755,29 @@ class QDESIGNER_UILIB_EXPORT DomActionGroup
    void setElementAttribute(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
+   enum Child {
+      Action      = 1,
+      ActionGroup = 2,
+      Property    = 4,
+      Attribute   = 8
+   };
+
+   DomActionGroup(const DomActionGroup &other);
+   void operator=(const DomActionGroup &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_name;
+
    bool m_has_attr_name;
 
-   // child element data
    uint m_children;
+
    QList<DomAction *> m_action;
    QList<DomActionGroup *> m_actionGroup;
    QList<DomProperty *> m_property;
    QList<DomProperty *> m_attribute;
-
-   enum Child {
-      Action = 1,
-      ActionGroup = 2,
-      Property = 4,
-      Attribute = 8
-   };
-
-   DomActionGroup(const DomActionGroup &other);
-   void operator = (const DomActionGroup &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomAction
@@ -789,7 +797,6 @@ class QDESIGNER_UILIB_EXPORT DomAction
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeName() const {
       return m_has_attr_name;
    }
@@ -837,27 +844,28 @@ class QDESIGNER_UILIB_EXPORT DomAction
    void setElementAttribute(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   QString m_attr_name;
-   bool m_has_attr_name;
-
-   QString m_attr_menu;
-   bool m_has_attr_menu;
-
-   // child element data
-   uint m_children;
-   QList<DomProperty *> m_property;
-   QList<DomProperty *> m_attribute;
    enum Child {
-      Property = 1,
+      Property  = 1,
       Attribute = 2
    };
 
    DomAction(const DomAction &other);
-   void operator = (const DomAction &other);
+   void operator=(const DomAction &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+   QString m_attr_name;
+   QString m_attr_menu;
+
+   bool m_has_attr_name;
+   bool m_has_attr_menu;
+
+   uint m_children;
+
+   QList<DomProperty *> m_property;
+   QList<DomProperty *> m_attribute;
+
 };
 
 class QDESIGNER_UILIB_EXPORT DomActionRef
@@ -896,18 +904,17 @@ class QDESIGNER_UILIB_EXPORT DomActionRef
    }
 
  private:
-   QString m_text;
+   DomActionRef(const DomActionRef &other);
+   void operator=(const DomActionRef &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_name;
+
    bool m_has_attr_name;
 
-   // child element data
    uint m_children;
-
-   DomActionRef(const DomActionRef &other);
-   void operator = (const DomActionRef &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomButtonGroup
@@ -959,24 +966,25 @@ class QDESIGNER_UILIB_EXPORT DomButtonGroup
    void setElementAttribute(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   QString m_attr_name;
-   bool m_has_attr_name;
-
-   // child element data
-   uint m_children;
-   QList<DomProperty *> m_property;
-   QList<DomProperty *> m_attribute;
    enum Child {
-      Property = 1,
+      Property  = 1,
       Attribute = 2
    };
 
    DomButtonGroup(const DomButtonGroup &other);
-   void operator = (const DomButtonGroup &other);
+   void operator=(const DomButtonGroup &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+   QString m_attr_name;
+
+   bool m_has_attr_name;
+
+   uint m_children;
+
+   QList<DomProperty *> m_property;
+   QList<DomProperty *> m_attribute;
 };
 
 class QDESIGNER_UILIB_EXPORT DomButtonGroups
@@ -996,8 +1004,6 @@ class QDESIGNER_UILIB_EXPORT DomButtonGroups
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomButtonGroup *> elementButtonGroup() const {
       return m_buttonGroup;
    }
@@ -1005,20 +1011,13 @@ class QDESIGNER_UILIB_EXPORT DomButtonGroups
    void setElementButtonGroup(const QList<DomButtonGroup *> &a);
 
  private:
-   QString m_text;
+   DomButtonGroups(const DomButtonGroups &other);
+   void operator=(const DomButtonGroups &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
+   QString m_text;
    QList<DomButtonGroup *> m_buttonGroup;
-
-   enum Child {
-      ButtonGroup = 1
-   };
-
-   DomButtonGroups(const DomButtonGroups &other);
-   void operator = (const DomButtonGroups &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomImages
@@ -1038,8 +1037,6 @@ class QDESIGNER_UILIB_EXPORT DomImages
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomImage *> elementImage() const {
       return m_image;
    }
@@ -1047,20 +1044,13 @@ class QDESIGNER_UILIB_EXPORT DomImages
    void setElementImage(const QList<DomImage *> &a);
 
  private:
-   QString m_text;
+   DomImages(const DomImages &other);
+   void operator=(const DomImages &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
+   QString m_text;
    QList<DomImage *> m_image;
-
-   enum Child {
-      Image = 1
-   };
-
-   DomImages(const DomImages &other);
-   void operator = (const DomImages &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomImage
@@ -1080,7 +1070,6 @@ class QDESIGNER_UILIB_EXPORT DomImage
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeName() const {
       return m_has_attr_name;
    }
@@ -1098,7 +1087,6 @@ class QDESIGNER_UILIB_EXPORT DomImage
       m_has_attr_name = false;
    }
 
-   // child element accessors
    DomImageData *elementData() const {
       return m_data;
    }
@@ -1107,29 +1095,27 @@ class QDESIGNER_UILIB_EXPORT DomImage
    void setElementData(DomImageData *a);
 
    bool hasElementData() const {
-      return m_children & Data;
+      return m_children & ImageContents;
    }
 
    void clearElementData();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   QString m_attr_name;
-   bool m_has_attr_name;
-
-   // child element data
-   uint m_children;
-   DomImageData *m_data;
-
-   enum Child {
-      Data = 1
-   };
+   static constexpr uint ImageContents = 1;
 
    DomImage(const DomImage &other);
-   void operator = (const DomImage &other);
+   void operator=(const DomImage &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+   QString m_attr_name;
+
+   bool m_has_attr_name;
+
+   uint m_children;
+
+   DomImageData *m_data;
 };
 
 class QDESIGNER_UILIB_EXPORT DomImageData
@@ -1149,7 +1135,6 @@ class QDESIGNER_UILIB_EXPORT DomImageData
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeFormat() const {
       return m_has_attr_format;
    }
@@ -1185,21 +1170,20 @@ class QDESIGNER_UILIB_EXPORT DomImageData
    }
 
  private:
-   QString m_text;
+   DomImageData(const DomImageData &other);
+   void operator=(const DomImageData &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_format;
-   bool m_has_attr_format;
 
-   int m_attr_length;
+   bool m_has_attr_format;
    bool m_has_attr_length;
 
-   // child element data
-   uint m_children;
+   int m_attr_length;
 
-   DomImageData(const DomImageData &other);
-   void operator = (const DomImageData &other);
+   uint m_children;
 };
 
 class QDESIGNER_UILIB_EXPORT DomCustomWidgets
@@ -1219,8 +1203,6 @@ class QDESIGNER_UILIB_EXPORT DomCustomWidgets
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomCustomWidget *> elementCustomWidget() const {
       return m_customWidget;
    }
@@ -1228,20 +1210,13 @@ class QDESIGNER_UILIB_EXPORT DomCustomWidgets
    void setElementCustomWidget(const QList<DomCustomWidget *> &a);
 
  private:
-   QString m_text;
+   DomCustomWidgets(const DomCustomWidgets &other);
+   void operator=(const DomCustomWidgets &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
+   QString m_text;
    QList<DomCustomWidget *> m_customWidget;
-
-   enum Child {
-      CustomWidget = 1
-   };
-
-   DomCustomWidgets(const DomCustomWidgets &other);
-   void operator = (const DomCustomWidgets &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomHeader
@@ -1261,7 +1236,6 @@ class QDESIGNER_UILIB_EXPORT DomHeader
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeLocation() const {
       return m_has_attr_location;
    }
@@ -1280,18 +1254,17 @@ class QDESIGNER_UILIB_EXPORT DomHeader
    }
 
  private:
-   QString m_text;
+   DomHeader(const DomHeader &other);
+   void operator=(const DomHeader &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_location;
+
    bool m_has_attr_location;
 
-   // child element data
    uint m_children;
-
-   DomHeader(const DomHeader &other);
-   void operator = (const DomHeader &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomCustomWidget
@@ -1311,8 +1284,6 @@ class QDESIGNER_UILIB_EXPORT DomCustomWidget
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QString elementClass() const {
       return m_class;
    }
@@ -1439,41 +1410,42 @@ class QDESIGNER_UILIB_EXPORT DomCustomWidget
    void clearElementPropertyspecifications();
 
  private:
-   QString m_text;
+   enum Child {
+      Class         = 1,
+      Extends       = 2,
+      Header        = 4,
+      SizeHint      = 8,
+      AddPageMethod = 16,
+      Container     = 32,
+      SizePolicy    = 64,
+      Pixmap        = 128,
+      Properties    = 256,
+      Slots         = 512,
+      Propertyspecifications = 1024
+   };
+
+   DomCustomWidget(const DomCustomWidget &other);
+   void operator=(const DomCustomWidget &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
    uint m_children;
+
+   QString m_text;
    QString m_class;
    QString m_extends;
+   QString m_addPageMethod;
+   QString m_pixmap;
+
+   int m_container;
+
    DomHeader *m_header;
    DomSize *m_sizeHint;
-   QString m_addPageMethod;
-   int m_container;
-   QString m_pixmap;
 
    DomSizePolicyData *m_sizePolicy;
    DomProperties *m_properties;
    DomSlots *m_slots;
    DomPropertySpecifications *m_propertyspecifications;
-
-   enum Child {
-      Class = 1,
-      Extends = 2,
-      Header = 4,
-      SizeHint = 8,
-      AddPageMethod = 16,
-      Container = 32,
-      SizePolicy = 64,
-      Pixmap = 128,
-      Properties = 256,
-      Slots = 512,
-      Propertyspecifications = 1024
-   };
-
-   DomCustomWidget(const DomCustomWidget &other);
-   void operator = (const DomCustomWidget &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomProperties
@@ -1493,8 +1465,6 @@ class QDESIGNER_UILIB_EXPORT DomProperties
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomPropertyData *> elementProperty() const {
       return m_property;
    }
@@ -1502,20 +1472,13 @@ class QDESIGNER_UILIB_EXPORT DomProperties
    void setElementProperty(const QList<DomPropertyData *> &a);
 
  private:
-   QString m_text;
+   DomProperties(const DomProperties &other);
+   void operator=(const DomProperties &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
+   QString m_text;
    QList<DomPropertyData *> m_property;
-
-   enum Child {
-      Property = 1
-   };
-
-   DomProperties(const DomProperties &other);
-   void operator = (const DomProperties &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomPropertyData
@@ -1535,7 +1498,6 @@ class QDESIGNER_UILIB_EXPORT DomPropertyData
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeType() const {
       return m_has_attr_type;
    }
@@ -1554,18 +1516,17 @@ class QDESIGNER_UILIB_EXPORT DomPropertyData
    }
 
  private:
-   QString m_text;
+   DomPropertyData(const DomPropertyData &other);
+   void operator=(const DomPropertyData &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_type;
+
    bool m_has_attr_type;
 
-   // child element data
    uint m_children;
-
-   DomPropertyData(const DomPropertyData &other);
-   void operator = (const DomPropertyData &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomSizePolicyData
@@ -1585,8 +1546,6 @@ class QDESIGNER_UILIB_EXPORT DomSizePolicyData
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    int elementHorData() const {
       return m_horData;
    }
@@ -1606,24 +1565,26 @@ class QDESIGNER_UILIB_EXPORT DomSizePolicyData
    bool hasElementVerData() const {
       return m_children & VerData;
    }
+
    void clearElementVerData();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   int m_horData;
-   int m_verData;
    enum Child {
       HorData = 1,
       VerData = 2
    };
 
    DomSizePolicyData(const DomSizePolicyData &other);
-   void operator = (const DomSizePolicyData &other);
+   void operator=(const DomSizePolicyData &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   int m_horData;
+   int m_verData;
 };
 
 class QDESIGNER_UILIB_EXPORT DomLayoutDefault
@@ -1643,7 +1604,6 @@ class QDESIGNER_UILIB_EXPORT DomLayoutDefault
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeSpacing() const {
       return m_has_attr_spacing;
    }
@@ -1676,21 +1636,20 @@ class QDESIGNER_UILIB_EXPORT DomLayoutDefault
    }
 
  private:
-   QString m_text;
+   DomLayoutDefault(const DomLayoutDefault &other);
+   void operator=(const DomLayoutDefault &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   int m_attr_spacing;
-   bool m_has_attr_spacing;
+   QString m_text;
 
-   int m_attr_margin;
+   bool m_has_attr_spacing;
    bool m_has_attr_margin;
 
-   // child element data
-   uint m_children;
+   int m_attr_spacing;
+   int m_attr_margin;
 
-   DomLayoutDefault(const DomLayoutDefault &other);
-   void operator = (const DomLayoutDefault &other);
+   uint m_children;
 };
 
 class QDESIGNER_UILIB_EXPORT DomLayoutFunction
@@ -1710,7 +1669,6 @@ class QDESIGNER_UILIB_EXPORT DomLayoutFunction
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeSpacing() const {
       return m_has_attr_spacing;
    }
@@ -1746,21 +1704,20 @@ class QDESIGNER_UILIB_EXPORT DomLayoutFunction
    }
 
  private:
-   QString m_text;
+   DomLayoutFunction(const DomLayoutFunction &other);
+   void operator=(const DomLayoutFunction &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   QString m_attr_spacing;
-   bool m_has_attr_spacing;
+   QString m_text;
 
+   QString m_attr_spacing;
    QString m_attr_margin;
+
+   bool m_has_attr_spacing;
    bool m_has_attr_margin;
 
-   // child element data
    uint m_children;
-
-   DomLayoutFunction(const DomLayoutFunction &other);
-   void operator = (const DomLayoutFunction &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomTabStops
@@ -1780,8 +1737,6 @@ class QDESIGNER_UILIB_EXPORT DomTabStops
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QStringList elementTabStop() const {
       return m_tabStop;
    }
@@ -1789,19 +1744,14 @@ class QDESIGNER_UILIB_EXPORT DomTabStops
    void setElementTabStop(const QStringList &a);
 
  private:
-   QString m_text;
+   DomTabStops(const DomTabStops &other);
+   void operator=(const DomTabStops &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
-   QStringList m_tabStop;
-   enum Child {
-      TabStop = 1
-   };
+   QString m_text;
 
-   DomTabStops(const DomTabStops &other);
-   void operator = (const DomTabStops &other);
+   QStringList m_tabStop;
 };
 
 class QDESIGNER_UILIB_EXPORT DomLayout
@@ -1821,7 +1771,6 @@ class QDESIGNER_UILIB_EXPORT DomLayout
       m_text = s;
    }
 
-   // attribute accessors
    bool hasAttributeClass() const {
       return m_has_attr_class;
    }
@@ -1958,10 +1907,19 @@ class QDESIGNER_UILIB_EXPORT DomLayout
    void setElementItem(const QList<DomLayoutItem *> &a);
 
  private:
-   QString m_text;
+   enum Child {
+      Property  = 1,
+      Attribute = 2,
+      Item      = 4
+   };
+
+   DomLayout(const DomLayout &other);
+   void operator=(const DomLayout &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
+
    QString m_attr_class;
    bool m_has_attr_class;
 
@@ -1988,20 +1946,18 @@ class QDESIGNER_UILIB_EXPORT DomLayout
    QList<DomProperty *> m_property;
    QList<DomProperty *> m_attribute;
    QList<DomLayoutItem *> m_item;
-
-   enum Child {
-      Property = 1,
-      Attribute = 2,
-      Item = 4
-   };
-
-   DomLayout(const DomLayout &other);
-   void operator = (const DomLayout &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomLayoutItem
 {
  public:
+   enum Kind {
+      Unknown = 0,
+      Widget,
+      Layout,
+      Spacer
+   };
+
    DomLayoutItem();
    ~DomLayoutItem();
 
@@ -2102,8 +2058,6 @@ class QDESIGNER_UILIB_EXPORT DomLayoutItem
       m_has_attr_alignment = false;
    }
 
-   // child element accessors
-   enum Kind { Unknown = 0, Widget, Layout, Spacer };
    Kind kind() const {
       return m_kind;
    }
@@ -2130,8 +2084,12 @@ class QDESIGNER_UILIB_EXPORT DomLayoutItem
    void setElementSpacer(DomSpacer *a);
 
  private:
-   QString m_text;
+   DomLayoutItem(const DomLayoutItem &other);
+   void operator=(const DomLayoutItem &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    int m_attr_row;
@@ -2154,9 +2112,6 @@ class QDESIGNER_UILIB_EXPORT DomLayoutItem
    DomWidget *m_widget;
    DomLayout *m_layout;
    DomSpacer *m_spacer;
-
-   DomLayoutItem(const DomLayoutItem &other);
-   void operator = (const DomLayoutItem &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomRow
@@ -2176,8 +2131,6 @@ class QDESIGNER_UILIB_EXPORT DomRow
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomProperty *> elementProperty() const {
       return m_property;
    }
@@ -2185,19 +2138,14 @@ class QDESIGNER_UILIB_EXPORT DomRow
    void setElementProperty(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
+   DomRow(const DomRow &other);
+   void operator=(const DomRow &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomProperty *> m_property;
-   enum Child {
-      Property = 1
-   };
+   QString m_text;
 
-   DomRow(const DomRow &other);
-   void operator = (const DomRow &other);
+   QList<DomProperty *> m_property;
 };
 
 class QDESIGNER_UILIB_EXPORT DomColumn
@@ -2217,8 +2165,6 @@ class QDESIGNER_UILIB_EXPORT DomColumn
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomProperty *> elementProperty() const {
       return m_property;
    }
@@ -2226,19 +2172,14 @@ class QDESIGNER_UILIB_EXPORT DomColumn
    void setElementProperty(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
+   DomColumn(const DomColumn &other);
+   void operator=(const DomColumn &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomProperty *> m_property;
-   enum Child {
-      Property = 1
-   };
+   QString m_text;
 
-   DomColumn(const DomColumn &other);
-   void operator = (const DomColumn &other);
+   QList<DomProperty *> m_property;
 };
 
 class QDESIGNER_UILIB_EXPORT DomItem
@@ -2308,8 +2249,17 @@ class QDESIGNER_UILIB_EXPORT DomItem
    void setElementItem(const QList<DomItem *> &a);
 
  private:
-   QString m_text;
+   enum Child {
+      Property = 1,
+      Item     = 2
+   };
+
+   DomItem(const DomItem &other);
+   void operator=(const DomItem &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    int m_attr_row;
@@ -2322,14 +2272,6 @@ class QDESIGNER_UILIB_EXPORT DomItem
    uint m_children;
    QList<DomProperty *> m_property;
    QList<DomItem *> m_item;
-
-   enum Child {
-      Property = 1,
-      Item = 2
-   };
-
-   DomItem(const DomItem &other);
-   void operator = (const DomItem &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomWidget
@@ -2465,8 +2407,28 @@ class QDESIGNER_UILIB_EXPORT DomWidget
    void setElementZOrder(const QStringList &a);
 
  private:
-   QString m_text;
+   enum Child {
+      Class       = 1,
+      Property    = 2,
+      WidgetData  = 4,
+      Attribute   = 8,
+      Row         = 16,
+      Column      = 32,
+      Item        = 64,
+      Layout      = 128,
+      Widget      = 256,
+      Action      = 512,
+      ActionGroup = 1024,
+      AddAction   = 2048,
+      ZOrder      = 4096
+   };
+
+   DomWidget(const DomWidget &other);
+   void operator=(const DomWidget &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_class;
@@ -2494,25 +2456,6 @@ class QDESIGNER_UILIB_EXPORT DomWidget
    QList<DomActionGroup *> m_actionGroup;
    QList<DomActionRef *> m_addAction;
    QStringList m_zOrder;
-
-   enum Child {
-      Class = 1,
-      Property = 2,
-      WidgetData = 4,
-      Attribute = 8,
-      Row = 16,
-      Column = 32,
-      Item = 64,
-      Layout = 128,
-      Widget = 256,
-      Action = 512,
-      ActionGroup = 1024,
-      AddAction = 2048,
-      ZOrder = 4096
-   };
-
-   DomWidget(const DomWidget &other);
-   void operator = (const DomWidget &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomSpacer
@@ -2556,22 +2499,18 @@ class QDESIGNER_UILIB_EXPORT DomSpacer
    void setElementProperty(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
+   DomSpacer(const DomSpacer &other);
+   void operator=(const DomSpacer &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_name;
    bool m_has_attr_name;
 
-   // child element data
-   uint m_children;
    QList<DomProperty *> m_property;
-   enum Child {
-      Property = 1
-   };
-
-   DomSpacer(const DomSpacer &other);
-   void operator = (const DomSpacer &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomColor
@@ -2638,27 +2577,28 @@ class QDESIGNER_UILIB_EXPORT DomColor
    void clearElementBlue();
 
  private:
-   QString m_text;
+   enum Child {
+      Red   = 1,
+      Green = 2,
+      Blue  = 4
+   };
+
+   DomColor(const DomColor &other);
+   void operator=(const DomColor &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    int m_attr_alpha;
    bool m_has_attr_alpha;
 
-   // child element data
    uint m_children;
+
    int m_red;
    int m_green;
    int m_blue;
-
-   enum Child {
-      Red = 1,
-      Green = 2,
-      Blue = 4
-   };
-
-   DomColor(const DomColor &other);
-   void operator = (const DomColor &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomGradientStop
@@ -2699,30 +2639,33 @@ class QDESIGNER_UILIB_EXPORT DomGradientStop
    DomColor *elementColor() const {
       return m_color;
    }
+
    DomColor *takeElementColor();
    void setElementColor(DomColor *a);
+
    bool hasElementColor() const {
-      return m_children & Color;
+      return m_children & StopColor;
    }
+
    void clearElementColor();
 
  private:
-   QString m_text;
+   static constexpr uint StopColor = 1;
+
+   DomGradientStop(const DomGradientStop &other);
+   void operator=(const DomGradientStop &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    double m_attr_position;
    bool m_has_attr_position;
 
-   // child element data
    uint m_children;
-   DomColor *m_color;
-   enum Child {
-      Color = 1
-   };
 
-   DomGradientStop(const DomGradientStop &other);
-   void operator = (const DomGradientStop &other);
+   DomColor *m_color;
 };
 
 class QDESIGNER_UILIB_EXPORT DomGradient
@@ -2960,8 +2903,12 @@ class QDESIGNER_UILIB_EXPORT DomGradient
    void setElementGradientStop(const QList<DomGradientStop *> &a);
 
  private:
-   QString m_text;
+   DomGradient(const DomGradient &other);
+   void operator=(const DomGradient &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    double m_attr_startX;
@@ -3003,20 +2950,19 @@ class QDESIGNER_UILIB_EXPORT DomGradient
    QString m_attr_coordinateMode;
    bool m_has_attr_coordinateMode;
 
-   // child element data
-   uint m_children;
    QList<DomGradientStop *> m_gradientStop;
-   enum Child {
-      GradientStop = 1
-   };
-
-   DomGradient(const DomGradient &other);
-   void operator = (const DomGradient &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomBrush
 {
  public:
+   enum Kind {
+      Unknown = 0,
+      Color,
+      Texture,
+      Gradient
+   };
+
    DomBrush();
    ~DomBrush();
 
@@ -3049,8 +2995,6 @@ class QDESIGNER_UILIB_EXPORT DomBrush
       m_has_attr_brushStyle = false;
    }
 
-   // child element accessors
-   enum Kind { Unknown = 0, Color, Texture, Gradient };
    Kind kind() const {
       return m_kind;
    }
@@ -3077,21 +3021,21 @@ class QDESIGNER_UILIB_EXPORT DomBrush
    void setElementGradient(DomGradient *a);
 
  private:
-   QString m_text;
+   DomBrush(const DomBrush &other);
+   void operator=(const DomBrush &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
    QString m_attr_brushStyle;
+
    bool m_has_attr_brushStyle;
 
-   // child element data
    Kind m_kind;
+
    DomColor *m_color;
    DomProperty *m_texture;
    DomGradient *m_gradient;
-
-   DomBrush(const DomBrush &other);
-   void operator = (const DomBrush &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomColorRole
@@ -3143,22 +3087,21 @@ class QDESIGNER_UILIB_EXPORT DomColorRole
    void clearElementBrush();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   QString m_attr_role;
-   bool m_has_attr_role;
-
-   // child element data
-   uint m_children;
-   DomBrush *m_brush;
-   enum Child {
-      Brush = 1
-   };
+   static constexpr uint Brush = 1;
 
    DomColorRole(const DomColorRole &other);
-   void operator = (const DomColorRole &other);
+   void operator=(const DomColorRole &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+   QString m_attr_role;
+
+   bool m_has_attr_role;
+
+   uint m_children;
+
+   DomBrush *m_brush;
 };
 
 class QDESIGNER_UILIB_EXPORT DomColorGroup
@@ -3191,21 +3134,22 @@ class QDESIGNER_UILIB_EXPORT DomColorGroup
    void setElementColor(const QList<DomColor *> &a);
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomColorRole *> m_colorRole;
-   QList<DomColor *> m_color;
    enum Child {
       ColorRole = 1,
-      Color = 2
+      Color     = 2
    };
 
    DomColorGroup(const DomColorGroup &other);
-   void operator = (const DomColorGroup &other);
+   void operator=(const DomColorGroup &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   QList<DomColorRole *> m_colorRole;
+   QList<DomColor *> m_color;
 };
 
 class QDESIGNER_UILIB_EXPORT DomPalette
@@ -3264,23 +3208,24 @@ class QDESIGNER_UILIB_EXPORT DomPalette
    void clearElementDisabled();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   DomColorGroup *m_active;
-   DomColorGroup *m_inactive;
-   DomColorGroup *m_disabled;
    enum Child {
-      Active = 1,
+      Active   = 1,
       Inactive = 2,
       Disabled = 4
    };
 
    DomPalette(const DomPalette &other);
-   void operator = (const DomPalette &other);
+   void operator=(const DomPalette &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   DomColorGroup *m_active;
+   DomColorGroup *m_inactive;
+   DomColorGroup *m_disabled;
 };
 
 class QDESIGNER_UILIB_EXPORT DomFont
@@ -3393,38 +3338,39 @@ class QDESIGNER_UILIB_EXPORT DomFont
    void clearElementKerning();
 
  private:
-   QString m_text;
+   enum Child {
+      Family        = 1,
+      PointSize     = 2,
+      Weight        = 4,
+      Italic        = 8,
+      Bold          = 16,
+      Underline     = 32,
+      StrikeOut     = 64,
+      Antialiasing  = 128,
+      StyleStrategy = 256,
+      Kerning       = 512
+   };
+
+   DomFont(const DomFont &other);
+   void operator=(const DomFont &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
+   QString m_text;
    QString m_family;
+   QString m_styleStrategy;
+
+   uint m_children;
+
    int m_pointSize;
    int m_weight;
+
    bool m_italic;
    bool m_bold;
    bool m_underline;
    bool m_strikeOut;
    bool m_antialiasing;
-   QString m_styleStrategy;
    bool m_kerning;
-
-   enum Child {
-      Family = 1,
-      PointSize = 2,
-      Weight = 4,
-      Italic = 8,
-      Bold = 16,
-      Underline = 32,
-      StrikeOut = 64,
-      Antialiasing = 128,
-      StyleStrategy = 256,
-      Kerning = 512
-   };
-
-   DomFont(const DomFont &other);
-   void operator = (const DomFont &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomPoint
@@ -3471,21 +3417,22 @@ class QDESIGNER_UILIB_EXPORT DomPoint
   void clearElementY();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   int m_x;
-   int m_y;
    enum Child {
       X = 1,
       Y = 2
    };
 
    DomPoint(const DomPoint &other);
-   void operator = (const DomPoint &other);
+   void operator=(const DomPoint &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   int m_x;
+   int m_y;
 };
 
 class QDESIGNER_UILIB_EXPORT DomRect
@@ -3550,25 +3497,26 @@ class QDESIGNER_UILIB_EXPORT DomRect
    void clearElementHeight();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   int m_x;
-   int m_y;
-   int m_width;
-   int m_height;
    enum Child {
-      X = 1,
-      Y = 2,
-      Width = 4,
+      X      = 1,
+      Y      = 2,
+      Width  = 4,
       Height = 8
    };
 
    DomRect(const DomRect &other);
-   void operator = (const DomRect &other);
+   void operator=(const DomRect &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   int m_x;
+   int m_y;
+   int m_width;
+   int m_height;
 };
 
 class QDESIGNER_UILIB_EXPORT DomLocale
@@ -3624,21 +3572,20 @@ class QDESIGNER_UILIB_EXPORT DomLocale
    }
 
  private:
-   QString m_text;
+   DomLocale(const DomLocale &other);
+   void operator=(const DomLocale &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
+
    QString m_attr_language;
    bool m_has_attr_language;
 
    QString m_attr_country;
    bool m_has_attr_country;
 
-   // child element data
    uint m_children;
-
-   DomLocale(const DomLocale &other);
-   void operator = (const DomLocale &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomSizePolicy
@@ -3743,8 +3690,19 @@ class QDESIGNER_UILIB_EXPORT DomSizePolicy
    void clearElementVerStretch();
 
  private:
-   QString m_text;
+   enum Child {
+      HSizeType  = 1,
+      VSizeType  = 2,
+      HorStretch = 4,
+      VerStretch = 8
+   };
+
+   DomSizePolicy(const DomSizePolicy &other);
+   void operator=(const DomSizePolicy &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_hSizeType;
@@ -3759,16 +3717,6 @@ class QDESIGNER_UILIB_EXPORT DomSizePolicy
    int m_vSizeType;
    int m_horStretch;
    int m_verStretch;
-
-   enum Child {
-      HSizeType = 1,
-      VSizeType = 2,
-      HorStretch = 4,
-      VerStretch = 8
-   };
-
-   DomSizePolicy(const DomSizePolicy &other);
-   void operator = (const DomSizePolicy &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomSize
@@ -3813,22 +3761,22 @@ class QDESIGNER_UILIB_EXPORT DomSize
    void clearElementHeight();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   int m_width;
-   int m_height;
-
    enum Child {
-      Width = 1,
+      Width  = 1,
       Height = 2
    };
 
    DomSize(const DomSize &other);
-   void operator = (const DomSize &other);
+   void operator=(const DomSize &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   int m_width;
+   int m_height;
 };
 
 class QDESIGNER_UILIB_EXPORT DomDate
@@ -3883,24 +3831,24 @@ class QDESIGNER_UILIB_EXPORT DomDate
    void clearElementDay();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   int m_year;
-   int m_month;
-   int m_day;
-
    enum Child {
-      Year = 1,
+      Year  = 1,
       Month = 2,
-      Day = 4
+      Day   = 4
    };
 
    DomDate(const DomDate &other);
-   void operator = (const DomDate &other);
+   void operator=(const DomDate &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   int m_year;
+   int m_month;
+   int m_day;
 };
 
 class QDESIGNER_UILIB_EXPORT DomTime
@@ -3957,24 +3905,24 @@ class QDESIGNER_UILIB_EXPORT DomTime
    void clearElementSecond();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   int m_hour;
-   int m_minute;
-   int m_second;
-
    enum Child {
-      Hour = 1,
+      Hour   = 1,
       Minute = 2,
       Second = 4
    };
 
    DomTime(const DomTime &other);
-   void operator = (const DomTime &other);
+   void operator=(const DomTime &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   int m_hour;
+   int m_minute;
+   int m_second;
 };
 
 class QDESIGNER_UILIB_EXPORT DomDateTime
@@ -4066,30 +4014,30 @@ class QDESIGNER_UILIB_EXPORT DomDateTime
    void clearElementDay();
 
  private:
-   QString m_text;
+   enum Child {
+      Hour   = 1,
+      Minute = 2,
+      Second = 4,
+      Year   = 8,
+      Month  = 16,
+      Day    = 32
+   };
+
+   DomDateTime(const DomDateTime &other);
+   void operator=(const DomDateTime &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
+   QString m_text;
+
    uint m_children;
+
    int m_hour;
    int m_minute;
    int m_second;
    int m_year;
    int m_month;
    int m_day;
-
-   enum Child {
-      Hour = 1,
-      Minute = 2,
-      Second = 4,
-      Year = 8,
-      Month = 16,
-      Day = 32
-   };
-
-   DomDateTime(const DomDateTime &other);
-   void operator = (const DomDateTime &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomStringList
@@ -4169,10 +4117,13 @@ class QDESIGNER_UILIB_EXPORT DomStringList
    void setElementString(const QStringList &a);
 
  private:
-   QString m_text;
+   DomStringList(const DomStringList &other);
+   void operator=(const DomStringList &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
+   QStringList m_string;
 
    QString m_attr_notr;
    bool m_has_attr_notr;
@@ -4182,17 +4133,6 @@ class QDESIGNER_UILIB_EXPORT DomStringList
 
    QString m_attr_extraComment;
    bool m_has_attr_extraComment;
-
-   // child element data
-   uint m_children;
-   QStringList m_string;
-
-   enum Child {
-      String = 1
-   };
-
-   DomStringList(const DomStringList &other);
-   void operator = (const DomStringList &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomResourcePixmap
@@ -4248,21 +4188,20 @@ class QDESIGNER_UILIB_EXPORT DomResourcePixmap
    }
 
  private:
-   QString m_text;
+   DomResourcePixmap(const DomResourcePixmap &other);
+   void operator=(const DomResourcePixmap &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
+
    QString m_attr_resource;
    bool m_has_attr_resource;
 
    QString m_attr_alias;
    bool m_has_attr_alias;
 
-   // child element data
    uint m_children;
-
-   DomResourcePixmap(const DomResourcePixmap &other);
-   void operator = (const DomResourcePixmap &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomResourceIcon
@@ -4419,8 +4358,23 @@ class QDESIGNER_UILIB_EXPORT DomResourceIcon
    void clearElementSelectedOn();
 
  private:
-   QString m_text;
+   enum Child {
+      NormalOff   = 1,
+      NormalOn    = 2,
+      DisabledOff = 4,
+      DisabledOn  = 8,
+      ActiveOff   = 16,
+      ActiveOn    = 32,
+      SelectedOff = 64,
+      SelectedOn  = 128
+   };
+
+   DomResourceIcon(const DomResourceIcon &other);
+   void operator=(const DomResourceIcon &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_theme;
@@ -4431,6 +4385,7 @@ class QDESIGNER_UILIB_EXPORT DomResourceIcon
 
    // child element data
    uint m_children;
+
    DomResourcePixmap *m_normalOff;
    DomResourcePixmap *m_normalOn;
    DomResourcePixmap *m_disabledOff;
@@ -4439,20 +4394,6 @@ class QDESIGNER_UILIB_EXPORT DomResourceIcon
    DomResourcePixmap *m_activeOn;
    DomResourcePixmap *m_selectedOff;
    DomResourcePixmap *m_selectedOn;
-
-   enum Child {
-      NormalOff = 1,
-      NormalOn = 2,
-      DisabledOff = 4,
-      DisabledOn = 8,
-      ActiveOff = 16,
-      ActiveOn = 32,
-      SelectedOff = 64,
-      SelectedOn = 128
-   };
-
-   DomResourceIcon(const DomResourceIcon &other);
-   void operator = (const DomResourceIcon &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomString
@@ -4525,8 +4466,12 @@ class QDESIGNER_UILIB_EXPORT DomString
    }
 
  private:
-   QString m_text;
+   DomString(const DomString &other);
+   void operator=(const DomString &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_notr;
@@ -4540,9 +4485,6 @@ class QDESIGNER_UILIB_EXPORT DomString
 
    // child element data
    uint m_children;
-
-   DomString(const DomString &other);
-   void operator = (const DomString &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomPointF
@@ -4589,22 +4531,22 @@ class QDESIGNER_UILIB_EXPORT DomPointF
    void clearElementY();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   double m_x;
-   double m_y;
-
    enum Child {
       X = 1,
       Y = 2
    };
 
    DomPointF(const DomPointF &other);
-   void operator = (const DomPointF &other);
+   void operator=(const DomPointF &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   double m_x;
+   double m_y;
 };
 
 class QDESIGNER_UILIB_EXPORT DomRectF
@@ -4624,15 +4566,15 @@ class QDESIGNER_UILIB_EXPORT DomRectF
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    double elementX() const {
       return m_x;
    }
+
    void setElementX(double a);
    bool hasElementX() const {
       return m_children & X;
    }
+
    void clearElementX();
 
    double elementY() const {
@@ -4670,26 +4612,26 @@ class QDESIGNER_UILIB_EXPORT DomRectF
    void clearElementHeight();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   double m_x;
-   double m_y;
-   double m_width;
-   double m_height;
-
    enum Child {
-      X = 1,
-      Y = 2,
-      Width = 4,
+      X      = 1,
+      Y      = 2,
+      Width  = 4,
       Height = 8
    };
 
    DomRectF(const DomRectF &other);
-   void operator = (const DomRectF &other);
+   void operator=(const DomRectF &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   double m_x;
+   double m_y;
+   double m_width;
+   double m_height;
 };
 
 class QDESIGNER_UILIB_EXPORT DomSizeF
@@ -4735,22 +4677,21 @@ class QDESIGNER_UILIB_EXPORT DomSizeF
    void clearElementHeight();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   double m_width;
-   double m_height;
-
    enum Child {
-      Width = 1,
+      Width  = 1,
       Height = 2
    };
 
    DomSizeF(const DomSizeF &other);
-   void operator = (const DomSizeF &other);
+   void operator=(const DomSizeF &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+   double m_width;
+   double m_height;
 };
 
 class QDESIGNER_UILIB_EXPORT DomChar
@@ -4770,31 +4711,30 @@ class QDESIGNER_UILIB_EXPORT DomChar
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    int elementUnicode() const {
       return m_unicode;
    }
+
    void setElementUnicode(int a);
    bool hasElementUnicode() const {
       return m_children & Unicode;
    }
+
    void clearElementUnicode();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   int m_unicode;
-   enum Child {
-      Unicode = 1
-   };
+   static constexpr uint Unicode = 1;
 
    DomChar(const DomChar &other);
-   void operator = (const DomChar &other);
+   void operator=(const DomChar &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   int m_unicode;
 };
 
 class QDESIGNER_UILIB_EXPORT DomUrl
@@ -4814,8 +4754,6 @@ class QDESIGNER_UILIB_EXPORT DomUrl
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    DomString *elementString() const {
       return m_string;
    }
@@ -4829,25 +4767,60 @@ class QDESIGNER_UILIB_EXPORT DomUrl
    void clearElementString();
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   DomString *m_string;
-
-   enum Child {
-      String = 1
-   };
+   static constexpr uint String = 1;
 
    DomUrl(const DomUrl &other);
-   void operator = (const DomUrl &other);
+   void operator=(const DomUrl &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   DomString *m_string;
 };
 
 class QDESIGNER_UILIB_EXPORT DomProperty
 {
  public:
+   enum Kind {
+      Unknown = 0,
+      Bool,
+      Brush,
+      Char,
+      Color,
+      Cstring,
+      Cursor,
+      CursorShape,
+      Date,
+      DateTime,
+      Double,
+      Enum,
+      Float,
+      Font,
+      IconSet,
+      Locale,
+      LongLong,
+      Number,
+      Palette,
+      Pixmap,
+      Point,
+      PointF,
+      Rect,
+      RectF,
+      Set,
+      Size,
+      SizeF,
+      SizePolicy,
+      String,
+      StringList,
+      Time,
+      UInt,
+      ULongLong,
+      Url,
+   };
+
    DomProperty();
    ~DomProperty();
 
@@ -4896,13 +4869,6 @@ class QDESIGNER_UILIB_EXPORT DomProperty
    void clearAttributeStdset() {
       m_has_attr_stdset = false;
    }
-
-   // child element accessors
-   enum Kind { Unknown = 0, Bool, Color, Cstring, Cursor, CursorShape, Enum,
-               Font, IconSet, Pixmap, Palette, Point, Rect, Set, Locale,
-               SizePolicy, Size, String, StringList, Number, Float, Double,
-               Date, Time, DateTime, PointF, RectF, SizeF, LongLong,
-               Char, Url, UInt, ULongLong, Brush };
 
    Kind kind() const {
       return m_kind;
@@ -5114,10 +5080,13 @@ class QDESIGNER_UILIB_EXPORT DomProperty
    void setElementBrush(DomBrush *a);
 
  private:
-   QString m_text;
+   DomProperty(const DomProperty &other);
+   void operator=(const DomProperty &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
+   QString m_text;
+
    QString m_attr_name;
    bool m_has_attr_name;
 
@@ -5126,12 +5095,15 @@ class QDESIGNER_UILIB_EXPORT DomProperty
 
    // child element data
    Kind m_kind;
+
    QString m_bool;
-   DomColor *m_color;
    QString m_cstring;
-   int m_cursor;
    QString m_cursorShape;
    QString m_enum;
+
+   int m_cursor;
+
+   DomColor *m_color;
    DomFont *m_font;
    DomResourceIcon *m_iconSet;
    DomResourcePixmap *m_pixmap;
@@ -5144,9 +5116,11 @@ class QDESIGNER_UILIB_EXPORT DomProperty
    DomSize *m_size;
    DomString *m_string;
    DomStringList *m_stringList;
+
    int m_number;
    float m_float;
    double m_double;
+
    DomDate *m_date;
    DomTime *m_time;
    DomDateTime *m_dateTime;
@@ -5159,9 +5133,6 @@ class QDESIGNER_UILIB_EXPORT DomProperty
    uint m_UInt;
    quint64 m_uLongLong;
    DomBrush *m_brush;
-
-   DomProperty(const DomProperty &other);
-   void operator = (const DomProperty &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomConnections
@@ -5181,8 +5152,6 @@ class QDESIGNER_UILIB_EXPORT DomConnections
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomConnection *> elementConnection() const {
       return m_connection;
    }
@@ -5190,20 +5159,14 @@ class QDESIGNER_UILIB_EXPORT DomConnections
    void setElementConnection(const QList<DomConnection *> &a);
 
  private:
-   QString m_text;
+   DomConnections(const DomConnections &other);
+   void operator=(const DomConnections &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
+   QString m_text;
+
    QList<DomConnection *> m_connection;
-
-   enum Child {
-      Connection = 1
-   };
-
-   DomConnections(const DomConnections &other);
-   void operator = (const DomConnections &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomConnection
@@ -5223,8 +5186,6 @@ class QDESIGNER_UILIB_EXPORT DomConnection
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QString elementSender() const {
       return m_sender;
    }
@@ -5234,38 +5195,46 @@ class QDESIGNER_UILIB_EXPORT DomConnection
    bool hasElementSender() const {
       return m_children & Sender;
    }
+
    void clearElementSender();
 
    QString elementSignal() const {
       return m_signal;
    }
+
    void setElementSignal(const QString &a);
    bool hasElementSignal() const {
       return m_children & Signal;
    }
+
    void clearElementSignal();
 
    QString elementReceiver() const {
       return m_receiver;
    }
+
    void setElementReceiver(const QString &a);
    bool hasElementReceiver() const {
       return m_children & Receiver;
    }
+
    void clearElementReceiver();
 
    QString elementSlot() const {
       return m_slot;
    }
+
    void setElementSlot(const QString &a);
    bool hasElementSlot() const {
       return m_children & Slot;
    }
+
    void clearElementSlot();
 
    DomConnectionHints *elementHints() const {
       return m_hints;
    }
+
    DomConnectionHints *takeElementHints();
    void setElementHints(DomConnectionHints *a);
    bool hasElementHints() const {
@@ -5274,28 +5243,28 @@ class QDESIGNER_UILIB_EXPORT DomConnection
    void clearElementHints();
 
  private:
-   QString m_text;
+   enum Child {
+      Sender   = 1,
+      Signal   = 2,
+      Receiver = 4,
+      Slot     = 8,
+      Hints    = 16
+   };
+
+   DomConnection(const DomConnection &other);
+   void operator=(const DomConnection &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
+   QString m_text;
+
    uint m_children;
+
    QString m_sender;
    QString m_signal;
    QString m_receiver;
    QString m_slot;
    DomConnectionHints *m_hints;
-
-   enum Child {
-      Sender = 1,
-      Signal = 2,
-      Receiver = 4,
-      Slot = 8,
-      Hints = 16
-   };
-
-   DomConnection(const DomConnection &other);
-   void operator = (const DomConnection &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomConnectionHints
@@ -5323,19 +5292,14 @@ class QDESIGNER_UILIB_EXPORT DomConnectionHints
    void setElementHint(const QList<DomConnectionHint *> &a);
 
  private:
-   QString m_text;
+   DomConnectionHints(const DomConnectionHints &other);
+   void operator=(const DomConnectionHints &other);
+
    void clear(bool clear_all = true);
 
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomConnectionHint *> m_hint;
-   enum Child {
-      Hint = 1
-   };
+   QString m_text;
 
-   DomConnectionHints(const DomConnectionHints &other);
-   void operator = (const DomConnectionHints &other);
+   QList<DomConnectionHint *> m_hint;
 };
 
 class QDESIGNER_UILIB_EXPORT DomConnectionHint
@@ -5358,13 +5322,16 @@ class QDESIGNER_UILIB_EXPORT DomConnectionHint
    bool hasAttributeType() const {
       return m_has_attr_type;
    }
+
    QString attributeType() const {
       return m_attr_type;
    }
+
    void setAttributeType(const QString &a) {
       m_attr_type = a;
       m_has_attr_type = true;
    }
+
    void clearAttributeType() {
       m_has_attr_type = false;
    }
@@ -5373,24 +5340,37 @@ class QDESIGNER_UILIB_EXPORT DomConnectionHint
    int elementX() const {
       return m_x;
    }
+
    void setElementX(int a);
    bool hasElementX() const {
       return m_children & X;
    }
+
    void clearElementX();
 
    int elementY() const {
       return m_y;
    }
+
    void setElementY(int a);
    bool hasElementY() const {
       return m_children & Y;
    }
+
    void clearElementY();
 
  private:
-   QString m_text;
+   enum Child {
+      X = 1,
+      Y = 2
+   };
+
+   DomConnectionHint(const DomConnectionHint &other);
+   void operator=(const DomConnectionHint &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_type;
@@ -5398,16 +5378,9 @@ class QDESIGNER_UILIB_EXPORT DomConnectionHint
 
    // child element data
    uint m_children;
+
    int m_x;
    int m_y;
-
-   enum Child {
-      X = 1,
-      Y = 2
-   };
-
-   DomConnectionHint(const DomConnectionHint &other);
-   void operator = (const DomConnectionHint &other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomWidgetData
@@ -5422,6 +5395,7 @@ class QDESIGNER_UILIB_EXPORT DomWidgetData
    QString text() const {
       return m_text;
    }
+
    void setText(const QString &s) {
       m_text = s;
    }
@@ -5434,19 +5408,15 @@ class QDESIGNER_UILIB_EXPORT DomWidgetData
    void setElementProperty(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomProperty *> m_property;
-   enum Child {
-      Property = 1
-   };
 
    DomWidgetData(const DomWidgetData &other);
-   void operator = (const DomWidgetData &other);
+   void operator=(const DomWidgetData &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   QList<DomProperty *> m_property;
 };
 
 class QDESIGNER_UILIB_EXPORT DomDesignerData
@@ -5466,27 +5436,21 @@ class QDESIGNER_UILIB_EXPORT DomDesignerData
       m_text = s;
    }
 
-   // attribute accessors
-   // child element accessors
    QList<DomProperty *> elementProperty() const {
       return m_property;
    }
    void setElementProperty(const QList<DomProperty *> &a);
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomProperty *> m_property;
-   enum Child {
-      Property = 1
-   };
 
    DomDesignerData(const DomDesignerData &other);
-   void operator = (const DomDesignerData &other);
+   void operator=(const DomDesignerData &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   QList<DomProperty *> m_property;
 };
 
 class QDESIGNER_UILIB_EXPORT DomSlots
@@ -5520,22 +5484,22 @@ class QDESIGNER_UILIB_EXPORT DomSlots
    void setElementSlot(const QStringList &a);
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   QStringList m_signal;
-   QStringList m_slot;
-
    enum Child {
       Signal = 1,
-      Slot = 2
+      Slot   = 2
    };
 
    DomSlots(const DomSlots &other);
-   void operator = (const DomSlots &other);
+   void operator=(const DomSlots &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   QStringList m_signal;
+   QStringList m_slot;
 };
 
 class QDESIGNER_UILIB_EXPORT DomPropertySpecifications
@@ -5570,22 +5534,22 @@ class QDESIGNER_UILIB_EXPORT DomPropertySpecifications
    void setElementStringpropertyspecification(const QList<DomStringPropertySpecification *> &a);
 
  private:
-   QString m_text;
-   void clear(bool clear_all = true);
-
-   // attribute data
-   // child element data
-   uint m_children;
-   QList<DomPropertyToolTip*> m_tooltip;
-   QList<DomStringPropertySpecification *> m_stringpropertyspecification;
-
    enum Child {
       Tooltip = 1,
       Stringpropertyspecification = 2
    };
 
    DomPropertySpecifications(const DomPropertySpecifications &other);
-   void operator = (const DomPropertySpecifications &other);
+   void operator=(const DomPropertySpecifications &other);
+
+   void clear(bool clear_all = true);
+
+   QString m_text;
+
+   uint m_children;
+
+   QList<DomPropertyToolTip*> m_tooltip;
+   QList<DomStringPropertySpecification *> m_stringpropertyspecification;
 };
 
 class QDESIGNER_UILIB_EXPORT DomPropertyToolTip
@@ -5624,8 +5588,12 @@ class QDESIGNER_UILIB_EXPORT DomPropertyToolTip
    }
 
  private:
-    QString m_text;
+    DomPropertyToolTip(const DomPropertyToolTip &other);
+    void operator=(const DomPropertyToolTip&other);
+
     void clear(bool clear_all = true);
+
+    QString m_text;
 
     // attribute data
     QString m_attr_name;
@@ -5633,9 +5601,6 @@ class QDESIGNER_UILIB_EXPORT DomPropertyToolTip
 
     // child element data
     uint m_children;
-
-    DomPropertyToolTip(const DomPropertyToolTip &other);
-    void operator = (const DomPropertyToolTip&other);
 };
 
 class QDESIGNER_UILIB_EXPORT DomStringPropertySpecification
@@ -5708,8 +5673,12 @@ class QDESIGNER_UILIB_EXPORT DomStringPropertySpecification
    }
 
  private:
-   QString m_text;
+   DomStringPropertySpecification(const DomStringPropertySpecification &other);
+   void operator=(const DomStringPropertySpecification &other);
+
    void clear(bool clear_all = true);
+
+   QString m_text;
 
    // attribute data
    QString m_attr_name;
@@ -5723,9 +5692,6 @@ class QDESIGNER_UILIB_EXPORT DomStringPropertySpecification
 
    // child element data
    uint m_children;
-
-   DomStringPropertySpecification(const DomStringPropertySpecification &other);
-   void operator = (const DomStringPropertySpecification &other);
 };
 
 #endif

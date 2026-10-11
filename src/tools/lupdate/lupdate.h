@@ -34,25 +34,25 @@ class Translator;
 class TranslatorMessage;
 
 enum UpdateOption {
-   Verbose    = 1,
-   NoObsolete = 2,
-   PluralOnly = 4,
-   NoSorting  = 8,
-   HeuristicSameText = 16,
+   Verbose              = 1,
+   NoObsolete           = 2,
+   PluralOnly           = 4,
+   NoSorting            = 8,
+   HeuristicSameText    = 16,
    HeuristicSimilarText = 32,
-   HeuristicNumber = 64,
-   AbsoluteLocations = 256,
-   RelativeLocations = 512,
-   NoLocations = 1024,
-   NoUiLines = 2048
+   HeuristicNumber      = 64,
+   AbsoluteLocations    = 256,
+   RelativeLocations    = 512,
+   NoLocations          = 1024,
+   NoUiLines            = 2048
 };
 
 using UpdateOptions = QFlags<UpdateOption>;
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(UpdateOptions)
 
-Translator merge(const Translator &tor, const Translator &virginTor, const QList<Translator> &aliens,
-                 UpdateOptions options, QString &err);
+Translator merge(const Translator &trObj, const Translator &newTrObj, const QList<Translator> &aliens,
+      UpdateOptions options, QString &err);
 
 void loadCPP(Translator &translator, const QStringList &filenames, ConversionData &cd);
 bool loadJava(Translator &translator, const QString &filename, ConversionData &cd);

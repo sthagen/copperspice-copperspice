@@ -761,21 +761,18 @@ const int QScriptGrammar::action_check [] = {
    -1, -1
 };
 
-static void recordMessage(
-   Translator *tor, const QString &context, const QString &text, const QString &comment,
+static void recordMessage(Translator *trObj, const QString &context, const QString &text, const QString &comment,
    const QString &extracomment, const QString &msgid, const TranslatorMessage::ExtraData &extra,
    bool plural, const QString &fileName, int lineNo)
 {
-   TranslatorMessage msg(
-      context, text, comment, QString(),
-      fileName, lineNo, QStringList(),
-      TranslatorMessage::Unfinished, plural);
+   TranslatorMessage msg(context, text, comment, QString(), fileName, lineNo, QStringList(), TranslatorMessage::Unfinished, plural);
+
    msg.setExtraComment(extracomment.simplified());
    msg.setId(msgid);
    msg.setExtras(extra);
-   tor->extend(msg);
-}
 
+   trObj->extend(msg);
+}
 
 namespace QScript {
 
@@ -1702,41 +1699,53 @@ int QScript::Lexer::lex()
                setDone(Octal);
             }
             break;
+
          case InNum:
             if (isDecimalDigit(current)) {
                record8(current);
+
             } else if (current == '.') {
                record8(current);
                state = InDecimal;
+
             } else if (current == 'e' || current == 'E') {
                record8(current);
                state = InExponentIndicator;
+
             } else {
                setDone(Number);
             }
             break;
+
          case InDecimal:
             if (isDecimalDigit(current)) {
                record8(current);
+
             } else if (current == 'e' || current == 'E') {
                record8(current);
                state = InExponentIndicator;
             } else {
+
                setDone(Number);
             }
+
             break;
+
          case InExponentIndicator:
             if (current == '+' || current == '-') {
                record8(current);
+
             } else if (isDecimalDigit(current)) {
                record8(current);
                state = InExponent;
+
             } else {
                setDone(Bad);
                err = IllegalExponentIndicator;
                errmsg = LU::tr("Illegal syntax for exponential number");
             }
             break;
+
          case InExponent:
             if (isDecimalDigit(current)) {
                record8(current);
@@ -1744,6 +1753,7 @@ int QScript::Lexer::lex()
                setDone(Number);
             }
             break;
+
          default:
             Q_ASSERT_X(0, "Lexer::lex", "Unhandled state in switch statement");
       }
@@ -1752,16 +1762,17 @@ int QScript::Lexer::lex()
       if (!done) {
          shift(1);
       }
+
       if (state != Start && state != InSingleLineComment) {
          bol = false;
       }
    }
 
-   // no identifiers allowed directly after numeric literal, e.g. "3in" is bad
+   // no identifiers allowed directly after numeric literal, for example, "3in" is not allowed
    if ((state == Number || state == Octal || state == Hex) && isIdentLetter(current)) {
       state = Bad;
       err = IllegalIdentifier;
-      errmsg = LU::tr("Identifier can not start with numeric literal");
+      errmsg = LU::tr("Identifier can not start with a numeric literal");
    }
 
    // terminate string
@@ -2291,6 +2302,7 @@ static inline QScriptParser::Location location(QScript::Lexer *lexer)
    loc.startColumn = lexer->startColumnNo();
    loc.endLine = lexer->endLineNo();
    loc.endColumn = lexer->endColumnNo();
+
    return loc;
 }
 
@@ -2299,9 +2311,9 @@ void QScriptParser::setLexer(QScript::Lexer *lex)
    lexer = lex;
 }
 
-void QScriptParser::setTranslator(Translator *tor)
+void QScriptParser::setTranslator(Translator *trObj)
 {
-   translator = tor;
+   translator = trObj;
 }
 
 bool QScriptParser::parse()

@@ -37,14 +37,15 @@
 
 static QString protect(const QString &str)
 {
-   QString p = str;
-   p.replace(QChar('&'),  QString("&amp;"));
-   p.replace(QChar('\"'), QString("&quot;"));
-   p.replace(QChar('>'),  QString("&gt;"));
-   p.replace(QChar('<'),  QString("&lt;"));
-   p.replace(QChar('\''), QString("&apos;"));
+   QString retval = str;
 
-   return p;
+   retval.replace(QChar('&'),  QString("&amp;"));
+   retval.replace(QChar('\"'), QString("&quot;"));
+   retval.replace(QChar('>'),  QString("&gt;"));
+   retval.replace(QChar('<'),  QString("&lt;"));
+   retval.replace(QChar('\''), QString("&apos;"));
+
+   return retval;
 }
 
 Phrase::Phrase()
@@ -301,9 +302,10 @@ bool PhraseBook::save(const QString &fileName)
 
    t << "<!DOCTYPE QPH>\n<QPH";
 
-   if (sourceLanguage() != QLocale::C)
+   if (sourceLanguage() != QLocale::C) {
       t << " sourcelanguage=\""
         << Translator::makeLanguageCode(sourceLanguage(), sourceCountry()) << '"';
+   }
 
    if (language() != QLocale::C) {
       t << " language=\"" << Translator::makeLanguageCode(language(), country()) << '"';
@@ -316,9 +318,11 @@ bool PhraseBook::save(const QString &fileName)
       t << "    <source>" << protect( p->source() ) << "</source>\n";
       t << "    <target>" << protect( p->target() ) << "</target>\n";
 
-      if (!p->definition().isEmpty())
+      if (! p->definition().isEmpty()) {
          t << "    <definition>" << protect( p->definition() )
            << "</definition>\n";
+      }
+
       t << "</phrase>\n";
    }
 
@@ -366,4 +370,3 @@ QString PhraseBook::friendlyPhraseBookName() const
 
    return QString();
 }
-

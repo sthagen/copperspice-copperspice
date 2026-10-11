@@ -113,6 +113,13 @@ struct WriteInitialization : public TreeWalker
    using DomPropertyList = QList<DomProperty *>;
    using DomPropertyMap  = QHash<QString, DomProperty *>;
 
+   enum {
+      Use43UiFile = 0,
+      TopLevelMargin,
+      ChildMargin,
+      SubLayoutMargin
+   };
+
    WriteInitialization(Uic *uic);
 
    // widgets
@@ -150,13 +157,6 @@ struct WriteInitialization : public TreeWalker
    // images
    void acceptImage(DomImage *image) override;
 
-   enum {
-      Use43UiFile = 0,
-      TopLevelMargin,
-      ChildMargin,
-      SubLayoutMargin
-   };
-
  private:
    enum {
       WritePropertyIgnoreMargin     = 1,
@@ -192,15 +192,15 @@ struct WriteInitialization : public TreeWalker
    class Item
    {
     public:
-      Item(const QString &itemClassName, const QString &indent, QTextStream &setupUiStream,
-               QTextStream &retranslateUiStream, Driver *driver);
-      ~Item();
-
       enum EmptyItemPolicy {
          DontConstruct,
          ConstructItemOnly,
          ConstructItemAndVariable
       };
+
+      Item(const QString &itemClassName, const QString &indent, QTextStream &setupUiStream,
+               QTextStream &retranslateUiStream, Driver *driver);
+      ~Item();
 
       QString writeSetupUi(const QString &parent, EmptyItemPolicy emptyItemPolicy = ConstructItemOnly);
       void writeRetranslateUi(const QString &parentPath);
@@ -221,19 +221,19 @@ struct WriteInitialization : public TreeWalker
     private:
       struct ItemData
       {
-         ItemData()
-            : policy(DontGenerate)
-         { }
-
-         QMultiMap<QString, QString> setters;
-         QSet<QString> directives;
-
          // policies with priority, number describes the priority
          enum TemporaryVariableGeneratorPolicy {
             DontGenerate = 1,
             GenerateWithMultiDirective = 2,
             Generate = 3
          };
+
+         ItemData()
+            : policy(DontGenerate)
+         { }
+
+         QMultiMap<QString, QString> setters;
+         QSet<QString> directives;
 
          TemporaryVariableGeneratorPolicy policy;
       };
@@ -346,10 +346,6 @@ struct WriteInitialization : public TreeWalker
          bool suppressMarginDefault, QTextStream &str) const;
 
     private:
-      void writeProperty(int p, const QString &indent, const QString &objectName, const DomPropertyMap &pm,
-         const QString &propertyName, const QString &setter, int defaultStyleValue,
-         bool suppressDefault, QTextStream &str) const;
-
       enum Properties {
          Margin,
          Spacing,
@@ -361,8 +357,13 @@ struct WriteInitialization : public TreeWalker
          HasDefaultFunction = 2
       };
 
+      void writeProperty(int p, const QString &indent, const QString &objectName, const DomPropertyMap &pm,
+         const QString &propertyName, const QString &setter, int defaultStyleValue,
+         bool suppressDefault, QTextStream &str) const;
+
       unsigned m_state[NumProperties];
       int m_defaultValues[NumProperties];
+
       QString m_functions[NumProperties];
    };
 

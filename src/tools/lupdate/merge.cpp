@@ -88,67 +88,76 @@ static QString zeroKey(const QString &key)
 static QString translationAttempt(const QString &oldTranslation, const QString &oldSource, const QString &newSource)
 {
    int p = zeroKey(oldSource).count(QChar('0'));
+
    QString attempt;
    QStringList oldNumbers;
    QStringList newNumbers;
    QVector<bool> met(p);
    QVector<int> matchedYet(p);
-   int i, j;
-   int k = 0, ell, best;
-   int m, n;
+
+   int i;
+   int j;
+   int k = 0;
+   int ell;
+   int best;
+   int m;
+   int n;
    int pass;
 
    /*
-     This algorithm is hard to follow, so we'll consider an example
-     all along: oldTranslation is "XeT 3.0", oldSource is "TeX 3.0"
-     and newSource is "XeT 3.1".
+     This algorithm can be complicated, consider an example:
+        oldTranslation is "XeT 3.0", oldSource is "TeX 3.0" and newSource is "XeT 3.1".
 
-     First, we set up two tables: oldNumbers and newNumbers. In our
-     example, oldNumber[0] is "3.0" and newNumber[0] is "3.1".
+     First, we set up two tables: oldNumbers and newNumbers. In our example,
+     oldNumber[0] is "3.0" and newNumber[0] is "3.1".
    */
+
    for (i = 0, j = 0; i < oldSource.size(); i++, j++) {
       m = numberLength(oldSource, i);
       n = numberLength(newSource, j);
+
       if (m > 0) {
          oldNumbers.append(oldSource.mid(i, m + 1));
          newNumbers.append(newSource.mid(j, n + 1));
+
          i += m;
          j += n;
          met[k] = false;
          matchedYet[k] = 0;
-         k++;
+
+         ++k;
       }
    }
 
    /*
-     We now go over the old translation, "XeT 3.0", one letter at a
-     time, looking for numbers found in oldNumbers. Whenever such a
-     number is met, it is replaced with its newNumber equivalent. In
+     We go over the old translation, "XeT 3.0", one letter at a time, looking for numbers found in
+     oldNumbers. Whenever such a number is met, it is replaced with its newNumber equivalent. In
      our example, the "3.0" of "XeT 3.0" becomes "3.1".
    */
+
    for (i = 0; i < oldTranslation.length(); i++) {
       attempt += oldTranslation[i];
       for (k = 0; k < p; k++) {
          if (oldTranslation[i] == oldNumbers[k][matchedYet[k]]) {
-            matchedYet[k]++;
+            ++matchedYet[k];
          } else {
             matchedYet[k] = 0;
          }
       }
 
       /*
-        Let's find out if the last character ended a match. We make
-        two passes over the data. In the first pass, we try to
-        match only numbers that weren't matched yet; if that fails,
-        the second pass does the trick. This is useful in some
-        suspicious cases, flagged below.
+        find out if the last character ended a match. We make two passes over the data.
+        In the first pass we try to match only numbers which were not matched yet.
+        If that fails the second pass will catch this. This is useful in odd cases which are flagged below.
       */
+
       for (pass = 0; pass < 2; pass++) {
-         best = p; // an impossible value
+         best = p;                            // an impossible value
+
          for (k = 0; k < p; k++) {
-            if ((!met[k] || pass > 0) &&
-                  matchedYet[k] == oldNumbers[k].length() &&
+            if ((! met[k] || pass > 0) && matchedYet[k] == oldNumbers[k].length() &&
                   numberLength(oldTranslation, i + 1 - matchedYet[k]) == matchedYet[k]) {
+
                // the longer the better
                if (best == p || matchedYet[k] > matchedYet[best]) {
                   best = k;
@@ -159,6 +168,7 @@ static QString translationAttempt(const QString &oldTranslation, const QString &
             attempt.truncate(attempt.length() - matchedYet[best]);
             attempt += newNumbers[best];
             met[best] = true;
+
             for (k = 0; k < p; k++) {
                matchedYet[k] = 0;
             }
@@ -168,12 +178,10 @@ static QString translationAttempt(const QString &oldTranslation, const QString &
    }
 
    /*
-     We flag two kinds of suspicious cases. They are identified as
-     such with comments such as "{2000?}" at the end.
+     flag two kinds of suspicious cases. They are identified as such with comments such as "{2000?}" at the end.
 
-     Example of the first kind: old source text "TeX 3.0" translated
-     as "XeT 2.0" is flagged "TeX 2.0 {3.0?}", no matter what the
-     new text is.
+     Example of the first kind: old source text "TeX 3.0" translated as "XeT 2.0" is flagged "TeX 2.0 {3.0?}",
+     no matter what the new text is.
    */
 
    for (k = 0; k < p; k++) {
@@ -189,10 +197,12 @@ static QString translationAttempt(const QString &oldTranslation, const QString &
    */
    for (k = 0; k < p; k++) {
       for (ell = 0; ell < p; ell++) {
-         if (k != ell && oldNumbers[k] == oldNumbers[ell] && newNumbers[k] < newNumbers[ell])
+         if (k != ell && oldNumbers[k] == oldNumbers[ell] && newNumbers[k] < newNumbers[ell]) {
             attempt += " {" + newNumbers[k] + " or " + newNumbers[ell] + "?}";
+         }
       }
    }
+
    return attempt;
 }
 
@@ -207,35 +217,37 @@ static QString translationAttempt(const QString &oldTranslation, const QString &
 
   Returns the number of additional messages that this heuristic translated.
 */
-int applyNumberHeuristic(Translator &tor)
+int applyNumberHeuristic(Translator &trObj)
 {
    QMap<QString, QPair<QString, QString>> translated;
-   QVector<bool> untranslated(tor.messageCount());
+   QVector<bool> untranslated(trObj.messageCount());
+
    int inserted = 0;
 
-   for (int i = 0; i < tor.messageCount(); ++i) {
-      const TranslatorMessage &msg = tor.message(i);
+   for (int i = 0; i < trObj.messageCount(); ++i) {
+      const TranslatorMessage &msg = trObj.message(i);
       bool hasTranslation = msg.isTranslated();
 
       if (msg.type() == TranslatorMessage::Type::Unfinished) {
-         if (!hasTranslation) {
+         if (! hasTranslation) {
             untranslated[i] = true;
          }
 
       } else if (hasTranslation && msg.translations().count() == 1) {
          const QString &key = zeroKey(msg.sourceText());
-         if (!key.isEmpty()) {
+
+         if (! key.isEmpty()) {
             translated.insert(key, qMakePair(msg.sourceText(), msg.translation()));
          }
       }
    }
 
-   for (int i = 0; i < tor.messageCount(); ++i) {
+   for (int i = 0; i < trObj.messageCount(); ++i) {
       if (untranslated[i]) {
-         TranslatorMessage &msg = tor.message(i);
+         TranslatorMessage &msg = trObj.message(i);
          const QString &key = zeroKey(msg.sourceText());
 
-         if (!key.isEmpty()) {
+         if (! key.isEmpty()) {
             QMap<QString, QPair<QString, QString>>::const_iterator t = translated.constFind(key);
 
             if (t != translated.constEnd() && t->first != msg.sourceText()) {
@@ -245,6 +257,7 @@ int applyNumberHeuristic(Translator &tor)
          }
       }
    }
+
    return inserted;
 }
 
@@ -259,95 +272,95 @@ int applyNumberHeuristic(Translator &tor)
   Returns the number of additional messages that this heuristic translated.
 */
 
-int applySameTextHeuristic(Translator &tor)
+int applySameTextHeuristic(Translator &trObj)
 {
    QMap<QString, QStringList> translated;
-   QMap<QString, bool> avoid; // Want a QTreeSet, in fact
-   QVector<bool> untranslated(tor.messageCount());
+   QMap<QString, bool> avoid;
+
+   QVector<bool> untranslated(trObj.messageCount());
    int inserted = 0;
 
-   for (int i = 0; i < tor.messageCount(); ++i) {
-      const TranslatorMessage &msg = tor.message(i);
-      if (!msg.isTranslated()) {
+   for (int i = 0; i < trObj.messageCount(); ++i) {
+      const TranslatorMessage &msg = trObj.message(i);
+
+      if (! msg.isTranslated()) {
          if (msg.type() == TranslatorMessage::Type::Unfinished) {
             untranslated[i] = true;
          }
 
       } else {
          const QString &key = msg.sourceText();
-         QMap<QString, QStringList>::const_iterator t = translated.constFind(key);
+         QMap<QString, QStringList>::const_iterator iter = translated.constFind(key);
 
-         if (t != translated.constEnd()) {
-            /*
-              The same source text is translated at least two
-              different ways. Do nothing then.
-            */
-            if (*t != msg.translations()) {
+         if (iter != translated.constEnd()) {
+            // same source text is translated at least two different ways. Do nothing then.
+
+            if (*iter != msg.translations()) {
                translated.remove(key);
                avoid.insert(key, true);
             }
 
-         } else if (!avoid.contains(key)) {
+         } else if (! avoid.contains(key)) {
             translated.insert(key, msg.translations());
          }
       }
    }
 
-   for (int i = 0; i < tor.messageCount(); ++i) {
+   for (int i = 0; i < trObj.messageCount(); ++i) {
       if (untranslated[i]) {
-         TranslatorMessage &msg = tor.message(i);
-         QMap<QString, QStringList>::const_iterator t = translated.constFind(msg.sourceText());
+         TranslatorMessage &msg = trObj.message(i);
 
-         if (t != translated.constEnd()) {
-            msg.setTranslations(*t);
+         QMap<QString, QStringList>::const_iterator iter = translated.constFind(msg.sourceText());
+
+         if (iter != translated.constEnd()) {
+            msg.setTranslations(*iter);
             ++inserted;
          }
       }
    }
+
    return inserted;
 }
 
 /*
-  Merges two Translator objects. The first one
-  is a set of source texts and translations for a previous version of
-  the internationalized program; the second one is a set of fresh
-  source texts newly extracted from the source code, without any
-  translation yet.
+
+Merges two Translator objects. The first one is a set of source texts and translations for a previous version of
+the internationalized program. The second one is a set of new source texts extracted from the source code,
+without any existing translations.
+
 */
 
-Translator merge(const Translator &tor, const Translator &virginTor, const QList<Translator> &aliens,
-                 UpdateOptions options, QString &err)
+Translator merge(const Translator &trObj, const Translator &newTrObj, const QList<Translator> &aliens,
+      UpdateOptions options, QString &err)
 {
-   int known = 0;
-   int neww = 0;
+   int known     = 0;
+   int neww      = 0;
    int obsoleted = 0;
    int similarTextHeuristicCount = 0;
 
-   Translator outTor;
-   outTor.setLanguageCode(tor.languageCode());
-   outTor.setSourceLanguageCode(tor.sourceLanguageCode());
-   outTor.setLocationsType(tor.locationsType());
+   Translator trOutObj;
+   trOutObj.setLanguageCode(trObj.languageCode());
+   trOutObj.setSourceLanguageCode(trObj.sourceLanguageCode());
+   trOutObj.setLocationType(trObj.locationType());
 
-   /*
-     The types of all the messages from the vernacular translator
-     are updated according to the virgin translator.
-   */
-   for (TranslatorMessage m : tor.messages()) {
+   // all the messages from the old translator are updated according to the new translator
+
+   for (TranslatorMessage m : trObj.messages()) {
       TranslatorMessage::Type newType = TranslatorMessage::Type::Finished;
 
       if (m.sourceText().isEmpty() && m.id().isEmpty()) {
          // context/file comment
-         int mvi = virginTor.find(m.context());
+         int mvi = newTrObj.find(m.context());
 
          if (mvi >= 0) {
-            m.setComment(virginTor.constMessage(mvi).comment());
+            m.setComment(newTrObj.constMessage(mvi).comment());
          }
 
       } else {
          QHash<QString, QString> extras;
 
          const TranslatorMessage *mv;
-         int mvi = virginTor.find(m);
+         int mvi = newTrObj.find(m);
 
          if (mvi < 0) {
             if (! (options & HeuristicSimilarText)) {
@@ -374,19 +387,17 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
                m.clearReferences();
 
             } else {
-               mvi = virginTor.find(m.context(), m.comment(), m.allReferences());
+               mvi = newTrObj.find(m.context(), m.comment(), m.allReferences());
 
                if (mvi < 0) {
-                  // did not find it in the virgin, mark it as obsolete
+                  // did not find it in the new trObj, mark it as obsolete
                   goto makeObsolete;
                }
 
-               mv = &virginTor.constMessage(mvi);
+               mv = &newTrObj.constMessage(mvi);
 
-               // Do not just accept it if its on the same line number,
-               // but different source text.
-               // Also check if the texts are more or less similar before
-               // we consider them to represent the same message
+               // Do not accept it if its on the same line number but different source text.
+               // Check if the texts are more or less similar before we consider them to represent the same message
 
                if (getSimilarityScore(m.sourceText(), mv->sourceText()) < textSimilarityThreshold) {
                   goto makeObsolete;
@@ -394,8 +405,8 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
 
                // It is just slightly modified, assume that it is the same string
                extras = mv->extras();
-               // Mark it as unfinished. (Since the source text
-               // was changed it might require re-translating...)
+
+               // Mark it as unfinished. (Since the source text was changed it might require re-translating...)
 
                newType = TranslatorMessage::Type::Unfinished;
                ++similarTextHeuristicCount;
@@ -405,14 +416,13 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
             }
 
          } else {
-            mv = &virginTor.message(mvi);
+            mv = &newTrObj.message(mvi);
             extras = mv->extras();
 
-            if (! mv->id().isEmpty()
-                  && (mv->context() != m.context()
-                      || mv->sourceText() != m.sourceText()
-                      || mv->comment() != m.comment())) {
-               known++;
+            if (! mv->id().isEmpty() && (mv->context() != m.context() || mv->sourceText() != m.sourceText()
+                     || mv->comment() != m.comment())) {
+               ++known;
+
                newType = TranslatorMessage::Type::Unfinished;
                m.setContext(mv->context());
                m.setComment(mv->comment());
@@ -424,7 +434,7 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
                   m.setSourceText(mv->sourceText());
                   const QString &oldpluralsource = m.extra("po-msgid_plural");
 
-                  if (!oldpluralsource.isEmpty()) {
+                  if (! oldpluralsource.isEmpty()) {
                      extras.insert("po-old_msgid_plural", oldpluralsource);
                   }
                }
@@ -459,11 +469,10 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
                }
             }
 
-            // Always get the filename and linenumber info from the
-            // virgin Translator, in case it has changed location.
-            // This should also enable us to read a file that does not
-            // have the <location> element.
-            // why not use operator=()? Because it overwrites e.g. userData
+            // Always get the filename and linenumber info from the new Translator
+            // in case it has changed location.
+
+            // can not use operator=() because it overwrites userData
 
             m.setReferences(mv->allReferences());
             m.setPlural(mv->isPlural());
@@ -474,29 +483,27 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
       }
 
       m.setType(newType);
-      outTor.append(m);
+      trOutObj.append(m);
    }
 
-   /*
-     Messages found only in the virgin translator are added to the
-     vernacular translator.
-   */
-   for (const TranslatorMessage &mv : virginTor.messages()) {
+   // messages found only in the main translator are added to the vernacular translator.
+
+   for (const TranslatorMessage &mv : newTrObj.messages()) {
       if (mv.sourceText().isEmpty() && mv.id().isEmpty()) {
-         if (tor.find(mv.context()) >= 0) {
+         if (trObj.find(mv.context()) >= 0) {
             continue;
          }
 
       } else {
-         if (tor.find(mv) >= 0) {
+         if (trObj.find(mv) >= 0) {
             continue;
          }
 
          if (options & HeuristicSimilarText) {
-            int mi = tor.find(mv.context(), mv.comment(), mv.allReferences());
+            int mi = trObj.find(mv.context(), mv.comment(), mv.allReferences());
 
             if (mi >= 0) {
-               if (getSimilarityScore(tor.constMessage(mi).sourceText(), mv.sourceText()) >= textSimilarityThreshold) {
+               if (getSimilarityScore(trObj.constMessage(mi).sourceText(), mv.sourceText()) >= textSimilarityThreshold) {
                   continue;
                }
             }
@@ -504,21 +511,18 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
       }
 
       if (options & NoLocations) {
-         outTor.append(mv);
+         trOutObj.append(mv);
 
       } else {
-         outTor.appendSorted(mv);
+         trOutObj.appendSorted(mv);
       }
 
-      if (! mv.sourceText().isEmpty() || !mv.id().isEmpty()) {
+      if (! mv.sourceText().isEmpty() || ! mv.id().isEmpty()) {
          ++neww;
       }
    }
 
-   /*
-   "Alien" translators can be used to augment the vernacular translator.
-   */
-
+   // "Alien" translators can be used to augment the vernacular translator
    for (const Translator &alf : aliens) {
 
       for (TranslatorMessage mv : alf.messages()) {
@@ -527,10 +531,10 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
             continue;
          }
 
-         int mvi = outTor.find(mv);
+         int mvi = trOutObj.find(mv);
 
          if (mvi >= 0) {
-            TranslatorMessage &tm = outTor.message(mvi);
+            TranslatorMessage &tm = trOutObj.message(mvi);
 
             if (tm.type() != TranslatorMessage::Type::Finished && ! tm.isTranslated()) {
                tm.setTranslations(mv.translations());
@@ -549,9 +553,9 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
                        ? TranslatorMessage::Type::Vanished : TranslatorMessage::Type::Obsolete);
 
             if (options & NoLocations) {
-               outTor.append(mv);
+               trOutObj.append(mv);
             } else {
-               outTor.appendSorted(mv);
+               trOutObj.appendSorted(mv);
             }
 
             ++known;
@@ -560,18 +564,14 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
       }
    }
 
-   /*
-     The same-text heuristic handles cases where a message has an
-     obsolete counterpart with a different context or comment.
-   */
-   int sameTextHeuristicCount = (options & HeuristicSameText) ? applySameTextHeuristic(outTor) : 0;
+   // The same-text heuristic handles cases where a message has an
+   // obsolete counterpart with a different context or comment.
+   int sameTextHeuristicCount = (options & HeuristicSameText) ? applySameTextHeuristic(trOutObj) : 0;
 
-   /*
-     The number heuristic handles cases where a message has an
-     obsolete counterpart with mostly numbers differing in the
-     source text.
-   */
-   int sameNumberHeuristicCount = (options & HeuristicNumber) ? applyNumberHeuristic(outTor) : 0;
+   // number heuristic handles cases where a message has an obsolete counterpart with mostly numbers
+   // differing in the source text.
+
+   int sameNumberHeuristicCount = (options & HeuristicNumber) ? applyNumberHeuristic(trOutObj) : 0;
 
    if (options & Verbose) {
       int totalFound = neww + known;
@@ -601,6 +601,5 @@ Translator merge(const Translator &tor, const Translator &virginTor, const QList
       }
    }
 
-   return outTor;
+   return trOutObj;
 }
-

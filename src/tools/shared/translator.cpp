@@ -43,7 +43,7 @@
 #include <stdio.h>
 
 Translator::Translator()
-   : m_locationsType(AbsoluteLocations), m_indexOk(true)
+   : m_locationType(Translator::LocationType::Absolute), m_indexOk(true)
 {
 }
 
@@ -520,13 +520,13 @@ void Translator::dropUiLines()
    QString uiXt  = QString(".ui");
    QString juiXt = QString(".jui");
 
-   for (auto it = m_messages.begin(); it != m_messages.end(); ++it) {
+   for (auto iter = m_messages.begin(); iter != m_messages.end(); ++iter) {
 
       QHash<QString, int> have;
       QList<TranslatorMessage::Reference> refs;
 
-      for (const TranslatorMessage::Reference &itref : it->allReferences()) {
-         const QString &fn = itref.fileName();
+      for (const TranslatorMessage::Reference &item : iter->allReferences()) {
+         const QString &fn = item.fileName();
 
          if (fn.endsWith(uiXt) || fn.endsWith(juiXt)) {
             if (++have[fn] == 1) {
@@ -534,11 +534,11 @@ void Translator::dropUiLines()
             }
 
          } else {
-            refs.append(itref);
+            refs.append(item);
          }
       }
 
-      it->setReferences(refs);
+      iter->setReferences(refs);
    }
 }
 
@@ -779,9 +779,10 @@ void Translator::normalizeTranslations(ConversionData &cd)
       }
    }
 
-   if (truncated)
+   if (truncated) {
       cd.appendError("Removed plural forms as the target language has less forms.\n"
-                     "If this sounds wrong, possibly the target language is not set or recognized.");
+            "If this sounds wrong, possibly the target language is not set or recognized.");
+   }
 }
 
 QString Translator::guessLanguageCodeFromFileName(const QString &filename)

@@ -168,7 +168,7 @@ void MessageEditor::messageModelAppended()
    bool writable = m_dataModel->isModelWritable(model);
    ed.transCommentText = new FormWidget(QString(), true);
    ed.transCommentText->setEditingEnabled(writable);
-   ed.transCommentText->setHideWhenEmpty(!writable);
+   ed.transCommentText->setHideWhenEmpty(! writable);
    ed.transCommentText->setWhatsThis(tr("Enter comments for your own records."
            " They have no effect on the translated applications.") );
 
@@ -238,9 +238,9 @@ void MessageEditor::addPluralForm(int model, const QString &label, bool writable
    FormMultiWidget *transEditor = new FormMultiWidget(label);
    connect(transEditor, SIGNAL(editorCreated(QTextEdit *)), SLOT(editorCreated(QTextEdit *)));
    transEditor->setEditingEnabled(writable);
-   transEditor->setHideWhenEmpty(!writable);
+   transEditor->setHideWhenEmpty(! writable);
 
-   if (!m_editors[model].transTexts.isEmpty()) {
+   if (! m_editors[model].transTexts.isEmpty()) {
       transEditor->setVisible(false);
    }
 
@@ -321,6 +321,7 @@ void MessageEditor::reallyFixTabOrder()
 QStringList MessageEditor::translations(int model) const
 {
    QStringList translations;
+
    for (int i = 0; i < m_editors[model].transTexts.count() &&
          m_editors[model].transTexts.at(i)->isVisible(); ++i) {
       translations << m_editors[model].transTexts[i]->getTranslation();
@@ -407,9 +408,9 @@ QTextEdit *MessageEditor::activeTranslation() const
 
    const QList<FormatTextEdit *> &editors = m_editors[m_currentModel].transTexts[m_currentNumerus]->getEditors();
 
-   for (QTextEdit * te : editors) {
-      if (te->hasFocus()) {
-         return te;
+   for (QTextEdit *item : editors) {
+      if (item->hasFocus()) {
+         return item;
       }
    }
 
@@ -419,11 +420,12 @@ QTextEdit *MessageEditor::activeTranslation() const
 QTextEdit *MessageEditor::activeOr1stTranslation() const
 {
    if (m_currentNumerus < 0) {
-      for (int i = 0; i < m_editors.size(); ++i)
+      for (int i = 0; i < m_editors.size(); ++i) {
          if (m_editors[i].container->isVisible()
-               && !m_editors[i].transTexts.first()->getEditors().first()->isReadOnly()) {
+               && ! m_editors[i].transTexts.first()->getEditors().first()->isReadOnly()) {
             return m_editors[i].transTexts.first()->getEditors().first();
          }
+      }
 
       return nullptr;
    }
@@ -442,29 +444,31 @@ QTextEdit *MessageEditor::activeTransComment() const
 
 QTextEdit *MessageEditor::activeEditor() const
 {
-   if (QTextEdit *te = activeTransComment()) {
-      return te;
+   if (QTextEdit *item = activeTransComment()) {
+      return item;
    }
+
    return activeTranslation();
 }
 
 QTextEdit *MessageEditor::activeOr1stEditor() const
 {
-   if (QTextEdit *te = activeTransComment()) {
-      return te;
+   if (QTextEdit *item = activeTransComment()) {
+      return item;
    }
+
    return activeOr1stTranslation();
 }
 
 void MessageEditor::setTargetLanguage(int model)
 {
    const QStringList &numerusForms = m_dataModel->model(model)->numerusForms();
-   const QString &langLocalized = m_dataModel->model(model)->localizedLanguage();
+   const QString &langLocalized    = m_dataModel->model(model)->localizedLanguage();
 
    for (int i = 0; i < numerusForms.count(); ++i) {
       const QString &label = tr("%1 translation (%2)").formatArgs(langLocalized, numerusForms[i]);
 
-      if (!i) {
+      if (! i) {
          m_editors[model].firstForm = label;
       }
 
@@ -474,10 +478,9 @@ void MessageEditor::setTargetLanguage(int model)
          m_editors[model].transTexts[i]->setLabel(label);
       }
 
-      m_editors[model].transTexts[i]->setVisible(!i || m_editors[model].pluralEditMode);
+      m_editors[model].transTexts[i]->setVisible(! i || m_editors[model].pluralEditMode);
       m_editors[model].transTexts[i]->setWhatsThis(
-         tr("This is where you can enter or modify"
-            " the translation of the above source text.") );
+         tr("This is where you can enter or modify the translation of the above source text.") );
    }
 
    for (int j = m_editors[model].transTexts.count() - numerusForms.count(); j > 0; --j) {
@@ -520,10 +523,12 @@ bool MessageEditor::eventFilter(QObject *o, QEvent *e)
                m_source->getEditor()->copy();
                return true;
             }
+
             if (m_pluralSource->getEditor()->textCursor().hasSelection()) {
                m_pluralSource->getEditor()->copy();
                return true;
             }
+
          } else if (ke->key() == Qt::Key_A) {
             return true;
          }
@@ -540,6 +545,7 @@ bool MessageEditor::eventFilter(QObject *o, QEvent *e)
 
    } else if (e->type() == QEvent::FocusIn) {
       QWidget *widget = static_cast<QWidget *>(o);
+
       if (widget != m_focusWidget) {
          trackFocus(widget);
       }
@@ -560,13 +566,18 @@ void MessageEditor::trackFocus(QWidget *widget)
 {
    m_focusWidget = widget;
 
-   int model, numerus;
+   int model;
+   int numerus;
+
    activeModelAndNumerus(&model, &numerus);
+
    if (model != m_currentModel || numerus != m_currentNumerus) {
       resetSelection();
       m_currentModel = model;
       m_currentNumerus = numerus;
+
       emit activeModelChanged(activeModel());
+
       updateBeginFromSource();
       updateUndoRedo();
       updateCanPaste();
@@ -578,6 +589,7 @@ void MessageEditor::showNothing()
    m_source->clearTranslation();
    m_pluralSource->clearTranslation();
    m_commentText->clearTranslation();
+
    for (int j = 0; j < m_editors.count(); ++j) {
       setEditingEnabled(j, false);
 
@@ -587,7 +599,9 @@ void MessageEditor::showNothing()
 
       m_editors[j].transCommentText->clearTranslation();
    }
+
    emit pasteAvailable(false);
+
    updateBeginFromSource();
    updateUndoRedo();
 }
@@ -639,8 +653,8 @@ void MessageEditor::showMessage(const MultiDataIndex &index)
       }
 
       setEditingEnabled(j, m_dataModel->isModelWritable(j)
-                        && msgCargo->message().type() != TranslatorMessage::Type::Obsolete
-                        && msgCargo->message().type() != TranslatorMessage::Type::Vanished);
+            && msgCargo->message().type() != TranslatorMessage::Type::Obsolete
+            && msgCargo->message().type() != TranslatorMessage::Type::Vanished);
 
       // Translation label
       ed.pluralEditMode = msgCargo->translations().count() > 1;
@@ -723,6 +737,7 @@ void MessageEditor::setEditingEnabled(int model, bool enabled)
 void MessageEditor::setLengthVariants(bool on)
 {
    m_lengthVariants = on;
+
    for (const MessageEditorData & ed : m_editors)  {
       for (FormMultiWidget * widget : ed.transTexts) {
          widget->setMultiEnabled(on);
@@ -744,6 +759,7 @@ void MessageEditor::updateUndoRedo()
 {
    bool newUndoAvail = false;
    bool newRedoAvail = false;
+
    if (QTextEdit *te = activeEditor()) {
       QTextDocument *doc = te->document();
       newUndoAvail = doc->isUndoAvailable();
@@ -774,7 +790,7 @@ void MessageEditor::copy()
 void MessageEditor::updateCanCutCopy()
 {
    bool newCopyState = false;
-   bool newCutState = false;
+   bool newCutState  = false;
 
    if (m_selectionHolder) {
       newCopyState = true;
@@ -800,7 +816,7 @@ void MessageEditor::paste()
 void MessageEditor::updateCanPaste()
 {
    QTextEdit *te;
-   emit pasteAvailable(!m_clipboardEmpty && (te = activeEditor()) && !te->isReadOnly());
+   emit pasteAvailable(! m_clipboardEmpty && (te = activeEditor()) && !te->isReadOnly());
 }
 
 void MessageEditor::clipboardChanged()
@@ -817,8 +833,7 @@ void MessageEditor::selectAll()
    QTextEdit *te;
 
    if ((te = m_source->getEditor())->underMouse()
-         || (te = m_pluralSource->getEditor())->underMouse()
-         || ((te = activeEditor()) && te->hasFocus())) {
+         || (te = m_pluralSource->getEditor())->underMouse() || ((te = activeEditor()) && te->hasFocus())) {
       te->selectAll();
    }
 }
@@ -835,6 +850,7 @@ void MessageEditor::emitTranslatorCommentChanged(QTextEdit *widget)
 {
    grabFocus(widget); // DND proofness
    updateUndoRedo();
+
    emit translatorCommentChanged(m_editors[m_currentModel].transCommentText->getTranslation());
 }
 
@@ -854,15 +870,16 @@ void MessageEditor::beginFromSource()
    MessageItem *msgCargo = m_dataModel->getMessageItem(m_currentIndex, m_currentModel);
 
    setTranslation(m_currentModel, m_currentNumerus > 0 &&
-               ! msgCargo->pluralText().isEmpty() ? msgCargo->pluralText() : msgCargo->text());
+         ! msgCargo->pluralText().isEmpty() ? msgCargo->pluralText() : msgCargo->text());
 }
 
 void MessageEditor::setEditorFocus()
 {
-   if (! widget()->hasFocus())
+   if (! widget()->hasFocus()) {
       if (QTextEdit *activeEditor = activeOr1stEditor()) {
          activeEditor->setFocus();
       }
+   }
 }
 
 void MessageEditor::setEditorFocusModel(int model)
@@ -877,6 +894,7 @@ void MessageEditor::setEditorFocusModel(int model)
          m_focusWidget    = nullptr;
 
          emit activeModelChanged(activeModel());
+
          updateBeginFromSource();
          updateUndoRedo();
          updateCanPaste();
@@ -928,7 +946,7 @@ void MessageEditor::setVisualizeWhitespace(bool value)
 
       for (FormMultiWidget *widget : med.transTexts) {
          for (FormatTextEdit *te : widget->getEditors()) {
-             te->setVisualizeWhitespace(value);
+            te->setVisualizeWhitespace(value);
          }
       }
    }
@@ -936,10 +954,10 @@ void MessageEditor::setVisualizeWhitespace(bool value)
 
 void MessageEditor::setFontSize(const float fontSize)
 {
-    if (m_fontSize != fontSize) {
-        m_fontSize = fontSize;
-        applyFontSize();
-    }
+   if (m_fontSize != fontSize) {
+      m_fontSize = fontSize;
+      applyFontSize();
+   }
 }
 
 float MessageEditor::fontSize()
@@ -962,6 +980,7 @@ void MessageEditor::applyFontSize()
                 te->setFont(font);
             }
         }
+
         med.transCommentText->getEditor()->setFont(font);
     }
 }

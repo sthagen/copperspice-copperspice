@@ -180,7 +180,7 @@ static bool checkProperty(const QString &fileName, const DomProperty *p)
          break;
 
       case DomProperty::Pixmap:
-         if (const DomResourcePixmap *drp = p->elementPixmap())
+         if (const DomResourcePixmap *drp = p->elementPixmap()) {
             if (drp->text().isEmpty()) {
                const QString msg = QString("%1: Warning, an invalid pixmap property '%2' was found")
                   .formatArg(fileName).formatArg(p->attributeName());
@@ -188,6 +188,7 @@ static bool checkProperty(const QString &fileName, const DomProperty *p)
 
                return false;
             }
+         }
          break;
 
       default:
@@ -485,7 +486,7 @@ void WriteInitialization::LayoutDefaultHandler::writeProperty(int p, const QStri
       const bool useLayoutFunctionPre43 = !suppressDefault && (m_state[p] == (HasDefaultFunction | HasDefaultValue))
             && value == m_defaultValues[p];
 
-      if (!useLayoutFunctionPre43) {
+      if (! useLayoutFunctionPre43) {
          bool ifndefMac = (! (m_state[p] & (HasDefaultFunction | HasDefaultValue))
                && value == defaultStyleValue);
 
@@ -936,7 +937,7 @@ void WriteInitialization::acceptWidget(DomWidget *node)
       writeProperties(varName + "->header()", "QHeaderView", headerProperties, WritePropertyIgnoreObjectName);
 
    } else if (m_uic->customWidgetsInfo()->extends(className, "QTableView")
-               || m_uic->customWidgetsInfo()->extends(className, "QTableWidget")) {
+         || m_uic->customWidgetsInfo()->extends(className, "QTableWidget")) {
 
       static QStringList headerPrefixes = { "horizontalHeader", "verticalHeader" };
 
@@ -1041,7 +1042,7 @@ void WriteInitialization::acceptLayout(DomLayout *node)
 
    m_output << m_indent << varName << " = new " << className << '(';
 
-   if (!m_layoutChain.top() && !isGroupBox) {
+   if (! m_layoutChain.top() && !isGroupBox) {
       m_output << m_driver->findOrInsertWidget(m_widgetChain.top());
    }
 
@@ -1205,7 +1206,7 @@ void WriteInitialization::acceptLayoutItem(DomLayoutItem *node)
       addArgs = QString("%1, %2, %3, %4, %5")
             .formatArg(itemName).formatArg(row).formatArg(col).formatArg(rowSpan).formatArg(colSpan);
 
-      if (!node->attributeAlignment().isEmpty()) {
+      if (! node->attributeAlignment().isEmpty()) {
          addArgs += ", " + node->attributeAlignment();
       }
 
@@ -1304,7 +1305,7 @@ void WriteInitialization::acceptActionRef(DomActionRef *node)
    } else if (DomWidget *w = m_driver->widgetByName(actionName)) {
       isMenu = m_uic->isMenu(w->attributeClass());
 
-   } else if (!(m_driver->actionByName(actionName) || isSeparator)) {
+   } else if (! (m_driver->actionByName(actionName) || isSeparator)) {
       qWarning( "%s: Warning: Action `%s' not declared",
             csPrintable(m_option.messagePrefix()), csPrintable(actionName));
 
@@ -1546,7 +1547,7 @@ void WriteInitialization::writeProperties(const QString &varName,
 
          case DomProperty::Enum:
             propertyValue = p->elementEnum();
-            if (!propertyValue.contains("::")) {
+            if (! propertyValue.contains("::")) {
                QString scope  = className;
                scope += "::";
                propertyValue.prepend(scope);
@@ -1770,8 +1771,10 @@ void WriteInitialization::writeProperties(const QString &varName,
          }
 
          if ((varName == m_mainFormVarName) && (&outStream == &m_refreshOut)) {
-            // only place (currently) where we output mainForm name to the retranslateUi()
-            // Other places output merely instances of a certain class (which cannot be main form, e.g. QListWidget).
+
+            // only place where we output mainForm name to the retranslateUi()
+            // other places output instances of a certain class (which can not be main form, like QListWidget).
+
             m_mainFormUsedInRetranslateUi = true;
          }
       }
@@ -2382,7 +2385,7 @@ QString WriteInitialization::disableSorting(DomWidget *w, const QString &varName
 
 void WriteInitialization::enableSorting(DomWidget *w, const QString &varName, const QString &tempName)
 {
-   if (!w->elementItem().isEmpty()) {
+   if (! w->elementItem().isEmpty()) {
       m_refreshOut << m_indent << varName << "->setSortingEnabled(" << tempName << ");\n\n";
    }
 }

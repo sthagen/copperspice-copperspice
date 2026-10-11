@@ -115,20 +115,22 @@ int main(int argc, char *argv[])
    QCoreApplication app(argc, argv);
 
 #ifndef Q_OS_WIN
-   QTranslator translator;
-   QTranslator qtTranslator;
+   QTranslator trObj1;
+   QTranslator trObj2;
+
    QString sysLocale   = QLocale::system().name();
    QString resourceDir = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
 
-   if (translator.load("linguist_" + sysLocale, resourceDir) && qtTranslator.load("qt_" + sysLocale, resourceDir)) {
-      app.installTranslator(&translator);
-      app.installTranslator(&qtTranslator);
+   if (trObj1.load("linguist_" + sysLocale, resourceDir) && trObj2.load("cs_" + sysLocale, resourceDir)) {
+      app.installTranslator(&trObj1);
+      app.installTranslator(&trObj2);
    }
 #endif
 
    QStringList args = app.arguments();
 
    QList<File> inFiles;
+
    QString inFormat("auto");
    QString outFileName;
    QString outFormat("auto");
@@ -140,10 +142,11 @@ int main(int argc, char *argv[])
    bool noFinished = false;
    bool verbose    = false;
    bool noUiLines  = false;
-   Translator::LocationsType locations = Translator::DefaultLocations;
+
+   Translator::LocationType locations = Translator::LocationType::Default;
 
    ConversionData cd;
-   Translator tr;
+   Translator trObj;
 
    for (int i = 1; i < args.size(); ++i) {
       if (args[i].startsWith("--")) {
@@ -151,51 +154,73 @@ int main(int argc, char *argv[])
       }
 
       if (args[i] == "-o" || args[i] == "-output-file") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
+
          outFileName = args[i];
 
       } else if (args[i] == "-of" || args[i] == "-output-format") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
+
          outFormat = args[i];
 
       } else if (args[i] == "-i" || args[i] == "-input-file") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
+
          File file;
-         file.name = args[i];
+         file.name   = args[i];
          file.format = inFormat;
+
          inFiles.append(file);
 
       } else if (args[i] == "-if" || args[i] == "-input-format") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
+
          inFormat = args[i];
 
       } else if (args[i] == "-drop-tags") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
+
          cd.m_dropTags.append(args[i]);
 
       } else if (args[i] == "-drop-translations") {
          dropTranslations = true;
 
       } else if (args[i] == "-target-language") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
+
          targetLanguage = args[i];
 
       } else if (args[i] == "-source-language") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
+
          sourceLanguage = args[i];
 
       } else if (args[i].startsWith("-h")) {
@@ -212,18 +237,20 @@ int main(int argc, char *argv[])
          cd.m_sortContexts = true;
 
       } else if (args[i] == "-locations") {
-         if (++i >= args.size()) {
+         ++i;
+
+         if (i >= args.size()) {
             return usage(args);
          }
 
          if (args[i] == "none") {
-            locations = Translator::NoLocations;
+            locations = Translator::LocationType::None;
 
          } else if (args[i] == "relative") {
-            locations = Translator::RelativeLocations;
+            locations = Translator::LocationType::Relative;
 
          } else if (args[i] == "absolute") {
-            locations = Translator::AbsoluteLocations;
+            locations = Translator::LocationType::Absolute;
 
          } else {
             return usage(args);
@@ -250,61 +277,67 @@ int main(int argc, char *argv[])
       return usage(args);
    }
 
-   tr.setLanguageCode(Translator::guessLanguageCodeFromFileName(inFiles[0].name));
+   trObj.setLanguageCode(Translator::guessLanguageCodeFromFileName(inFiles[0].name));
 
-   if (!tr.load(inFiles[0].name, cd, inFiles[0].format)) {
+   if (! trObj.load(inFiles[0].name, cd, inFiles[0].format)) {
       std::cerr << csPrintable(cd.error());
       return 2;
    }
-   tr.reportDuplicates(tr.resolveDuplicates(), inFiles[0].name, verbose);
+
+   trObj.reportDuplicates(trObj.resolveDuplicates(), inFiles[0].name, verbose);
 
    for (int i = 1; i < inFiles.size(); ++i) {
-      Translator tr2;
-      if (!tr2.load(inFiles[i].name, cd, inFiles[i].format)) {
+      Translator trObj3;
+
+      if (! trObj3.load(inFiles[i].name, cd, inFiles[i].format)) {
          std::cerr << csPrintable(cd.error());
+
          return 2;
       }
-      tr2.reportDuplicates(tr2.resolveDuplicates(), inFiles[i].name, verbose);
-      for (int j = 0; j < tr2.messageCount(); ++j) {
-         tr.replaceSorted(tr2.message(j));
+
+      trObj3.reportDuplicates(trObj3.resolveDuplicates(), inFiles[i].name, verbose);
+
+      for (int j = 0; j < trObj3.messageCount(); ++j) {
+         trObj.replaceSorted(trObj3.message(j));
       }
    }
 
    if (! targetLanguage.isEmpty()) {
-      tr.setLanguageCode(targetLanguage);
+      trObj.setLanguageCode(targetLanguage);
    }
 
    if (! sourceLanguage.isEmpty()) {
-      tr.setSourceLanguageCode(sourceLanguage);
+      trObj.setSourceLanguageCode(sourceLanguage);
    }
 
    if (noObsolete) {
-      tr.stripObsoleteMessages();
+      trObj.stripObsoleteMessages();
    }
 
    if (noFinished) {
-      tr.stripFinishedMessages();
+      trObj.stripFinishedMessages();
    }
 
    if (dropTranslations) {
-      tr.dropTranslations();
+      trObj.dropTranslations();
    }
 
    if (noUiLines) {
-      tr.dropUiLines();
+      trObj.dropUiLines();
    }
 
-   if (locations != Translator::DefaultLocations) {
-      tr.setLocationsType(locations);
+   if (locations != Translator::LocationType::Default) {
+      trObj.setLocationType(locations);
    }
 
-   tr.normalizeTranslations(cd);
+   trObj.normalizeTranslations(cd);
+
    if (! cd.errors().isEmpty()) {
       std::cerr << csPrintable(cd.error());
       cd.clearErrors();
    }
 
-   if (! tr.save(outFileName, cd, outFormat)) {
+   if (! trObj.save(outFileName, cd, outFormat)) {
       std::cerr << csPrintable(cd.error());
       return 3;
    }

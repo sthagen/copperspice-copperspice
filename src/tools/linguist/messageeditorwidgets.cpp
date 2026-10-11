@@ -132,16 +132,17 @@ void FormatTextEdit::setEditable(bool editable)
       setFocusPolicy(Qt::NoFocus);
    }
 
-   setReadOnly(!editable);
+   setReadOnly(! editable);
 }
 
 void FormatTextEdit::setPlainText(const QString &text, bool userAction)
 {
-   if (!userAction) {
+   if (! userAction) {
       // Prevent contentsChanged signal
       bool oldBlockState = blockSignals(true);
       document()->setUndoRedoEnabled(false);
       ExpandingTextEdit::setPlainText(text);
+
       // highlighter is out of sync because of blocked signals
       m_highlighter->rehighlight();
       document()->setUndoRedoEnabled(true);
@@ -156,13 +157,9 @@ void FormatTextEdit::setVisualizeWhitespace(bool value)
     QTextOption option = document()->defaultTextOption();
 
     if (value) {
-        option.setFlags(option.flags()
-                        | QTextOption::ShowLineAndParagraphSeparators
-                        | QTextOption::ShowTabsAndSpaces);
+        option.setFlags(option.flags() | QTextOption::ShowLineAndParagraphSeparators | QTextOption::ShowTabsAndSpaces);
     } else {
-        option.setFlags(option.flags()
-                        & ~QTextOption::ShowLineAndParagraphSeparators
-                        & ~QTextOption::ShowTabsAndSpaces);
+        option.setFlags(option.flags() & ~QTextOption::ShowLineAndParagraphSeparators & ~QTextOption::ShowTabsAndSpaces);
     }
 
     document()->setDefaultTextOption(option);
@@ -209,6 +206,7 @@ void FormWidget::slotSelectionChanged()
 void FormWidget::setTranslation(const QString &text, bool userAction)
 {
    m_editor->setPlainText(text, userAction);
+
    if (m_hideWhenEmpty) {
       setHidden(text.isEmpty());
    }
@@ -216,23 +214,22 @@ void FormWidget::setTranslation(const QString &text, bool userAction)
 
 void FormWidget::setEditingEnabled(bool enable)
 {
-   // Use read-only state so that the text can still be copied
-   m_editor->setReadOnly(!enable);
+   // use read-only state so the text can still be copied
+   m_editor->setReadOnly(! enable);
    m_label->setEnabled(enable);
 }
 
-
 class ButtonWrapper : public QWidget
 {
-   // no Q_OBJECT: no need to, and don't want the useless moc file
-
  public:
    ButtonWrapper(QWidget *wrapee, QWidget *relator) : m_wrapee(wrapee) {
       setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored);
+
       QBoxLayout *box = new QVBoxLayout;
       box->setMargin(0);
       setLayout(box);
       box->addWidget(wrapee, 0, Qt::AlignBottom);
+
       if (relator) {
          relator->installEventFilter(this);
       }
@@ -299,11 +296,14 @@ bool FormMultiWidget::eventFilter(QObject *watched, QEvent *event)
 {
    int i = 0;
 
-   while (m_editors.at(i) != watched)
-      if (++i >= m_editors.count()) {
-         // Happens when deleting an editor
+   while (m_editors.at(i) != watched) {
+      ++i;
+
+      if (i >= m_editors.count()) {
+         // happens when deleting an editor
          return false;
       }
+   }
 
    if (event->type() == QEvent::FocusOut) {
       m_minusButtons.at(i)->setToolTip(QString());
@@ -322,8 +322,9 @@ bool FormMultiWidget::eventFilter(QObject *watched, QEvent *event)
          if (ke->key() == Qt::Key_Delete) {
             deleteEditor(i);
             return true;
+
          } else if (ke->key() == Qt::Key_Insert) {
-            if (!(ke->modifiers() & Qt::ShiftModifier)) {
+            if (! (ke->modifiers() & Qt::ShiftModifier)) {
                ++i;
             }
             insertEditor(i);
@@ -385,14 +386,15 @@ void FormMultiWidget::setTranslation(const QString &text, bool userAction)
       delete m_plusButtons.takeLast();
       delete m_editors.takeLast();
    }
+
    while (m_editors.count() < texts.count()) {
       addEditor(m_editors.count());
    }
+
    updateLayout();
 
-   for (int i = 0; i < texts.count(); ++i)
+   for (int i = 0; i < texts.count(); ++i) {
       // this will emit n textChanged signals
-   {
       m_editors.at(i)->setPlainText(texts.at(i), userAction);
    }
 
@@ -403,23 +405,28 @@ void FormMultiWidget::setTranslation(const QString &text, bool userAction)
 
 QString FormMultiWidget::getTranslation() const
 {
-   QString ret;
+   QString retval;
+
    for (int i = 0; i < m_editors.count(); ++i) {
       if (i) {
-         ret += QChar(Translator::BinaryVariantSeparator);
+         retval += QChar(Translator::BinaryVariantSeparator);
       }
-      ret += m_editors.at(i)->toPlainText();
+
+      retval += m_editors.at(i)->toPlainText();
    }
-   return ret;
+
+   return retval;
 }
 
 void FormMultiWidget::setEditingEnabled(bool enable)
 {
-   // Use read-only state so that the text can still be copied
+   // use read-only state so the text can still be copied
    for (int i = 0; i < m_editors.count(); ++i) {
-      m_editors.at(i)->setReadOnly(!enable);
+      m_editors.at(i)->setReadOnly(! enable);
    }
+
    m_label->setEnabled(enable);
+
    if (m_multiEnabled) {
       updateLayout();
    }
@@ -428,6 +435,7 @@ void FormMultiWidget::setEditingEnabled(bool enable)
 void FormMultiWidget::setMultiEnabled(bool enable)
 {
    m_multiEnabled = enable;
+
    if (m_label->isEnabled()) {
       updateLayout();
    }
@@ -446,31 +454,36 @@ void FormMultiWidget::plusButtonClicked()
 {
    QWidget *btn = static_cast<QAbstractButton *>(sender())->parentWidget();
    int i = 0;
+
    while (m_plusButtons.at(i) != btn) {
       ++i;
    }
+
    insertEditor(i);
 }
 
 void FormMultiWidget::deleteEditor(int idx)
 {
    if (m_editors.count() == 1) {
-      // Don't just clear(), so the undo history is not lost
+      // Do not just clear(), so the undo history is not lost
       QTextCursor c = m_editors.first()->textCursor();
       c.select(QTextCursor::Document);
       c.removeSelectedText();
 
    } else {
-      if (!m_editors.at(idx)->toPlainText().isEmpty()) {
+      if (! m_editors.at(idx)->toPlainText().isEmpty()) {
          if (QMessageBox::question(topLevelWidget(), tr("Confirm"), tr("Delete non empty length variant?"),
                QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) != QMessageBox::Yes) {
             return;
          }
       }
+
       delete m_editors.takeAt(idx);
       delete m_minusButtons.takeAt(idx);
       delete m_plusButtons.takeAt(idx + 1);
+
       updateLayout();
+
       emit textChanged(m_editors.at((m_editors.count() == idx) ? idx - 1 : idx));
    }
 }
@@ -481,4 +494,3 @@ void FormMultiWidget::insertEditor(int idx)
    updateLayout();
    emit textChanged(m_editors.at(idx));
 }
-

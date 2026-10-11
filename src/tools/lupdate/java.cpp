@@ -82,7 +82,7 @@ static int yyTok;
 static QString yyInStr;
 static int yyInPos;
 
-// The parser maintains the following global variables.
+// parser maintains the following global variables.
 static QString yyPackage;
 static QStack<Scope *> yyScope;
 
@@ -169,13 +169,16 @@ static int getToken()
 
             case '/':
                yyCh = getChar();
+
                if ( yyCh == '/' ) {
                   do {
                      yyCh = getChar();
                      if (yyCh == EOF) {
                         break;
                      }
+
                      yyComment.append(yyCh);
+
                   } while (yyCh != '\n');
 
                   return Tok_Comment;
@@ -239,6 +242,7 @@ static int getToken()
                               }
                               unicode += sub;
                            }
+
                            yyCh = getChar();
                         }
 
@@ -269,15 +273,18 @@ static int getToken()
             case ':':
                yyCh = getChar();
                return Tok_Colon;
+
             case '\'':
                yyCh = getChar();
 
                if ( yyCh == '\\') {
                   yyCh = getChar();
                }
+
                do {
                   yyCh = getChar();
                } while ( yyCh != EOF && yyCh != '\'');
+
                yyCh = getChar();
                break;
 
@@ -293,7 +300,8 @@ static int getToken()
                if (yyParenDepth == 0) {
                   yyParenLineNo = yyCurLineNo;
                }
-               yyParenDepth++;
+
+               ++yyParenDepth;
                yyCh = getChar();
                return Tok_LeftParen;
 
@@ -319,6 +327,7 @@ static int getToken()
 
             case '+':
                yyCh = getChar();
+
                if (yyCh == '+') {
                   yyCh = getChar();
                   return Tok_PlusPlus;
@@ -328,6 +337,7 @@ static int getToken()
                   yyCh = getChar();
                   return Tok_PlusEq;
                }
+
                return Tok_Plus;
 
             case '0':
@@ -397,7 +407,7 @@ static bool matchString( QString &s )
          s += yyString;
       } else {
          yyMsg() << "String used in translation can contain only literals"
-                    " concatenated with other literals, not expressions or numbers.\n";
+               " concatenated with other literals, not expressions or numbers.\n";
 
          return false;
       }
@@ -412,28 +422,28 @@ static bool matchStringOrNull(QString &s)
 {
    bool matches = matchString(s);
 
-   if (!matches) {
+   if (! matches) {
       matches = (yyTok == Tok_null);
+
       if (matches) {
          yyTok = getToken();
       }
    }
+
    return matches;
 }
 
 /*
  * match any expression that can return a number, which can be
- * 1. Literal number (e.g. '11')
- * 2. simple identifier (e.g. 'm_count')
- * 3. simple function call (e.g. 'size()' )
- * 4. function call on an object (e.g. 'list.size()')
- * 5. function call on an object (e.g. 'list->size()')
+ * 1. Literal number (for example, '11')
+ * 2. simple identifier (for example, 'm_count')
+ * 3. simple function call (for example, 'size()' )
+ * 4. function call on an object (for example, 'list.size()')
+ * 5. function call on an object (for example, 'list->size()')
  *
- * Other cases:
  * size(2,4)
  * list().size()
  * list(a,b).size(2,4)
- * etc...
  */
 static bool matchExpression()
 {
@@ -447,21 +457,27 @@ static bool matchExpression()
          if (parenlevel == 0) {
             break;
          }
+
          --parenlevel;
          yyTok = getToken();
+
       } else if (yyTok == Tok_LeftParen) {
          yyTok = getToken();
+
          if (yyTok == Tok_RightParen) {
             yyTok = getToken();
          } else {
             ++parenlevel;
          }
+
       } else if (yyTok == Tok_Ident) {
          continue;
+
       } else if (parenlevel == 0) {
          return false;
       }
    }
+
    return true;
 }
 
@@ -486,17 +502,17 @@ static const QString context()
    return context;
 }
 
-static void recordMessage(Translator *tor, const QString &context, const QString &text, const QString &comment,
+static void recordMessage(Translator *trObj, const QString &context, const QString &text, const QString &comment,
    const QString &extracomment, bool plural, ConversionData &cd)
 {
    TranslatorMessage msg(context, text, comment, QString(), yyFileName, yyLineNo, QStringList(),
-            TranslatorMessage::Type::Unfinished, plural);
+         TranslatorMessage::Type::Unfinished, plural);
 
    msg.setExtraComment(extracomment.simplified());
-   tor->extend(msg, cd);
+   trObj->extend(msg, cd);
 }
 
-static void parse(Translator *tor, ConversionData &cd)
+static void parse(Translator *trObj, ConversionData &cd)
 {
    QString text;
    QString com;
@@ -506,7 +522,7 @@ static void parse(Translator *tor, ConversionData &cd)
    yyTok = getToken();
 
    while ( yyTok != Tok_Eof ) {
-      switch ( yyTok ) {
+      switch (yyTok) {
          case Tok_class:
             yyTok = getToken();
 
@@ -521,6 +537,7 @@ static void parse(Translator *tor, ConversionData &cd)
             while (! match(Tok_LeftBrace)) {
                yyTok = getToken();
             }
+
             break;
 
          case Tok_tr:
@@ -535,6 +552,7 @@ static void parse(Translator *tor, ConversionData &cd)
 
                } else if (match(Tok_Comma) && matchStringOrNull(com)) {
                   // comment
+
                   if ( match(Tok_RightParen)) {
                      // ok
 
@@ -544,7 +562,7 @@ static void parse(Translator *tor, ConversionData &cd)
                }
 
                if (! text.isEmpty()) {
-                  recordMessage(tor, context(), text, com, extracomment, plural, cd);
+                  recordMessage(trObj, context(), text, com, extracomment, plural, cd);
                }
             }
             break;
@@ -553,16 +571,14 @@ static void parse(Translator *tor, ConversionData &cd)
             QString contextOverride;
             yyTok = getToken();
 
-            if ( match(Tok_LeftParen) &&
-                  matchString(contextOverride) &&
-                  match(Tok_Comma) &&
-                  matchString(text) ) {
+            if ( match(Tok_LeftParen) && matchString(contextOverride) && match(Tok_Comma) && matchString(text) ) {
 
                com.clear();
                bool plural = false;
 
                if (! match(Tok_RightParen)) {
                   // look for comment
+
                   if ( match(Tok_Comma) && matchStringOrNull(com)) {
                      if (! match(Tok_RightParen)) {
                         if (match(Tok_Comma) && matchExpression() && match(Tok_RightParen)) {
@@ -578,7 +594,7 @@ static void parse(Translator *tor, ConversionData &cd)
                }
 
                if (! text.isEmpty()) {
-                  recordMessage(tor, contextOverride, text, com, extracomment, plural, cd);
+                  recordMessage(trObj, contextOverride, text, com, extracomment, plural, cd);
                }
             }
          }
@@ -620,6 +636,7 @@ static void parse(Translator *tor, ConversionData &cd)
 
          case Tok_Package:
             yyTok = getToken();
+
             while (! match(Tok_Semicolon)) {
                switch (yyTok) {
                   case Tok_Ident:
@@ -646,12 +663,12 @@ static void parse(Translator *tor, ConversionData &cd)
    if (! yyScope.isEmpty() ) {
       yyMsg(yyScope.top()->line) << "Unbalanced opening brace.\n";
 
-   } else if ( yyParenDepth != 0 ) {
+   } else if (yyParenDepth != 0) {
       yyMsg(yyParenLineNo) << "Unbalanced opening parenthesis.\n";
    }
 }
 
-bool loadJava(Translator &translator, const QString &filename, ConversionData &cd)
+bool loadJava(Translator &trObj, const QString &filename, ConversionData &cd)
 {
    QFile file(filename);
 
@@ -660,26 +677,29 @@ bool loadJava(Translator &translator, const QString &filename, ConversionData &c
       return false;
    }
 
-   yyInPos = -1;
+   yyInPos    = -1;
    yyFileName = filename;
+
    yyPackage.clear();
    yyScope.clear();
-   yyTok = -1;
-   yyParenDepth = 0;
-   yyCurLineNo = 0;
+
+   yyTok         = -1;
+   yyParenDepth  = 0;
+   yyCurLineNo   = 0;
    yyParenLineNo = 1;
 
    QTextStream ts(&file);
 
    ts.setCodec(QTextCodec::codecForName("UTF-8"));
    ts.setAutoDetectUnicode(true);
-   yyInStr = ts.readAll();
-   yyInPos = 0;
-   yyFileName = filename;
-   yyCurLineNo = 1;
+
+   yyInStr       = ts.readAll();
+   yyInPos       = 0;
+   yyFileName    = filename;
+   yyCurLineNo   = 1;
    yyParenLineNo = 1;
 
-   parse(&translator, cd);
+   parse(&trObj, cd);
 
    return true;
 }

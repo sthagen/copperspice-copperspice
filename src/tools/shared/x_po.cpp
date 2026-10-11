@@ -309,19 +309,25 @@ static QByteArray slurpEscapedString(const QList<QByteArray> &lines, int &l,
                case '6':
                case '7':
                   stoff = offset - 1;
-                  while ((c = line[offset]) >= '0' && c <= '7')
+
+                  while ((c = line[offset]) >= '0' && c <= '7') {
                      if (++offset == line.length()) {
                         goto premature_eol;
                      }
+                  }
+
                   msg += line.mid(stoff, offset - stoff).toUInt(nullptr, 8);
                   break;
 
                case 'x':
                   stoff = offset;
-                  while (isxdigit(line[offset]))
+
+                  while (isxdigit(line[offset])) {
                      if (++offset == line.length()) {
                         goto premature_eol;
                      }
+                  }
+
                   msg += line.mid(stoff, offset - stoff).toUInt(nullptr, 16);
                   break;
 
@@ -545,7 +551,9 @@ bool loadPO(Translator &translator, QIODevice &dev, ConversionData &cd)
 
                } else if (hdrName == "Content-Transfer-Encoding") {
                   if (hdrValue != "8bit") {
-                     cd.appendError(QString("Unexpected Content-Transfer-Encoding '%1'").formatArg(QString::fromLatin1(hdrValue)));
+                     cd.appendError(QString("Unexpected Content-Transfer-Encoding '%1'")
+                           .formatArg(QString::fromLatin1(hdrValue)));
+
                      return false;
                   }
 
@@ -561,8 +569,6 @@ bool loadPO(Translator &translator, QIODevice &dev, ConversionData &cd)
 
                if (translator.languageCode().isEmpty()) {
                   extras[makePoHeader("Plural-Forms")] = pluralForms;
-               } else {
-                  // FIXME: make a consistency check
                }
             }
 
@@ -839,15 +845,17 @@ bool savePO(const Translator &translator, QIODevice &dev, ConversionData &cd)
    }
 
    bool qtContexts = false;
-   for (const TranslatorMessage &msg : translator.messages())
+   for (const TranslatorMessage &msg : translator.messages()) {
 
       if (!msg.context().isEmpty()) {
          qtContexts = true;
          break;
       }
+   }
 
    QString cmt = translator.extra(QLatin1String("po-header_comment"));
-   if (!cmt.isEmpty()) {
+
+   if (! cmt.isEmpty()) {
       out << cmt << '\n';
    }
 
@@ -930,11 +938,14 @@ bool savePO(const Translator &translator, QIODevice &dev, ConversionData &cd)
          msg.extras().find(QLatin1String("po-flags"));
       if (itr != msg.extras().end()) {
          QStringList atoms = itr->split(QLatin1String(", "));
-         for (const QString &atom : atoms)
+
+         for (const QString &atom : atoms) {
             if (atom.endsWith(str_format)) {
                skipFormat = true;
                break;
             }
+         }
+
          if (atoms.contains(QLatin1String("no-wrap"))) {
             noWrap = true;
          }
@@ -991,6 +1002,7 @@ bool savePO(const Translator &translator, QIODevice &dev, ConversionData &cd)
 
       } else {
          QString plural = msg.extra(QLatin1String("po-msgid_plural"));
+
          if (plural.isEmpty()) {
             plural = msg.sourceText();
          }
@@ -1005,14 +1017,16 @@ bool savePO(const Translator &translator, QIODevice &dev, ConversionData &cd)
          }
       }
    }
+
    return ok;
 }
 
 static bool savePOT(const Translator &translator, QIODevice &dev, ConversionData &cd)
 {
-   Translator ttor = translator;
-   ttor.dropTranslations();
-   return savePO(ttor, dev, cd);
+   Translator trObj = translator;
+   trObj.dropTranslations();
+
+   return savePO(trObj, dev, cd);
 }
 
 int initPO()
